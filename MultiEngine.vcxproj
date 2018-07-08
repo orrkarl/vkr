@@ -70,7 +70,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VCInstallDir)UnitTest\include;$(IncludePath);</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(VCInstallDir)UnitTest\lib;$(LibraryPath);</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(VCInstallDir)UnitTest\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VCInstallDir)UnitTest\include;$(IncludePath);</IncludePath>
@@ -101,6 +101,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -137,21 +138,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="arithmetic_error.h" />
-    <ClInclude Include="custom_runtime_error.h" />
-    <ClInclude Include="except.h" />
+    <ClInclude Include="dynamic_array.h" />
+    <ClInclude Include="error_handling.h" />
+    <ClInclude Include="field.h" />
     <ClInclude Include="format.h" />
-    <ClInclude Include="general_ops.h" />
-    <ClInclude Include="invalid_action_error.h" />
+    <ClInclude Include="general.h" />
     <ClInclude Include="io_stream.h" />
-    <ClInclude Include="out_of_range.h" />
+    <ClInclude Include="lu_decomposition.h" />
+    <ClInclude Include="matrix.h" />
+    <ClInclude Include="message.h" />
     <ClInclude Include="strings.h" />
     <ClInclude Include="vector.h" />
     <ClInclude Include="win_main.h" />
-    <ClInclude Include="zero_division_error.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="format.cc" />
+    <ClCompile Include="lu_decomposition.cc" />
+    <ClCompile Include="matrix.cc" />
+    <ClCompile Include="vector.cc" />
     <ClCompile Include="win_main.cc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

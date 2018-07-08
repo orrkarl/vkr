@@ -5,83 +5,85 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\math">
-      <UniqueIdentifier>{92bf0968-8f24-4cb8-b6d8-ca6a68a1cfdc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\math\algebra">
-      <UniqueIdentifier>{a711b970-0a0b-4efd-ad9b-aee8f4f401c6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\util">
-      <UniqueIdentifier>{065e38d8-f5b5-43f1-88e1-63f4570b6986}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\util">
       <UniqueIdentifier>{3ffa66de-3a01-4b37-bd18-7ea6166598f8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\predefs">
-      <UniqueIdentifier>{03c756eb-1037-4376-adbe-a5df8ecc089a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\core">
-      <UniqueIdentifier>{5b7db2f2-37ec-435c-8d49-edaa902333f1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\core">
       <UniqueIdentifier>{50dd9503-4ee7-4408-821b-c1caddb60100}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\util\exceptions">
-      <UniqueIdentifier>{d23cfa9b-d468-4b2b-9867-f42163c45f36}</UniqueIdentifier>
+    <Filter Include="Source Files\math">
+      <UniqueIdentifier>{313966ff-f5b5-48d9-bce7-610cf9a0ab7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\math\algebra">
+      <UniqueIdentifier>{f9e9ca26-debb-4417-b5d7-59820848176c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\math\algebra\base">
+      <UniqueIdentifier>{91db8876-e71c-472c-866e-03dfb1e2bdc5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core\messaging">
+      <UniqueIdentifier>{95aaa934-7062-4e0c-a3e6-2d67be85cc72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\predefs">
+      <UniqueIdentifier>{03c756eb-1037-4376-adbe-a5df8ecc089a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="format.h">
-      <Filter>Header Files\util</Filter>
+    <ClInclude Include="message.h">
+      <Filter>Source Files\core\messaging</Filter>
     </ClInclude>
-    <ClInclude Include="vector.h">
-      <Filter>Header Files\math\algebra</Filter>
-    </ClInclude>
-    <ClInclude Include="win_main.h">
-      <Filter>Header Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="zero_division_error.h">
-      <Filter>Header Files\util\exceptions</Filter>
-    </ClInclude>
-    <ClInclude Include="custom_runtime_error.h">
-      <Filter>Header Files\util\exceptions</Filter>
-    </ClInclude>
-    <ClInclude Include="except.h">
-      <Filter>Header Files\predefs</Filter>
+    <ClInclude Include="error_handling.h">
+      <Filter>Source Files\predefs</Filter>
     </ClInclude>
     <ClInclude Include="io_stream.h">
-      <Filter>Header Files\predefs</Filter>
-    </ClInclude>
-    <ClInclude Include="arithmetic_error.h">
-      <Filter>Header Files\util\exceptions</Filter>
-    </ClInclude>
-    <ClInclude Include="invalid_action_error.h">
-      <Filter>Header Files\util\exceptions</Filter>
-    </ClInclude>
-    <ClInclude Include="out_of_range.h">
-      <Filter>Header Files\util\exceptions</Filter>
+      <Filter>Source Files\predefs</Filter>
     </ClInclude>
     <ClInclude Include="strings.h">
-      <Filter>Header Files\predefs</Filter>
+      <Filter>Source Files\predefs</Filter>
     </ClInclude>
-    <ClInclude Include="general_ops.h">
-      <Filter>Header Files\math</Filter>
+    <ClInclude Include="win_main.h">
+      <Filter>Source Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="matrix.h">
+      <Filter>Source Files\math\algebra\base</Filter>
+    </ClInclude>
+    <ClInclude Include="vector.h">
+      <Filter>Source Files\math\algebra\base</Filter>
+    </ClInclude>
+    <ClInclude Include="lu_decomposition.h">
+      <Filter>Source Files\math\algebra</Filter>
+    </ClInclude>
+    <ClInclude Include="dynamic_array.h">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="field.h">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="format.h">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="general.h">
+      <Filter>Source Files\util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="win_main.cc">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
     <ClCompile Include="format.cc">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="win_main.cc">
-      <Filter>Source Files\core</Filter>
+    <ClCompile Include="matrix.cc">
+      <Filter>Source Files\math\algebra\base</Filter>
+    </ClCompile>
+    <ClCompile Include="lu_decomposition.cc">
+      <Filter>Source Files\math\algebra</Filter>
+    </ClCompile>
+    <ClCompile Include="vector.cc">
+      <Filter>Source Files\math\algebra\base</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

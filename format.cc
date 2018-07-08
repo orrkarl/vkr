@@ -57,7 +57,7 @@ char* format(const char* fmt, va_list args)
 	const auto str_p = static_cast<char**>(malloc(sizeof(char*)));
 	if (str_p == nullptr) return nullptr;
 
-		const auto count = format(str_p, fmt, args);
+	const auto count = format(str_p, fmt, args);
 	if (count == -1) return nullptr;
 	const auto ret = *str_p;
 	free(str_p);
