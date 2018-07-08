@@ -2,243 +2,162 @@
 #define MATH_ALGEBRA__VECTOR_H_
 
 #include <cstdarg>
+#include <string>
 
-#include "except.h"
-#include "general_ops.h"
-#include "strings.h"
+#include "error_handling.h"
+#include "general.h"
+#include "dynamic_array.h"
 
 namespace math {
 
 namespace algebra {
 
-template <const int Dimension>
 class Vector
 {
-private:
-	double m_values_[Dimension]{};
+	util::DynamicArray<float, 1> m_data_;
 
-	static void __fastcall ValidateDimension(const int dimension)
+	static void ValidateLength(const int length)
 	{
-		THROW_IF(Dimension < 2, std::runtime_error("cannot create vector of dimension < 2"));
+		ASSERT(length >= 2);
 	}
 
 public:
-	Vector()
+
+	// --------------------- Constructors ---------------------
+
+	explicit Vector(int size, bool init_values = false);
+
+	explicit Vector(int size, const float* values);
+
+	explicit Vector(int size, float values, ...);
+
+	explicit Vector(int size, int values, ...);
+
+	// --------------------- Accessors --------------------- 
+
+	int GetDimension() const { return m_data_.GetSize(); }
+
+	float& operator()(const int index) { return m_data_[index]; }
+
+	float operator()(const int index) const { return m_data_[index]; }
+
+	float* Base() { return m_data_.Base(); }
+
+	const float* Base() const { return m_data_.Base(); }
+
+	// --------------------- Vector->Vector Operations --------------------- 
+
+	static void Add(const Vector& self, const Vector& other, Vector& dest);
+	
+	static Vector Add(const Vector& self, const Vector& other)
 	{
-		ValidateDimension(Dimension);
-	}
-
-	explicit Vector(double values...) : Vector()
-	{
-		va_list va;
-		va_start(va, values);
-		m_values_[0] = values;
-		for (auto i = 1; i < Dimension; ++i)
-		{
-			m_values_[i] = va_arg(va, double);
-		}
-		va_end(va);
-	}
-
-	explicit Vector(int values...) : Vector()
-	{
-		va_list va;
-		va_start(va, values);
-		m_values_[0] = double(values);
-		for (auto i = 1; i < Dimension; ++i)
-		{
-			m_values_[i] = double(va_arg(va, int));
-		}
-		va_end(va);
-	}
-
-	explicit Vector(const double values[]) : Vector()
-	{
-		for (auto i = 0; i < Dimension; ++i)
-			m_values_[i] = values[i];
-	}
-
-	Vector(const Vector& vec) = default;
-
-	Vector(Vector&& vec) = default;
-
-	Vector<Dimension>& operator=(Vector<Dimension>&& vec) = default;
-
-	Vector<Dimension>& operator=(const Vector<Dimension>& other) = default;
-
-	~Vector() = default;
-
-	static double DotProduct(const Vector<Dimension>& vec1, const Vector<Dimension>& vec2)
-	{
-		return sqrt(DotProductSquared(vec1, vec2));
-	}
-
-	static double DotProductSquared(const Vector<Dimension>& vec1, const Vector<Dimension>& vec2)
-	{
-		double ret = 0;
-		for (auto i = 0; i < Dimension; ++i)
-		{
-			ret += vec1[i] * vec2[i];
-		}
-
+		Vector ret(self.GetDimension());
+		Add(self, other, ret);
 		return ret;
 	}
 
-	static Vector<Dimension>& VectorProduct(const Vector<Dimension>& vectors...)
+	Vector operator+(const Vector& other) const { return Add(*this, other); }
+
+	Vector& operator+=(const Vector& other) { Add(*this, other, *this); return *this; }
+
+	static void Substract(const Vector& self, const Vector& other, Vector& dest);
+
+	static Vector Substract(const Vector& self, const Vector& other)
 	{
-		return nullptr;
-	}
-
-	static int VectorDimension()
-	{
-		return Dimension;
-	}
-
-	double Norm() const
-	{
-		return DotProduct(*this, *this);
-	}
-
-	double NormSquared() const
-	{
-		return DotProductSquared(*this, *this);
-	}
-
-	bool IsOrthogonalTo(const Vector<Dimension>& other) const
-	{
-		return !DotProductSquared(*this, other);
-	}
-
-	double operator[](const int index) const
-	{
-		THROW_IF(index < 0 || index >= Dimension,
-			util::OutOfRange::GetInstance("index out of range: %d", index));
-
-		return m_values_[index];
-	}
-
-	double& operator[](const int index)
-	{
-		THROW_IF(index < 0 || index >= Dimension,
-			util::OutOfRange::GetInstance("index out of range: %d", index));
-
-		return m_values_[index];
-	}
-
-	Vector<Dimension> operator+(const Vector<Dimension>& other) const
-	{
-		Vector<Dimension> vec;
-
-		for (auto i = 0; i < Dimension; i++)
-			vec[i] = m_values_[i] + other[i];
-
-		return vec;
-	}
-
-	Vector<Dimension> operator-(const Vector<Dimension>& other) const
-	{
-		Vector<Dimension> vec;
-
-		for (auto i = 0; i < Dimension; i++)
-			vec[i] = m_values_[i] - other[i];
-
-		return vec;
-	}
-
-	Vector<Dimension> operator*(const double scale) const
-	{
-		Vector<Dimension> vec;
-
-		for (auto i = 0; i < Dimension; i++)
-			vec[i] = m_values_[i] * scale;
-
-		return vec;
-	}
-
-	Vector<Dimension> operator/(const double scale) const
-	{
-		THROW_IF(scale == 0, util::ZeroDivisionError());
-
-		Vector<Dimension> vec;
-
-		for (auto i = 0; i < Dimension; i++)
-			vec[i] = m_values_[i] / scale;
-
-		return vec;
-	}
-
-	Vector<Dimension>& operator+=(const Vector<Dimension>& other)
-	{
-		for (auto i = 0; i < Dimension; i++)
-			m_values_[i] += other[i];
-
-		return *this;
-	}
-
-	Vector<Dimension>& operator-=(const Vector<Dimension>& other)
-	{
-		for (auto i = 0; i < Dimension; i++)
-			m_values_[i] -= other[i];
-
-		return *this;
-	}
-
-	Vector<Dimension>& operator*=(const double scale)
-	{
-		for (auto i = 0; i < Dimension; i++)
-			m_values_[i] *= scale;
-
-		return *this;
-	}
-
-	Vector<Dimension>& operator/=(const double scale)
-	{
-		THROW_IF(scale == 0, util::ZeroDivisionError());
-
-		for (auto i = 0; i < Dimension; i++)
-			m_values_[i] /= scale;
-
-		return *this;
-	}
-
-	bool operator==(const Vector<Dimension>& other)
-	{
-		for (auto i = 0; i < Dimension; ++i)
-			if (this[i] != other[i]) return false;
-
-		return true;
-	}
-
-	bool operator!=(const Vector<Dimension>& other)
-	{
-		return !(this == other);
-	}
-
-	void Normalize()
-	{
-		this->operator/=(this->Norm());
-	}
-
-	Vector<Dimension> AsUnitVector() const
-	{
-		return this->operator/(this->Norm());
-	}
-
-	bool IsUnitVector() const
-	{
-		return round(this->Norm(), 10) == 1.0;
-	}
-
-	std::string ToString()
-	{
-		std::string ret;
-		ret += "Vector [";
-		for (auto i = 0; i < Dimension - 1; i++)
-			ret += TO_STRING(m_values_[i]) += L",";
-		ret += TO_STRING(m_values_[Dimension - 1]);
-		ret += "]";
+		Vector ret(self.GetDimension());
+		Substract(self, other, ret);
 		return ret;
 	}
+
+	Vector operator-(const Vector& other) const { return Substract(*this, other); }
+
+	Vector& operator-=(const Vector& other) { Substract(*this, other, *this); return *this; }
+
+	static void Negate(const Vector& self, Vector& dest);
+
+	static Vector Negate(const Vector& self)
+	{
+		Vector ret(self.GetDimension());
+		Negate(self, ret);
+		return ret;
+	}
+
+	Vector operator-() const { return Negate(*this); }
+
+	static bool Equals(const Vector& self, const Vector& other, float tolerance = util::kPercision);
+
+	bool operator==(const Vector& other) const { return Equals(*this, other); }
+
+	bool operator!=(const Vector& other) const { return !Equals(*this, other); }
+
+	// --------------------- Vector->Scalar Operations --------------------- 
+
+	static void Multiply(const Vector& self, float scale, Vector& dest);
+
+	static Vector Multiply(const Vector& self, const float scale)
+	{
+		Vector ret(self.GetDimension());
+		Multiply(self, scale, ret);
+		return ret;
+	}
+
+	Vector operator*(const float scale) const { return Multiply(*this, scale); }
+
+	Vector& operator*=(const float scale) { Multiply(*this, scale, *this); return *this; }
+
+	static void Divide(const Vector& self, float scale, Vector& dest);
+
+	static Vector Divide(const Vector& self, const float scale)
+	{
+		Vector ret(self.GetDimension());
+		Divide(self, scale, ret);
+		return ret;
+	}
+
+	Vector operator/(const float scale) const { return Divide(*this, scale); }
+
+	Vector& operator/=(const float scale) { Divide(*this, scale, *this); return *this; }
+
+
+	// --------------------- Geometric Properties --------------------- 
+
+	static float DotProductSquared(const Vector& vec1, const Vector& vec2);
+
+	static float DotProduct(const Vector& vec1, const Vector& vec2) { return sqrt(DotProductSquared(vec1, vec2)); }
+
+	float GetLength() const { return DotProduct(*this, *this); }
+
+	float GetLengthSquared() const { return DotProductSquared(*this, *this); }
+
+	bool IsOrthogonalTo(const Vector& other) const { return DotProductSquared(*this, other) == 0; }
+
+	float DistanceToSquared(const Vector& other) const { return (*this - other).GetLengthSquared(); }
+
+	float DistanceTo(const Vector& other) const { return sqrt(DistanceToSquared(other)); }
+
+	bool IsUnitVector(const float tolerance = util::kPercision) const { return util::equals_rounded(GetLengthSquared(), 1, tolerance); }
+
+	bool IsZero(const float tolerance = util::kPercision) const { return util::equals_rounded(GetLengthSquared(), 0, tolerance); }
+
+	// --------------------- Geometric Operations --------------------- 
+
+	static void AsUnitVector(const Vector& self, Vector& dest) { return Divide(self, self.GetLength(), dest); }
+
+	void Normalize() { AsUnitVector(*this, *this); }
+
+	Vector AsUnitVector() const
+	{
+		Vector ret(GetDimension());
+		AsUnitVector(*this, ret);
+		return ret;
+	}
+
+	// --------------------- Helper Functions --------------------- 
+
+	std::string ToString();
+
+	bool IsValid() const;
+
 };
 
 }

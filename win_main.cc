@@ -4,6 +4,8 @@
 
 #include "io_stream.h"
 #include "vector.h"
+#include "matrix.h"
+#include "lu_decomposition.h"
 
 int main()
 {
@@ -13,26 +15,21 @@ int main()
 	return WinMain(HINSTANCE(GetModuleHandle(nullptr)), nullptr, nullptr, SW_SHOW);
 }
 
+	
+
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int mCmdShow)
 {
 	if (hPrevInstance != nullptr) return -1;
-	typedef math::algebra::Vector<15> Vector15;
-	typedef math::algebra::Vector<2> Vector2;
 
-	Vector2 vec2{ 1, -1 };
-	Vector2 vec3{ 1, 1 };
-	Vector15 vec4{ 1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1 };
-	Vector15 vec5{ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 };
+	const auto iden4 = math::algebra::Matrix::MakeIdentity(2);
+	const math::algebra::Matrix mat0(3, 1, 2, 3, 4, 5, 7, 7, 8, 9);
+	math::algebra::LUDecomposition decomp(mat0);
 
-	std::cout << vec2.AsUnitVector().Norm() << std::endl;
-	std::cout << vec3.AsUnitVector().Norm() << std::endl;
-	std::cout << vec4.AsUnitVector().IsUnitVector() << std::endl;
-	std::cout << vec5.AsUnitVector().IsUnitVector() << std::endl;
-
-	std::cout << vec2[-1] << std::endl;
+	std::cout << (decomp.Inverse() * mat0).IsIdentity() << std::endl;
 
 	getchar();
+
 	return 0;
 }
 
