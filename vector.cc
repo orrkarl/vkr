@@ -5,38 +5,109 @@ namespace math {
 	
 namespace algebra {
 
+#if _MATH_DEBUG_
+#define VALIDATE_VECTOR_DIMENSION(vec, dim) COND_ASSERT(_MATH_DEBUG_, vec.m_data_.GetSize() == dim)
+#else
+#define VALIDATE_VECTOR_DIMENSION(mat, dim)
+#endif
+
 // -------------------------------------------------------------------------------------
 // Constructors 
 // -------------------------------------------------------------------------------------
 
+#if _MATH_DEBUG_
+Vector::Vector(const int dimension)
+	: m_data_(dimension)
+{
+	ValidateDimension(dimension);
+	for (auto i = 0; i < dimension; ++i)
+		m_data_[i] = NAN;
+}
+#else
+Vector::Vector(const int dimension)
+	: m_data_(new float[dimension])
+{
+}
+#endif // _MATH_DEBUG_
+
+Vector::Vector(const int dimension, const float init_value) 
+	: Vector(dimension)
+{
+	for (auto i = 0; i < dimension; ++i)
+		m_data_[i] = init_value;
+}
 
 
-Vector::Vector(const int size, const bool init_values) : m_data_(size, init_values) {}
+Vector::Vector(const int dimension, const float* values)
+	: Vector(dimension)
+{
+	for (auto i = 0; i < dimension; ++i)
+		m_data_[i] = values[i];
+}
 
-Vector::Vector(const int size, const float* values) : m_data_(size, values) {}
-
-Vector::Vector(const int size, const float values, ...) : Vector(size)
+Vector::Vector(const int dimension, const float values, ...) 
+	: Vector(dimension)
 {
 	va_list va;
 	va_start(va, values);
 
 	m_data_[0] = values;
-	for (auto i = 1; i < size; ++i)
+	for (auto i = 1; i < dimension; ++i)
 		m_data_[i] = va_arg(va, float);
 
 	va_end(va);
 }
 
-Vector::Vector(const int size, const int values, ...) : Vector(size)
+Vector::Vector(const int dimension, const int values, ...) 
+	: Vector(dimension)
 {
 	va_list va;
 	va_start(va, values);
 
 	m_data_[0] = float(values);
-	for (auto i = 1; i < size; ++i)
+	for (auto i = 1; i < dimension; ++i)
 		m_data_[i] = float(va_arg(va, int));
 
 	va_end(va);
+}
+
+
+
+
+// -------------------------------------------------------------------------------------
+// Accessors 
+// -------------------------------------------------------------------------------------
+
+float& Vector::At(const int index)
+{
+	COND_ASSERT(_MATH_DEBUG_, 0 <= index && index < m_data_.GetSize());
+
+	return m_data_[index];
+}
+
+const float& Vector::At(const int index) const
+{
+	COND_ASSERT(_MATH_DEBUG_, 0 <= index && index < m_data_.GetSize());
+
+	return m_data_[index];
+}
+
+float* Vector::Base()
+{
+#if _MATH_DEBUG_
+	return m_data_.Base();
+#else 
+	return m_data_.get();
+#endif // _MATH_DEBUG_
+}
+
+const float* Vector::Base() const
+{
+#if _MATH_DEBUG_
+	return m_data_.Base();
+#else 
+	return m_data_.get();
+#endif // _MATH_DEBUG_
 }
 
 
@@ -45,37 +116,62 @@ Vector::Vector(const int size, const int values, ...) : Vector(size)
 // Vector->Vector Operations 
 // -------------------------------------------------------------------------------------
 
-void Vector::Add(const Vector& self, const Vector& other, Vector& dest)
+void Vector::Add(const int dimension, const Vector& self, const Vector& other, Vector& dest)
 {
-	ASSERT(self.GetDimension() == other.GetDimension());
-	ASSERT(self.GetDimension() == dest.GetDimension());
+	VALIDATE_VECTOR_DIMENSION(self, dimension);
+	VALIDATE_VECTOR_DIMENSION(other, dimension);
+	VALIDATE_VECTOR_DIMENSION(dest, dimension);
 
-	for (auto i = 0; i < self.GetDimension(); ++i)
-		dest(i) = self.m_data_[i] + other.m_data_[i];
+	for (auto i = 0; i < dimension; ++i)
+		dest.At(i) = self.m_data_[i] + other.m_data_[i];
 }
 
-void Vector::Substract(const Vector& self, const Vector& other, Vector& dest)
+Vector Vector::Add(const int dimension, const Vector& self, const Vector& other)
 {
-	ASSERT(self.GetDimension() == other.GetDimension());
-	ASSERT(self.GetDimension() == dest.GetDimension());
-
-	for (auto i = 0; i < self.GetDimension(); ++i)
-		dest(i) = self.m_data_[i] - other.m_data_[i];
+	Vector ret(dimension);
+	Add(dimension, self, other, ret);
+	return ret;
 }
 
-void Vector::Negate(const Vector& self, Vector& dest)
+void Vector::Substract(const int dimension, const Vector& self, const Vector& other, Vector& dest)
 {
-	ASSERT(self.GetDimension() == dest.GetDimension());
+	VALIDATE_VECTOR_DIMENSION(self, dimension);
+	VALIDATE_VECTOR_DIMENSION(other, dimension);
+	VALIDATE_VECTOR_DIMENSION(dest, dimension);
 
-	for (auto i = 0; i < self.GetDimension(); ++i)
-		dest(i) = -self.m_data_[i];
+	for (auto i = 0; i < dimension; ++i)
+		dest.At(i) = self.m_data_[i] - other.m_data_[i];
 }
 
-bool Vector::Equals(const Vector& self, const Vector& other, const float tolerance)
+Vector Vector::Substract(const int dimension, const Vector& self, const Vector& other)
 {
-	ASSERT(self.GetDimension() == other.GetDimension());
+	Vector ret(dimension);
+	Substract(dimension, self, other, ret);
+	return ret;
+}
 
-	for (auto i = 0; i < self.GetDimension(); ++i)
+void Vector::Negate(const int dimension, const Vector& self, Vector& dest)
+{
+	VALIDATE_VECTOR_DIMENSION(self, dimension);
+	VALIDATE_VECTOR_DIMENSION(dest, dimension);
+
+	for (auto i = 0; i < dimension; ++i)
+		dest.At(i) = -self.m_data_[i];
+}
+
+Vector Vector::Negate(const int dimension, const Vector& self)
+{
+	Vector ret(dimension);
+	Negate(dimension, self, ret);
+	return ret;
+}
+
+bool Vector::Equals(const int dimension, const Vector& self, const Vector& other, const float tolerance)
+{
+	VALIDATE_VECTOR_DIMENSION(self, dimension);
+	VALIDATE_VECTOR_DIMENSION(other, dimension);
+
+	for (auto i = 0; i < dimension; ++i)
 		if (!util::equals_rounded(self.m_data_[i], other.m_data_[i], tolerance))
 			return false;
 
@@ -88,21 +184,37 @@ bool Vector::Equals(const Vector& self, const Vector& other, const float toleran
 // Vector->Scalar Operations 
 // -------------------------------------------------------------------------------------
 
-void Vector::Multiply(const Vector& self, const float scale, Vector& dest)
+void Vector::Multiply(const int dimension, const Vector& self, const float scale, Vector& dest)
 {
-	ASSERT(self.GetDimension() == dest.GetDimension());
+	VALIDATE_VECTOR_DIMENSION(self, dimension);
+	VALIDATE_VECTOR_DIMENSION(dest, dimension);
 
-	for (auto i = 0; i < self.GetDimension(); ++i)
-		dest(i) = self(i) * scale;
+	for (auto i = 0; i < dimension; ++i)
+		dest.At(i) = self.At(i) * scale;
 }
 
-void Vector::Divide(const Vector& self, const float scale, Vector& dest)
+Vector Vector::Multiply(const int dimension, const Vector& self, const float scale)
 {
-	ASSERT(self.GetDimension() == dest.GetDimension());
-	ASSERT(!util::equals_rounded(scale, 0));
+	Vector ret(dimension);
+	Multiply(dimension, self, scale, ret);
+	return ret;
+}
 
-	for (auto i = 0; i < self.GetDimension(); ++i)
-		dest(i) = self(i) / scale;
+void Vector::Divide(const int dimension, const Vector& self, const float scale, Vector& dest)
+{
+	VALIDATE_VECTOR_DIMENSION(self, dimension);
+	VALIDATE_VECTOR_DIMENSION(dest, dimension);
+	COND_ASSERT(_MATH_DEBUG_, !util::equals_rounded(scale, 0));
+
+	for (auto i = 0; i < dimension; ++i)
+		dest.At(i) = self.At(i) / scale;
+}
+
+Vector Vector::Divide(const int dimension, const Vector& self, const float scale)
+{
+	Vector ret(dimension);
+	Divide(dimension, self, scale, ret);
+	return ret;
 }
 
 
@@ -111,14 +223,15 @@ void Vector::Divide(const Vector& self, const float scale, Vector& dest)
 // Geometric Properties
 // -------------------------------------------------------------------------------------
 
-float Vector::DotProductSquared(const Vector& vec1, const Vector& vec2)
+float Vector::DotProductSquared(const int dimension, const Vector& vec1, const Vector& vec2)
 {
-	ASSERT(vec1.GetDimension() == vec2.GetDimension());
+	VALIDATE_VECTOR_DIMENSION(vec1, dimension);
+	VALIDATE_VECTOR_DIMENSION(vec2, dimension);
 
 	float ret = 0;
 
-	for (auto i = 0; i < vec1.GetDimension(); ++i)
-		ret += vec1(i) * vec2(i);
+	for (auto i = 0; i < dimension; ++i)
+		ret += vec1.At(i) * vec2.At(i);
 
 	return ret;
 }
@@ -129,19 +242,25 @@ float Vector::DotProductSquared(const Vector& vec1, const Vector& vec2)
 // Helper Functions
 // -------------------------------------------------------------------------------------
 
-std::string Vector::ToString()
+std::string Vector::ToString(const int dimension) const
 {
+	VALIDATE_VECTOR_DIMENSION((*this), dimension);
+
 	std::string ret("Vector");
-	ret += TO_STRING(m_data_.GetSize()) += " [";
-	for (auto i = 0; i < GetDimension() - 1; ++i)
+	ret += TO_STRING(dimension) += " [";
+	
+	for (auto i = 0; i < dimension - 1; ++i)
 		ret += TO_STRING(m_data_[i]) += ", ";
-	ret += TO_STRING(m_data_[GetDimension() - 1]) += ']';
+	ret += TO_STRING(m_data_[dimension - 1]) += ']';
+	
 	return ret;
 }
 
-bool Vector::IsValid() const
+bool Vector::IsValid(const int dimension) const
 {
-	for (auto i = 0; i < m_data_.GetActualSize(); ++i)
+	VALIDATE_VECTOR_DIMENSION((*this), dimension);
+
+	for (auto i = 0; i < dimension; ++i)
 		if (!isfinite(m_data_[i]))
 			return false;
 

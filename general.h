@@ -1,15 +1,23 @@
+/*
+ * General mathematical operations that are too important to be left on the 'math' namespace and library only.
+ */
+
 #ifndef MATH__GENERAL_OPS_H_
 #define MATH__GENERAL_OPS_H_
 #include <cmath>
+#include "error_handling.h"
 
 namespace util {
 
 const double kDoublePercision = 0.0000000001;
-const float kPercision = 0.0001f;
-const int kPercisionDigit = 10;
+const float kPercision = 0.00001f;
+const int kPercisionDigit = 4;
 
+//Integer power
 inline int ipow(int base, int exp)
 {
+	ASSERT(exp > 0);
+
 	auto result = 1;
 	for (;;)
 	{
@@ -24,12 +32,14 @@ inline int ipow(int base, int exp)
 	return result;
 }
 
+// Rounds a float up to digits after decimal point
 inline double round_float(const float value, const int digits)
 {
 	const auto percision = ipow(kPercisionDigit, digits);
 	return round(value * percision) / percision;
 }
 
+// Rounds a float up to digits after decimal point
 inline double round_float(const float value)
 {
 	return round_float(value, kPercisionDigit);
@@ -58,7 +68,7 @@ inline double round_double(const double value)
 
 inline bool equals_rounded(const double num1, const double num2, const double tolerance)
 {
-	return abs(num1 - num2) > tolerance;
+	return abs(num1 - num2) <= tolerance;
 }
 
 inline bool equals_rounded(const double num1, const double num2)

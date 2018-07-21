@@ -10,23 +10,47 @@ namespace math {
 	
 namespace algebra {
 
-void Matrix::ValidateDimensions(const int size)
+void Matrix::ValidateDimensions(const int dim)
 {
-	ASSERT(size > 1);
+	COND_ASSERT(_MATH_DEBUG_, dim > 1);
 }
 
-int get_index(const int size, const int row, const int col)
+int get_index(const int dim, const int row, const int col)
 {
-	return size * row + col;
+	COND_ASSERT(_MATH_DEBUG_, 0 <= row && row < dim);
+	COND_ASSERT(_MATH_DEBUG_, 0 <= col && col < dim);
+	COND_ASSERT(_MATH_DEBUG_, dim > 1);
+
+	return dim * row + col;
 }
+
+#if _MATH_DEBUG_
+#define VALIDATE_MATRIX_DIMENSION(mat, dim) COND_ASSERT(_MATH_DEBUG_, mat.m_data_.GetSize() == dim)
+#else
+#define VALIDATE_MATRIX_DIMENSION(mat, dim)
+#endif
 
 // -------------------------------------------------------------------------------------
 // Constructors 
 // -------------------------------------------------------------------------------------
 
-Matrix::Matrix(const int size, const bool init_values) : m_data_(size, init_values)
+#if _MATH_DEBUG_
+Matrix::Matrix(const int size) : m_data_(size)
 {
 	ValidateDimensions(size);
+	for (auto i = 0; i < size * size; ++i)
+		m_data_[i] = NAN;
+}
+#else
+Matrix::Matrix(const int size) : m_data_(new float[size * size])
+{
+}
+#endif // _DEBUG
+
+Matrix::Matrix(const int size, const float initial_value) : Matrix(size)
+{
+	for (auto i = 0; i < size * size; ++i)
+		m_data_[i] = initial_value;
 }
 
 Matrix::Matrix(const int size, float** values) : Matrix(size)
@@ -60,13 +84,33 @@ Matrix::Matrix(const int size, int values, ...) : Matrix(size)
 	va_end(va);
 }
 
+Matrix Matrix::MakeCopy(const int dimensions, const Matrix& mat)
+{
+	Matrix ret(dimensions);
+
+	for (auto i = 0; i < dimensions * dimensions; ++i)
+		ret.m_data_[i] = mat.m_data_[i];
+
+	return ret;
+}
+
+Matrix* Matrix::MakeNewCopy(const int dimensions, const Matrix& mat)
+{
+	auto ret = new Matrix(dimensions);
+
+	for (auto i = 0; i < dimensions * dimensions; ++i)
+		ret->m_data_[i] = mat.m_data_[i];
+
+	return ret;
+}
+
 Matrix Matrix::MakeIdentity(const int dimensions)
 {
 	Matrix ret(dimensions);
 
 	for (auto i = 0; i < dimensions; ++i)
 		for (auto j = 0; j < dimensions; ++j)
-			ret(i, j) = i == j ? 1 : 0;
+			ret.At(dimensions, i, j) = i == j ? 1 : 0;
 
 	return ret;
 }
@@ -76,7 +120,7 @@ Matrix* Matrix::MakeNewIdentity(const int dimensions)
 	auto ret = new Matrix(dimensions);
 
 	for (auto i = 0; i < dimensions; ++i)
-		ret->At(i, i) = 1;
+		ret->At(dimensions, i, i) = 1;
 
 	return ret;
 }
@@ -87,75 +131,94 @@ Matrix* Matrix::MakeNewIdentity(const int dimensions)
 // Accessors 
 // -------------------------------------------------------------------------------------
 
-float& Matrix::operator()(const int row, const int col)
+float& Matrix::At(const int dimensions, const int row, const int col)
 {
-	return m_data_[get_index(m_data_.GetSize(), row, col)];
+	return m_data_[get_index(dimensions, row, col)];
 }
 
-float Matrix::operator()(const int row, const int col) const
+float Matrix::At(const int dimensions, const int row, const int col) const
 {
-	return m_data_[get_index(m_data_.GetSize(), row, col)];
+	return m_data_[get_index(dimensions, row, col)];
 }
 
-const float* Matrix::operator()(const int row) const
+float* Matrix::At(const int dimensions, const int row)
 {
-	ASSERT(0 <= row && row < m_data_.GetSize());
-
-	return m_data_.Base() + m_data_.GetSize() * row;
+	return Base() + get_index(dimensions, row, 0);
 }
 
-
-float* Matrix::operator()(const int row)
+const float* Matrix::At(const int dimensions, const int row) const
 {
-	ASSERT(0 <= row && row < m_data_.GetSize());
-
-	return m_data_.Base() + m_data_.GetSize() * row;
+	return Base() + get_index(dimensions, row, 0);
 }
 
-Vector Matrix::GetRow(const Matrix& mat, const int nRow)
+float* Matrix::Base()
 {
-	return Vector(mat.GetDimensions(), mat(nRow));
+#if _MATH_DEBUG_
+	return m_data_.Base();
+#else
+	return m_data_.get();
+#endif // _DEBUG
 }
 
-Vector Matrix::GetColumn(const Matrix& mat, const int nColumn)
+const float* Matrix::Base() const
 {
-	Vector ret(mat.GetDimensions());
+#if _MATH_DEBUG_
+	return m_data_.Base();
+#else
+	return m_data_.get();
+#endif // _DEBUG
+}
 
-	for (auto i = 0; i <  mat.GetDimensions(); ++i)
-		ret(i) = mat(nColumn, i);
+Vector Matrix::GetRow(const int dimensions, const Matrix& mat, const int nRow)
+{
+	VALIDATE_MATRIX_DIMENSION(mat, dimensions);
+	return Vector(dimensions, mat.At(dimensions, nRow));
+}
 
+Vector Matrix::GetColumn(const int dimensions, const Matrix& mat, const int nColumn)
+{
+	Vector ret(dimensions);
+	GetColumn(dimensions, mat, nColumn, ret);
 	return ret;
 }
 
-void Matrix::GetRow(const Matrix& mat, const int nRow, Vector& row)
+void Matrix::GetRow(const int dimensions, const Matrix& mat, const int nRow, Vector& row)
 {
-	for (auto i = 0; i < mat.GetDimensions(); ++i)
+	VALIDATE_MATRIX_DIMENSION(mat, dimensions);
+
+	for (auto i = 0; i < dimensions; ++i)
 	{
-		row(i) = mat(nRow, i);
+		row.At(i) = mat.At(dimensions, nRow, i);
 	}
 }
 
-void Matrix::GetColumn(const Matrix& mat, const int nColumn, Vector& column)
+void Matrix::GetColumn(const int dimensions, const Matrix& mat, const int nColumn, Vector& column)
 {
-	for (auto i = 0; i < mat.GetDimensions(); ++i)
+	VALIDATE_MATRIX_DIMENSION(mat, dimensions);
+
+	for (auto i = 0; i < dimensions; ++i)
 	{
-		column(i) = mat(i, nColumn);
+		column.At(i) = mat.At(dimensions, i, nColumn);
 	}
 }
 
-void Matrix::SetRow(Matrix& mat, const int nRow, const Vector& row)
+void Matrix::SetRow(const int dimensions, Matrix& mat, const int nRow, const Vector& row)
 {
-	for (auto i = 0; i < mat.GetDimensions(); ++i)
+	VALIDATE_MATRIX_DIMENSION(mat, dimensions);
+
+	for (auto i = 0; i < dimensions; ++i)
 	{
-		mat(nRow, i) = row(i);
+		mat.At(dimensions, nRow, i) = row.At(i);
 	}
 }
 
-void Matrix::SetColumn(Matrix& mat, const int nColumn, const Vector& column)
+void Matrix::SetColumn(const int dimensions, Matrix& mat, const int nColumn, const Vector& column)
 {
-	for (auto i = 0; i < mat.GetDimensions(); ++i)
+	VALIDATE_MATRIX_DIMENSION(mat, dimensions);
+
+	for (auto i = 0; i < dimensions; ++i)
 	{
-		mat(i, nColumn) = column(i);
+		mat.At(dimensions, i, nColumn) = column.At(i);
 	}
 }
 
@@ -165,70 +228,96 @@ void Matrix::SetColumn(Matrix& mat, const int nColumn, const Vector& column)
 // Matrix->Matrix Operations 
 // -------------------------------------------------------------------------------------
 
-void Matrix::Add(const Matrix& self, const Matrix& other, Matrix& dest)
+void Matrix::Add(const int dimensions, const Matrix& self, const Matrix& other, Matrix& dest)
 {
-	ASSERT(self.GetDimensions() == other.GetDimensions());
-	ASSERT(self.GetDimensions() == dest.GetDimensions());
+	VALIDATE_MATRIX_DIMENSION(self, dimensions);
+	VALIDATE_MATRIX_DIMENSION(other, dimensions);
+	VALIDATE_MATRIX_DIMENSION(dest, dimensions);
 
-	for (auto i = 0; i < self.GetDimensions(); ++i)
-		for (auto j = 0; j < self.GetDimensions(); ++j)
-			dest(i, j) = self(i, j) + other(i, j);
+	for (auto i = 0; i < dimensions; ++i)
+		for (auto j = 0; j < dimensions; ++j)
+			dest.At(dimensions, i, j) = self.At(dimensions, i, j) + other.At(dimensions, i, j);
 }
 
-void Matrix::Substract(const Matrix& self, const Matrix& other, Matrix& dest)
+Matrix Matrix::Add(const int dimensions, const Matrix& self, const Matrix& other)
 {
-	ASSERT(self.GetDimensions() == other.GetDimensions());
-	ASSERT(self.GetDimensions() == dest.GetDimensions());
-
-	for (auto i = 0; i < self.GetDimensions(); ++i)
-		for (auto j = 0; j < self.GetDimensions(); ++j)
-			dest(i, j) = self(i, j) - other(i, j);
+	Matrix ret(dimensions);
+	Add(dimensions, self, other, ret);
+	return ret;
 }
 
-void Matrix::Negate(const Matrix& self, Matrix& dest)
+void Matrix::Substract(const int dimensions, const Matrix& self, const Matrix& other, Matrix& dest)
 {
-	ASSERT(self.GetDimensions() == dest.GetDimensions());
+	VALIDATE_MATRIX_DIMENSION(self, dimensions);
+	VALIDATE_MATRIX_DIMENSION(other, dimensions);
+	VALIDATE_MATRIX_DIMENSION(dest, dimensions);
 
-	for (auto i = 0; i < self.GetDimensions(); ++i)
-		for (auto j = 0; j < self.GetDimensions(); ++j)
-			dest(i, j) = -self(i, j);
+	for (auto i = 0; i < dimensions; ++i)
+		for (auto j = 0; j < dimensions; ++j)
+			dest.At(dimensions, i, j) = self.At(dimensions, i, j) - other.At(dimensions, i, j);
 }
 
-void Matrix::Multiply(const Matrix& self, const Matrix& other, Matrix& dest)
+Matrix Matrix::Substract(const int dimensions, const Matrix& self, const Matrix& other)
 {
-	ASSERT(self.GetDimensions() == other.GetDimensions());
-	ASSERT(self.GetDimensions() == dest.GetDimensions());
+	Matrix ret(dimensions);
+	Substract(dimensions, self, other, ret);
+	return ret;
+}
+
+void Matrix::Negate(const int dimensions, const Matrix& self, Matrix& dest)
+{
+	VALIDATE_MATRIX_DIMENSION(self, dimensions);
+	VALIDATE_MATRIX_DIMENSION(dest, dimensions);
+
+	for (auto i = 0; i < dimensions; ++i)
+		for (auto j = 0; j < dimensions; ++j)
+			dest.At(dimensions, i, j) = -self.At(dimensions, i, j);
+}
+
+Matrix Matrix::Negate(const int dimensions, const Matrix& self)
+{
+	Matrix ret(dimensions);
+	Negate(dimensions, self, ret);
+	return ret;
+}
+
+void Matrix::Multiply(const int dimensions, const Matrix& self, const Matrix& other, Matrix& dest)
+{
+	VALIDATE_MATRIX_DIMENSION(self, dimensions);
+	VALIDATE_MATRIX_DIMENSION(other, dimensions);
+	VALIDATE_MATRIX_DIMENSION(dest, dimensions);
 
 	float row_sum = 0;
 
-	for (auto i = 0; i < self.GetDimensions(); ++i)
+	for (auto i = 0; i < dimensions; ++i)
 	{
-		for (auto j = 0; j < self.GetDimensions(); ++j)
+		for (auto j = 0; j < dimensions; ++j)
 		{
 			row_sum = 0;
 
-			for (auto k = 0; k < self.GetDimensions(); ++k)
-				row_sum += self(i, k) * other(k, j);
+			for (auto k = 0; k < dimensions; ++k)
+				row_sum += self.At(dimensions, i, k) * other.At(dimensions, k, j);
 
-			dest(i, j) = row_sum;
+			dest.At(dimensions, i, j) = row_sum;
 		}
 	}
 }
 
-
-Matrix& Matrix::operator*=(const Matrix& other)
+Matrix Matrix::Multiply(const int dimensions, const Matrix& self, const Matrix& other)
 {
-	auto tmp = Multiply(*this, other);
-	for (auto i = 0; i < other.GetDimensions() * other.GetDimensions(); ++i)
-		m_data_[i] = other(i / other.GetDimensions(), i % other.GetDimensions());
-	return *this;
+	Matrix ret(dimensions);
+	Multiply(dimensions, self, other, ret);
+	return ret;
 }
 
-bool Matrix::Equals(const Matrix& self, const Matrix& other, const float tolerance)
+bool Matrix::Equals(const int dimensions, const Matrix& self, const Matrix& other, const float tolerance)
 {
-	for (auto i = 0; i < self.GetDimensions(); ++i)
-		for (auto j = 0; j < self.GetDimensions(); ++j)
-			if (!util::equals_rounded(self(i, j), other(i, j), tolerance))
+	VALIDATE_MATRIX_DIMENSION(self, dimensions);
+	VALIDATE_MATRIX_DIMENSION(other, dimensions);
+
+	for (auto i = 0; i < dimensions; ++i)
+		for (auto j = 0; j < dimensions; ++j)
+			if (!util::equals_rounded(self.At(dimensions, i, j), other.At(dimensions, i, j), tolerance))
 				return false;
 
 	return true;
@@ -239,23 +328,39 @@ bool Matrix::Equals(const Matrix& self, const Matrix& other, const float toleran
 // Matrix->Scalar Operations 
 // -------------------------------------------------------------------------------------
 
-void Matrix::Multiply(const Matrix& self, const float scale, Matrix& dest)
+void Matrix::Multiply(const int dimensions, const Matrix& self, const float scale, Matrix& dest)
 {
-	ASSERT(self.GetDimensions() == dest.GetDimensions());
+	VALIDATE_MATRIX_DIMENSION(self, dimensions);
+	VALIDATE_MATRIX_DIMENSION(dest, dimensions);
 
-	for (auto i = 0; i < self.GetDimensions(); ++i)
-		for (auto j = 0; j < self.GetDimensions(); ++j)
-			dest(i, j) = scale * self(i, j);
+	for (auto i = 0; i < dimensions; ++i)
+		for (auto j = 0; j < dimensions; ++j)
+			dest.At(dimensions, i, j) = scale * self.At(dimensions, i, j);
 }
 
-void Matrix::Divide(const Matrix& self, const float scale, Matrix& dest)
+Matrix Matrix::Multiply(int dimensions, const Matrix& self, float scale)
 {
-	ASSERT(!util::equals_rounded(scale, 0));
-	ASSERT(self.GetDimensions() == dest.GetDimensions());
+	Matrix ret(dimensions);
+	Multiply(dimensions, self, scale, ret);
+	return ret;
+}
 
-	for (auto i = 0; i < self.GetDimensions(); ++i)
-		for (auto j = 0; j < self.GetDimensions(); ++j)
-			dest(i, j) = self(i, j) / scale;
+void Matrix::Divide(const int dimensions, const Matrix& self, const float scale, Matrix& dest)
+{
+	COND_ASSERT(_MATH_DEBUG_, !util::equals_rounded(scale, 0));
+	VALIDATE_MATRIX_DIMENSION(self, dimensions);
+	VALIDATE_MATRIX_DIMENSION(dest, dimensions);
+
+	for (auto i = 0; i < dimensions; ++i)
+		for (auto j = 0; j < dimensions; ++j)
+			dest.At(dimensions, i, j) = self.At(dimensions, i, j) / scale;
+}
+
+Matrix Matrix::Divide(const int dimensions, const Matrix& self, float scale)
+{
+	Matrix ret(dimensions);
+	Divide(dimensions, self, scale, ret);
+	return ret;
 }
 
 
@@ -264,34 +369,30 @@ void Matrix::Divide(const Matrix& self, const float scale, Matrix& dest)
 // Matrix->Vector Operations 
 // -------------------------------------------------------------------------------------
 
-
-Vector Matrix::Multiply(const Matrix& self, const Vector& vec)
+Vector Matrix::Multiply(const int dimensions, const Matrix& self, const Vector& vec)
 {
-	Vector ret(self.GetDimensions());
-	Multiply(self, vec, ret);
+	VALIDATE_MATRIX_DIMENSION(self, dimensions);
+
+	Vector ret(dimensions);
+	Multiply(dimensions, self, vec, ret);
 	return ret;
 }
 
 
-void Matrix::Multiply(const Matrix& self , const Vector& vec, Vector& dest)
+void Matrix::Multiply(const int dimensions, const Matrix& self , const Vector& vec, Vector& dest)
 {
-	ASSERT(self.GetDimensions() == dest.GetDimension());
+	VALIDATE_MATRIX_DIMENSION(self, dimensions);
 
 	float row_sum = 0;
 
-	for (auto i = 0; i < self.GetDimensions(); ++i)
+	for (auto i = 0; i < dimensions; ++i)
 	{
-		for (auto j = 0; j < self.GetDimensions(); ++j)
-			row_sum += self(i, j) *vec(j);
+		for (auto j = 0; j < dimensions; ++j)
+			row_sum += self.At(dimensions, i, j) * vec.At(j);
 
-		dest(i) = row_sum;
+		dest.At(i) = row_sum;
 		row_sum = 0;
 	}
-}
-
-Vector Matrix::operator*(const Vector& vec) const
-{
-	return Multiply(*this, vec);
 }
 
 
@@ -300,23 +401,23 @@ Vector Matrix::operator*(const Vector& vec) const
 // Properties 
 // -------------------------------------------------------------------------------------
 
-bool Matrix::IsIdentity(const float tolerance) const
+bool Matrix::IsIdentity(const int dimensions, const float tolerance) const
 {
-	for (auto i = 0; i < m_data_.GetActualSize(); ++i)
+	for (auto i = 0; i < dimensions * dimensions; ++i)
 	{
-		if (!util::equals_rounded(m_data_[i], 1, tolerance) && i % GetDimensions() == i / GetDimensions())
+		if (!util::equals_rounded(m_data_[i], 1, tolerance) && i % dimensions == i / dimensions)
 			return false;
 
-		if (!util::equals_rounded(m_data_[i], 0, tolerance) && i % GetDimensions() != i / GetDimensions())
+		if (!util::equals_rounded(m_data_[i], 0, tolerance) && i % dimensions != i / dimensions)
 			return false;
 	}
 
 	return true;
 }
 
-bool Matrix::IsZero(const float tolerance) const
+bool Matrix::IsZero(const int dimensions, const float tolerance) const
 {
-	for (auto i = 0; i < m_data_.GetActualSize(); ++i)
+	for (auto i = 0; i < dimensions * dimensions; ++i)
 		if (!util::equals_rounded(m_data_[i], 0, tolerance))
 			return false;
 
@@ -329,29 +430,31 @@ bool Matrix::IsZero(const float tolerance) const
 // Helper Functions
 // -------------------------------------------------------------------------------------
 
-void Matrix::SwapRows(Matrix& self, const int i, const int j)
+void Matrix::SwapRows(const int dimensions, Matrix& self, const int i, const int j)
 {
-	ASSERT(0 <= i && i < self.GetDimensions());
-	ASSERT(0 <= j && j < self.GetDimensions());
+	COND_ASSERT(_MATH_DEBUG_, 0 <= i && i < dimensions);
+	COND_ASSERT(_MATH_DEBUG_, 0 <= j && j < dimensions);
+	VALIDATE_MATRIX_DIMENSION(self, dimensions);
 
 	float tmp = 0;
 
-	for (auto index = 0; index < self.GetDimensions(); ++index)
-	{
-		tmp = self(i, index);
-		self(i, index) = self(j, index);
-		self(j, index) = tmp;
-	}
+	const auto tmp_row = new float[dimensions];
+
+	memcpy_s(tmp_row, dimensions, self.At(dimensions, i), dimensions);
+	memcpy_s(self.At(dimensions, i), dimensions, self.At(dimensions, j), dimensions);
+	memcpy_s(self.At(dimensions, j), dimensions, tmp_row, dimensions);
+
+	delete[] tmp_row;
 }
 
-std::string Matrix::ToString() const
+std::string Matrix::ToString(const int dimensions) const
 {
 	std::string ret;
 
-	for (auto i = 0; i < GetDimensions(); ++i)
+	for (auto i = 0; i < dimensions; ++i)
 	{
-		for (auto j = 0; j < GetDimensions(); ++j)
-			ret += TO_STRING(At(i, j)) += " ";
+		for (auto j = 0; j < dimensions; ++j)
+			ret += TO_STRING(this->At(dimensions, i, j)) += " ";
 
 		ret += "\n";
 	}
@@ -359,9 +462,9 @@ std::string Matrix::ToString() const
 	return ret;
 }
 
-bool Matrix::IsValid() const
+bool Matrix::IsValid(const int dimensions) const
 {
-	for (auto i = 0; i < m_data_.GetActualSize(); ++i)
+	for (auto i = 0; i < dimensions * dimensions; ++i)
 		if (!isfinite(m_data_[i]))
 			return false;
 

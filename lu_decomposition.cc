@@ -8,45 +8,27 @@ namespace math {
 	
 namespace algebra {
 
-LUDecomposition::LUDecomposition(const Matrix& mat) 
-	: m_decompositioned_matrix_(std::make_unique<Matrix>(mat.GetDimensions())), m_permutations_vector_(new int[mat.GetDimensions() + 1])
-{
-	const auto size = mat.GetDimensions();
 
-	for (auto i = 0; i <= size; ++i)
+LUDecomposition::LUDecomposition(const int dimensions, std::unique_ptr<Matrix> mat)
+	: m_decompositioned_matrix_(std::move(mat)),
+	  m_permutations_vector_(new int[dimensions + 1]),
+	  m_dimensions_(dimensions)
+{
+	for (auto i = 0; i <= m_dimensions_; ++i)
 		m_permutations_vector_[i] = i;
 
-	for (auto i = 0; i < size; ++i)
-		for (auto j = 0; j < size; ++j)
-			m_decompositioned_matrix_->At(i, j) = mat(i, j);
-
-	if (!Decompose())
-	{
-		delete[] m_permutations_vector_;
-		m_decompositioned_matrix_.reset();
-		m_decompositioned_matrix_ = nullptr;
-		m_permutations_vector_ = nullptr;
-	}
+	if (!Decompose()) Cleanup();
 }
 
-LUDecomposition::LUDecomposition(const std::unique_ptr<Matrix> mat)
-	: m_decompositioned_matrix_(std::make_unique<Matrix>(mat->GetDimensions())), m_permutations_vector_(new int[mat->GetDimensions() + 1])
+LUDecomposition::LUDecomposition(const int dimensions, const Matrix& mat)
+	: LUDecomposition(dimensions, std::unique_ptr<Matrix>(Matrix::MakeNewCopy(dimensions, mat)))
 {
-	for (auto i = 0; i <= mat->GetDimensions(); ++i)
-		m_permutations_vector_[i] = i;
-
-	if (!Decompose())
-	{
-		delete[] m_permutations_vector_;
-		m_decompositioned_matrix_.reset();
-		m_decompositioned_matrix_ = nullptr;
-		m_permutations_vector_ = nullptr;
-	}
 }
 
-LUDecomposition::~LUDecomposition()
+void LUDecomposition::Cleanup()
 {
-	delete[] m_permutations_vector_;
+	m_permutations_vector_.reset();
+	m_decompositioned_matrix_.reset();
 }
 
 
@@ -55,14 +37,14 @@ bool LUDecomposition::Decompose() const
 	int j, k;
 	float current_absolute_value;
 
-	for (auto i = 0; i < m_decompositioned_matrix_->GetDimensions(); ++i)
+	for (auto i = 0; i < m_dimensions_; ++i)
 	{
 		float column_max = 0;
 		auto column_max_index = i;
 
-		for (k = i; k < m_decompositioned_matrix_->GetDimensions(); ++k)
+		for (k = i; k < m_dimensions_; ++k)
 		{
-			if ((current_absolute_value = abs(m_decompositioned_matrix_->At(k, i))) > column_max)
+			if ((current_absolute_value = abs(m_decompositioned_matrix_->At(m_dimensions_, k, i))) > column_max)
 			{
 				column_max = current_absolute_value;
 				column_max_index = k;
@@ -78,43 +60,33 @@ bool LUDecomposition::Decompose() const
 			m_permutations_vector_[i] = m_permutations_vector_[column_max_index];
 			m_permutations_vector_[column_max_index] = j;
 
-			Matrix::SwapRows(*m_decompositioned_matrix_, i, column_max_index);
+			Matrix::SwapRows(m_dimensions_, *m_decompositioned_matrix_, i, column_max_index);
 
-			++m_permutations_vector_[m_decompositioned_matrix_->GetDimensions()];
+			++m_permutations_vector_[m_dimensions_];
 		}
 
-		for (j = i + 1; j < m_decompositioned_matrix_->GetDimensions(); ++j)
+		for (j = i + 1; j < m_dimensions_; ++j)
 		{
-			m_decompositioned_matrix_->At(j, i) /= m_decompositioned_matrix_->At(i, i);
+			m_decompositioned_matrix_->At(m_dimensions_, j, i) /= m_decompositioned_matrix_->At(m_dimensions_, i, i);
 
-			for (k = i + 1; k < m_decompositioned_matrix_->GetDimensions(); ++k)
-				m_decompositioned_matrix_->At(j, k) -= m_decompositioned_matrix_->At(j, i) * m_decompositioned_matrix_->At(i, k);
+			for (k = i + 1; k < m_dimensions_; ++k)
+				m_decompositioned_matrix_->At(m_dimensions_, j, k) -= m_decompositioned_matrix_->At(m_dimensions_, j, i) * m_decompositioned_matrix_->At(m_dimensions_, i, k);
 		}
 	}
 
 	return true;
 }
 
-LUDecomposition LUDecomposition::MakeDecomposition(const Matrix& mat)
-{
-	LUDecomposition decomp(mat);
-
-	if (decomp.IsValid())
-		return decomp;
-	
-	return static_cast<LUDecomposition>(nullptr);
-}
-
 float LUDecomposition::Determinant() const
 {
 	if (!IsValid()) return 0;
 
-	auto ret = m_decompositioned_matrix_->At(0, 0);
+	auto ret = m_decompositioned_matrix_->At(m_dimensions_, 0, 0);
 
-	for (auto i = 1; i < m_decompositioned_matrix_->GetDimensions(); ++i)
-		ret *= m_decompositioned_matrix_->At(i, i);
+	for (auto i = 1; i < m_dimensions_; ++i)
+		ret *= m_decompositioned_matrix_->At(m_dimensions_, i, i);
 
-	if ((m_permutations_vector_[m_decompositioned_matrix_->GetDimensions()] - m_decompositioned_matrix_->GetDimensions()) % 2 == 0)
+	if ((m_permutations_vector_[m_dimensions_] - m_dimensions_) % 2 == 0)
 		return ret;
 
 	return -ret;
@@ -123,23 +95,25 @@ float LUDecomposition::Determinant() const
 
 void LUDecomposition::Inverse(Matrix& result) const
 {
-	util::DynamicArray<float, 1> identity_row(m_decompositioned_matrix_->GetDimensions(), true);
+	COND_ASSERT(_MATH_DEBUG_, IsValid());
 
-	for (auto i = 0; i < m_decompositioned_matrix_->GetDimensions(); ++i)
+	util::DynamicArray<float, 1> identity_row(m_dimensions_, 0.0f);
+
+	for (auto i = 0; i < m_dimensions_; ++i)
 	{
 		if (i != 0) identity_row[i - 1] = 0;
 		identity_row[i] = 1;
 
 		auto ret_column = Solve(identity_row.Base());
 
-		for (auto j = 0; j < m_decompositioned_matrix_->GetDimensions(); ++j)
-			result(j, i) = ret_column(j);
+		for (auto j = 0; j < m_dimensions_; ++j)
+			result.At(m_dimensions_, j, i) = ret_column.At(j);
 	}
 }
 
 Matrix LUDecomposition::Inverse() const
 {
-	Matrix ret(m_decompositioned_matrix_->GetDimensions());
+	Matrix ret(m_dimensions_);
 	Inverse(ret);
 	return ret;
 }
@@ -147,24 +121,24 @@ Matrix LUDecomposition::Inverse() const
 
 void LUDecomposition::Solve(const float* b, Vector& result) const
 {
-	ASSERT(IsValid());
+	COND_ASSERT(_MATH_DEBUG_, IsValid());
 
 	// solve Ly = Pb
-	for (auto i = 0; i < m_decompositioned_matrix_->GetDimensions(); ++i)
+	for (auto i = 0; i < m_dimensions_; ++i)
 	{
-		result(i) = b[m_permutations_vector_[i]];
+		result.At(i) = b[m_permutations_vector_[i]];
 
 		for (auto k = 0; k < i; ++k)
-			result(i) -= m_decompositioned_matrix_->At(i, k) * result(k);
+			result.At(i) -= m_decompositioned_matrix_->At(m_dimensions_, i, k) * result.At(k);
 	}
 
 	// solve Ux = y
-	for (auto i = m_decompositioned_matrix_->GetDimensions() - 1; i >= 0; --i)
+	for (auto i = m_dimensions_ - 1; i >= 0; --i)
 	{
-		for (auto k = i + 1; k < m_decompositioned_matrix_->GetDimensions(); ++k)
-			result(i) -= m_decompositioned_matrix_->At(i, k) * result(k);
+		for (auto k = i + 1; k < m_dimensions_; ++k)
+			result.At(i) -= m_decompositioned_matrix_->At(m_dimensions_, i, k) * result.At(k);
 
-		result(i) /= m_decompositioned_matrix_->At(i, i);
+		result.At(i) /= m_decompositioned_matrix_->At(m_dimensions_, i, i);
 	}
 }
 
@@ -175,7 +149,7 @@ void LUDecomposition::Solve(const Vector& vec, Vector& result) const
 
 Vector LUDecomposition::Solve(const float* b) const
 {
-	Vector ret(m_decompositioned_matrix_->GetDimensions());
+	Vector ret(m_dimensions_);
 	Solve(b, ret);
 	return ret;
 }
@@ -183,7 +157,7 @@ Vector LUDecomposition::Solve(const float* b) const
 
 Vector LUDecomposition::Solve(const Vector& vec) const
 {
-	Vector ret(m_decompositioned_matrix_->GetDimensions());
+	Vector ret(m_dimensions_);
 	Solve(vec, ret);
 	return ret;
 }
@@ -191,7 +165,7 @@ Vector LUDecomposition::Solve(const Vector& vec) const
 
 int LUDecomposition::GetRowExchangesCount() const
 {
-	return m_permutations_vector_[m_decompositioned_matrix_->GetDimensions()];
+	return m_permutations_vector_[m_dimensions_];
 }
 
 

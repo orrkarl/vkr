@@ -39,25 +39,18 @@ namespace algebra {
 class LUDecomposition
 {
 	std::unique_ptr<Matrix> m_decompositioned_matrix_;
-	int* m_permutations_vector_;
+	std::unique_ptr<int[]> m_permutations_vector_;
+	const int m_dimensions_;
+
+	void Cleanup();
 
 	bool Decompose() const;
 
 public:
-	explicit LUDecomposition(const Matrix& mat);
+	explicit LUDecomposition(int dimensions, const Matrix& mat);
 
-	explicit LUDecomposition(std::unique_ptr<Matrix> mat);
-
-	~LUDecomposition();
-
-	LUDecomposition(const LUDecomposition& pOther)
-		: m_decompositioned_matrix_(pOther.m_decompositioned_matrix_.get()),
-		  m_permutations_vector_(pOther.m_permutations_vector_)
-	{
-	}
-
-	static LUDecomposition MakeDecomposition(const Matrix& mat);
-
+	explicit LUDecomposition(int dimensions, std::unique_ptr<Matrix> mat);
+	
 	float Determinant() const;
 
 	Matrix Inverse() const;

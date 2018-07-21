@@ -68,6 +68,9 @@
     <ClInclude Include="general.h">
       <Filter>Source Files\util</Filter>
     </ClInclude>
+    <ClInclude Include="predefs.h">
+      <Filter>Source Files\predefs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="win_main.cc">

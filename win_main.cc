@@ -1,4 +1,5 @@
 #include "win_main.h"
+#include "predefs.h"
 
 #include <cstdio>
 
@@ -15,18 +16,23 @@ int main()
 	return WinMain(HINSTANCE(GetModuleHandle(nullptr)), nullptr, nullptr, SW_SHOW);
 }
 
-	
-
-
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int mCmdShow)
 {
 	if (hPrevInstance != nullptr) return -1;
 
 	const auto iden4 = math::algebra::Matrix::MakeIdentity(2);
-	const math::algebra::Matrix mat0(3, 1, 2, 3, 4, 5, 7, 7, 8, 9);
-	math::algebra::LUDecomposition decomp(mat0);
+	const math::algebra::Matrix mat0(3,
+		1, 0, 0,
+		0, 1, 0,
+		0, 0, 1);
+	
+	math::algebra::LUDecomposition decomp(3, mat0);
 
-	std::cout << (decomp.Inverse() * mat0).IsIdentity() << std::endl;
+	auto mat = math::algebra::Matrix::MakeCopy(3, mat0);
+	auto mat1 = math::algebra::Matrix::MakeCopy(3, mat);
+	
+	std::cout << decomp.IsValid() << std::endl;
+	std::cout << math::algebra::Matrix::Multiply(3, decomp.Inverse(), mat0).ToString(3) << std::endl;
 
 	getchar();
 
