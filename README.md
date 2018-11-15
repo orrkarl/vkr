@@ -1,1 +1,1 @@
-# hachsharot-2018
+Just your friendly neighborhood Nth dimension rasterizer
