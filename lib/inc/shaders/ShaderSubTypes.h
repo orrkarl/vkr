@@ -1,4 +1,4 @@
-#include "../predefs.h"
+#include "../general/predefs.h"
 
 #include "Shader.h"
 

@@ -1,4 +1,4 @@
-#include "predefs.h"
+#include "../general/predefs.h"
 
 #pragma once
 
@@ -32,9 +32,10 @@ Error fromGLError(GLint err)
 {
     switch(err)
     {
-        case GL_INVALID_ENUM:   return Error::INVALID_TYPE;
-        case GL_INVALID_VALUE:  return Error::INVALID_VALUE;
-        case GL_NO_ERROR:       return Error::NO_ERROR;
+        case GL_INVALID_ENUM:       return Error::INVALID_TYPE;
+        case GL_INVALID_VALUE:      return Error::INVALID_VALUE;
+        case GL_INVALID_OPERATION:  return Error::INVALID_OPERATION;
+        case GL_NO_ERROR:           return Error::NO_ERROR;
 
         default:
             return Error::UNKNOWN_ERROR;
@@ -52,6 +53,19 @@ GLenum fromNRShaderType(const ShaderType& type)
     {
         case ShaderType::VERTEX:    return GL_VERTEX_SHADER;
         case ShaderType::FRAGMENT:  return GL_FRAGMENT_SHADER;
+
+        default:
+            return 0;
+    }
+}
+
+GLenum fromNRPrimitiveType(const Primitive& type)
+{
+    switch(type)
+    {
+        case Primitive::POINTS:     return GL_POINTS;
+        case Primitive::LINES:      return GL_LINES;
+        case Primitive::TRIANGLES:  return GL_TRIANGLES;
 
         default:
             return 0;

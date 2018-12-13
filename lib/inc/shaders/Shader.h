@@ -1,5 +1,6 @@
-#include "../predefs.h"
-#include "../Converters.h"
+#include "../general/predefs.h"
+
+#include "../utils/converters.h"
 
 #pragma once
 
@@ -13,8 +14,7 @@ private:
     const ShaderType m_type;
     NRbool m_isCompiled;
 
-public:
-
+protected:
     Shader(
         const std::string& code,
         const NRbool compile,
@@ -42,6 +42,8 @@ public:
             }
         }
     }
+
+public:
 
     ~Shader() { release(); }
 

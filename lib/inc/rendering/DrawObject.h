@@ -1,8 +1,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../predefs.h"
-#include "../Buffer.h"
+#include "../general/predefs.h"
+#include "../buffers/Buffer.h"
 
 #pragma once
 
@@ -10,20 +10,17 @@
 namespace nr
 {
 
-// TODO: move the bindings thingie to Render, since render has to take the projection
-
 class DrawObject
 {
 private:
-
 	std::unordered_map<NRuint, Buffer*> m_buffers{};
-	GLuint m_vao = 0;
+	const Primitive m_primitiveType;
 
 public:
 
-	~DrawObject()
+	DrawObject(const Primitive& type = Primitive::POINTS)
+		: m_primitiveType(type)
 	{
-		resetBindings();
 	}
 
 	void bindBuffer(const NRuint index, Buffer* buffer)
@@ -31,31 +28,12 @@ public:
 		m_buffers.insert({ index, buffer });
 	}
 
-	Error finalizeBindings();
-
-	void resetBindings()
+	std::unordered_map<NRuint, Buffer*> getContent() const
 	{
-		if (m_vao != 0)
-		{
-			GLint bufferAsInt;
-			glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &bufferAsInt);
-			GLuint buffer = (GLuint) bufferAsInt;
-			
-			glDeleteBuffers(1, &buffer);
-			glDeleteVertexArrays(1, &m_vao);
-			m_vao = 0;
-		}
+		return m_buffers;
 	}
 
-	void release()
-	{
-		resetBindings();
-	}
-
-	GLuint getContent()
-	{
-		return m_vao;
-	}
+	Primitive getPrimitiveType() const { return m_primitiveType; }
 };
 
 }

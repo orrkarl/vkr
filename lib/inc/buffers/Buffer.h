@@ -1,13 +1,13 @@
 #include <vector>
 
-#include "predefs.h"
+#include "../general/predefs.h"
 
 #pragma once
 
 
 #define CTOR(DataType, dataTypeName) 										\
 	Buffer(std::vector<DataType>& data, NRuint elementSize = 1)				\
-		: Buffer(&data[0], Type::dataTypeName, data.size(), elementSize)	\
+		: Buffer(data.data(), Type::dataTypeName, data.size(), elementSize)	\
 	{																		\
 	}
 

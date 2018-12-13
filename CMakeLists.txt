@@ -7,7 +7,7 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF()
 
 OPTION(BUILD_TESTS "builds the test directory and gtest")
-OPTION(BUILD_DEMOS "builds the demo directory")
+OPTION(BUILD_DEMOS "builds the demo directory" ON)
 
 FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(GLEW REQUIRED)
@@ -24,9 +24,6 @@ IF(BUILD_TESTS)
 
 	ENABLE_TESTING()
 
-	ADD_TEST(
-		NAME NrasterTests
-		COMMAND $<TARGET_FILE:NrasterTest>
-	)
+	ADD_TEST(NAME unifyBuffersTest COMMAND NrasterTest)
 ENDIF()
 
