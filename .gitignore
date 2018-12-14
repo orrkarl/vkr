@@ -1,6 +1,6 @@
-# build directory
-build/
+# My attitude for gitignore might be weird: I want my repo to be 
+# IDE independent, without any IDE configuration file
 
-
-# IDE dependent data
+# Visual Studio Code
 .vscode/
+build/

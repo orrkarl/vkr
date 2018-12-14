@@ -1,1 +1,1 @@
-Just your friendly neighborhood Nth dimension rasterizer
+Just your friendly neighborhood N-dimensional rasterizer
