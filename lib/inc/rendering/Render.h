@@ -2,7 +2,7 @@
 
 #include "../shaders/Shader.h"
 
-#include "DrawObject.h"
+#include "RenderData.h"
 #include "RenderState.h"
 
 #pragma once
@@ -20,7 +20,7 @@ private:
 
     GLuint m_program;
 
-    Error bind(const DrawObject& obj, GLuint* vaoptr) const;
+    Error bind(const RenderData& obj, GLuint* vaoptr) const;
 
     void unbind(GLuint* vaoptr) const;
 
@@ -37,7 +37,7 @@ public:
         glDeleteProgram(m_program);
     }
 
-    Error drawArrays(const DrawObject& drawable) const;
+    Error drawArrays(const RenderData& drawable) const;
 
     Error link();
 
@@ -48,12 +48,12 @@ public:
             case ShaderType::VERTEX:
                 m_vertexShader = shader;
                 glAttachShader(m_program, shader->getContent());
-                return getLastGLError();
+                return utils::getLastGLError();
             
             case ShaderType::FRAGMENT:
                 m_fragmentShader = shader;
                 glAttachShader(m_program, shader->getContent());
-                return getLastGLError();
+                return utils::getLastGLError();
 
             default:
                 return Error::INVALID_TYPE;

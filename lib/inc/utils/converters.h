@@ -5,6 +5,9 @@
 namespace nr
 {
 
+namespace utils
+{
+
 GLenum fromNRType(Type type)
 {
     switch(type)
@@ -70,6 +73,8 @@ GLenum fromNRPrimitiveType(const Primitive& type)
         default:
             return 0;
     }
+}
+
 }
 
 }

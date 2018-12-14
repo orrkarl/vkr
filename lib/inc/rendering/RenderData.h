@@ -10,7 +10,7 @@
 namespace nr
 {
 
-class DrawObject
+class RenderData
 {
 private:
 	std::unordered_map<NRuint, Buffer*> m_buffers{};
@@ -18,7 +18,7 @@ private:
 
 public:
 
-	DrawObject(const Primitive& type = Primitive::POINTS)
+	RenderData(const Primitive& type)
 		: m_primitiveType(type)
 	{
 	}

@@ -9,6 +9,11 @@
 	Buffer(std::vector<DataType>& data, NRuint elementSize = 1)				\
 		: Buffer(data.data(), Type::dataTypeName, data.size(), elementSize)	\
 	{																		\
+	}																		\
+	\
+	Buffer(DataType* data, NRuint size, NRuint elementSize = 1)				\
+		: Buffer(data, Type::dataTypeName, size, elementSize)				\
+	{																		\
 	}
 
 
@@ -30,13 +35,40 @@ private:
 
 public:
 
+	CTOR(NRdouble, DOUBLE)
+
 	CTOR(NRfloat, FLOAT)
+
+	CTOR(NRlong, LONG)
+
+	CTOR(NRulong, ULONG)
 
 	CTOR(NRint, INT)
 
 	CTOR(NRuint, UINT)
 
+	CTOR(NRshort, SHORT)
+
+	CTOR(NRushort, USHORT)
+
+	CTOR(NRbyte, BYTE)
+
+	CTOR(NRubyte, UBYTE)
+
 	CTOR(NRchar, CHAR)
+
+	//CTOR(NRbool, BOOL) 	
+	/*
+	since vector<bool> is specialized to be a bitset, it doesn't contain a bool array laid
+	flat in the memory - so it can not be converted to a buffer, and you have to use the
+	more dangeorous raw pointer.
+	*/
+
+	Buffer(NRbool* data, NRuint size, NRuint elementSize = 1)				
+		: Buffer(data, Type::BOOL, size, elementSize)				\
+	{																		
+	}
+
 
 	void* getData() const { return m_data; }
 	
@@ -45,6 +77,8 @@ public:
 	NRuint getSize() const { return m_size; }
 
 	NRuint getElementSize() const { return m_elementSize; }
+
+	NRuint getByteSize() const { return getSize() * type::getByteSize(getDataType()); }
 
 	void release() 
 	{

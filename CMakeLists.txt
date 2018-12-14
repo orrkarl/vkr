@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
 project(Nraster CXX)
 
@@ -6,11 +6,13 @@ IF(NOT CMAKE_BUILD_TYPE)
 	SET(CMAKE_BUILD_TYPE Debug)
 ENDIF()
 
-OPTION(BUILD_TESTS "builds the test directory and gtest")
-OPTION(BUILD_DEMOS "builds the demo directory" ON)
+OPTION(BUILD_TESTS "builds the test directory and gtest" ON)
+OPTION(BUILD_DEMOS "builds the demo directory")
 
 FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(GLEW REQUIRED)
+
+SET(CMAKE_CXX_STANDARD 17)
 
 ADD_SUBDIRECTORY(dependencies)
 ADD_SUBDIRECTORY(lib)
@@ -20,10 +22,12 @@ IF(BUILD_DEMOS)
 ENDIF()
 
 IF(BUILD_TESTS)
+	SET(NRASTER_ALL_INCLUDES ${PROJECT_SOURCE_DIR}/lib/inc)
+	
 	ADD_SUBDIRECTORY(test)
-
 	ENABLE_TESTING()
+	ADD_TEST(NAME AllTests COMMAND NrasterTest) # run the executable itself for a better log
 
-	ADD_TEST(NAME unifyBuffersTest COMMAND NrasterTest)
+	UNSET(NRASTER_ALL_INCLUDES)
 ENDIF()
 

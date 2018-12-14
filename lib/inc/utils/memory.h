@@ -1,36 +1,48 @@
 #include <cstring>
 #include <vector>
+#include <iostream>
 
 #include "../general/predefs.h"
-
-#include "../rendering/DrawObject.h"
+#include "../buffers/Buffer.h"
 
 #pragma once
 
 namespace nr
 {
 
-std::pair<NRuint, void*> unifyBuffers(const std::unordered_map<NRuint, Buffer*>& buffers)
+namespace utils
+{
+
+std::pair<NRuint, void*> unifyBuffers(const std::vector<Buffer*>& buffers)
 {
     NRuint totalSize = 0;
 
     for (const auto& it : buffers)
     {
-        totalSize += it.second->getSize();
+        totalSize += it->getByteSize();
     }
+
+    auto ret = malloc(totalSize);
 
     totalSize = 0;
 
     // actually using malloc and voidptr in cpp, almost ashamed of myself...
-    auto ret = malloc(totalSize);
 
     for (const auto& buffer : buffers)
     {
-        std::memcpy(static_cast<void*>(static_cast<char*>(ret) + totalSize), buffer.second->getData(), buffer.second->getSize());
-        totalSize += buffer.second->getSize();
+        memcpy((char*)ret + totalSize, buffer->getData(), buffer->getByteSize());
+        totalSize += buffer->getByteSize();
     }
 
     return { totalSize, ret };
+}
+
+template <typename T>
+NRuint vectorByteSize(const std::vector<T>& vec)
+{
+    return vec.size() * sizeof(T);
+}
+
 }
 
 }

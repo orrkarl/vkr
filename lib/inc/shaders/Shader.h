@@ -20,7 +20,7 @@ protected:
         const NRbool compile,
         const ShaderType shaderType,
         Error& err)
-        : m_type(shaderType), m_shader(glCreateShader(fromNRShaderType(shaderType))), m_isCompiled(compile)
+        : m_type(shaderType), m_shader(glCreateShader(utils::fromNRShaderType(shaderType))), m_isCompiled(compile)
     {
         auto str = code.c_str();
         GLint len = code.size();
@@ -29,7 +29,7 @@ protected:
         if (compile)
         {
             glCompileShader(m_shader);
-            if ((err = getLastGLError()) != Error::NO_ERROR)
+            if ((err = utils::getLastGLError()) != Error::NO_ERROR)
             {
                 GLint success;
                 glGetShaderiv(m_shader, GL_COMPILE_STATUS, &success);
@@ -53,7 +53,7 @@ public:
 
         Error err = Error::NO_ERROR;
         glCompileShader(m_shader);
-        if ((err = getLastGLError()) == Error::NO_ERROR)
+        if ((err = utils::getLastGLError()) == Error::NO_ERROR)
         {
             GLint success;
             glGetShaderiv(m_shader, GL_COMPILE_STATUS, &success);
@@ -63,7 +63,7 @@ public:
             }
         }
 
-        m_isCompiled = isSuccess(err) ? true : false;
+        m_isCompiled = error::isSuccess(err) ? true : false;
         return err;
     }
 

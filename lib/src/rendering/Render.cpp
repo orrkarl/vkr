@@ -1,21 +1,38 @@
 #include <algorithm>
-#include <numeric>
-#include <memory>
-#include <unordered_map>
+#include <algorithm>
 #include <cstring>
+#include <memory>
+#include <numeric>
+#include <vector>
+#include <unordered_map>
 
-#include "../../inc/rendering/Render.h"
+#include <rendering/Render.h>
 
-#include "../../inc/utils/converters.h"
-#include "../../inc/utils/memory.h"
+#include <utils/converters.h>
+#include <utils/memory.h>
 
 namespace nr
 {
 
-Error Render::bind(const DrawObject& obj, GLuint* vaoptr) const
+Error Render::bind(const RenderData& obj, GLuint* vaoptr) const
 {
     auto buffers = obj.getContent();
-    auto unified = unifyBuffers(obj.getContent());
+
+    std::vector<std::pair<NRuint, Buffer*>> buffersMappedVec;
+    std::transform(buffers.cbegin(), buffers.cend(), buffersMappedVec.begin(),
+                     [](const std::pair<NRuint, Buffer*> in) { 
+                         return in;
+                      });
+
+
+    std::vector<Buffer*> buffersVec;
+    std::transform(buffersMappedVec.cbegin(), buffersMappedVec.cend(), buffersVec.begin(),
+                     [](const std::pair<NRuint, Buffer*> in) { 
+                         return in.second;
+                      });
+
+    
+    auto unified = utils::unifyBuffers(buffersVec);
     auto h_buf = unified.second;
     auto h_size = unified.first;
 
@@ -29,13 +46,13 @@ Error Render::bind(const DrawObject& obj, GLuint* vaoptr) const
     glBufferData(d_buf, h_size, h_buf, GL_STATIC_DRAW);
 
     GLint err;
-    for (const auto& buffer : buffers)
+    for (const auto& buffer : buffersMappedVec)
     {
         glEnableVertexAttribArray(buffer.first);
         glVertexAttribPointer(
             buffer.first, 
             buffer.second->getElementSize(), 
-            fromNRType(buffer.second->getDataType()),
+            utils::fromNRType(buffer.second->getDataType()),
             GL_FALSE,
             0,
             0);
@@ -43,7 +60,7 @@ Error Render::bind(const DrawObject& obj, GLuint* vaoptr) const
         if ((err = glGetError()) != GL_NO_ERROR)
         {
             glBindVertexArray(0);
-            return fromGLError(err);
+            return utils::fromGLError(err);
         }
     }
 
@@ -77,7 +94,7 @@ Error Render::link()
     if (isLinked == GL_FALSE)
     {
         glDeleteProgram(m_program);
-        return getLastGLError();
+        return utils::getLastGLError();
     }
 
     glDetachShader(m_program, m_vertexShader->getContent());    
@@ -86,11 +103,11 @@ Error Render::link()
     return Error::NO_ERROR;
 }
 
-Error Render::drawArrays(const DrawObject& obj) const
+Error Render::drawArrays(const RenderData& obj) const
 {
     GLuint vao;
     auto err = bind(obj, &vao);
-    if (!isSuccess(err)) 
+    if (!error::isSuccess(err)) 
     {
         unbind(&vao);
         return err;
@@ -109,7 +126,7 @@ Error Render::drawArrays(const DrawObject& obj) const
     glUseProgram(m_program);
     glBindVertexArray(vao);
     
-    glDrawArrays(fromNRPrimitiveType(obj.getPrimitiveType()), 0, itemCount);
+    glDrawArrays(utils::fromNRPrimitiveType(obj.getPrimitiveType()), 0, itemCount);
     
     glBindVertexArray(vao);
     glUseProgram(m_program);
