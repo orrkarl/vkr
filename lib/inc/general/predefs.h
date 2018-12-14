@@ -1,9 +1,9 @@
+#pragma once
+
 #include <cstdint>
 #include <string>
 
 #include <GL/glew.h>
-
-#pragma once
 
 typedef double NRdouble;
 typedef float NRfloat;

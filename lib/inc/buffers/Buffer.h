@@ -1,8 +1,8 @@
+#pragma once
+
 #include <vector>
 
 #include "../general/predefs.h"
-
-#pragma once
 
 
 #define CTOR(DataType, dataTypeName) 										\

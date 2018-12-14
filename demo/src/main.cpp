@@ -1,9 +1,12 @@
-#include <GL/glew.h>
+#include <Nraster/predefs.h>
 #include <GLFW/glfw3.h>
 
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <Nraster/Buffer.h>
+#include <Nraster/rendering/RenderData.h>
+#include <Nraster/rendering/Render.h>
 
 #include "../inc/glutil.h"
 
@@ -62,6 +65,7 @@ int main(void)
     glfwSetKeyCallback(window, key_callback);
     glfwSwapInterval(1);
 
+    
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 

@@ -1,11 +1,10 @@
+#pragma once
+
 #include <unordered_map>
 #include <vector>
 
 #include "../general/predefs.h"
 #include "../buffers/Buffer.h"
-
-#pragma once
-
 
 namespace nr
 {
@@ -15,6 +14,9 @@ class RenderData
 private:
 	std::unordered_map<NRuint, Buffer*> m_buffers{};
 	const Primitive m_primitiveType;
+	
+	GLuint m_vao;
+	GLuint m_buffer;
 
 public:
 
@@ -34,6 +36,12 @@ public:
 	}
 
 	Primitive getPrimitiveType() const { return m_primitiveType; }
+
+	Error finalizeBindings();
+
+	NRbool isBound() const { return m_vao == 0; }
+
+    void unbind();
 };
 
 }

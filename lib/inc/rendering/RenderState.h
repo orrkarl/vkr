@@ -1,6 +1,8 @@
+#pragma once
+
+
 #include "../general/predefs.h"
 
-#pragma once
 
 namespace nr
 {

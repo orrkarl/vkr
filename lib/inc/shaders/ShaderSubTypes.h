@@ -1,8 +1,10 @@
+#pragma once
+
+
 #include "../general/predefs.h"
 
 #include "Shader.h"
 
-#pragma once
 
 #define ShaderSubType(name, shaderType)                                     \
     class name : Shader                                                     \

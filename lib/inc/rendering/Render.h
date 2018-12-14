@@ -1,11 +1,11 @@
+#pragma once
+
 #include "../general/predefs.h"
 
 #include "../shaders/Shader.h"
 
 #include "RenderData.h"
 #include "RenderState.h"
-
-#pragma once
 
 namespace nr
 {
@@ -20,10 +20,6 @@ private:
 
     GLuint m_program;
 
-    Error bind(const RenderData& obj, GLuint* vaoptr) const;
-
-    void unbind(GLuint* vaoptr) const;
-
 public:
     Render()
         : m_program(glCreateProgram())
@@ -37,7 +33,7 @@ public:
         glDeleteProgram(m_program);
     }
 
-    Error drawArrays(const RenderData& drawable) const;
+    Error drawArrays(RenderData& drawable) const;
 
     Error link();
 

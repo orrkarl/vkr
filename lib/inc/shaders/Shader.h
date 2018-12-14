@@ -1,8 +1,9 @@
+#pragma once
+
+
 #include "../general/predefs.h"
 
 #include "../utils/converters.h"
-
-#pragma once
 
 namespace nr
 {

@@ -1,11 +1,11 @@
+#pragma once
+
 #include <cstring>
 #include <vector>
 #include <iostream>
 
 #include "../general/predefs.h"
 #include "../buffers/Buffer.h"
-
-#pragma once
 
 namespace nr
 {
