@@ -1,6 +1,9 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
-ADD_LIBRARY(Nraster SHARED src/rendering/Render.cpp src/rendering/RenderData.cpp)
+ADD_LIBRARY(Nraster SHARED 
+	src/rendering/Render.cpp src/rendering/RenderData.cpp
+	src/utils/memory.cpp src/utils/converters.cpp
+	src/general/predefs.cpp)
 
 TARGET_LINK_LIBRARIES(Nraster
 	PRIVATE ${OPENGL_LIBRARIES}
@@ -9,7 +12,7 @@ TARGET_LINK_LIBRARIES(Nraster
 TARGET_INCLUDE_DIRECTORIES(Nraster
 	PRIVATE ${OPENGL_INCLUDE_DIRS}
 	PRIVATE ${GLEW_INCLUDE_DIRS}
-	PRIVATE ${PROJECT_SOURCE_DIR}/lib/inc)
+	PRIVATE inc)
 
-SET(NRASTER_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/lib/public/)
+SET(NRASTER_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/public CACHE INTERNAL "")
 

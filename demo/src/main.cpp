@@ -4,9 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <Nraster/Buffer.h>
-#include <Nraster/rendering/RenderData.h>
-#include <Nraster/rendering/Render.h>
+#include <Nraster/buffer.h>
+#include <Nraster/render.h>
 
 #include "../inc/glutil.h"
 
