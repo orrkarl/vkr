@@ -28,7 +28,7 @@ namespace nr
 
 typedef std::basic_string<NRchar> string;
 
-enum class Type : int
+enum class Type : NRint
 {
 	DOUBLE, FLOAT, ULONG, LONG, UINT, INT, USHORT, SHORT, UBYTE, BYTE, CHAR, BOOL
 };
@@ -38,7 +38,7 @@ namespace type
 	NRuint getByteSize(const Type& type);
 }
 
-enum class Error : int
+enum class Error : NRint
 {
 	NO_ERROR=0, INVALID_TYPE, INVALID_VALUE, INVALID_OPERATION, UNKNOWN_ERROR
 };
@@ -49,12 +49,12 @@ namespace error
 	NRbool isFailure(const Error& err);
 }
 
-enum class ShaderType : int
+enum class ShaderType : NRint
 {
 	VERTEX, FRAGMENT
 };
 
-enum class Primitive : int
+enum class Primitive : NRint
 {
 	POINTS, LINES, TRIANGLES
 };

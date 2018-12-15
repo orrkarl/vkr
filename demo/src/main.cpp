@@ -2,25 +2,25 @@
 #include <GLFW/glfw3.h>
 
 #include <stdlib.h>
+#include <vector>
 #include <stdio.h>
 
 #include <Nraster/buffer.h>
 #include <Nraster/render.h>
+#include <Nraster/shader.h>
 
 #include "../inc/glutil.h"
 
-static const struct
+void nrCheckError(const nr::Error& err, const char* file, const int line)
 {
-    float x, y;
-    float r, g, b;
+    if (nr::error::isFailure(err))
+    {
+        std::cerr << "at " << file << ":" << line << ": " << (NRint)err << std::endl;
+        throw std::runtime_error("");
+    }
 }
 
-vertices[3] =
-{
-    { -0.6f, -0.4f, 1.f, 0.f, 0.f },
-    {  0.6f, -0.4f, 0.f, 1.f, 0.f },
-    {   0.f,  0.6f, 0.f, 0.f, 1.f }
-};
+#define nrCheckError(err) nrCheckError(err, __FILE__, __LINE__);
 
 static void error_callback(int error, const char* description)
 {
@@ -31,12 +31,10 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
+
 int main(void)
 {
     GLFWwindow* window;
-    GLuint vao, vertex_buffer, vertex_shader, fragment_shader, program;
-    GLint mvp_location, vpos_location, vcol_location;
-    
     glfwSetErrorCallback(error_callback);
     
     if (!glfwInit())
@@ -64,53 +62,57 @@ int main(void)
     glfwSetKeyCallback(window, key_callback);
     glfwSwapInterval(1);
 
-    
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    glGenBuffers(1, &vertex_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    
-    vertex_shader = loadShader(GL_VERTEX_SHADER, "shaders/shader.vert");
-    fragment_shader = loadShader(GL_FRAGMENT_SHADER, "shaders/shader.frag");
-    program = glCreateProgram();
-    CheckError("could not create program");
-    
-    glAttachShader(program, vertex_shader);
-    glAttachShader(program, fragment_shader);
-    CheckError("could not attach shaders");
-    validLinkProgram(program);
-    
-    vpos_location = glGetAttribLocation(program, "vPos");
-    vcol_location = glGetAttribLocation(program, "vCol");
-    CheckError("could not find attributes");
-    glEnableVertexAttribArray(vpos_location);
-    glVertexAttribPointer(vpos_location, 2, GL_FLOAT, GL_FALSE,
-                          sizeof(vertices[0]), (void*) 0);
-    CheckError("at pos attirb assignging");
-    glEnableVertexAttribArray(vcol_location);
-    glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE,
-                          sizeof(vertices[0]), (void*) (sizeof(float) * 2));
-    CheckError("at col attirb assignging");
-    
-    while (!glfwWindowShouldClose(window))
+    auto nrErr = nr::Error::NO_ERROR;
+        
+    std::vector<NRfloat> vertecies = 
     {
-        float ratio;
-        int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
-        ratio = width / (float) height;
-        glViewport(0, 0, width, height);
-        CheckError("at glViewport");
-        glClearColor(0.0, 0.0, 0.0, 0.0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        CheckError("at Color reseting");
-    
-        glUseProgram(program);
-        CheckError("at program use");
+        -0.6f, -0.4f,
+        0.6f , -0.4f,
+        0.0f ,  0.6f,
+    };
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        CheckError("at glDrawArrays");
+    std::vector<NRfloat> colors = 
+    {
+        1.f, 0.f, 0.f,
+        0.f, 1.f, 0.f,
+        0.f, 0.f, 1.f 
+    };
+
+    auto vao = nr::RenderData(nr::Primitive::TRIANGLES);
+    
+    auto vertex_buffer = nr::Buffer(vertecies, 2u);
+    vao.bindBuffer(0u, &vertex_buffer);
+    
+    auto color_buffer  = nr::Buffer(colors, 3u);
+    vao.bindBuffer(1u, &color_buffer);
+
+
+    auto program = nr::Render();
+
+    auto vertex_shader = nr::Shader(loadFile("shaders/shader.vert"), true, nr::ShaderType::VERTEX, nrErr);
+    nrCheckError(nrErr);
+    nrCheckError(program.bindShader(&vertex_shader));
+
+    auto fragment_shader = nr::Shader(loadFile("shaders/shader.frag"), true, nr::ShaderType::FRAGMENT, nrErr);
+    nrCheckError(nrErr);
+    nrCheckError(program.bindShader(&fragment_shader));    
+
+    nrCheckError(program.link());
+
+    nrCheckError(vao.finalizeBindings());    
+    nr::Render::setClearColor(0.0, 0.0, 0.0, 0.0);
+    
+    NRint width, height;
+    while (!glfwWindowShouldClose(window))
+    {   
+        glfwGetFramebufferSize(window, &width, &height);
+
+        nr::Render::viewPort(0, 0, width, height);
+
+        nr::Render::clearColor();
+        
+        nrCheckError(program.drawArrays(vao));
+        
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

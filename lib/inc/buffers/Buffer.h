@@ -65,7 +65,7 @@ public:
 	*/
 
 	Buffer(NRbool* data, NRuint size, NRuint elementSize = 1)				
-		: Buffer(data, Type::BOOL, size, elementSize)				\
+		: Buffer(data, Type::BOOL, size, elementSize)				
 	{																		
 	}
 

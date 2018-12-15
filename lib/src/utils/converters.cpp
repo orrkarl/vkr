@@ -30,7 +30,7 @@ GLenum fromNRType(Type type)
     }
 }
 
-Error fromGLError(GLint err)
+Error fromGLError(GLenum err)
 {
     switch(err)
     {

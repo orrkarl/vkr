@@ -16,9 +16,9 @@ private:
     Shader* m_vertexShader;
     Shader* m_fragmentShader;
 
-    RenderState m_state;
+    static RenderState state;
 
-    GLuint m_program;
+    GLuint m_program = 0;
 
 public:
     Render()
@@ -31,6 +31,7 @@ public:
     void release()
     {
         glDeleteProgram(m_program);
+        m_program = 0;
     }
 
     Error drawArrays(RenderData& drawable) const;
@@ -56,6 +57,22 @@ public:
         }
     }
 
+    static void viewPort(NRint x, NRint y, NRuint w, NRuint h)
+    {
+        state.wnd.set(x, y, w, h);
+        glViewport(x, y, w, h);
+    }
+
+    static void setClearColor(const NRfloat r, const NRfloat g, const NRfloat b, const NRfloat a)
+    {
+        state.color.set(r, g, b, a);
+        glClearColor(r, g, b, a);
+    }
+
+    static void clearColor()
+    {
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
 };
 
 }

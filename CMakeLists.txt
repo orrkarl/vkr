@@ -7,7 +7,9 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF()
 
 OPTION(BUILD_TESTS "builds the test directory and gtest" ON)
-OPTION(BUILD_DEMOS "builds the demo directory")
+OPTION(BUILD_DEMOS "builds the demo directory" OFF)
+
+OPTION(FIND_GTEST "find installed gtest instead of building it" OFF)
 
 FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(GLEW REQUIRED)
@@ -15,6 +17,7 @@ FIND_PACKAGE(GLEW REQUIRED)
 SET(CMAKE_CXX_STANDARD 17)
 
 ADD_SUBDIRECTORY(dependencies)
+
 ADD_SUBDIRECTORY(lib)
 
 IF(BUILD_DEMOS)

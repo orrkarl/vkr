@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <general/predefs.h>
 
 #include <rendering/Render.h>
@@ -5,6 +7,8 @@
 
 namespace nr
 {
+
+RenderState Render::state = { { 0, 0, 0, 0 }, { 0.0f, 0.0f, 0.0f, 0.0f } };
 
 Error Render::link()
 {
@@ -22,7 +26,7 @@ Error Render::link()
     glDetachShader(m_program, m_vertexShader->getContent());    
     glDetachShader(m_program, m_fragmentShader->getContent());
 
-    return Error::NO_ERROR;
+    return utils::getLastGLError();
 }
 
 Error Render::drawArrays(RenderData& obj) const
@@ -44,11 +48,18 @@ Error Render::drawArrays(RenderData& obj) const
 
     auto vertBuf = obj.getContent().at(0);
     auto itemCount = vertBuf->getSize() / vertBuf->getElementSize();
-
+    
     glUseProgram(m_program);
-    glDrawArrays(utils::fromNRPrimitiveType(obj.getPrimitiveType()), 0, itemCount);
 
-    return Error::NO_ERROR;
+    if (error::isFailure(err = utils::getLastGLError()))
+    {
+        return err;
+    }
+
+    glDrawArrays(utils::fromNRPrimitiveType(obj.getPrimitiveType()), 0, itemCount);
+    glUseProgram(0);
+
+    return utils::getLastGLError();
 }
 
 }

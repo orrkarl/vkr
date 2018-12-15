@@ -31,22 +31,26 @@ GLint getProgramField(GLuint program, GLenum field)
     return ret;
 }
 
-GLuint loadShader(GLenum shaderType, const std::string& shaderFileName)
+std::string loadFile(const std::string& fileName)
 {
-    std::ifstream f(shaderFileName);
+    std::ifstream f(fileName);
 
     if (!f)
     {
-        std::cerr << "could not find\\open file " << shaderFileName << std::endl;
+        std::cerr << "could not find\\open file " << fileName << std::endl;
         throw std::exception();
     }
 
     std::stringstream buffer;
     
     buffer << f.rdbuf();
+    return buffer.str();
+}
 
+GLuint loadShader(GLenum shaderType, const std::string& shaderFileName)
+{
     auto ret = glCreateShader(shaderType);
-    auto mem = buffer.str();
+    auto mem = loadFile(shaderFileName);
     auto mem_base = mem.c_str();
     glShaderSource(ret, 1, &mem_base, NULL);
     CheckError("could not use shader source");

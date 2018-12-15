@@ -15,7 +15,8 @@ private:
     const ShaderType m_type;
     NRbool m_isCompiled;
 
-protected:
+public:
+
     Shader(
         const std::string& code,
         const NRbool compile,
@@ -43,8 +44,6 @@ protected:
             }
         }
     }
-
-public:
 
     ~Shader() { release(); }
 

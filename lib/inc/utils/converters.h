@@ -10,7 +10,7 @@ namespace utils
 
 GLenum fromNRType(Type type);
 
-Error fromGLError(GLint err);
+Error fromGLError(GLenum err);
 
 Error getLastGLError();
 

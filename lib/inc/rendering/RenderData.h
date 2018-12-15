@@ -1,6 +1,6 @@
 #pragma once
 
-#include <unordered_map>
+#include <map>
 #include <vector>
 
 #include "../general/predefs.h"
@@ -12,7 +12,7 @@ namespace nr
 class RenderData
 {
 private:
-	std::unordered_map<NRuint, Buffer*> m_buffers{};
+	std::map<NRuint, Buffer*> m_buffers{};
 	const Primitive m_primitiveType;
 	
 	GLuint m_vao;
@@ -30,7 +30,7 @@ public:
 		m_buffers.insert({ index, buffer });
 	}
 
-	std::unordered_map<NRuint, Buffer*> getContent() const
+	std::map<NRuint, Buffer*> getContent() const
 	{
 		return m_buffers;
 	}
@@ -39,7 +39,7 @@ public:
 
 	Error finalizeBindings();
 
-	NRbool isBound() const { return m_vao == 0; }
+	NRbool isBound() const { return m_vao == 0 && m_buffer == 0; }
 
     void unbind();
 };
