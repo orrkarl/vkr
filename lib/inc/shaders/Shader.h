@@ -2,7 +2,6 @@
 
 
 #include "../general/predefs.h"
-
 #include "../utils/converters.h"
 
 namespace nr
@@ -10,19 +9,16 @@ namespace nr
 
 class Shader
 {
-private:
-    const GLuint m_shader;
-    const ShaderType m_type;
-    NRbool m_isCompiled;
-
 public:
 
     Shader(
         const std::string& code,
         const NRbool compile,
-        const ShaderType shaderType,
+        const Role shaderType,
         Error& err)
-        : m_type(shaderType), m_shader(glCreateShader(utils::fromNRShaderType(shaderType))), m_isCompiled(compile)
+        : m_type(shaderType),
+          m_shader(glCreateShader(utils::fromNRShaderType(shaderType))),
+          m_isCompiled(compile)
     {
         auto str = code.c_str();
         GLint len = code.size();
@@ -76,7 +72,13 @@ public:
 
     GLuint getContent() const { return m_shader; }
 
-    ShaderType getShaderType() const { return m_type; }
+    Role getShaderType() const { return m_type; }
+
+private:
+    const GLuint m_shader;
+    const Role m_type;
+    NRbool m_isCompiled;
+
 };
 
 }

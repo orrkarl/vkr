@@ -21,6 +21,7 @@ private:
     GLuint m_program = 0;
 
 public:
+
     Render()
         : m_program(glCreateProgram())
     {
@@ -42,12 +43,12 @@ public:
     {
         switch(shader->getShaderType())
         {
-            case ShaderType::VERTEX:
+            case Role::VERTEX:
                 m_vertexShader = shader;
                 glAttachShader(m_program, shader->getContent());
                 return utils::getLastGLError();
             
-            case ShaderType::FRAGMENT:
+            case Role::FRAGMENT:
                 m_fragmentShader = shader;
                 glAttachShader(m_program, shader->getContent());
                 return utils::getLastGLError();

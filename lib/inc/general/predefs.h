@@ -30,7 +30,7 @@ typedef std::basic_string<NRchar> string;
 
 enum class Type : NRint
 {
-	DOUBLE, FLOAT, ULONG, LONG, UINT, INT, USHORT, SHORT, UBYTE, BYTE, CHAR, BOOL
+	DOUBLE, FLOAT, ULONG, LONG, UINT, INT, USHORT, SHORT, UBYTE, BYTE, CHAR, BOOL, RAW
 };
 
 namespace type
@@ -49,7 +49,7 @@ namespace error
 	NRbool isFailure(const Error& err);
 }
 
-enum class ShaderType : NRint
+enum class Role : NRint
 {
 	VERTEX, FRAGMENT
 };

@@ -4,12 +4,30 @@
 #include <stdlib.h>
 #include <vector>
 #include <stdio.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 #include <Nraster/buffer.h>
 #include <Nraster/render.h>
 #include <Nraster/shader.h>
 
-#include "../inc/glutil.h"
+
+std::string loadFile(const std::string& fileName)
+{
+    std::ifstream f(fileName);
+
+    if (!f)
+    {
+        std::cerr << "could not find\\open file " << fileName << std::endl;
+        throw std::exception();
+    }
+
+    std::stringstream buffer;
+    
+    buffer << f.rdbuf();
+    return buffer.str();
+}
 
 void nrCheckError(const nr::Error& err, const char* file, const int line)
 {
@@ -81,19 +99,18 @@ int main(void)
     auto vao = nr::RenderData(nr::Primitive::TRIANGLES);
     
     auto vertex_buffer = nr::Buffer(vertecies, 2u);
-    vao.bindBuffer(0u, &vertex_buffer);
+    vao.bindVertexBuffer(&vertex_buffer);
     
     auto color_buffer  = nr::Buffer(colors, 3u);
-    vao.bindBuffer(1u, &color_buffer);
-
+    vao.bindAttribute(1u, &color_buffer);
 
     auto program = nr::Render();
 
-    auto vertex_shader = nr::Shader(loadFile("shaders/shader.vert"), true, nr::ShaderType::VERTEX, nrErr);
+    auto vertex_shader = nr::Shader(loadFile("shaders/shader.vert"), true, nr::Role::VERTEX, nrErr);
     nrCheckError(nrErr);
     nrCheckError(program.bindShader(&vertex_shader));
 
-    auto fragment_shader = nr::Shader(loadFile("shaders/shader.frag"), true, nr::ShaderType::FRAGMENT, nrErr);
+    auto fragment_shader = nr::Shader(loadFile("shaders/shader.frag"), true, nr::Role::FRAGMENT, nrErr);
     nrCheckError(nrErr);
     nrCheckError(program.bindShader(&fragment_shader));    
 

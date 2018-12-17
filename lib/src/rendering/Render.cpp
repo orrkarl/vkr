@@ -39,14 +39,10 @@ Error Render::drawArrays(RenderData& obj) const
         return err;
     }
 
-    auto data = obj.getContent();
+    auto vertBuf = obj.getVertexBuffer();
+    
+    if (vertBuf == nullptr) return Error::INVALID_VALUE;
 
-    if (data.count(0) == 0)
-    {
-        return Error::INVALID_VALUE;
-    }
-
-    auto vertBuf = obj.getContent().at(0);
     auto itemCount = vertBuf->getSize() / vertBuf->getElementSize();
     
     glUseProgram(m_program);

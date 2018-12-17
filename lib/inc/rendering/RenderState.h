@@ -40,10 +40,38 @@ struct Color
     }
 };
 
+struct Depth
+{
+    NRbool active = false;
+
+    void enable()
+    {
+        glEnable(GL_DEPTH_TEST);
+        active = true;
+    }
+
+    void disable()
+    {
+        glDisable(GL_DEPTH_TEST);
+        active = false;
+    }
+
+    NRbool isEnabled() const
+    {
+        return active;
+    }
+};
+
+struct Test
+{
+    Depth dpeth;
+};
+
 struct RenderState
 {
     ViewPort wnd;
     Color color;
+    Test test;
 };
 
 }

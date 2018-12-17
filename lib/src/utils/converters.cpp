@@ -1,4 +1,6 @@
 #include <utils/converters.h>
+#include <shaders/Shader.h>
+#include <rendering/RenderData.h>
 
 
 namespace nr
@@ -25,6 +27,9 @@ GLenum fromNRType(Type type)
         case Type::FLOAT:   return GL_FLOAT;
         case Type::DOUBLE:  return GL_DOUBLE;
         
+        case Type::RAW:     
+            return 0; // this is not the default because i will probably change it in the future
+
         default:
             return 0; // type is not supported in core GL 
     }
@@ -49,12 +54,12 @@ Error getLastGLError()
     return fromGLError(glGetError());
 }
 
-GLenum fromNRShaderType(const ShaderType& type)
+GLenum fromNRShaderType(const Role& type)
 {
     switch(type)
     {
-        case ShaderType::VERTEX:    return GL_VERTEX_SHADER;
-        case ShaderType::FRAGMENT:  return GL_FRAGMENT_SHADER;
+        case Role::VERTEX:    return GL_VERTEX_SHADER;
+        case Role::FRAGMENT:  return GL_FRAGMENT_SHADER;
 
         default:
             return 0;

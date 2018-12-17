@@ -69,8 +69,16 @@ public:
 	{																		
 	}
 
+	Buffer(void* data, NRuint size)				
+		: Buffer(data, Type::RAW, size, 0)
+	{																		
+	}
+
 
 	void* getData() const { return m_data; }
+
+	template<typename T>
+	T getData() const { return (T) m_data; }
 	
 	Type getDataType() const { return m_dataType; }
 	
