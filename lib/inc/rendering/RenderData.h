@@ -29,11 +29,13 @@ public:
 			if (buffer == nullptr)
 			{
 				m_attributes.erase(index);
+				requestUpdate();
 				return Error::NO_ERROR;
 			}
 			else
 			{
 				m_attributes.insert({ index, buffer });
+				requestUpdate();
 				return Error::NO_ERROR;
 			}
 		}
@@ -43,41 +45,14 @@ public:
 		}
 
 		m_attributes.insert({ index, buffer });
+		requestUpdate();
 		return Error::NO_ERROR;
 	}
 
-	Error bindUniform(const NRuint index, Uniform* buffer)
-	{
-		if (m_uniforms.count(index) != 0)
-		{
-			if (buffer == nullptr)
-			{
-				m_uniforms.erase(index);
-				return Error::NO_ERROR;
-			}
-			else
-			{
-				m_uniforms.insert({ index, buffer });
-				return Error::NO_ERROR;
-			}
-		}
-		if (isIndexBound(index))
-		{
-			return Error::INVALID_OPERATION;
-		}
-
-		m_uniforms.insert({ index, buffer });
-		return Error::NO_ERROR;
-	}
-
-	void bindUniformBuffer(Buffer* buffer)
-	{
-		m_uniformBuffer = buffer;
-	}
-	
 	void bindVertexBuffer(Buffer* buffer)
 	{
 		m_vertexBuffer = buffer;
+		requestUpdate();
 	}
 
 	Primitive getPrimitiveType() const { return m_primitiveType; }
@@ -92,28 +67,30 @@ public:
 
 private:
 	std::map<NRuint, Buffer*> m_attributes{};
-	std::map<NRuint, Uniform*> m_uniforms{};
 
-	Buffer* m_uniformBuffer;
 	Buffer* m_vertexBuffer;
 
 	const Primitive m_primitiveType;
 	
 	GLuint m_vao = 0u;
 	GLuint m_attrBuffer = 0u;
-	GLuint m_uniBuffer = 0u;
+
+	NRbool m_hasUpdates = false;
 
 	NRbool isIndexBound(const NRuint index) const
 	{
-		return index == 0u || m_attributes.count(index) != 0 || m_uniforms.count(index) != 0;
+		return index == 0u || m_attributes.count(index) != 0;
 	}
 
 	Error initBindings();
 
 	Error finalizeAttributes();
 
-	Error finalizeUniforms();
+	NRbool isUpToDate() const { return !m_hasUpdates; }
 
+	void update() { m_hasUpdates = false; }
+
+	void requestUpdate() { m_hasUpdates = true; }
 };
 
 }

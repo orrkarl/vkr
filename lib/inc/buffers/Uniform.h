@@ -5,8 +5,12 @@
 
 
 #define CTOR(DataType)                                          \
-    Uniform(DataType* data, const NRuint n, const NRuint m)     \
-        : Buffer(data, n * m), n(n)                             \
+    Uniform(                                                    \
+        DataType* data,                                         \
+        const NRuint n,                                         \
+        const NRuint m,                                         \
+        const NRuint count = 1)                                 \
+        : Buffer(data, n * m * count), n(n), count(count)       \
     {                                                           \
     }
 
@@ -24,13 +28,16 @@ public:
 
     CTOR(NRuint);
 
-    std::pair<NRuint, NRuint> getDimensions() 
+    std::pair<NRuint, NRuint> getDimensions() const
     {
-        return { n, getSize() / n };
+        return { n, getSize() / (n * count) };
     }
 
+    NRuint getCount() const { return count; }
+    
 private:
     const NRuint n;
+    const NRuint count;
 };
 
 }

@@ -43,6 +43,12 @@ struct Color
 struct Depth
 {
     NRbool active = false;
+    NRfloat z;
+
+    void set(const NRfloat z)
+    {
+        this->z = z;
+    }
 
     void enable()
     {
@@ -62,16 +68,10 @@ struct Depth
     }
 };
 
-struct Test
-{
-    Depth dpeth;
-};
-
 struct RenderState
 {
     ViewPort wnd;
     Color color;
-    Test test;
 };
 
 }

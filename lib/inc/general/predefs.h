@@ -59,5 +59,6 @@ enum class Primitive : NRint
 	POINTS, LINES, TRIANGLES
 };
 
+
 }
 

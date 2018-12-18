@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <math.h>
 
 #include <Nraster/buffer.h>
 #include <Nraster/render.h>
@@ -96,6 +97,15 @@ int main(void)
         0.f, 0.f, 1.f 
     };
 
+    NRfloat angle = M_PI / 10;
+    NRfloat cosine = cos(angle);
+    NRfloat sine = sin(angle);
+    NRfloat rotation[] = 
+    {
+        cosine, sine,
+        -sine, cosine
+    };
+
     auto vao = nr::RenderData(nr::Primitive::TRIANGLES);
     
     auto vertex_buffer = nr::Buffer(vertecies, 2u);
@@ -103,23 +113,35 @@ int main(void)
     
     auto color_buffer  = nr::Buffer(colors, 3u);
     vao.bindAttribute(1u, &color_buffer);
-
+    nrCheckError(nr::utils::getLastGLError());
     auto program = nr::Render();
-
+    nrCheckError(nr::utils::getLastGLError());
+    auto rotation_uniform = nr::Uniform(rotation, 2u, 2u);
+    
+    nrCheckError(program.bindUniform(2u, &rotation_uniform));
+    
     auto vertex_shader = nr::Shader(loadFile("shaders/shader.vert"), true, nr::Role::VERTEX, nrErr);
-    nrCheckError(nrErr);
+    if (nr::error::isFailure(nrErr))
+    {
+        std::cerr << vertex_shader.getCompilerLog(nrErr) << std::endl;
+        throw std::runtime_error("could not compile shader");
+    }
     nrCheckError(program.bindShader(&vertex_shader));
 
     auto fragment_shader = nr::Shader(loadFile("shaders/shader.frag"), true, nr::Role::FRAGMENT, nrErr);
-    nrCheckError(nrErr);
+    if (nr::error::isFailure(nrErr))
+    {
+        std::cerr << vertex_shader.getCompilerLog(nrErr) << std::endl;
+        throw std::runtime_error("could not compile shader");
+    }
     nrCheckError(program.bindShader(&fragment_shader));    
 
     nrCheckError(program.link());
 
-    nrCheckError(vao.finalizeBindings());    
     nr::Render::setClearColor(0.0, 0.0, 0.0, 0.0);
     
     NRint width, height;
+    NRuint count = 1;
     while (!glfwWindowShouldClose(window))
     {   
         glfwGetFramebufferSize(window, &width, &height);
@@ -129,7 +151,11 @@ int main(void)
         nr::Render::clearColor();
         
         nrCheckError(program.drawArrays(vao));
-        
+        rotation_uniform.getData<float*>()[0] = cos(angle * count);
+        rotation_uniform.getData<float*>()[3] = cos(angle * count);
+        rotation_uniform.getData<float*>()[1] = sin(angle * count);
+        rotation_uniform.getData<float*>()[2] = -sin(angle * count);
+        count++;
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

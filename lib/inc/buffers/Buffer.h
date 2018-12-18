@@ -75,10 +75,10 @@ public:
 	}
 
 
-	void* getData() const { return m_data; }
+	void* getData() { return m_data; }
 
 	template<typename T>
-	T getData() const { return (T) m_data; }
+	T getData() { return (T) m_data; }
 	
 	Type getDataType() const { return m_dataType; }
 	
