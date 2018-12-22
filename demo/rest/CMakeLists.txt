@@ -17,3 +17,4 @@ INCLUDE_DIRECTORIES(
 
 ADD_EXECUTABLE(triangle src/triangle.cpp)
 ADD_EXECUTABLE(cube src/cube.cpp)
+ADD_EXECUTABLE(cube4d src/multiD.cpp)
