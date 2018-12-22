@@ -5,8 +5,8 @@
 #include <Nraster/render.h>
 #include <Nraster/shader.h>
 
-const NRfloat near = 0.5f;
-const NRfloat far = 5.0f;
+NRfloat near = 0.5f;
+NRfloat far = 7.0f;
 const NRfloat scale = 1.0f;
 
 std::vector<NRfloat> perspectiveMatrix = 
@@ -19,7 +19,7 @@ std::vector<NRfloat> perspectiveMatrix =
 
 std::vector<NRfloat> camOffset = 
 {
-    0.8f, 0.5f
+    0.5f, 0.5f
 };
 
 std::vector<NRfloat> vertecies4d = 
@@ -75,22 +75,12 @@ int main(void)
     auto nrErr = nr::Error::NO_ERROR;
 
     auto vao = nr::RenderData(nr::Primitive::POINTS);
-    
-    /*float rotate1[16];
-    rotation(4, {0, 3}, M_PI / 4, rotate1);
-    float rotate2[16];
-    rotation(4, {1, 2}, -M_PI / 7, rotate2);
-    float rotate[16];
-    matmul(4, 4, 4, rotate1, rotate2, rotate);
-
-    float rotated[16 * 4];*/
-    
+        
     for (unsigned i = 0; i < 16 * 4; i += 4)
     {
-        //matmul(4, 4, 1, rotate, vertecies4d.data() + i, rotated + i);
         vertecies4d[i]   -= 1;
-        vertecies4d[i+1] -= 1;
-        vertecies4d[i+2] -= 1;
+        vertecies4d[i+1] -= 2;
+        vertecies4d[i+2] -= 3;
         vertecies4d[i+3] -= 1;
     }
 
@@ -101,12 +91,6 @@ int main(void)
         vertecies.push_back(vertecies4d[i]     / abs(vertecies4d[i + 3]));
         vertecies.push_back(vertecies4d[i + 1] / abs(vertecies4d[i + 3]));
         vertecies.push_back(vertecies4d[i + 2] / abs(vertecies4d[i + 3]));
-    }
-
-    printf("\n");
-    for (unsigned int i = 0; i < vertecies.size(); i += 3)
-    {
-        printf("%f, %f, %f\n", vertecies[i], vertecies[i+1], vertecies[i+2]);
     }
 
     auto vertex_buffer = nr::Buffer(vertecies, 3u);
@@ -137,6 +121,9 @@ int main(void)
 
     auto offset = nr::Uniform(camOffset.data(), 1, 2);
     validate(program.bindUniform(3u, &offset));
+
+    auto unifFar = nr::Uniform(&far, 1, 1);
+    validate(program.bindUniform(4u, &unifFar));
 
     nr::Render::setClearColor(0.0, 0.0, 0.0, 0.0);
 
