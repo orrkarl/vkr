@@ -8,7 +8,7 @@
 namespace nr
 {
 
-RenderState Render::state = { { 0, 0, 0, 0 }, { 0.0f, 0.0f, 0.0f, 0.0f } };
+RenderState Render::state = {};
 
 Error Render::link()
 {
@@ -25,7 +25,7 @@ Error Render::link()
     glDetachShader(m_program, m_vertexShader->getContent());    
     glDetachShader(m_program, m_fragmentShader->getContent());
     m_isLinked = true;
-    return Error::NO_ERROR;
+    return utils::getLastGLError();
 }
 
 Error Render::drawArrays(RenderData& obj)
@@ -38,29 +38,35 @@ Error Render::drawArrays(RenderData& obj)
     glUseProgram(m_program);
     if (error::isFailure(err = utils::getLastGLError()))
     {
+        printf("in use program\n");
         return err;
     }
 
-    err = obj.finalizeBindings();
-    if (error::isFailure(err)) 
+    if (error::isFailure(err = obj.finalizeBindings())) 
     {
         obj.unbind();
+        printf("in fainalize bindings\n");
         return err;
     }
 
-    if (error::isFailure((err = finalizeUniforms())))
+    if (!isUpToDate())
     {
-        return err;
+        if (error::isFailure((err = finalizeUniforms())))
+        {
+            printf("in finalize uniforms\n");
+            return err;
+        }
+        update();
     }
-
+    
     glBindBuffer(GL_UNIFORM_BUFFER, m_uniBuffer);
     if (error::isFailure((err = utils::getLastGLError())))
     {
+        printf("in binding uniforms buffer\n");
         return err;
     }
-
-    auto itemCount = vertBuf->getSize() / vertBuf->getElementSize();
     
+    auto itemCount = vertBuf->getSize() / vertBuf->getElementSize();
     glDrawArrays(utils::fromNRPrimitiveType(obj.getPrimitiveType()), 0, itemCount);
     glUseProgram(0);
 
@@ -76,7 +82,6 @@ Error Render::finalizeUniforms()
     {
         index = unif.first;
         uniform = unif.second;
-        
         auto dim = uniform->getDimensions();
         auto count = uniform->getCount();
         
@@ -92,36 +97,38 @@ Error Render::finalizeUniforms()
                         {
                             case 1u:
                                 glUniform1f(index, data[0]);
-                                return Error::NO_ERROR;            
+                                break;           
                             case 2u:
                                 glUniform2f(index, data[0], data[1]);
-                                return Error::NO_ERROR;
+                                break;           
                             case 3u:
                                 glUniform3f(index, data[0], data[1], data[2]);
-                                return Error::NO_ERROR;
+                                break;           
                             case 4u:
                                 glUniform4f(index, data[0], data[1], data[2], data[3]);
-                                return Error::NO_ERROR;
+                                break;           
                             default:
                                 return Error::INVALID_VALUE;   
                         }
+                        break;
                     case 2u:
                         switch (dim.second)
                         {
                             case 1u:
-                                return Error::INVALID_VALUE;            
+                                return Error::INVALID_VALUE;
                             case 2u:
                                 glUniformMatrix2fv(index, count, GL_FALSE, data);
-                                return Error::NO_ERROR;
+                                break;           
                             case 3u:
                                 glUniformMatrix2x3fv(index, count, GL_FALSE, data);
-                                return Error::NO_ERROR;
+                                break;           
                             case 4u:
                                 glUniformMatrix2x4fv(index, count, GL_FALSE, data);
-                                return Error::NO_ERROR;
+                                break;           
                             default:
                                 return Error::INVALID_VALUE;   
                         }
+                        break;
                     case 3u:
                         switch (dim.second)
                         {
@@ -129,16 +136,17 @@ Error Render::finalizeUniforms()
                                 return Error::INVALID_VALUE;            
                             case 2u:
                                 glUniformMatrix3x2fv(index, count, GL_FALSE, data);
-                                return Error::NO_ERROR;
+                                break;           
                             case 3u:
                                 glUniformMatrix3fv(index, count, GL_FALSE, data);
-                                return Error::NO_ERROR;
+                                break;           
                             case 4u:
                                 glUniformMatrix3x4fv(index, count, GL_FALSE, data);
-                                return Error::NO_ERROR;
+                                break;           
                             default:
                                 return Error::INVALID_VALUE;   
                         }
+                        break;
                     case 4u:
                         switch (dim.second)
                         {
@@ -146,26 +154,27 @@ Error Render::finalizeUniforms()
                                 return Error::INVALID_VALUE;            
                             case 2u:
                                 glUniformMatrix4x2fv(index, count, GL_FALSE, data);
-                                return Error::NO_ERROR;
+                                break;           
                             case 3u:
                                 glUniformMatrix4x3fv(index, count, GL_FALSE, data);
-                                return Error::NO_ERROR;
+                                break;           
                             case 4u:
                                 glUniformMatrix4fv(index, count, GL_FALSE, data);
-                                return Error::NO_ERROR;
+                                break;           
                             default:
                                 return Error::INVALID_VALUE;   
                         }
+                        break;
                     default:
                         return Error::INVALID_VALUE;
                 }
-
+                break;
             default:
                 return Error::INVALID_TYPE;
         }
     }
 
-    return Error::NO_ERROR;
+    return utils::getLastGLError();
 }
 
 

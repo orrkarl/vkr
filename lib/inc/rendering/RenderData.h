@@ -55,6 +55,8 @@ public:
 		requestUpdate();
 	}
 
+	void requestUpdate() { m_hasUpdates = true; }
+
 	Primitive getPrimitiveType() const { return m_primitiveType; }
 
 	Error finalizeBindings();
@@ -90,7 +92,6 @@ private:
 
 	void update() { m_hasUpdates = false; }
 
-	void requestUpdate() { m_hasUpdates = true; }
 };
 
 }

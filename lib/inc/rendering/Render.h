@@ -21,15 +21,6 @@ public:
         glGenBuffers(1, &m_uniBuffer);
     }
 
-    Render(Error& linkError)
-        : Render()
-    {
-        if (error::isFailure(linkError = link()))
-        {
-            release();
-        }
-    }
-
     ~Render() { release(); }
 
     void release()
@@ -79,11 +70,13 @@ public:
 			if (buffer == nullptr)
 			{
 				m_uniforms.erase(index);
+                requsetUniformUpdate();
 				return Error::NO_ERROR;
 			}
 			else
 			{
 				m_uniforms.insert({ index, buffer });
+                requsetUniformUpdate();
 				return Error::NO_ERROR;
 			}
 		}
@@ -91,8 +84,9 @@ public:
 		{
 			return Error::INVALID_OPERATION;
 		}
-
-		m_uniforms.insert({ index, buffer });
+		
+        m_uniforms.insert({ index, buffer });
+        requsetUniformUpdate();
 		return Error::NO_ERROR;
 	}
 
@@ -100,6 +94,7 @@ public:
 	{
         if (buffer->getDataType() != Type::RAW) return Error::INVALID_OPERATION;
 		m_uniformBuffer = buffer;
+        requsetUniformUpdate();
         return Error::NO_ERROR;
 	}
 	
@@ -108,19 +103,33 @@ public:
     static void viewPort(NRint x, NRint y, NRuint w, NRuint h)
     {
         state.wnd.set(x, y, w, h);
-        glViewport(x, y, w, h);
     }
 
     static void setClearColor(const NRfloat r, const NRfloat g, const NRfloat b, const NRfloat a)
     {
         state.color.set(r, g, b, a);
-        glClearColor(r, g, b, a);
+    }
+
+    static void cullFace(
+        const FaceCulling::Face culled = FaceCulling::Face::BACK,
+        const FaceCulling::Direction dir = FaceCulling::Direction::CLOCKWISE)
+    {
+        state.cull.cullFace(culled);
+        state.cull.frontDirection(dir);
+        state.cull.activate();
     }
 
     static void clearColor()
     {
         glClear(GL_COLOR_BUFFER_BIT);
     }
+
+    void requsetUniformUpdate() 
+    {
+        m_uniformStatus = false;
+    }
+
+    NRbool isUpToDate() const { return m_uniformStatus; }
 
 private:
     Shader* m_vertexShader;
@@ -131,6 +140,7 @@ private:
     std::map<NRuint, Uniform*> m_uniforms{};
     Buffer* m_uniformBuffer;
     GLuint m_uniBuffer = 0u;
+    NRbool m_uniformStatus = true;
 
     static RenderState state;
 
@@ -138,6 +148,8 @@ private:
 	{
 		return index == 0u || m_uniforms.count(index) != 0;
 	}
+
+    void update() { m_uniformStatus = true; }
 };
 
 }
