@@ -18,6 +18,8 @@ GLenum fromNRShaderType(const Role& type);
 
 GLenum fromNRPrimitiveType(const Primitive& type);
 
+Error fromCLError(const cl_int& err);
+
 }
 
 }

@@ -79,6 +79,31 @@ GLenum fromNRPrimitiveType(const Primitive& type)
     }
 }
 
+Error fromCLError(const cl_int& err)
+{
+    switch(err)
+    {
+        case CL_SUCCESS:
+            return Error::NO_ERROR;
+
+        case CL_INVALID_PROGRAM:
+        case CL_INVALID_PROGRAM_EXECUTABLE:
+        case CL_INVALID_KERNEL_NAME:
+        case CL_INVALID_VALUE:
+            return Error::INVALID_VALUE;
+
+        case CL_INVALID_KERNEL_DEFINITION:
+            return Error::INVALID_TYPE;
+
+        case CL_OUT_OF_RESOURCES:
+        case CL_OUT_OF_HOST_MEMORY:
+            return Error::INVALID_OPERATION;
+        
+        default:
+            return Error::UNKNOWN_ERROR;
+    }
+}
+
 }
 
 }

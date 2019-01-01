@@ -5,6 +5,9 @@
 
 #include <GL/glew.h>
 
+#define CL_HPP_TARGET_OPENCL_VERSION 200
+#include <CL/cl2.hpp>
+
 typedef double NRdouble;
 typedef float NRfloat;
 
@@ -40,7 +43,12 @@ namespace type
 
 enum class Error : NRint
 {
-	NO_ERROR=0, INVALID_TYPE, INVALID_VALUE, INVALID_OPERATION, UNKNOWN_ERROR
+	NO_ERROR=0,
+	INVALID_TYPE,
+	INVALID_VALUE,
+	INVALID_OPERATION,
+	
+	UNKNOWN_ERROR
 };
 
 namespace error

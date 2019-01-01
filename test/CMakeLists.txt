@@ -5,8 +5,10 @@ ADD_EXECUTABLE(NrasterTest includes.h unify_buffers_tests.h tests.cpp)
 TARGET_LINK_LIBRARIES(NrasterTest 
 	PRIVATE Nraster
 	PRIVATE gtest 
-	PRIVATE gmock)
+	PRIVATE gmock
+	PRIVATE OpenCL::OpenCL)
 
 TARGET_INCLUDE_DIRECTORIES(NrasterTest 
 	PRIVATE ${NRASTER_ALL_INCLUDES}
-	PRIVATE ${gtest_SOURCE_DIR}/include)
+	PRIVATE ${gtest_SOURCE_DIR}/include
+	PRIVATE ${OpenCL_INCLUDE_DIRS})

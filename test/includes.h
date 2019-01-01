@@ -5,4 +5,4 @@
 #pragma once
 
 const float TOLERANCE = 0.00001f;
-const double DOUBLE_TOLERANCE = 0.00000001;
+const double DOUBLE_TOLERANCE = 0.000000001;
