@@ -96,9 +96,20 @@ Error fromCLError(const cl_int& err)
             return Error::INVALID_TYPE;
 
         case CL_OUT_OF_RESOURCES:
+            return Error::DEVIDE_OUT_OF_MEMORY; 
         case CL_OUT_OF_HOST_MEMORY:
-            return Error::INVALID_OPERATION;
+            return Error::HOST_OUT_OF_MEMORY;
         
+        case CL_INVALID_OPERATION:
+            return Error::INVALID_OPERATION;
+
+        case CL_INVALID_BUILD_OPTIONS:
+            return Error::INVALID_COMPILER_OPTIONS;
+        case CL_BUILD_PROGRAM_FAILURE:
+            return Error::COMPILATION_FAILURE;
+        case CL_COMPILER_NOT_AVAILABLE:
+            return Error::INVALID_COMPILER;
+
         default:
             return Error::UNKNOWN_ERROR;
     }

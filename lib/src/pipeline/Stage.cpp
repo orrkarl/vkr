@@ -8,10 +8,17 @@ Stage::Stage(const string& fileContents, const string& stageName, const NRuint d
 {
     cl_int error;
 
-    cl::Program code({ fileContents }, &error);
+    cl::Program code(fileContents, CL_TRUE, &error);
     if (error != CL_SUCCESS)
     {
         err = utils::fromCLError(error);
+
+        if (err == Error::COMPILATION_FAILURE)
+        {
+            
+        }
+
+        fprintf(stderr, "At program creation: %d\n", (NRint) err);
         return;
     }
 
@@ -19,6 +26,7 @@ Stage::Stage(const string& fileContents, const string& stageName, const NRuint d
     if (error != CL_SUCCESS)
     {
         err = utils::fromCLError(error);
+        fprintf(stderr, "At kernel creation: %d\n", (NRint) err);
         return;
     }
 }

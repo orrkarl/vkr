@@ -29,7 +29,7 @@ protected:
 
 private:
     cl::Kernel kernel;
-
+    const string log;
 };
 
 }

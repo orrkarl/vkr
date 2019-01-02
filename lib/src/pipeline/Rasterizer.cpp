@@ -1,18 +1,18 @@
 #include <pipeline/Rasterizer.h>
+#include <pipeline/PipelineCL.h>
 
 #include <utils/files.h>
-
 
 namespace nr
 {
 
 Rasterizer::Rasterizer(const NRuint& dimension, Error& err)
     : Stage(
-        utils::loadResourceFile("kernels/rasterizer_dim_generic.cl", err), 
+        rasterizer_generic_dim, 
         "rasterize", 
         dimension,
         err),
-      h_info(0, 0, dimension)
+      h_info(dimension)
 {
     cl_int error;
     d_info = cl::Buffer(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(Info), &h_info, &error);
@@ -20,8 +20,8 @@ Rasterizer::Rasterizer(const NRuint& dimension, Error& err)
     if (error != CL_SUCCESS)
     {
         err = utils::fromCLError(error);
+        fprintf(stderr, "At buffer creation: %d\n", (NRint) err);
     }
-
 }
 
 Error Rasterizer::apply(const cl::Buffer& src, const cl::Buffer& dest, const cl::CommandQueue& queue)

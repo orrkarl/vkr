@@ -19,6 +19,11 @@ public:
             : width(width), height(height), dimension(dimension)
         {
         }
+
+        Info(const NRuint dimension)
+            : Info(0, 0, dimension)
+        {
+        }
     };
 
     Rasterizer(const NRuint& dimension, Error& err);
