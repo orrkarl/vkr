@@ -22,11 +22,16 @@ TEST(RasterizerTest, 2dViewPortTest)
     nr::Error err = nr::Error::NO_ERROR;
     cl_int error = CL_SUCCESS;
     nr::Rasterizer rasterizer(2, err);
-    rasterizer.set(0, 0, 10, 10);
+
+    const NRuint width = 10;
+    const NRuint height = 10;
+    const NRuint kernelCount = 50;
+
+    rasterizer.set(0, 0, width, height);
 
     ASSERT_TRUE(nr::error::isSuccess(err));
 
-    std::vector<NRfloat> h_src(100, 0.0f);
+    std::vector<NRfloat> h_src(kernelCount * 2, 0.0f);
     
     // Bottom right corner
     h_src[0] = 1;
@@ -51,7 +56,7 @@ TEST(RasterizerTest, 2dViewPortTest)
         &error);
     ASSERT_TRUE(nr::error::isSuccess(err = nr::utils::fromCLError(error)));
 
-    std::vector<NRubyte> h_dest(300, 0);
+    std::vector<NRubyte> h_dest(width * height * 3, 0);
     cl::Buffer d_dest = cl::Buffer(
         CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, 
         h_dest.size() * sizeof(NRubyte), 
@@ -59,25 +64,23 @@ TEST(RasterizerTest, 2dViewPortTest)
         &error);
     ASSERT_TRUE(nr::error::isSuccess(err = nr::utils::fromCLError(error)));
 
-    cl::CommandQueue queue(cl::QueueProperties::None, &error);
+    auto queue = cl::CommandQueue::getDefault();
     ASSERT_EQ((NRint) rasterizer.update(queue), (NRint) nr::Error::NO_ERROR);
     ASSERT_EQ((NRint) rasterizer.apply(d_src, d_dest, queue), (NRint) nr::Error::NO_ERROR);
     queue.finish();
     queue.enqueueReadBuffer(d_dest, CL_TRUE, 0, h_dest.size() * sizeof(NRubyte), h_dest.data());
 
-    NRubyte expected_pixel[] = { 255, 0, 0 };
+    NRubyte pixel_on[] = { 255, 0, 0 };
+    NRubyte pixel_off[] = { 0, 0, 0 };
+    
     auto h_destRaw = h_dest.data();
 
-    for (auto i = 0; i < 300; i += 3)
-    {
-        if (i % 30 == 27)
-            fprintf(stderr, "[ %d %d %d ]\n", h_dest[0], h_dest[1], h_dest[2]);
-        else
-            fprintf(stderr, "[ %d %d %d ] ", h_dest[0], h_dest[1], h_dest[2]);
-    }
+    comparePixels(h_destRaw, pixel_on, 0);                                  // Top left corner
+    comparePixels(h_destRaw, pixel_on, width - 1);                          // Top right corner
+    comparePixels(h_destRaw, pixel_on, (height - 1) * height);              // Bottom left corner
+    comparePixels(h_destRaw, pixel_on, (height - 1) * height + width - 1);  // Bottom right corner
 
-    comparePixels(h_destRaw, expected_pixel, 0);    // Top left corner
-    comparePixels(h_destRaw, expected_pixel, 9);    // Top right corner
-    comparePixels(h_destRaw, expected_pixel, 90);   // Bottom left corner
-    comparePixels(h_destRaw, expected_pixel, 99);  // Bottom right corner
+    comparePixels(h_destRaw, pixel_off, 5);
+    comparePixels(h_destRaw, pixel_off, 70);
+
 }
