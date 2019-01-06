@@ -42,25 +42,24 @@ public:
         infoUpdated = false;
     }
 
-    Error apply(const cl::Buffer& src, const cl::Buffer& dest, const cl::CommandQueue& queue) override;
-
-private:
-    NRfloat x, y;
-
-    NRbool infoUpdated = false;
-    Info h_info;
-    cl::Buffer d_info;
-
-    Error updateInfo(const cl::CommandQueue& queue);
-
     Error update(const cl::CommandQueue& queue)
     {
-        if (infoUpdated)
+        if (!infoUpdated)
         {
             return updateInfo(queue);
         }
     }
 
+    Error apply(const cl::Buffer& src, const cl::Buffer& dest, const cl::CommandQueue& queue) override;
+
+private:
+    NRfloat x, y;
+
+    NRbool infoUpdated = true;
+    Info h_info;
+    cl::Buffer d_info;
+
+    Error updateInfo(const cl::CommandQueue& queue);
 };
 
 }

@@ -15,10 +15,11 @@ Stage::Stage(const string& fileContents, const string& stageName, const NRuint d
 
         if (err == Error::COMPILATION_FAILURE)
         {
-            
+            log = code.getBuildInfo<CL_PROGRAM_BUILD_LOG>(cl::Device::getDefault());
         }
 
         fprintf(stderr, "At program creation: %d\n", (NRint) err);
+        fprintf(stderr, "%s\n", log.c_str());
         return;
     }
 

@@ -90,6 +90,9 @@ Error fromCLError(const cl_int& err)
         case CL_INVALID_PROGRAM_EXECUTABLE:
         case CL_INVALID_KERNEL_NAME:
         case CL_INVALID_VALUE:
+        case CL_INVALID_COMMAND_QUEUE:
+        case CL_INVALID_CONTEXT:
+        case CL_INVALID_MEM_OBJECT:
             return Error::INVALID_VALUE;
 
         case CL_INVALID_KERNEL_DEFINITION:

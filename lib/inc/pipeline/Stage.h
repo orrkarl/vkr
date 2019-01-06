@@ -16,20 +16,21 @@ public:
     {
         
     }
+
+    string getCompilationLog() const
+    {
+        return log;
+    }
     
 protected:
     const NRuint dimension;
 
+    cl::Kernel kernel;
+
     Stage(const string& fileContents, const string& stageName, const NRuint dimension, Error& err);
 
-    cl::Kernel* getKernel()
-    {
-        return &kernel;
-    }
-
 private:
-    cl::Kernel kernel;
-    const string log;
+    string log;
 };
 
 }
