@@ -19,7 +19,7 @@ Rasterizer::Rasterizer(const NRuint& dimension, Error& err)
     if (error != CL_SUCCESS) err = utils::fromCLError(error);
 }
 
-Error Rasterizer::apply(const cl::Buffer& src, const cl::Buffer& dest, const cl::CommandQueue& queue)
+Error Rasterizer::apply(const cl::Buffer& src, const cl::Buffer& dest, const cl::CommandQueue& queue, const NRuint vertexCount)
 {
     Error err;
     if (error::isFailure(err = update(queue))) return err;
@@ -28,7 +28,7 @@ Error Rasterizer::apply(const cl::Buffer& src, const cl::Buffer& dest, const cl:
     if (error::isFailure(err = utils::fromCLError(kernel.setArg(1, src))))    return err;
     if (error::isFailure(err = utils::fromCLError(kernel.setArg(2, dest))))   return err;
     // TODO: find a way to make the work group sizes right
-    return utils::fromCLError(queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(50)));
+    return utils::fromCLError(queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(vertexCount)));
 }
 
 Error Rasterizer::updateInfo(const cl::CommandQueue& queue)

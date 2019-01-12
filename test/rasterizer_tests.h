@@ -3,6 +3,10 @@
 #include <pipeline/Stage.h>
 #include <pipeline/Rasterizer.h>
 
+#include <chrono>
+#include <ctime>  
+
+
 void comparePixels(const NRubyte* result, const NRubyte* expected, const NRuint i)
 {
     ASSERT_EQ(result[3 * i], expected[0]) << i % 10 << ',' << i / 10 << " R";
@@ -25,13 +29,13 @@ TEST(RasterizerTest, 2dViewPortTest)
 
     const NRuint width = 10;
     const NRuint height = 10;
-    const NRuint kernelCount = 50;
+    const NRuint vertexCount = 50;
 
     rasterizer.set(0, 0, width, height);
 
     ASSERT_TRUE(nr::error::isSuccess(err));
 
-    std::vector<NRfloat> h_src(kernelCount * 2, 0.0f);
+    std::vector<NRfloat> h_src(vertexCount * 2, 0.0f);
     
     // Bottom right corner
     h_src[0] = 1;
@@ -66,7 +70,7 @@ TEST(RasterizerTest, 2dViewPortTest)
 
     auto queue = cl::CommandQueue::getDefault();
     ASSERT_EQ((NRint) rasterizer.update(queue), (NRint) nr::Error::NO_ERROR);
-    ASSERT_EQ((NRint) rasterizer.apply(d_src, d_dest, queue), (NRint) nr::Error::NO_ERROR);
+    ASSERT_EQ((NRint) rasterizer.apply(d_src, d_dest, queue, vertexCount), (NRint) nr::Error::NO_ERROR);
     queue.finish();
     queue.enqueueReadBuffer(d_dest, CL_TRUE, 0, h_dest.size() * sizeof(NRubyte), h_dest.data());
 
@@ -82,5 +86,4 @@ TEST(RasterizerTest, 2dViewPortTest)
 
     comparePixels(h_destRaw, pixel_off, 5);
     comparePixels(h_destRaw, pixel_off, 70);
-
 }

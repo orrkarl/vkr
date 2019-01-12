@@ -50,7 +50,7 @@ public:
         }
     }
 
-    Error apply(const cl::Buffer& src, const cl::Buffer& dest, const cl::CommandQueue& queue) override;
+    Error apply(const cl::Buffer& src, const cl::Buffer& dest, const cl::CommandQueue& queue, const NRuint vertexCount);
 
 private:
     NRfloat x, y;

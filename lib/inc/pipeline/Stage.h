@@ -10,8 +10,6 @@ class Stage
 {
 public:
 
-    virtual Error apply(const cl::Buffer& src, const cl::Buffer& dest, const cl::CommandQueue& queue) = 0;
-
     virtual ~Stage()
     {
         
