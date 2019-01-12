@@ -33,7 +33,7 @@ void ndcToScreen(constant RasterizeInfo* info, const float x, const float y, glo
 
 kernel void rasterize(constant RasterizeInfo* info, global const float* src, global uchar* dest)
 {
-    const uint i = 2 * get_global_id(0);
+    const uint i = info->dimension * get_global_id(0);
     ndcToScreen(info, src[i], src[i + 1], dest);
 }
 

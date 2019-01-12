@@ -3,10 +3,6 @@
 #include <pipeline/Stage.h>
 #include <pipeline/Rasterizer.h>
 
-#include <chrono>
-#include <ctime>  
-
-
 void comparePixels(const NRubyte* result, const NRubyte* expected, const NRuint i)
 {
     ASSERT_EQ(result[3 * i], expected[0]) << i % 10 << ',' << i / 10 << " R";
@@ -14,44 +10,35 @@ void comparePixels(const NRubyte* result, const NRubyte* expected, const NRuint 
     ASSERT_EQ(result[3 * i + 2], expected[2]) << i % 10 << ',' << i / 10 << " B";
 }
 
-TEST(RasterizerTest, LoaderSanityTest)
+void testViewPort(const NRuint dim, const NRuint width, const NRuint height)
 {
-    nr::Error err = nr::Error::NO_ERROR;
-    nr::Rasterizer rasterizer(3, err);
-    ASSERT_TRUE(nr::error::isSuccess(err));
-}
-
-TEST(RasterizerTest, 2dViewPortTest)
-{
+    const NRuint vertexCount = 4;
     nr::Error err = nr::Error::NO_ERROR;
     cl_int error = CL_SUCCESS;
-    nr::Rasterizer rasterizer(2, err);
 
-    const NRuint width = 10;
-    const NRuint height = 10;
-    const NRuint vertexCount = 50;
+    nr::Rasterizer rasterizer(dim, err);
 
     rasterizer.set(0, 0, width, height);
 
     ASSERT_TRUE(nr::error::isSuccess(err));
 
-    std::vector<NRfloat> h_src(vertexCount * 2, 0.0f);
+    std::vector<NRfloat> h_src(vertexCount * dim, 0.0f);
     
     // Bottom right corner
     h_src[0] = 1;
     h_src[1] = 1;
 
     // Top left corner
-    h_src[2] = -1;
-    h_src[3] = -1;
+    h_src[dim] = -1;
+    h_src[dim + 1] = -1;
 
     // Top right corner
-    h_src[4] = 1;
-    h_src[5] = -1;
+    h_src[2 * dim] = 1;
+    h_src[2 * dim + 1] = -1;
 
     // Bottom left corner
-    h_src[6] = -1;
-    h_src[7] = 1;
+    h_src[3 * dim] = -1;
+    h_src[3 * dim + 1] = 1;
 
     cl::Buffer d_src = cl::Buffer(
         CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY,
@@ -79,11 +66,55 @@ TEST(RasterizerTest, 2dViewPortTest)
     
     auto h_destRaw = h_dest.data();
 
-    comparePixels(h_destRaw, pixel_on, 0);                                  // Top left corner
-    comparePixels(h_destRaw, pixel_on, width - 1);                          // Top right corner
-    comparePixels(h_destRaw, pixel_on, (height - 1) * height);              // Bottom left corner
-    comparePixels(h_destRaw, pixel_on, (height - 1) * height + width - 1);  // Bottom right corner
+    const NRuint TOP_LEFT = 0;
+    const NRuint TOP_RIGHT = width - 1;
+    const NRuint BOTTOM_LEFT = (height - 1) * height;
+    const NRuint BOTTOM_RIGHT = (height - 1) * height + width - 1;
+    
+    const std::set<NRuint> shouldBeOn{ TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT };
+    const std::set<NRuint> shouldBeOff{ (NRuint) 0.7 * height * width, width / 2 };
 
-    comparePixels(h_destRaw, pixel_off, 5);
-    comparePixels(h_destRaw, pixel_off, 70);
+    for (const auto& i : shouldBeOn)
+    {
+        comparePixels(h_destRaw, pixel_on, i);
+    }
+
+    for (const auto& i : shouldBeOff)
+    {
+        if (shouldBeOn.count(i) == 0)
+        {
+            comparePixels(h_destRaw, pixel_off, i);
+        }
+    }
+}
+
+TEST(RasterizerTest, LoaderSanityTest)
+{
+    nr::Error err = nr::Error::NO_ERROR;
+    nr::Rasterizer rasterizer(3, err);
+    ASSERT_TRUE(nr::error::isSuccess(err));
+}
+
+TEST(RasterizerTest, 2dViewPortTest)
+{
+    const NRuint dim = 2;
+    const NRuint width = 10;
+    const NRuint height = 10;
+    testViewPort(dim, width, height);
+}
+
+TEST(RasterizerTest, 3dViewPortTest)
+{
+    const NRuint dim = 3;
+    const NRuint width = 10;
+    const NRuint height = 10;
+    testViewPort(dim, width, height);
+}
+
+TEST(RasterizerTest, 11dViewPortTest)
+{
+    const NRuint dim = 11;
+    const NRuint width = 10;
+    const NRuint height = 10;
+    testViewPort(dim, width, height);
 }
