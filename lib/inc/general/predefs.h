@@ -72,7 +72,7 @@ enum class Role : NRint
 
 enum class Primitive : NRint
 {
-	POINTS, LINES, TRIANGLES
+	POINTS, LINES, K_SIMPLICES
 };
 
 

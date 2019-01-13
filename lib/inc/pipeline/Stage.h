@@ -6,6 +6,9 @@
 namespace nr 
 {
 
+namespace __internal
+{
+
 class Stage
 {
 public:
@@ -17,18 +20,15 @@ public:
 
     string getCompilationLog() const
     {
-        return log;
+        return code.getBuildInfo<CL_PROGRAM_BUILD_LOG>(cl::Device::getDefault());
     }
     
 protected:
-    const NRuint dimension;
+    cl::Program code;
 
-    cl::Kernel kernel;
-
-    Stage(const string& fileContents, const string& stageName, const NRuint dimension, Error& err);
-
-private:
-    string log;
+    Stage(const string& stageFile, cl_int& err);
 };
+
+}
 
 }

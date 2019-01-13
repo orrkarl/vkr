@@ -57,7 +57,7 @@ void testViewPort(const NRuint dim, const NRuint width, const NRuint height)
 
     auto queue = cl::CommandQueue::getDefault();
     ASSERT_EQ((NRint) rasterizer.update(queue), (NRint) nr::Error::NO_ERROR);
-    ASSERT_EQ((NRint) rasterizer.apply(d_src, d_dest, queue, vertexCount), (NRint) nr::Error::NO_ERROR);
+    ASSERT_EQ((NRint) rasterizer.rasterize(d_src, d_dest, queue, vertexCount, nr::Primitive::POINTS), (NRint) nr::Error::NO_ERROR);
     queue.finish();
     queue.enqueueReadBuffer(d_dest, CL_TRUE, 0, h_dest.size() * sizeof(NRubyte), h_dest.data());
 
@@ -90,9 +90,9 @@ void testViewPort(const NRuint dim, const NRuint width, const NRuint height)
 
 TEST(RasterizerTest, LoaderSanityTest)
 {
-    nr::Error err = nr::Error::NO_ERROR;
-    nr::Rasterizer rasterizer(3, err);
-    ASSERT_TRUE(nr::error::isSuccess(err));
+    cl_int err;
+    nr::__internal::Rasterizer rasterizer(3, &err);
+    ASSERT_TRUE(nr::error::isSuccess(nr::utils::fromCLError(err));
 }
 
 TEST(RasterizerTest, 2dViewPortTest)

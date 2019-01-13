@@ -6,6 +6,9 @@
 namespace nr
 {
 
+namespace __internal
+{
+
 class Rasterizer : public Stage
 {
 public:
@@ -26,7 +29,7 @@ public:
         }
     };
 
-    Rasterizer(const NRuint& dimension, Error& err);
+    Rasterizer(const NRuint& dimension, cl_int& err);
 
     ~Rasterizer()
     {
@@ -42,15 +45,12 @@ public:
         infoUpdated = false;
     }
 
-    Error update(const cl::CommandQueue& queue)
-    {
-        if (!infoUpdated)
-        {
-            return updateInfo(queue);
-        }
-    }
-
-    Error apply(const cl::Buffer& src, const cl::Buffer& dest, const cl::CommandQueue& queue, const NRuint vertexCount);
+    Error rasterize(
+        const cl::Buffer& src,
+        const cl::Buffer& dest,
+        const cl::CommandQueue& queue,
+        const NRuint vertexCount, 
+        const Primitive primitive);
 
 private:
     NRfloat x, y;
@@ -59,8 +59,23 @@ private:
     Info h_info;
     cl::Buffer d_info;
 
+    cl::Kernel points;
+    cl::Kernel lines;
+    cl::Kernel k_simplices;
+
     Error updateInfo(const cl::CommandQueue& queue);
+
+    Error update(const cl::CommandQueue& queue)
+    {
+        if (!infoUpdated)
+        {
+            return updateInfo(queue);
+        }
+        return Error::NO_ERROR;
+    }
 };
+
+}
 
 }
 
