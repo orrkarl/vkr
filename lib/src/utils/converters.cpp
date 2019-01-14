@@ -70,9 +70,9 @@ GLenum fromNRPrimitiveType(const Primitive& type)
 {
     switch(type)
     {
-        case Primitive::POINTS:     return GL_POINTS;
-        case Primitive::LINES:      return GL_LINES;
-        case Primitive::TRIANGLES:  return GL_TRIANGLES;
+        case Primitive::POINTS:         return GL_POINTS;
+        case Primitive::LINES:          return GL_LINES;
+        case Primitive::K_SIMPLICES:    return GL_TRIANGLES;
 
         default:
             return 0;
@@ -95,6 +95,9 @@ Error fromCLError(const cl_int& err)
         case CL_INVALID_MEM_OBJECT:
             return Error::INVALID_VALUE;
 
+        case CL_INVALID_KERNEL_ARGS:
+            return Error::INVALID_ARGS;
+
         case CL_INVALID_KERNEL_DEFINITION:
             return Error::INVALID_TYPE;
 
@@ -114,6 +117,7 @@ Error fromCLError(const cl_int& err)
             return Error::INVALID_COMPILER;
 
         default:
+            fprintf(stderr, "unknown error (%d)\n", err);
             return Error::UNKNOWN_ERROR;
     }
 }

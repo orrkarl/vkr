@@ -35,12 +35,21 @@ Error Rasterizer::rasterize(
     switch (primitive)
     {
         case Primitive::POINTS:
+            points.setArg(0, d_info);
+            points.setArg(1, src);
+            points.setArg(2, dest);
             return utils::fromCLError(
                 queue.enqueueNDRangeKernel(points, cl::NullRange, global_range));
         case Primitive::LINES:
+            lines.setArg(0, d_info);
+            lines.setArg(1, src);
+            lines.setArg(2, dest);
             return utils::fromCLError(
                 queue.enqueueNDRangeKernel(lines, cl::NullRange, global_range));
         case Primitive::K_SIMPLICES:
+            simplices.setArg(0, d_info);
+            simplices.setArg(1, src);
+            simplices.setArg(2, dest);
             return utils::fromCLError(
                 queue.enqueueNDRangeKernel(simplices, cl::NullRange, global_range));
         default:

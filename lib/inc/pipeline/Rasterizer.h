@@ -61,7 +61,7 @@ private:
 
     cl::Kernel points;
     cl::Kernel lines;
-    cl::Kernel k_simplices;
+    cl::Kernel simplices;
 
     Error updateInfo(const cl::CommandQueue& queue);
 

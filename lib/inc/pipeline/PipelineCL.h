@@ -12,12 +12,12 @@ typedef struct _RasterizeInfo
     const uint width, height;
 } RasterizeInfo;
 
-enum PixelColor
+typedef enum _PixelColor
 {
     R = 0,
     G = 1,
     B = 2
-};
+} PixelColor;
 
 typedef struct _Position
 {
@@ -25,11 +25,31 @@ typedef struct _Position
     uint y;
 } Position;
 
+typedef struct _Line
+{
+    Position start;
+    Position end;
+} Line;
+
 typedef struct _NDCPosition
 {
     float x;
     float y;
 } NDCPosition;
+
+typedef struct _NDCLine
+{
+    NDCPosition start;
+    NDCPosition end;
+} NDCLine;
+
+typedef struct _BresenhamLine
+{
+    int x1;
+    int y1;
+    int x2;
+    int y2;
+} BresenhamLine;
 
 typedef struct _Pixel
 {
@@ -46,12 +66,28 @@ typedef struct _ColorRGB
 
 uint getPixelIndex(constant RasterizeInfo* info, const Pixel pixel)
 {
-    return 3 * (info->width * pixel.y + pixel.x) + pixel.position;
+    return 3 * (info->width * pixel.position.y + pixel.position.x) + pixel.color;
 }
 
 uint positionToPixel(const uint axisLength, const float axisPosition)
 {
     return (uint) ((axisLength - 1) * 0.5 * (1 + axisPosition));
+}
+
+Position fromNDCPosition(constant RasterizeInfo* info, const NDCPosition ndcPos)
+{
+    Position ret;
+    ret.x = positionToPixel(info->width, ndcPos.x);
+    ret.y = positionToPixel(info->height, ndcPos.y);
+    return ret;
+}
+
+Line fromNDCLine(constant RasterizeInfo* info, const NDCLine line)
+{
+    Line ret;
+    ret.start = fromNDCPosition(info, line.start);
+    ret.end   = fromNDCPosition(info, line.end);  
+    return ret;
 }
 
 void paintPixel(
@@ -83,14 +119,29 @@ void paintPoint(
     paintPixel(info, index, color, dest);
 }
 
+void paintLineBresenham(
+    constant RasterizeInfo* info,
+    const BresenhamLine line,
+    const ColorRGB color,
+    global uchar* dest)
+{
+
+}
+
 void paintLine(
     constant RasterizeInfo* info, 
-    const NDCPosition start, 
-    const NDCPosition end, 
+    const NDCLine line,
     const ColorRGB color,
-    const uchar* dest)
+    global uchar* dest)
 {
-        
+    BresenhamLine bresenhamLine = 
+    {
+        (int) (info->width * line.start.x),
+        (int) (info->height * line.start.y),
+        (int) (info->width * line.end.x), 
+        (int) (info->height * line.end.y)
+    };
+    paintLineBresenham(info, bresenhamLine, color, dest);
 }
 
 kernel void points(
@@ -113,9 +164,12 @@ kernel void lines(
 {
     const uint i = (2 * info->dimension) * get_global_id(0);
     ColorRGB RED = { 255, 0, 0 };
+    NDCLine line;
     NDCPosition start = { src[i], src[i + 1] };
     NDCPosition end   = { src[i + info->dimension], src[i + info->dimension + 1] };
-    paintLine(info, start, end, RED, dest);
+    line.start = start;
+    line.end = end;
+    paintLine(info, line, RED, dest);
 }
 
 kernel void simplices(
