@@ -59,7 +59,7 @@ Error Rasterizer::rasterize(
 
 Error Rasterizer::updateInfo(const cl::CommandQueue& queue)
 {
-    auto err = queue.enqueueWriteBuffer(d_info, CL_FALSE, 0, sizeof(h_info), &h_info);
+    auto err = queue.enqueueWriteBuffer(d_info, CL_TRUE, 0, sizeof(h_info), &h_info);
     infoUpdated = err == CL_SUCCESS;
     return utils::fromCLError(err);
 }

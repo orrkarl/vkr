@@ -6,6 +6,12 @@ namespace nr
 {
 
 const string rasterizer_generic_dim = R"__CODE__(
+
+#define SWAP(x, y)  \
+x ^= y  \
+y ^= x  \
+x ^= y
+
 typedef struct _RasterizeInfo
 {
     const uint dimension;
@@ -42,14 +48,6 @@ typedef struct _NDCLine
     NDCPosition start;
     NDCPosition end;
 } NDCLine;
-
-typedef struct _BresenhamLine
-{
-    int x1;
-    int y1;
-    int x2;
-    int y2;
-} BresenhamLine;
 
 typedef struct _Pixel
 {
@@ -106,7 +104,20 @@ void paintPixel(
     dest[getPixelIndex(info, current)] = color.b;
 }
 
-void paintPoint(
+void paintPointI(
+    constant RasterizeInfo* info,
+    const int x,
+    const int y,
+    const ColorRGB color,
+    global uchar* dest)
+{
+    Position pos;
+    pos.x = info->width / 2 + x;
+    pos.y = info->height / 2 + y;
+    paintPixel(info, pos, color, dest);
+}
+
+void paintPointF(
     constant RasterizeInfo* info, 
     const NDCPosition pos, 
     const ColorRGB color, 
@@ -119,13 +130,78 @@ void paintPoint(
     paintPixel(info, index, color, dest);
 }
 
-void paintLineBresenham(
+void paintLowLine(
     constant RasterizeInfo* info,
-    const BresenhamLine line,
+    const int x0,
+    const int y0,
+    const int x1,
+    const int y1,
     const ColorRGB color,
     global uchar* dest)
 {
+    int dx = x1 - x0;
+    int dy = y1 - y0;
+    
+    int yi = 1;
+    if (dy < 0)
+    {
+        yi = -1;
+        dy = -dy;
+    }
 
+    int dx2 = 2 * dx;
+    int dy2 = 2 * dy;
+
+    int d = dy2 - dx;
+    int y = y0;
+    
+    for (int x = x0; x <= x1; ++x)
+    {
+        paintPointI(info, x, y, color, dest);
+        if (d > 0)
+        {
+            y += yi;
+            d -= dx2;
+        }
+        d += dy2;
+    }
+}
+
+void paintHighLine(
+    constant RasterizeInfo* info,
+    const int x0,
+    const int y0,
+    const int x1,
+    const int y1,
+    const ColorRGB color,
+    global uchar* dest)
+{
+    paintLowLine(info, y0, x0, y1, x1, color, dest);
+}
+
+void paintLineBresenham(
+    constant RasterizeInfo* info,
+    const int x0,
+    const int y0,
+    const int x1,
+    const int y1,
+    const ColorRGB color,
+    global uchar* dest)
+{
+    if (abs_diff(y0, y1) < abs_diff(x0, x1))
+    {
+        if (x0 <= x1)
+            paintLowLine(info, x0, y0, x1, y1, color, dest);
+        else
+            paintLowLine(info, x1, y1, x0, y0, color, dest);
+    }
+    else
+    {
+        if (y0 <= y1)
+            paintHighLine(info, x0, y0, x1, y1, color, dest);
+        else
+            paintHighLine(info, x1, y1, x0, y0, color, dest);
+    }
 }
 
 void paintLine(
@@ -134,14 +210,14 @@ void paintLine(
     const ColorRGB color,
     global uchar* dest)
 {
-    BresenhamLine bresenhamLine = 
-    {
-        (int) (info->width * line.start.x),
-        (int) (info->height * line.start.y),
-        (int) (info->width * line.end.x), 
-        (int) (info->height * line.end.y)
-    };
-    paintLineBresenham(info, bresenhamLine, color, dest);
+    paintLineBresenham(
+        info,
+        (int) (info->width * line.start.x) / 2,
+        (int) (info->height * line.start.y) / 2,
+        (int) (info->width * line.end.x) / 2,
+        (int) (info->height * line.end.y) / 2,
+        color, 
+        dest);
 }
 
 kernel void points(
@@ -149,12 +225,12 @@ kernel void points(
     global const float* src, 
     global uchar* dest)
 {
-    const uint i = info->dimension * get_global_id(0);
+    const uint i = (info->dimension + 1) * get_global_id(0);
     NDCPosition point;
     point.x = src[i];
     point.y = src[i + 1];
     ColorRGB RED = { 255, 0, 0 };
-    paintPoint(info, point, RED, dest);
+    paintPointF(info, point, RED, dest);
 }
 
 kernel void lines(
@@ -162,11 +238,11 @@ kernel void lines(
     global const float* src, 
     global uchar* dest)
 {
-    const uint i = (2 * info->dimension) * get_global_id(0);
+    const uint i = (2 * info->dimension + 2) * get_global_id(0);
     ColorRGB RED = { 255, 0, 0 };
     NDCLine line;
     NDCPosition start = { src[i], src[i + 1] };
-    NDCPosition end   = { src[i + info->dimension], src[i + info->dimension + 1] };
+    NDCPosition end   = { src[i + info->dimension + 1], src[i + info->dimension + 1 + 1] };
     line.start = start;
     line.end = end;
     paintLine(info, line, RED, dest);

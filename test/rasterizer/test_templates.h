@@ -1,4 +1,10 @@
-#include "includes.h"
+#pragma once
+
+#include "../includes.h"
+
+#include <vector>
+#include <set>
+#include <utility>
 
 #include <pipeline/Stage.h>
 #include <pipeline/Rasterizer.h>
@@ -13,6 +19,7 @@ void comparePixels(const NRubyte* result, const NRubyte* expected, const NRuint 
 void testPointRaster(const NRuint dim, const NRuint width, const NRuint height)
 {
     const NRuint vertexCount = 4;
+    const NRuint elemSize = dim + 1;
     nr::Error err = nr::Error::NO_ERROR;
     cl_int error = CL_SUCCESS;
 
@@ -21,23 +28,23 @@ void testPointRaster(const NRuint dim, const NRuint width, const NRuint height)
 
     rasterizer.set(0, 0, width, height);
 
-    std::vector<NRfloat> h_src(vertexCount * dim, 0.0f);
+    std::vector<NRfloat> h_src(vertexCount * elemSize, 0.0f);
     
     // Bottom right corner
     h_src[0] = 1;
     h_src[1] = 1;
 
     // Top left corner
-    h_src[dim] = -1;
-    h_src[dim + 1] = -1;
+    h_src[elemSize] = -1;
+    h_src[elemSize + 1] = -1;
 
     // Top right corner
-    h_src[2 * dim] = 1;
-    h_src[2 * dim + 1] = -1;
+    h_src[2 * elemSize] = 1;
+    h_src[2 * elemSize + 1] = -1;
 
     // Bottom left corner
-    h_src[3 * dim] = -1;
-    h_src[3 * dim + 1] = 1;
+    h_src[3 * elemSize] = -1;
+    h_src[3 * elemSize + 1] = 1;
 
     cl::Buffer d_src = cl::Buffer(
         CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY,
@@ -58,6 +65,18 @@ void testPointRaster(const NRuint dim, const NRuint width, const NRuint height)
     ASSERT_EQ((NRint) rasterizer.rasterize(d_src, d_dest, queue, vertexCount, nr::Primitive::POINTS), (NRint) nr::Error::NO_ERROR);
     queue.finish();
     queue.enqueueReadBuffer(d_dest, CL_TRUE, 0, h_dest.size() * sizeof(NRubyte), h_dest.data());
+    
+    for (auto i = 0; i < h_dest.size(); i += 3)
+    {
+        if ((i / 3) % width == (width - 1))
+        {
+            fprintf(stderr, "[ %d %d %d ]\n", h_dest[i], h_dest[i+1], h_dest[i+2]);
+        }
+        else
+        {
+            fprintf(stderr, "[ %d %d %d ] ", h_dest[i], h_dest[i+1], h_dest[i+2]);
+        }
+    }
 
     NRubyte pixel_on[] = { 255, 0, 0 };
     NRubyte pixel_off[] = { 0, 0, 0 };
@@ -86,40 +105,28 @@ void testPointRaster(const NRuint dim, const NRuint width, const NRuint height)
     }
 }
 
-void testLineRaster(const NRuint dim, const NRuint width, const NRuint height)
+void testLineRaster(
+    const NRuint dim, 
+    const NRuint width, 
+    const NRuint height,
+    std::vector<NRfloat> vertecies,
+    std::set<std::pair<NRuint, NRuint>> shouldBeOn)
 {
-    const NRuint vertexCount = 4;
-    const NRuint elementCount = vertexCount * 2;
     nr::Error err = nr::Error::NO_ERROR;
     cl_int error = CL_SUCCESS;
+    const auto elemSize = dim + 1;
+    const auto lineSize = elemSize * 2;
+    const auto vertexCount = vertecies.size() / lineSize;
 
     nr::__internal::Rasterizer rasterizer(dim, error);
     ASSERT_EQ(error, CL_SUCCESS);
 
     rasterizer.set(0, 0, width, height);
 
-    std::vector<NRfloat> h_src(elementCount * dim, 0.0f);
-
-    // First line :: Start
-    h_src[0] = 1;
-    h_src[1] = 1;
-
-    // First line :: End
-    h_src[dim] = -1;
-    h_src[dim + 1] = -1;
-
-    // Second line :: Start
-    h_src[2 * dim] = 1;
-    h_src[2 * dim + 1] = -1;
-
-    // Second line :: End
-    h_src[3 * dim] = -1;
-    h_src[3 * dim + 1] = 1;
-
     cl::Buffer d_src = cl::Buffer(
         CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY,
-        h_src.size() * sizeof(NRfloat), 
-        h_src.data(), 
+        vertecies.size() * sizeof(NRfloat), 
+        vertecies.data(), 
         &error);
     ASSERT_EQ(error, CL_SUCCESS);
 
@@ -139,65 +146,33 @@ void testLineRaster(const NRuint dim, const NRuint width, const NRuint height)
     NRubyte pixel_on[] = { 255, 0, 0 };
     NRubyte pixel_off[] = { 0, 0, 0 };
     
-    auto h_destRaw = h_dest.data();
-
-    const NRuint TOP_LEFT = 0;
-    const NRuint TOP_RIGHT = width - 1;
-    const NRuint BOTTOM_LEFT = (height - 1) * height;
-    const NRuint BOTTOM_RIGHT = (height - 1) * height + width - 1;
-    
-    const std::set<NRuint> shouldBeOn{ TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT };
-    const std::set<NRuint> shouldBeOff{ (NRuint) 0.7 * height * width, width / 2 };
-
-    for (const auto& i : shouldBeOn)
+    for (auto i = 0; i < h_dest.size(); i += 3)
     {
-        comparePixels(h_destRaw, pixel_on, i);
-    }
-
-    for (const auto& i : shouldBeOff)
-    {
-        if (shouldBeOn.count(i) == 0)
+        if ((i / 3) % width == (width - 1))
         {
-            comparePixels(h_destRaw, pixel_off, i);
+            fprintf(stderr, "[ %d %d %d ]\n", h_dest[i], h_dest[i+1], h_dest[i+2]);
+        }
+        else
+        {
+            fprintf(stderr, "[ %d %d %d ] ", h_dest[i], h_dest[i+1], h_dest[i+2]);
         }
     }
-}
 
-TEST(RasterizerTest, LoaderSanityTest)
-{
-    cl_int err;
-    nr::__internal::Rasterizer rasterizer(3, err);
-    ASSERT_EQ(err, CL_SUCCESS) << rasterizer.getCompilationLog();
-}
+    auto h_destRaw = h_dest.data();
 
-TEST(RasterizerTest, 2dPointRasterTest)
-{
-    const NRuint dim = 2;
-    const NRuint width = 10;
-    const NRuint height = 10;
-    testPointRaster(dim, width, height);
-}
+    std::set<NRuint> rawShouldBeOn{};
+    for (auto p : shouldBeOn)
+    {
+        auto res = (p.second - 1) * width + p.first - 1;
+        rawShouldBeOn.insert(res);
+    }
 
-TEST(RasterizerTest, 3dPointRasterTest)
-{
-    const NRuint dim = 3;
-    const NRuint width = 10;
-    const NRuint height = 10;
-    testPointRaster(dim, width, height);
-}
+    for (auto i = 0; i < h_dest.size() / 3; ++i)
+    {
+        if (rawShouldBeOn.count(i) > 0) 
+            comparePixels(h_destRaw, pixel_on, i);
+        else 
+            comparePixels(h_destRaw, pixel_off, i);
+    }
 
-TEST(RasterizerTest, 11dPointRasterTest)
-{
-    const NRuint dim = 11;
-    const NRuint width = 10;
-    const NRuint height = 10;
-    testPointRaster(dim, width, height);
-}
-
-TEST(RasterizerTest, 2dLineRasterTest)
-{
-    const NRuint dim = 2;
-    const NRuint width = 10;
-    const NRuint height = 10;
-    testLineRaster(dim, width, height);
 }
