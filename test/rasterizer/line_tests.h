@@ -1,5 +1,7 @@
 #pragma once
 
+#include <math.h>
+
 #include "../includes.h"
 
 #include "test_templates.h"
@@ -12,14 +14,15 @@ TEST(RasterizerTest, 2dVerticalLineRasterTest)
     const NRuint height = 10;
     
     std::vector<NRfloat> lines = {
-        -0.5, 0, 1,
-        0.5, 0, 1
-    };
+        -1, 0, 1,     // start
+        1, 0, 1       // end
+    }; 
     
+    const NRuint y = (height - 1) / 2;
     std::set<std::pair<NRuint, NRuint>> shouldBeOn{};
-    for (NRuint i = width / 4; i <= width * 3 / 4; ++i)
+    for (NRuint i = 0; i < width; ++i)
     {
-        shouldBeOn.insert(std::pair<NRuint, NRuint>(i, height / 2));
+        shouldBeOn.insert(std::pair<NRuint, NRuint>(i, y));
     }
 
     testLineRaster(dim, width, height, lines, shouldBeOn);

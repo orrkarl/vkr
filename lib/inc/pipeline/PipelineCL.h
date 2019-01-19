@@ -62,6 +62,36 @@ typedef struct _ColorRGB
     uchar b;
 } ColorRGB;
 
+#ifdef _DEBUG
+
+#define debug_message(fmt) printf(fmt)
+#define debug_message1(fmt, arg1) printf(fmt, arg1)
+#define debug_message2(fmt, arg1, arg2) printf(fmt, arg1, arg2)
+#define debug_message3(fmt, arg1, arg2, arg3) printf(fmt, arg1, arg2, arg3)
+#define debug_message4(fmt, arg1, arg2, arg3, arg4) printf(fmt, arg1, arg2, arg3, arg4)
+
+#else
+
+#define debug_message(fmt)
+#define debug_message1(fmt, arg1)
+#define debug_message2(fmt, arg1, arg2)
+#define debug_message3(fmt, arg1, arg2, arg3)
+#define debug_message4(fmt, arg1, arg2, arg3, arg4)
+
+#endif // _DEBUG
+
+int reportI(constant char* fmt, const int arg)
+{
+    debug_message1(fmt, arg);
+    return arg;
+}
+
+uint reportUI(constant char* fmt, const uint arg)
+{
+    debug_message1(fmt, arg);
+    return arg;
+}
+
 uint getPixelIndex(constant RasterizeInfo* info, const Pixel pixel)
 {
     return 3 * (info->width * pixel.position.y + pixel.position.x) + pixel.color;
@@ -70,6 +100,12 @@ uint getPixelIndex(constant RasterizeInfo* info, const Pixel pixel)
 uint positionToPixel(const uint axisLength, const float axisPosition)
 {
     return (uint) ((axisLength - 1) * 0.5 * (1 + axisPosition));
+}
+
+int ndcToSignedPixel(const uint axisLength, const float axisPosition)
+{
+    int l = (int) axisLength - 1;
+    return floor(l * 0.5 * (1 + axisPosition) - (l / 2));
 }
 
 Position fromNDCPosition(constant RasterizeInfo* info, const NDCPosition ndcPos)
@@ -112,8 +148,9 @@ void paintPointI(
     global uchar* dest)
 {
     Position pos;
-    pos.x = info->width / 2 + x;
-    pos.y = info->height / 2 + y;
+    pos.x = (info->width - 1) / 2 + x;
+    pos.y = (info->height - 1) / 2 + y;
+    debug_message2("painting point: (%x, %x)\n", pos.x, pos.y);
     paintPixel(info, pos, color, dest);
 }
 
@@ -157,6 +194,7 @@ void paintLowLine(
     
     for (int x = x0; x <= x1; ++x)
     {
+        debug_message2("asking to paint: (%d, %d)\n", x, y);
         paintPointI(info, x, y, color, dest);
         if (d > 0)
         {
@@ -191,16 +229,24 @@ void paintLineBresenham(
     if (abs_diff(y0, y1) < abs_diff(x0, x1))
     {
         if (x0 <= x1)
+        {
             paintLowLine(info, x0, y0, x1, y1, color, dest);
+        }
         else
+        {
             paintLowLine(info, x1, y1, x0, y0, color, dest);
+        }
     }
     else
     {
         if (y0 <= y1)
+        {
             paintHighLine(info, x0, y0, x1, y1, color, dest);
+        }
         else
+        {
             paintHighLine(info, x1, y1, x0, y0, color, dest);
+        }
     }
 }
 
@@ -212,10 +258,10 @@ void paintLine(
 {
     paintLineBresenham(
         info,
-        (int) (info->width * line.start.x) / 2,
-        (int) (info->height * line.start.y) / 2,
-        (int) (info->width * line.end.x) / 2,
-        (int) (info->height * line.end.y) / 2,
+        reportI("start x: %d, ", ndcToSignedPixel(info->width, line.start.x)),
+        reportI("start y: %d, ", ndcToSignedPixel(info->height, line.start.y)),
+        reportI("end x: %d, ", ndcToSignedPixel(info->width, line.end.x)),
+        reportI("end y: %d\n", ndcToSignedPixel(info->height, line.end.y)),
         color, 
         dest);
 }

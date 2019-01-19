@@ -9,11 +9,32 @@
 #include <pipeline/Stage.h>
 #include <pipeline/Rasterizer.h>
 
-void comparePixels(const NRubyte* result, const NRubyte* expected, const NRuint i)
+void printFrame(const std::vector<NRubyte>& frame, const NRuint width)
 {
-    ASSERT_EQ(result[3 * i], expected[0]) << i % 10 << ',' << i / 10 << " R";
-    ASSERT_EQ(result[3 * i + 1], expected[1]) << i % 10 << ',' << i / 10 << " G";
-    ASSERT_EQ(result[3 * i + 2], expected[2]) << i % 10 << ',' << i / 10 << " B";
+    for (auto i = 0; i < frame.size(); i += 3)
+    {
+        if ((i / 3) % width == (width - 1))
+        {
+            printf("[ %d %d %d ]\n", frame[i], frame[i+1], frame[i+2]);
+        }
+        else
+        {
+            printf("[ %d %d %d ] ", frame[i], frame[i+1], frame[i+2]);
+        }
+    }
+}
+
+#ifndef NDEBUG
+#define PRINT_FRAME(frame, width) printFrame(frame, width)
+#else
+#define PRINT_FRAME(frame, width)
+#endif // NDEBUG
+
+void comparePixels(const NRubyte* result, const NRubyte* expected, const NRuint w, const NRuint h, const NRuint i)
+{
+    ASSERT_EQ(result[3 * i], expected[0]) << i % w << ',' << i / w << " R";
+    ASSERT_EQ(result[3 * i + 1], expected[1]) << i % w << ',' << i / w << " G";
+    ASSERT_EQ(result[3 * i + 2], expected[2]) << i % w << ',' << i / w << " B";
 }
 
 void testPointRaster(const NRuint dim, const NRuint width, const NRuint height)
@@ -66,17 +87,7 @@ void testPointRaster(const NRuint dim, const NRuint width, const NRuint height)
     queue.finish();
     queue.enqueueReadBuffer(d_dest, CL_TRUE, 0, h_dest.size() * sizeof(NRubyte), h_dest.data());
     
-    for (auto i = 0; i < h_dest.size(); i += 3)
-    {
-        if ((i / 3) % width == (width - 1))
-        {
-            fprintf(stderr, "[ %d %d %d ]\n", h_dest[i], h_dest[i+1], h_dest[i+2]);
-        }
-        else
-        {
-            fprintf(stderr, "[ %d %d %d ] ", h_dest[i], h_dest[i+1], h_dest[i+2]);
-        }
-    }
+    PRINT_FRAME(h_dest, width);
 
     NRubyte pixel_on[] = { 255, 0, 0 };
     NRubyte pixel_off[] = { 0, 0, 0 };
@@ -93,14 +104,14 @@ void testPointRaster(const NRuint dim, const NRuint width, const NRuint height)
 
     for (const auto& i : shouldBeOn)
     {
-        comparePixels(h_destRaw, pixel_on, i);
+        comparePixels(h_destRaw, pixel_on, width, height, i);
     }
 
     for (const auto& i : shouldBeOff)
     {
         if (shouldBeOn.count(i) == 0)
         {
-            comparePixels(h_destRaw, pixel_off, i);
+            comparePixels(h_destRaw, pixel_off, width, height, i);
         }
     }
 }
@@ -146,33 +157,22 @@ void testLineRaster(
     NRubyte pixel_on[] = { 255, 0, 0 };
     NRubyte pixel_off[] = { 0, 0, 0 };
     
-    for (auto i = 0; i < h_dest.size(); i += 3)
-    {
-        if ((i / 3) % width == (width - 1))
-        {
-            fprintf(stderr, "[ %d %d %d ]\n", h_dest[i], h_dest[i+1], h_dest[i+2]);
-        }
-        else
-        {
-            fprintf(stderr, "[ %d %d %d ] ", h_dest[i], h_dest[i+1], h_dest[i+2]);
-        }
-    }
-
+    PRINT_FRAME(h_dest, width);
+    
     auto h_destRaw = h_dest.data();
 
     std::set<NRuint> rawShouldBeOn{};
     for (auto p : shouldBeOn)
     {
-        auto res = (p.second - 1) * width + p.first - 1;
+        auto res = p.second * width + p.first;
         rawShouldBeOn.insert(res);
     }
 
     for (auto i = 0; i < h_dest.size() / 3; ++i)
     {
         if (rawShouldBeOn.count(i) > 0) 
-            comparePixels(h_destRaw, pixel_on, i);
+            comparePixels(h_destRaw, pixel_on, width, height, i);
         else 
-            comparePixels(h_destRaw, pixel_off, i);
+            comparePixels(h_destRaw, pixel_off, width, height, i);
     }
-
 }

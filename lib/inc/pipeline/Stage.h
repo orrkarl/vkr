@@ -27,6 +27,8 @@ protected:
     cl::Program code;
 
     Stage(const string& stageFile, cl_int& err);
+
+    static const char* STANDARD_COMPILE_OPTIONS;
 };
 
 }
