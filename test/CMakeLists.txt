@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
-ADD_EXECUTABLE(NrasterTest includes.h unify_buffers_tests.h tests.cpp)
+ADD_EXECUTABLE(NrasterTest tests.cpp)
 
 TARGET_LINK_LIBRARIES(NrasterTest 
 	PRIVATE Nraster

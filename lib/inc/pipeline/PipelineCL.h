@@ -149,7 +149,7 @@ void paintPointI(
 {
     Position pos;
     pos.x = (info->width - 1) / 2 + x;
-    pos.y = (info->height - 1) / 2 + y;
+    pos.y = info->height / 2 - y;
     debug_message2("painting point: (%x, %x)\n", pos.x, pos.y);
     paintPixel(info, pos, color, dest);
 }
@@ -214,15 +214,41 @@ void paintHighLine(
     const ColorRGB color,
     global uchar* dest)
 {
-    paintLowLine(info, y0, x0, y1, x1, color, dest);
+    int dx = x1 - x0;
+    int dy = y1 - y0;
+    
+    int xi = 1;
+    if (dx < 0)
+    {
+        xi = -1;
+        dx = -dx;
+    }
+
+    int dx2 = 2 * dx;
+    int dy2 = 2 * dy;
+
+    int d = dx2 - dy;
+    int x = x0;
+    
+    for (int y = y0; y <= y1; ++y)
+    {
+        debug_message2("asking to paint: (%d, %d)\n", x, y);
+        paintPointI(info, x, y, color, dest);
+        if (d > 0)
+        {
+            x += xi;
+            d -= dy2;
+        }
+        d += dx2;
+    }
 }
 
 void paintLineBresenham(
     constant RasterizeInfo* info,
-    const int x0,
-    const int y0,
-    const int x1,
-    const int y1,
+    int x0,
+    int y0,
+    int x1,
+    int y1,
     const ColorRGB color,
     global uchar* dest)
 {
@@ -230,10 +256,12 @@ void paintLineBresenham(
     {
         if (x0 <= x1)
         {
+            printf("Option 1\n");
             paintLowLine(info, x0, y0, x1, y1, color, dest);
         }
         else
         {
+            printf("Option 2\n");
             paintLowLine(info, x1, y1, x0, y0, color, dest);
         }
     }
@@ -241,10 +269,12 @@ void paintLineBresenham(
     {
         if (y0 <= y1)
         {
+            printf("Option 3\n");
             paintHighLine(info, x0, y0, x1, y1, color, dest);
         }
         else
         {
+            printf("Option 4\n");
             paintHighLine(info, x1, y1, x0, y0, color, dest);
         }
     }
