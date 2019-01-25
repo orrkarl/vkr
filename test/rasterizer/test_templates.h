@@ -37,40 +37,27 @@ void comparePixels(const NRubyte* result, const NRubyte* expected, const NRuint 
     ASSERT_EQ(result[3 * i + 2], expected[2]) << i % w << ',' << i / w << " B";
 }
 
-void testPointRaster(const NRuint dim, const NRuint width, const NRuint height)
+void testPointRaster(
+    const NRuint dim, 
+    const NRuint width, 
+    const NRuint height,
+    std::vector<NRfloat> vertecies,
+    std::set<std::pair<NRuint, NRuint>> shouldBeOn)
 {
-    const NRuint vertexCount = 4;
-    const NRuint elemSize = dim + 1;
     nr::Error err = nr::Error::NO_ERROR;
     cl_int error = CL_SUCCESS;
+    const auto elemSize = dim + 1;
+    const auto vertexCount = vertecies.size() / elemSize;
 
     nr::__internal::Rasterizer rasterizer(dim, error);
     ASSERT_EQ(error, CL_SUCCESS);
 
     rasterizer.set(0, 0, width, height);
 
-    std::vector<NRfloat> h_src(vertexCount * elemSize, 0.0f);
-    
-    // Bottom right corner
-    h_src[0] = 1;
-    h_src[1] = 1;
-
-    // Top left corner
-    h_src[elemSize] = -1;
-    h_src[elemSize + 1] = -1;
-
-    // Top right corner
-    h_src[2 * elemSize] = 1;
-    h_src[2 * elemSize + 1] = -1;
-
-    // Bottom left corner
-    h_src[3 * elemSize] = -1;
-    h_src[3 * elemSize + 1] = 1;
-
     cl::Buffer d_src = cl::Buffer(
         CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY,
-        h_src.size() * sizeof(NRfloat), 
-        h_src.data(), 
+        vertecies.size() * sizeof(NRfloat), 
+        vertecies.data(), 
         &error);
     ASSERT_EQ(error, CL_SUCCESS);
 
@@ -83,36 +70,32 @@ void testPointRaster(const NRuint dim, const NRuint width, const NRuint height)
     ASSERT_EQ(error, CL_SUCCESS);
 
     auto queue = cl::CommandQueue::getDefault();
-    ASSERT_EQ((NRint) rasterizer.rasterize(d_src, d_dest, queue, vertexCount, nr::Primitive::POINTS), (NRint) nr::Error::NO_ERROR);
+    ASSERT_EQ(
+        (NRint) rasterizer.rasterize(d_src, d_dest, queue, vertexCount, nr::Primitive::POINTS),
+        (NRint) nr::Error::NO_ERROR);
     queue.finish();
     queue.enqueueReadBuffer(d_dest, CL_TRUE, 0, h_dest.size() * sizeof(NRubyte), h_dest.data());
-    
-    PRINT_FRAME(h_dest, width);
 
     NRubyte pixel_on[] = { 255, 0, 0 };
     NRubyte pixel_off[] = { 0, 0, 0 };
     
+    PRINT_FRAME(h_dest, width);
+    
     auto h_destRaw = h_dest.data();
 
-    const NRuint TOP_LEFT = 0;
-    const NRuint TOP_RIGHT = width - 1;
-    const NRuint BOTTOM_LEFT = (height - 1) * height;
-    const NRuint BOTTOM_RIGHT = (height - 1) * height + width - 1;
-    
-    const std::set<NRuint> shouldBeOn{ TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT };
-    const std::set<NRuint> shouldBeOff{ (NRuint) 0.7 * height * width, width / 2 };
-
-    for (const auto& i : shouldBeOn)
+    std::set<NRuint> rawShouldBeOn{};
+    for (auto p : shouldBeOn)
     {
-        comparePixels(h_destRaw, pixel_on, width, height, i);
+        auto res = p.second * width + p.first;
+        rawShouldBeOn.insert(res);
     }
 
-    for (const auto& i : shouldBeOff)
+    for (auto i = 0; i < h_dest.size() / 3; ++i)
     {
-        if (shouldBeOn.count(i) == 0)
-        {
+        if (rawShouldBeOn.count(i) > 0) 
+            comparePixels(h_destRaw, pixel_on, width, height, i);
+        else 
             comparePixels(h_destRaw, pixel_off, width, height, i);
-        }
     }
 }
 

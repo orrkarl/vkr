@@ -11,26 +11,41 @@ TEST(RasterizerTest, LoaderSanityTest)
     ASSERT_EQ(err, CL_SUCCESS) << rasterizer.getCompilationLog();
 }
 
-TEST(RasterizerTest, 2dPointRasterTest)
-{
-    const NRuint dim = 2;
-    const NRuint width = 10;
-    const NRuint height = 10;
-    testPointRaster(dim, width, height);
-}
 
-TEST(RasterizerTest, 3dPointRasterTest)
+TEST(RasterizerTest, PointSanityTest)
 {
     const NRuint dim = 3;
     const NRuint width = 10;
     const NRuint height = 10;
-    testPointRaster(dim, width, height);
+
+    const std::vector<NRfloat> vertecies = {
+        -1, 1, 0, 1,
+        -1, -1, 0, 1,
+        1, -1, 0, 1,
+        1, 1, 0, 1
+    };
+
+    const std::set<std::pair<NRuint, NRuint>> shouldBeOn = {
+        std::pair<NRuint, NRuint>(0, 0),
+        std::pair<NRuint, NRuint>(0, width - 1),
+        std::pair<NRuint, NRuint>(height - 1, 0),
+        std::pair<NRuint, NRuint>(height - 1, width - 1)
+    };
+
+    testPointRaster(dim, width, height, vertecies, shouldBeOn);
 }
 
-TEST(RasterizerTest, 11dPointRasterTest)
+TEST(RasterizerTest, SpecificPointTest)
 {
-    const NRuint dim = 11;
-    const NRuint width = 10;
-    const NRuint height = 10;
-    testPointRaster(dim, width, height);
+    const NRuint dim = 3, width = 10, height = 10;
+    
+    const std::vector<NRfloat> vertecies = {
+        -0.5, 0.5, 200, 1
+    };
+
+    const std::set<std::pair<NRuint, NRuint>> shouldBeOn = {
+        std::pair<NRuint, NRuint>(width / 4, height / 2 - height / 4)
+    };
+
+    testPointRaster(dim, width, height, vertecies, shouldBeOn);
 }
