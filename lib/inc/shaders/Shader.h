@@ -8,7 +8,7 @@
 namespace nr
 {
 
-class Shader
+class NR_SHARED_EXPORT Shader
 {
 public:
 

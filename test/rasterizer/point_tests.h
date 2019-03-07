@@ -11,7 +11,6 @@ TEST(RasterizerTest, LoaderSanityTest)
     ASSERT_EQ(err, CL_SUCCESS) << rasterizer.getCompilationLog();
 }
 
-
 TEST(RasterizerTest, PointSanityTest)
 {
     const NRuint dim = 3;

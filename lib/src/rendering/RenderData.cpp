@@ -94,9 +94,10 @@ Error RenderData::finalizeBindings()
     if (!isUpToDate())
     {
         update();
-        glBindVertexArray(m_vao);
-        return finalizeAttributes();
     }
+
+	glBindVertexArray(m_vao);
+	return finalizeAttributes();
 }
 
 void RenderData::unbind()

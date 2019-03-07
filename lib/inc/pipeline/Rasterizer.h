@@ -9,7 +9,7 @@ namespace nr
 namespace __internal
 {
 
-class Rasterizer : public Stage
+class NR_SHARED_EXPORT Rasterizer : public Stage
 {
 public:
 

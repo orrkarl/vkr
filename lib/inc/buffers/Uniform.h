@@ -18,7 +18,7 @@
 namespace nr
 {
 
-class Uniform : public Buffer
+class NR_SHARED_EXPORT Uniform : public Buffer
 {
 public:
     

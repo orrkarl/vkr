@@ -8,9 +8,9 @@ namespace nr
 namespace utils
 {
 
-string loadFile(const string& fileName, Error& err);
+NR_SHARED_EXPORT string loadFile(const string& fileName, Error& err);
 
-string loadResourceFile(const string& resourceName, Error& err);
+NR_SHARED_EXPORT string loadResourceFile(const string& resourceName, Error& err);
 
 }
 

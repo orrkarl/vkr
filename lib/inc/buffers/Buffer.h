@@ -20,7 +20,7 @@
 namespace nr
 {
 
-class Buffer
+class NR_SHARED_EXPORT Buffer
 {
 private:
 	Type m_dataType;

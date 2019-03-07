@@ -9,7 +9,7 @@ namespace nr
 namespace __internal
 {
 
-class Stage
+class NR_SHARED_EXPORT Stage
 {
 public:
 

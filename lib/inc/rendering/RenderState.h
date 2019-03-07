@@ -7,7 +7,7 @@
 namespace nr
 {
 
-struct ViewPort
+struct NR_SHARED_EXPORT ViewPort
 {
 public:
     void set(const NRint x, const NRint y, const NRuint w, const NRuint h)
@@ -78,7 +78,7 @@ private:
     NRfloat z;
 };
 
-struct FaceCulling
+struct NR_SHARED_EXPORT FaceCulling
 {
 public:
     enum class Face : NRint
@@ -149,7 +149,7 @@ private:
     }
 };
 
-struct RenderState
+struct NR_SHARED_EXPORT RenderState
 {
     ViewPort wnd;
     Color color;

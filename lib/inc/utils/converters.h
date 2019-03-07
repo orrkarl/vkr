@@ -8,17 +8,17 @@ namespace nr
 namespace utils
 {
 
-GLenum fromNRType(Type type);
+NR_SHARED_EXPORT GLenum fromNRType(Type type);
 
-Error fromGLError(GLenum err);
+NR_SHARED_EXPORT Error fromGLError(GLenum err);
 
-Error getLastGLError();
+NR_SHARED_EXPORT Error getLastGLError();
 
-GLenum fromNRShaderType(const Role& type);
+NR_SHARED_EXPORT GLenum fromNRShaderType(const Role& type);
 
-GLenum fromNRPrimitiveType(const Primitive& type);
+NR_SHARED_EXPORT GLenum fromNRPrimitiveType(const Primitive& type);
 
-Error fromCLError(const cl_int& err);
+NR_SHARED_EXPORT Error fromCLError(const cl_int& err);
 
 }
 

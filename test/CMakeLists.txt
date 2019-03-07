@@ -12,3 +12,11 @@ TARGET_INCLUDE_DIRECTORIES(NrasterTest
 	PRIVATE ${NRASTER_ALL_INCLUDES}
 	PRIVATE ${gtest_SOURCE_DIR}/include
 	PRIVATE ${OpenCL_INCLUDE_DIRS})
+
+if(WIN32)
+    # Copy DLL files to output directory
+    add_custom_command(TARGET NrasterTest POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${PROJECT_BINARY_DIR}/lib/Nraster.dll"             
+    $<TARGET_FILE_DIR:NrasterTest>)
+endif()

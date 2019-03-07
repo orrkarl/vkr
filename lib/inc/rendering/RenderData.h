@@ -10,7 +10,7 @@
 namespace nr
 {
 
-class RenderData
+class NR_SHARED_EXPORT RenderData
 {
 
 public:

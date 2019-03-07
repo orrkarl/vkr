@@ -13,7 +13,7 @@ class Buffer;
 namespace utils
 {
 
-std::pair<NRuint, void*> unifyBuffers(const std::vector<Buffer*>& buffers);
+NR_SHARED_EXPORT std::pair<NRuint, void*> unifyBuffers(const std::vector<Buffer*>& buffers);
 
 template <typename T>
 NRuint vectorByteSize(const std::vector<T>& vec)

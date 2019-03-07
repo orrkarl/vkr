@@ -17,6 +17,10 @@ FIND_PACKAGE(GLEW REQUIRED)
 
 SET(CMAKE_CXX_STANDARD 17)
 
+IF(WIN32)
+	SET(gtest_force_shared_crt ON)
+ENDIF(WIN32)
+
 ADD_SUBDIRECTORY(dependencies)
 
 ADD_SUBDIRECTORY(lib)
@@ -30,7 +34,7 @@ IF(BUILD_TESTS)
 	
 	ADD_SUBDIRECTORY(test)
 	ENABLE_TESTING()
-	ADD_TEST(NAME AllTests COMMAND NrasterTest) # run the executable itself for a better log, as it uses GTest
+	ADD_TEST(NAME AllTests COMMAND NrasterTest) # run the executable itself for a better log as it uses GTest
 
 	UNSET(NRASTER_ALL_INCLUDES)
 ENDIF()
