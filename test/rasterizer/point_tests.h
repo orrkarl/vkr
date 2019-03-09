@@ -1,14 +1,17 @@
 #pragma once
 
 #include "../includes.h"
+#include <pipeline/PipelineCL.h>
 
 #include "test_templates.h"
 
 TEST(RasterizerTest, LoaderSanityTest)
 {
     cl_int err;
-    nr::__internal::Rasterizer rasterizer(3, err);
-    ASSERT_EQ(err, CL_SUCCESS) << rasterizer.getCompilationLog();
+    cl::Program code(nr::rasterizer_generic_dim, true, &err);
+    auto log = code.getBuildInfo<CL_PROGRAM_BUILD_LOG>();
+
+    ASSERT_EQ(err, CL_SUCCESS) << log[0].second;
 }
 
 TEST(RasterizerTest, PointSanityTest)

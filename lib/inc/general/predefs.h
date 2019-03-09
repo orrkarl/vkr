@@ -30,7 +30,7 @@ typedef bool NRbool;
 	#define NR_SHARED_EXPORT __declspec(dllexport)
 #else
 	#define NR_SHARED_EXPORT
-#endif // WIN32
+#endif // Windows
 
 namespace nr
 {

@@ -96,8 +96,8 @@ uint getPixelIndex(constant RasterizeInfo* info, const Pixel pixel)
 
 int ndcToSignedPixel(const uint axisLength, const float axisPosition)
 {
- int l = (int) axisLength - 1;
-    return floor(l * 0.5 * (1 + axisPosition) - (l / 2));
+    int l = (int) axisLength - 1;
+    return (int) floor((float) (l * 0.5 * (1 + axisPosition) - (l / 2)));
 }
 
 // -------------------------------------------------------------

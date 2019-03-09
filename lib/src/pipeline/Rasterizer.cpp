@@ -12,7 +12,7 @@ namespace __internal
 Rasterizer::Rasterizer(const NRuint& dimension, cl_int& err)
     : Stage(rasterizer_generic_dim, err),
       h_info(dimension)
-{
+{    
     d_info = cl::Buffer(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(Info), &h_info, &err);
 
     points      = cl::Kernel(code, "points", &err);
