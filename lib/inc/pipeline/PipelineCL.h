@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../general/predefs.h"
+#include "inc/general/predefs.h"
 
 namespace nr
 {
