@@ -20,6 +20,8 @@ NR_SHARED_EXPORT GLenum fromNRPrimitiveType(const Primitive& type);
 
 NR_SHARED_EXPORT Error fromCLError(const cl_int& err);
 
+NR_SHARED_EXPORT const string stringFromCLError(const cl_int& error);
+
 }
 
 }

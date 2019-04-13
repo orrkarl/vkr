@@ -9,13 +9,12 @@ namespace nr
 namespace utils
 {
 
-string loadFile(const string& fileName, Error& err)
+string loadFile(const string& fileName)
 {
     std::ifstream file(fileName);
 
     if (!file) 
     {
-        err = Error::INVALID_OPERATION;
         return "";
     }
 
@@ -24,9 +23,9 @@ string loadFile(const string& fileName, Error& err)
     return ss.str();
 }
 
-string loadResourceFile(const string& resourceName, Error& err)
+string loadResourceFile(const string& resourceName)
 {
-    return loadFile("resource/" + resourceName, err);
+    return loadFile("resource/" + resourceName);
 }
 
 }

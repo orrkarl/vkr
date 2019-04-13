@@ -2,16 +2,11 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
 # main Nraster library
 
-ADD_LIBRARY(Nraster SHARED 
-	src/rendering/Render.cpp 
-	src/rendering/RenderData.cpp
-	
-	src/utils/memory.cpp
+ADD_LIBRARY(Nraster SHARED
 	src/utils/converters.cpp
 	src/utils/files.cpp
 
-	src/pipeline/Stage.cpp
-	src/pipeline/Rasterizer.cpp
+	src/base/CLModule.cpp
 
 	src/general/predefs.cpp)
 

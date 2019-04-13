@@ -1,6 +1,6 @@
 #include "includes.h"
 
-#include "rasterizer/all_tests.h"
+#include "modules/all_module_tests.h"
 
 int main(int argc, char **argv) 
 {

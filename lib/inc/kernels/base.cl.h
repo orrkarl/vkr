@@ -1,6 +1,6 @@
 #pragma once
 
-#include "inc/general/predefs.h"
+#include "../general/predefs.h"
 
 namespace nr
 {
@@ -46,6 +46,12 @@ typedef struct _ColorRGB
     uchar b;
 } ColorRGB;
 
+typedef struct _ColorRGBA
+{
+    ColorRGB color;
+    uchar a;
+} ColorRGBA;
+
 typedef uint  Index;
 typedef float Depth;
 
@@ -68,16 +74,6 @@ typedef struct _Fragment
 
 // -------------------------------------- Utilities -------------------------------------- 
 
-bool has_stencil(const FrameBuffer buffer)
-{
-    return buffer.stencil != NULL;
-}
-
-bool has_depth(const FrameBuffer buffer)
-{
-    retrun buffer.depth != NULL;
-}
-
 uint index_from_screen(const ScreenPosition pos, const ScreenDimension dim)
 {
     return pos.y * dim.width + pos.x;
@@ -85,60 +81,56 @@ uint index_from_screen(const ScreenPosition pos, const ScreenDimension dim)
 
 uint from_continuous(const float continuous)
 {
-    return floor(continous);
+    return floor(continuous);
 }
 
-float from_discrete(const uint discrete)
+uint axis_screen_from_ndc(const float pos, const uint length)
 {
-    return discrete + 0.5;
-}
-
-uint axis_screen_from_ndc(const float axis_pos, const uint axis_length)
-{
-    return from_continuous((axis_pos + 1) * 0.5 * (axis_length - 1));
+    return from_continuous((pos + 1) * (length - 1) / 2);
 }
 
 void screen_from_ndc(const NDCPosition ndc, const ScreenDimension dim, ScreenPosition* screen)
 {
-    screen.x = axis_screen_from_ndc(ndc.x, dim.width);
-    screen.y = axis_screen_from_ndc(ndc.y, dim.height);
+    screen->x = axis_screen_from_ndc(ndc.x, dim.width);
+    screen->y = axis_screen_from_ndc(ndc.y, dim.height);
 }
 
-int axis_signed_from_ndc(const float axis_pos, const uint axis_length)
+int axis_signed_from_ndc(const float pos, const uint length)
 {
-    return from_continuous((axis_pos + 1) * 0.5 * (axis_length - 1) - axis_length / 2);
+    return axis_screen_from_ndc(pos, length) - length / 2;
 }
 
-void signed_from_ndc(const NDCPosition ndc, const ScreenDimension dim, SignedPosition* screen)
+void signed_from_ndc(const NDCPosition ndc, const ScreenDimension dim, SignedScreenPosition* screen)
 {
-    screen.x = axis_signed_from_ndc(ndc.x, dim.width);
-    screen.y = axis_signed_from_ndc(ndc.y, dim.height);
+    screen->x = axis_signed_from_ndc(ndc.x, dim.width);
+    screen->y = axis_signed_from_ndc(ndc.y, dim.height);
 }
 
-void screen_from_signed(const SignedPosition signed, const ScreenDimension dim, ScreenPosition* screen)
+void screen_from_signed(const SignedScreenPosition pos, const ScreenDimension dim, ScreenPosition* screen)
 {
-    screen.x = signed.x + dim.width / 2;
-    screen.y = signed.y + dim.height / 2;
+    screen->x = pos.x + dim.width / 2;
+    screen->y = pos.y + dim.height / 2;
 }
 
 // ----------------------------------------------------------------------------
 
 // -------------------------------------- Draw -------------------------------------- 
 
-void apply_fragment_full(const Fragment fragment, FrameBuffer* frame)
-{
-    uint index = index_from_screen(fragment.position); 
-
-    frame.color[index]   = fragment.color;
-    frame.stencil[index] = fragment.primitive;
+void apply_fragment_full(const Fragment fragment, const ScreenDimension dim, FrameBuffer* frame)
+{ 
+    frame->color[index_from_screen(fragment.position, dim)] = fragment.color;
 }
 
-void apply_fragment_no_stencil(const Fragment fragment, FrameBuffer* frame)
+// ----------------------------------------------------------------------------
+
+// -------------------------------------- Testing -------------------------------------- 
+
+kernel void screen_from_ndc_kernel(NDCPosition pos, ScreenDimension dim, global ScreenPosition* res)
 {
-    uint index = index_from_screen(fragment.position); 
-
-    frame.color[index] = fragment.color;
-
+    ScreenPosition tmp;
+    screen_from_ndc(pos, dim, &tmp);
+    res->x = tmp.x;
+    res->y = tmp.y;
 }
 
 )__CODE__";
