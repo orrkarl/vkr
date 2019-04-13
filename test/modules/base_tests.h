@@ -2,8 +2,8 @@
 
 #include "../includes.h"
 
-#include <base/CLModule.h>
-#include <base/CLKernel.h>
+#include <base/Module.h>
+#include <base/Kernel.h>
 #include <rendering/RenderState.h>
 #include <kernels/base.cl.h>
 
@@ -62,7 +62,7 @@ private:
     
 };
 
-void screenFromNDCTestTemplate(CLKernel<ScreenFromNDCParams> kernel, cl::CommandQueue queue, const NDCPosition& ndc, const ScreenDimension& dim, const ScreenPosition& expected)
+void screenFromNDCTestTemplate(Kernel<ScreenFromNDCParams> kernel, cl::CommandQueue queue, const NDCPosition& ndc, const ScreenDimension& dim, const ScreenPosition& expected)
 {
     cl_int err;
 
@@ -88,11 +88,11 @@ void screenFromNDCTestTemplate(CLKernel<ScreenFromNDCParams> kernel, cl::Command
 }
 
 
-TEST(Compilation, Base)
+TEST(Base, Compilation)
 {
     cl_int err = CL_SUCCESS; 
 
-    CLModule base(clcode::base, &err);
+    Module base(clcode::base, "-D RenderDimension=3", &err);
     ASSERT_EQ(CL_SUCCESS, err);
 
     auto log = base.getBuildLog(&err);
@@ -100,13 +100,13 @@ TEST(Compilation, Base)
     ASSERT_EQ("", log) << log;
 }
 
-TEST(ScreenFromNDC, Base)
+TEST(Base, ScreenFromNDC)
 {
     cl_int err = CL_SUCCESS; 
  
     cl::CommandQueue queue = cl::CommandQueue::getDefault();
 
-    CLModule base(clcode::base, &err);
+    Module base(clcode::base, "-D RenderDimension=3", &err);
     ASSERT_EQ(CL_SUCCESS, err) << "Failed to compile base module:\t" << utils::stringFromCLError(err);
 
     auto screen_from_ndc = base.makeKernel<ScreenFromNDCParams>("screen_from_ndc_kernel", &err);

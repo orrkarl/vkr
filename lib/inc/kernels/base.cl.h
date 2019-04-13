@@ -15,6 +15,10 @@ const string base = R"__CODE__(
 
 // -------------------------------------- Types -------------------------------------- 
 
+#ifndef RenderDimension 
+    #error "RenderDimension has to be defined!"
+#endif
+
 typedef struct _ScreenDimension
 {
     uint width;
@@ -69,6 +73,9 @@ typedef struct _Fragment
     Depth           depth;
     Index           primitive;
 } Fragment;
+
+typedef float Point[RenderDimension];   // point in n-dimensional space 
+typedef Point Simplex[RenderDimension]; // N-1 simplex (rendering is done on an object's surface)
 
 // ----------------------------------------------------------------------------
 

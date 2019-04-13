@@ -9,18 +9,18 @@ namespace __internal
 {
 
 template<class Params>
-class NR_SHARED_EXPORT CLKernel
+class NR_SHARED_EXPORT Kernel
 {
 
 public:
-    CLKernel() {}
+    Kernel() {}
 
-    explicit CLKernel(cl::Kernel kernel)
+    explicit Kernel(cl::Kernel kernel)
         : m_kernel(kernel)
     {
     }
 
-    CLKernel(const cl::Program& code, const string& name, cl_int* err)
+    Kernel(const cl::Program& code, const string& name, cl_int* err)
         : m_kernel(code, name.data(), err)
     {
     }

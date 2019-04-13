@@ -6,7 +6,10 @@ ADD_LIBRARY(Nraster SHARED
 	src/utils/converters.cpp
 	src/utils/files.cpp
 
-	src/base/CLModule.cpp
+	src/base/Module.cpp
+	src/base/Buffer.cpp
+
+	src/pipeline/BinRasterizer.cpp
 
 	src/general/predefs.cpp)
 

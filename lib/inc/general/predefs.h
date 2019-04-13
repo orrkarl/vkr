@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <string>
+#include <cmath>
 
 #include <GL/glew.h>
 
@@ -72,17 +73,6 @@ namespace error
 	NR_SHARED_EXPORT NRbool isSuccess(const Error& err);
 	NR_SHARED_EXPORT NRbool isFailure(const Error& err);
 }
-
-enum class NR_SHARED_EXPORT Role : NRint
-{
-	VERTEX, FRAGMENT
-};
-
-enum class NR_SHARED_EXPORT Primitive : NRint
-{
-	POINTS, LINES, K_SIMPLICES
-};
-
 
 }
 

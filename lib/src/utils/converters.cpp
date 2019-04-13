@@ -51,31 +51,6 @@ Error getLastGLError()
     return fromGLError(glGetError());
 }
 
-GLenum fromNRShaderType(const Role& type)
-{
-    switch(type)
-    {
-        case Role::VERTEX:    return GL_VERTEX_SHADER;
-        case Role::FRAGMENT:  return GL_FRAGMENT_SHADER;
-
-        default:
-            return 0;
-    }
-}
-
-GLenum fromNRPrimitiveType(const Primitive& type)
-{
-    switch(type)
-    {
-        case Primitive::POINTS:         return GL_POINTS;
-        case Primitive::LINES:          return GL_LINES;
-        case Primitive::K_SIMPLICES:    return GL_TRIANGLES;
-
-        default:
-            return 0;
-    }
-}
-
 Error fromCLError(const cl_int& err)
 {
     switch(err)
