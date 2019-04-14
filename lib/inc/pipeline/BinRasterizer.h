@@ -14,7 +14,7 @@ namespace __internal
 class BinRasterizerParams
 {
 public:
-    cl_int init(cl::CommandQueue queue);
+    cl_int init(cl::CommandQueue queue) {}
 
     cl_int load(cl::Kernel kernel);
 
@@ -37,13 +37,6 @@ public:
     {
         m_simplexData = data;
         m_simplexCount = count;
-    }
-
-    Error allocateBatchIndex()
-    {
-        Error ret;
-        m_batchIdx = Buffer(CL_MEM_READ_WRITE, sizeof(NRuint), Type::UINT, &ret);
-        return ret;
     }
 
 private:
@@ -70,9 +63,6 @@ private:
     // Simplex data
     Buffer m_simplexData;
     NRuint m_simplexCount;
-
-    // Batch index
-    Buffer m_batchIdx;
 };
 
 typedef Kernel<BinRasterizerParams> BinRasterizer;

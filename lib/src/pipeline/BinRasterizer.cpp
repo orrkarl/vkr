@@ -8,11 +8,6 @@ namespace __internal
 
 const NRuint BinRasterizerParams::ZERO = 0;
 
-cl_int BinRasterizerParams::init(cl::CommandQueue queue)
-{
-    return queue.enqueueWriteBuffer(m_batchIdx.getBuffer(), CL_TRUE, 0, sizeof(NRuint), &ZERO);
-}
-
 cl_int BinRasterizerParams::load(cl::Kernel kernel)
 {
     cl_int err = CL_SUCCESS;

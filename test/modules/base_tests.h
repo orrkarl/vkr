@@ -97,9 +97,8 @@ void screenFromNDCTestTemplate(Kernel<ScreenFromNDCParams> kernel, cl::CommandQu
 
 TEST(Base, Compilation)
 {
-    cl_int err = CL_SUCCESS; 
-
-    Module base(clcode::base, "-D RenderDimension=3", &err);
+    cl_int err = CL_SUCCESS;
+    Module base(clcode::base, "-cl-std=CL2.0 -Werror -D RENDER_DIMENSION=3", &err);
     ASSERT_EQ(CL_SUCCESS, err);
 
     auto log = base.getBuildLog(&err);
@@ -109,11 +108,11 @@ TEST(Base, Compilation)
 
 TEST(Base, ScreenFromNDC)
 {
-    cl_int err = CL_SUCCESS; 
+     cl_int err = CL_SUCCESS; 
  
     cl::CommandQueue queue = cl::CommandQueue::getDefault();
 
-    Module base(clcode::base, "-D RenderDimension=3", &err);
+    Module base(clcode::base, "-cl-std=CL2.0 -Werror -D RENDER_DIMENSION=3", &err);
     ASSERT_EQ(CL_SUCCESS, err) << "Failed to compile base module:\t" << utils::stringFromCLError(err);
 
     auto screen_from_ndc = base.makeKernel<ScreenFromNDCParams>("screen_from_ndc_kernel", &err);

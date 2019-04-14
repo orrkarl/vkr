@@ -15,13 +15,15 @@ const string base = R"__CODE__(
 
 // -------------------------------------- Types -------------------------------------- 
 
-#ifndef RenderDimension 
-    #error "RenderDimension has to be defined!"
+// #define RENDER_DIMENSION 4
+
+#ifndef RENDER_DIMENSION 
+    #error "RENDER_DIMENSION has to be defined!"
 #endif
 
-#if RenderDimension < 3
-    #error "RenderDimension has to be at least 3!"
-#endif 
+#if RENDER_DIMENSION < 3
+    #error "RENDER_DIMENSION has to be at least 3!"
+#endif
 
 typedef struct _ScreenDimension
 {
@@ -29,36 +31,15 @@ typedef struct _ScreenDimension
     uint height;
 } ScreenDimension;
 
-typedef struct _ScreenPosition
-{
-    uint x;
-    uint y;
-} ScreenPosition;
+typedef uint2 ScreenPosition;
 
-typedef struct _SignedScreenPosition
-{
-    int x;
-    int y;
-} SignedScreenPosition;
+typedef int2 SignedScreenPosition;
 
-typedef struct _NDCPosition
-{
-    float x;
-    float y;
-} NDCPosition;
+typedef float2 NDCPosition;
 
-typedef struct _ColorRGB 
-{
-    uchar r;
-    uchar g;
-    uchar b;
-} ColorRGB;
+typedef float3 ColorRGB;
 
-typedef struct _ColorRGBA
-{
-    ColorRGB color;
-    uchar a;
-} ColorRGBA;
+typedef float4 ColorRGBA;
 
 typedef uint  Index;
 typedef float Depth;
@@ -78,8 +59,8 @@ typedef struct _Fragment
     Index           primitive;
 } Fragment;
 
-typedef float Point[RenderDimension];   // point in n-dimensional space 
-typedef Point Simplex[RenderDimension]; // N-1 simplex (rendering is done on an object's surface)
+typedef float Point[RENDER_DIMENSION];   // point in n-dimensional space 
+typedef Point Simplex[RENDER_DIMENSION]; // N-1 simplex (rendering is done on an object's surface)
 
 // ----------------------------------------------------------------------------
 
