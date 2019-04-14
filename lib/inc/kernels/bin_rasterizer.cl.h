@@ -31,7 +31,7 @@ bool is_point_in_bin(const NDCPosition point, const Bin bin)
 }
 
 kernel void bin_rasterize(
-    constant Simplex* simplexData,
+    const global Simplex* simplexData,
     uint simplexCount,
     ScreenDimension dim,
     uint binWidth,
@@ -80,9 +80,9 @@ kernel void bin_rasterize(
         if (currentBatchIdx >= simplexCount) break;
 
         // Copying x values of each point
-        // batchAcquisition = async_work_group_strided_copy((local float*) localSimplexData, (constant float*) simplexData, BATCH_COUNT * RENDER_DIMENSION, sizeof(Point) / sizeof(float), 0);
+        batchAcquisition = async_work_group_strided_copy((local float*) localSimplexData, (const global float*) simplexData, BATCH_COUNT * RENDER_DIMENSION, sizeof(Point) / sizeof(float), 0);
         // Copying y values of each point
-        // async_work_group_strided_copy(((local float*) localSimplexData) + 1, ((constant float*) simplexData) + 1, BATCH_COUNT * RENDER_DIMENSION, sizeof(Point) / sizeof(float), batchAcquisition);
+        async_work_group_strided_copy(((local float*) localSimplexData) + 1, ((const global float*) simplexData) + 1, BATCH_COUNT * RENDER_DIMENSION, sizeof(Point) / sizeof(float), batchAcquisition);
 
         wait_group_events(1, &batchAcquisition);
 
