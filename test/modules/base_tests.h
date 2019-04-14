@@ -40,12 +40,12 @@ public:
         result = cl::Buffer(CL_MEM_WRITE_ONLY, sizeof(ScreenPosition), nullptr, err);
     }
 
-    static cl_int load(cl::Kernel kernel, const ScreenFromNDCParams& self)
+    cl_int load(cl::Kernel kernel)
     {
         cl_int err = CL_SUCCESS;
-        if ((err = kernel.setArg(0, self.ndcPosition)) != CL_SUCCESS) return err;
-        if ((err = kernel.setArg(1, self.dimension)) != CL_SUCCESS) return err;        
-        err = kernel.setArg(2, self.result);
+        if ((err = kernel.setArg(0, ndcPosition)) != CL_SUCCESS) return err;
+        if ((err = kernel.setArg(1, dimension)) != CL_SUCCESS) return err;        
+        err = kernel.setArg(2, result);
         return err;
     }
 
@@ -54,12 +54,16 @@ public:
         return cl::CommandQueue::getDefault().enqueueReadBuffer(result, CL_TRUE, 0, sizeof(ScreenPosition), res);
     } 
 
+    cl_int init(cl::CommandQueue queue)
+    {
+        return CL_SUCCESS;
+    }
+
     NDCPosition ndcPosition;
     ScreenDimension dimension;
 
 private:
     cl::Buffer result;
-    
 };
 
 void screenFromNDCTestTemplate(Kernel<ScreenFromNDCParams> kernel, cl::CommandQueue queue, const NDCPosition& ndc, const ScreenDimension& dim, const ScreenPosition& expected)
@@ -71,6 +75,9 @@ void screenFromNDCTestTemplate(Kernel<ScreenFromNDCParams> kernel, cl::CommandQu
     
     kernel.params.ndcPosition = ndc;
     kernel.params.dimension   = dim;
+
+    err = kernel.initParams(queue);
+    ASSERT_EQ(CL_SUCCESS, err) << "Failed to init kernel args:\t" << utils::stringFromCLError(err);
 
     err = kernel.loadParams();
     ASSERT_EQ(CL_SUCCESS, err) << "Failed to load kernel args:\t" << utils::stringFromCLError(err);

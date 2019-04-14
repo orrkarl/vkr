@@ -39,7 +39,20 @@ public:
 
     cl_int loadParams()
     {
-        return Params::load(m_kernel, params);
+        return params.load(m_kernel);
+    }
+
+    cl_int initParams(cl::CommandQueue queue)
+    {
+        return params.init(queue);
+    }
+
+    cl_int operator()(cl::CommandQueue queue)
+    {
+        cl_int err;
+        if ((err = initParams(queue)) != CL_SUCCESS) return err;;
+        if ((err = loadParams()) != CL_SUCCESS) return err;
+        return apply(queue);
     }
 
 public:

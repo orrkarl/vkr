@@ -11,7 +11,7 @@ TEST(Binning, Compilation)
 {
     cl_int err = CL_SUCCESS; 
 
-    Module base(std::vector<string>{clcode::base, clcode::bin_rasterizer}, "-D RenderDimension=3", &err);
+    Module base({clcode::base, clcode::bin_rasterizer}, "-D RenderDimension=3", &err);
     ASSERT_EQ(CL_SUCCESS, err);
 
     auto log = base.getBuildLog(&err);

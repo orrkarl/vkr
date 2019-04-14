@@ -14,23 +14,36 @@ namespace __internal
 class BinRasterizerParams
 {
 public:
-    cl_int load(cl::Kernel kernel, const BinRasterizerParams& self);
+    cl_int init(cl::CommandQueue queue);
 
-    cl_int allocateBinQueues(const NRuint workGroupCount, const ScreenDimension& dim, const NRuint& binWidth, const NRuint& binHeight, const NRuint binQueueSize)
+    cl_int load(cl::Kernel kernel);
+
+    Error allocateBinQueues(const NRuint workGroupCount, const ScreenDimension& dim, const NRuint& binWidth, const NRuint& binHeight, const NRuint binQueueSize)
     {
-        m_binQueues.resize(CL_MEM_READ_WRITE, workGroupCount * getBinCount(dim, binWidth, binHeight) * binQueueSize * sizeof(NRuint));
+        Error ret;
+        ret = m_binQueues.resize(CL_MEM_READ_WRITE, workGroupCount * getBinCount(dim, binWidth, binHeight) * binQueueSize * sizeof(NRuint));
+        if (error::isFailure(ret)) return ret;
+
         m_binQueueSize = binQueueSize;
         m_dim = dim;
 
         m_binWidth = binWidth;
         m_binHeight = binHeight;
-    }
 
+        return ret;
+    }
 
     void configureSimplexBuffer(Buffer data, const NRuint& count)
     {
         m_simplexData = data;
         m_simplexCount = count;
+    }
+
+    Error allocateBatchIndex()
+    {
+        Error ret;
+        m_batchIdx = Buffer(CL_MEM_READ_WRITE, sizeof(NRuint), Type::UINT, &ret);
+        return ret;
     }
 
 private:
@@ -40,6 +53,8 @@ private:
         NRuint yCount = (NRuint) ceil(((NRfloat) dim.height) / binHeight);
         return xCount * yCount;
     }
+
+    static const NRuint ZERO;
 
     // Screen Dimensions
     ScreenDimension m_dim;
@@ -55,6 +70,9 @@ private:
     // Simplex data
     Buffer m_simplexData;
     NRuint m_simplexCount;
+
+    // Batch index
+    Buffer m_batchIdx;
 };
 
 typedef Kernel<BinRasterizerParams> BinRasterizer;

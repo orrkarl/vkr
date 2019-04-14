@@ -19,6 +19,10 @@ const string base = R"__CODE__(
     #error "RenderDimension has to be defined!"
 #endif
 
+#if RenderDimension < 3
+    #error "RenderDimension has to be at least 3!"
+#endif 
+
 typedef struct _ScreenDimension
 {
     uint width;

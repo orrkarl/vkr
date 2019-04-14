@@ -17,9 +17,7 @@ public:
     Module() {}
 
     Module(const string& code, const char* options, cl_int* err);
-    Module(const std::vector<string> codes, const char* options, cl_int* err);
-    static cl_int make(const string& fileName, const char* options, Module& module);
-    static cl_int make(const std::vector<string> files, const char* options, Module& module);
+    Module(const std::initializer_list<string> codes, const char* options, cl_int* err);
 
     template<class Params>
     Kernel<Params> makeKernel(const string& name, cl_int* err)
