@@ -20,6 +20,11 @@ public:
     {
     }
 
+    Buffer(const Type& type)
+        : m_type(type)
+    {
+    }
+
     CTOR(NRdouble, DOUBLE)
 
     CTOR(NRfloat, FLOAT)
