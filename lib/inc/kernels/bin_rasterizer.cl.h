@@ -32,18 +32,21 @@ typedef struct _Bin
 
 // -------------------------------------- Utilities --------------------------------------
 
-bool is_point_in_bin(const float x, const float y, const Bin bin)
+bool is_point_in_bin(const uint x, const uint y, const Bin bin)
 {
-    return bin.x <= x && x <= bin.x + bin.width && bin.y <= y && y <= bin.y + bin.height; 
+    return bin.x <= x && x < bin.x + bin.width && bin.y <= y && y < bin.y + bin.height; 
 }
 
-bool is_simplex_in_bin(const generic float x[RENDER_DIMENSION], const generic float y[RENDER_DIMENSION], const Bin bin)
+bool is_simplex_in_bin(const generic float x[RENDER_DIMENSION], const generic float y[RENDER_DIMENSION], const Bin bin, const ScreenDimension dim)
 {
     bool result = false;
+    uint curr_x, curr_y;
     __attribute__((opencl_unroll_hint))
     for (uchar j = 0; j < RENDER_DIMENSION; ++j)
     {
-        result |= is_point_in_bin(x[j], y[j], bin);
+        curr_x = axis_screen_from_ndc(x[j], dim.width);
+        curr_y = axis_screen_from_ndc(y[j], dim.height);
+        result |= is_point_in_bin(curr_x, curr_y, bin);
     }
     return result;
 }
@@ -146,7 +149,7 @@ kernel void bin_rasterize(
 
         for (private uint i = 0; i < BATCH_COUNT; ++i)
         {
-            if (is_simplex_in_bin(reduced_simplices_x + i * RENDER_DIMENSION, reduced_simplices_y + i * RENDER_DIMENSION, current_bin))
+            if (is_simplex_in_bin(reduced_simplices_x + i * RENDER_DIMENSION, reduced_simplices_y + i * RENDER_DIMENSION, current_bin, dim))
             {
                 bin_queues[current_queue_index++] = i;
             }
@@ -176,15 +179,11 @@ kernel void bin_rasterize(
 kernel void is_simplex_in_bin_test(
     const global float simplex_x[RENDER_DIMENSION],
     const global float simplex_y[RENDER_DIMENSION], 
-    const uint width, 
-    const uint height, 
-    const uint x, 
-    const uint y,
+    const Bin bin,
+    const ScreenDimension dim,
     global bool* result)
 {
-    Bin bin = {width, height, x, y};
-
-    *result = is_simplex_in_bin(simplex_x, simplex_y, bin);
+    *result = is_simplex_in_bin(simplex_x, simplex_y, bin, dim);
 }
 
 kernel void reduce_simplex_buffer_test(

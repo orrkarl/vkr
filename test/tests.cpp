@@ -1,6 +1,6 @@
-#include "includes.h"
+#include "inc/includes.h"
 
-#include "modules/all_module_tests.h"
+#include "inc/modules/all_module_tests.h"
 
 int main(int argc, char **argv) 
 {

@@ -106,6 +106,26 @@ void screen_from_signed(const SignedScreenPosition pos, const ScreenDimension di
 
 // ----------------------------------------------------------------------------
 
+// -------------------------------------- Debugging -------------------------------------- 
+
+#ifdef _DEBUG
+    #define DEBUG_MESSAGE(msg) printf(msg)
+    #define DEBUG_MESSAGE1(msg, arg1) printf(msg, arg1)
+    #define DEBUG_MESSAGE2(msg, arg1, arg2) printf(msg, arg1, arg2)
+    #define DEBUG_MESSAGE3(msg, arg1, arg2, arg3) printf(msg, arg1, arg2, arg3)
+    #define DEBUG_MESSAGE4(msg, arg1, arg2, arg3, arg4) printf(msg, arg1, arg2, arg3, arg4)
+    #define DEBUG_MESSAGE5(msg, arg1, arg2, arg3, arg4, arg5) printf(msg, arg1, arg2, arg3, arg4, arg5)
+#else
+    #define DEBUG_MESSAGE(msg) 
+    #define DEBUG_MESSAGE1(msg, arg1)
+    #define DEBUG_MESSAGE2(msg, arg1, arg2) 
+    #define DEBUG_MESSAGE3(msg, arg1, arg2, arg3) 
+    #define DEBUG_MESSAGE4(msg, arg1, arg2, arg3, arg4)
+    #define DEBUG_MESSAGE5(msg, arg1, arg2, arg3, arg4, arg5)     
+#endif // _DEBUG
+
+// ----------------------------------------------------------------------------
+
 // -------------------------------------- Draw -------------------------------------- 
 
 void apply_fragment_full(const Fragment fragment, const ScreenDimension dim, FrameBuffer* frame)

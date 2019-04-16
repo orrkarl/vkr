@@ -1,4 +1,6 @@
-#include "../includes.h"
+#pragma once
+
+#include <inc/includes.h>
 
 #include <base/Module.h>
 #include <kernels/base.cl.h>
@@ -9,29 +11,6 @@ using namespace nr;
 using namespace nr::__internal;
 using namespace testing;
 
-class SimplexInBinParams
-{
-public:
-    cl_int init(cl::CommandQueue queue) { return CL_SUCCESS; }
-    
-    cl_int load(cl::Kernel kernel)
-    {
-        cl_int err = CL_SUCCESS;
-        if ((err = kernel.setArg(0, simplices.getBuffer())) != CL_SUCCESS) return err;
-        if ((err = kernel.setArg(1, width)) != CL_SUCCESS) return err;
-        if ((err = kernel.setArg(2, height)) != CL_SUCCESS) return err;
-        if ((err = kernel.setArg(3, x)) != CL_SUCCESS) return err;
-        if ((err = kernel.setArg(4, y)) != CL_SUCCESS) return err;
-        return kernel.setArg(5, result.getBuffer());
-    }
-
-    Buffer simplices = Buffer(Type::FLOAT);
-    NRuint width;
-    NRuint height;
-    NRuint x;
-    NRuint y;
-    Buffer result = Buffer(Type::BOOL);
-};
 
 class ReduceSimplexBufferParams
 {
@@ -94,24 +73,6 @@ void extractNDCPosition(const NRuint simplexCount, const Simplex<dim>* buffer, N
     }
 }
 
-TEST(Binning, Compilation)
-{
-    cl_int err = CL_SUCCESS; 
-
-    Module production({clcode::base, clcode::bin_rasterizer}, "-cl-std=CL2.0 -Werror -D RENDER_DIMENSION=3", &err);
-    ASSERT_EQ(CL_SUCCESS, err);
-
-    Module testing({clcode::base, clcode::bin_rasterizer}, "-cl-std=CL2.0 -Werror -D _TEST_BINNING -D RENDER_DIMENSION=5 -D SIMPLEX_TEST_COUNT=3", &err);
-    ASSERT_EQ(CL_SUCCESS, err);
-
-    auto log = production.getBuildLog(&err);
-    ASSERT_EQ(CL_SUCCESS, err);
-    ASSERT_EQ("", log) << "Compiling production code failed:\n" << log;
-
-    log = testing.getBuildLog(&err);
-    ASSERT_EQ(CL_SUCCESS, err);
-    ASSERT_EQ("", log) << "Compiling testing code failed:\n" << log;
-}
 
 TEST(Binning, ReduceSimplexBuffer)
 {
@@ -119,7 +80,7 @@ TEST(Binning, ReduceSimplexBuffer)
     const NRuint simplexCount = 3;
     const NRuint offset = 2;
 
-    const char options_fmt[] = "-cl-std=CL2.0 -Werror -D _TEST_BINNING -D RENDER_DIMENSION=%d -D SIMPLEX_TEST_COUNT=%d";
+    const char options_fmt[] = "-cl-std=CL2.0 -Werror -D _DEBUG -D _TEST_BINNING -D RENDER_DIMENSION=%d -D SIMPLEX_TEST_COUNT=%d";
     char options[sizeof(options_fmt) * 2];
     memset(options, 0, sizeof(options));
 
@@ -164,3 +125,4 @@ TEST(Binning, ReduceSimplexBuffer)
 
     ASSERT_THAT(h_actual, ElementsAreArray(h_expected, sizeof(h_expected) / sizeof(NRfloat)));
 }
+
