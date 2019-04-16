@@ -3,6 +3,10 @@
 namespace nr
 {
 
+std::ostream& operator<<(std::ostream& os, const Error& error)
+{
+	return os << (NRint) error;
+}
 
 namespace type
 {

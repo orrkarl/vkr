@@ -6,14 +6,12 @@ namespace nr
 namespace __internal
 {
 
-const NRuint BinRasterizerParams::ZERO = 0;
 const cl_bool F = CL_FALSE;
 
 cl_int BinRasterizerParams::init(cl::CommandQueue queue)
 {
     return queue.enqueueWriteBuffer(m_hasOverflow.getBuffer(), CL_FALSE, 0, sizeof(cl_bool), &F);
 }
-
 
 cl_int BinRasterizerParams::load(cl::Kernel kernel)
 {

@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <cmath>
+#include <stdio.h>
 
 #include <GL/glew.h>
 
@@ -67,6 +68,9 @@ enum class NR_SHARED_EXPORT Error : NRint
 	
 	UNKNOWN_ERROR
 };
+
+
+std::ostream& operator<<(std::ostream& os, const Error& error);
 
 namespace error
 {
