@@ -120,7 +120,7 @@ kernel void bin_rasterize(
     if (!get_global_id(0) && !get_global_id(1))
     {
         atomic_init(&total_batch_index, 0);
-        DEBUG2_ONCE("Group count: (%d, %d)\n", get_num_groups(0), get_num_groups(1));
+        DEBUG2_ONCE("Screen dim: (%d, %d)\n", dim.width, dim.height);
     }
 
     if (is_init_manager)
