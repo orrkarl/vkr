@@ -42,15 +42,11 @@ bool is_simplex_in_bin(const generic float x[RENDER_DIMENSION], const generic fl
     bool result = false;
     uint curr_x, curr_y;
 
-    DEBUG4_ONCE("first 2 points: (%f, %f), (%f, %f)\n", x[0], y[0], x[1], y[1]);
-    DEBUG2_ONCE("Screen dim: (%d, %d)\n", dim.width, dim.height);
-
     __attribute__((opencl_unroll_hint))
     for (uint j = 0; j < RENDER_DIMENSION; ++j)
     {
         curr_x = axis_screen_from_ndc(x[j], dim.width);
         curr_y = axis_screen_from_ndc(y[j], dim.height);
-        DEBUG2_ONCE("processing point (%d, %d)\n", curr_x, curr_y);
         result |= is_point_in_bin(curr_x, curr_y, bin);
     }
     return result;
@@ -120,7 +116,6 @@ kernel void bin_rasterize(
     if (!get_global_id(0) && !get_global_id(1))
     {
         atomic_init(&total_batch_index, 0);
-        DEBUG2_ONCE("Screen dim: (%d, %d)\n", dim.width, dim.height);
     }
 
     if (is_init_manager)
@@ -148,21 +143,15 @@ kernel void bin_rasterize(
 
         if (*has_overflow)
         {
-            DEBUG_MESSAGE("An overflowing queue was detected\n");
             return;
         }
         
         // no more batches to process, this work group has no more work to do
         if (current_batch_index >= total_simplex_count)
         {
-            DEBUG_MESSAGE2("all batches proccessed, leaving: current - %d, max - %d\n", current_batch_index, total_simplex_count);
             return;
         }
-        else
-        {
-            DEBUG_MESSAGE1("processing batch %d\n", current_batch_index);
-        }
-
+        
         batch_actual_size = min((uint) BATCH_COUNT, total_simplex_count - current_batch_index);
 
         // Copying x values of each point
@@ -179,14 +168,12 @@ kernel void bin_rasterize(
                     dim))
             {   
                 bin_queues[current_queue_index++] = current_batch_index + i;
-                DEBUG_MESSAGE3("simplex in bin (%d, %d): %d\n", index_x, index_y, i);
             }
 
             // An overflowing queue was detected
             if (current_queue_index >= bin_queue_size + bin_queue_base + 1)
             {
                 *has_overflow = true;
-                DEBUG_MESSAGE3("Overflow detected in work group (%d, %d) at index %d\n", index_x, index_y, i);
                 break;
             }
         }
