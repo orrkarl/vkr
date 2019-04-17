@@ -14,8 +14,14 @@ namespace __internal
 class BinRasterizerParams
 {
 public:
+
+    static NRuint getTotalBinQueueSize(const NRuint workGroupCount, const ScreenDimension& dim, const NRuint binWidth, const NRuint binHeight, const NRuint binQueueSize)
+    {
+        return workGroupCount * getBinCount(dim, binWidth, binHeight) * binQueueSize * sizeof(NRuint);
+    }
+    
     BinRasterizerParams()
-        : m_binQueues(Type::FLOAT), m_hasOverflow(Type::BOOL), m_simplexData(Type::RAW)
+        : m_binQueues(Type::UINT), m_hasOverflow(Type::BOOL), m_simplexData(Type::FLOAT)
     {
     }
 
@@ -25,11 +31,12 @@ public:
 
     Error allocateBinQueues(const NRuint workGroupCount, const ScreenDimension& dim, const NRuint& binWidth, const NRuint& binHeight, const NRuint binQueueSize)
     {
-        Error ret;
-        ret = m_binQueues.resize(CL_MEM_READ_WRITE, workGroupCount * getBinCount(dim, binWidth, binHeight) * binQueueSize * sizeof(NRuint));
+        Error ret = Error::NO_ERROR;
+        ret = m_binQueues.resize(CL_MEM_READ_WRITE, getTotalBinQueueSize(workGroupCount, dim, binWidth, binHeight, binQueueSize));
         if (error::isFailure(ret)) return ret;
         ret = m_hasOverflow.resize(CL_MEM_READ_WRITE, sizeof(cl_bool));
-
+        if (error::isFailure(ret)) return ret;
+        
         m_binQueueSize = binQueueSize;
         m_dim = dim;
 
@@ -53,8 +60,13 @@ public:
         return ret;
     }
 
+    Buffer getBinQueues()
+    {
+        return m_binQueues;
+    }
+
 private:
-    NRuint getBinCount(const ScreenDimension& dim, const NRuint& binWidth, const NRuint& binHeight)
+    static NRuint getBinCount(const ScreenDimension& dim, const NRuint& binWidth, const NRuint& binHeight)
     {
         NRuint xCount = (NRuint) ceil(((NRfloat) dim.width) / binWidth);
         NRuint yCount = (NRuint) ceil(((NRfloat) dim.height) / binHeight);

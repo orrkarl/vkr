@@ -109,19 +109,39 @@ void screen_from_signed(const SignedScreenPosition pos, const ScreenDimension di
 // -------------------------------------- Debugging -------------------------------------- 
 
 #ifdef _DEBUG
+
     #define DEBUG_MESSAGE(msg) printf(msg)
     #define DEBUG_MESSAGE1(msg, arg1) printf(msg, arg1)
     #define DEBUG_MESSAGE2(msg, arg1, arg2) printf(msg, arg1, arg2)
     #define DEBUG_MESSAGE3(msg, arg1, arg2, arg3) printf(msg, arg1, arg2, arg3)
     #define DEBUG_MESSAGE4(msg, arg1, arg2, arg3, arg4) printf(msg, arg1, arg2, arg3, arg4)
     #define DEBUG_MESSAGE5(msg, arg1, arg2, arg3, arg4, arg5) printf(msg, arg1, arg2, arg3, arg4, arg5)
+
+    // Prints only from the first work item in a work group
+    // Prints once PER GROUP
+    #define DEBUG_ONCE(msg) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg); } else {} 
+    #define DEBUG1_ONCE(msg, arg1) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1); } else {} 
+    #define DEBUG2_ONCE(msg, arg1, arg2) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1, arg2); } else {} 
+    #define DEBUG3_ONCE(msg, arg1, arg2, arg3) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1, arg2, arg3); } else {} 
+    #define DEBUG4_ONCE(msg, arg1, arg2, arg3, arg4) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1, arg2, arg3, arg4); } else {} 
+    #define DEBUG5_ONCE(msg, arg1, arg2, arg3, arg4, arg5) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1, arg2, arg3, arg4, arg5); } else {} 
+
 #else
+
     #define DEBUG_MESSAGE(msg) 
     #define DEBUG_MESSAGE1(msg, arg1)
     #define DEBUG_MESSAGE2(msg, arg1, arg2) 
     #define DEBUG_MESSAGE3(msg, arg1, arg2, arg3) 
     #define DEBUG_MESSAGE4(msg, arg1, arg2, arg3, arg4)
     #define DEBUG_MESSAGE5(msg, arg1, arg2, arg3, arg4, arg5)     
+
+    #define DEBUG_ONCE(msg) 
+    #define DEBUG1_ONCE(msg, arg1) 
+    #define DEBUG2_ONCE(msg, arg1, arg2)
+    #define DEBUG3_ONCE(msg, arg1, arg2, arg3)
+    #define DEBUG4_ONCE(msg, arg1, arg2, arg3, arg4)
+    #define DEBUG5_ONCE(msg, arg1, arg2, arg3, arg4, arg5) 
+
 #endif // _DEBUG
 
 // ----------------------------------------------------------------------------

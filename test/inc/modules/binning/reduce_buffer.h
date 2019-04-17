@@ -30,18 +30,6 @@ public:
     Buffer result = Buffer(Type::BOOL);
 };
 
-template<NRuint Dim>
-struct Point
-{
-    NRfloat values[Dim];
-};
-
-template<NRuint Dim>
-struct Simplex
-{
-    Point<Dim> points[Dim];
-};
-
 template<NRuint dim>
 void generateSimplexData(const NRuint simplexCount, Simplex<dim>* buffer)
 {

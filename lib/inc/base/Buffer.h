@@ -7,8 +7,8 @@ namespace nr
 {
 
 #define CTOR(DataType, DataTypeID)                                                              \
-    Buffer(cl_mem_flags flags, const NRulong& size, DataType* data, Error* err = nullptr)     \
-        : Buffer(flags, size, Type::DataTypeID, data, err)                                    \
+    Buffer(cl_mem_flags flags, const NRulong& size, DataType* data, Error* err = nullptr)       \
+        : Buffer(flags, size, Type::DataTypeID, data, err)                                      \
     {                                                                                           \
     }                                                                                           \
 

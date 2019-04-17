@@ -2,6 +2,8 @@
 
 #include <inc/includes.h>
 
+#include "bin_utils.h"
+
 #include <base/Module.h>
 #include <kernels/base.cl.h>
 #include <kernels/bin_rasterizer.cl.h>
@@ -11,14 +13,6 @@
 using namespace nr;
 using namespace nr::__internal;
 using namespace testing;
-
-struct Bin
-{
-    NRuint width;
-    NRuint height;
-    NRuint x;
-    NRuint y;
-};
 
 class SimplexInBinParams
 {
@@ -42,12 +36,6 @@ public:
     ScreenDimension dim;
     Buffer result = Buffer(Type::BOOL);
 };
-
-void mkSimplexInCoords(const NRuint x, const NRuint y, const ScreenDimension& dim, float* simplex_x, float* simplex_y)
-{
-    simplex_x[0] = 2 * (x + 0.5) / (dim.width - 1) - 1;
-    simplex_y[0] = 2 * (y + 0.5) / (dim.height - 1) - 1;
-}
 
 void testBin(Kernel<SimplexInBinParams> testee, cl::CommandQueue q, const NRuint dimension, const Bin& bin, const ScreenDimension& dim, NRfloat* simplex_x, NRfloat* simplex_y)
 {

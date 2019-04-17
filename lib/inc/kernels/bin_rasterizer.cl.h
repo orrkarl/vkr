@@ -41,11 +41,16 @@ bool is_simplex_in_bin(const generic float x[RENDER_DIMENSION], const generic fl
 {
     bool result = false;
     uint curr_x, curr_y;
+
+    DEBUG4_ONCE("first 2 points: (%f, %f), (%f, %f)\n", x[0], y[0], x[1], y[1]);
+    DEBUG2_ONCE("Screen dim: (%d, %d)\n", dim.width, dim.height);
+
     __attribute__((opencl_unroll_hint))
-    for (uchar j = 0; j < RENDER_DIMENSION; ++j)
+    for (uint j = 0; j < RENDER_DIMENSION; ++j)
     {
         curr_x = axis_screen_from_ndc(x[j], dim.width);
         curr_y = axis_screen_from_ndc(y[j], dim.height);
+        DEBUG2_ONCE("processing point (%d, %d)\n", curr_x, curr_y);
         result |= is_point_in_bin(curr_x, curr_y, bin);
     }
     return result;
@@ -75,7 +80,7 @@ event_t reduce_simplex_buffer(
 
     const uint raw_copy_count = simplex_count * RENDER_DIMENSION; // one for each point in the simplex buffer
 
-    event_t ret = async_work_group_strided_copy(dest_x, src_base, raw_copy_count, RENDER_DIMENSION, 0);      // Copying x values
+    event_t ret = async_work_group_strided_copy(dest_x, src_base, raw_copy_count, RENDER_DIMENSION, 0);  // Copying x values
     return async_work_group_strided_copy(dest_y, src_base + 1, raw_copy_count, RENDER_DIMENSION, ret);   // Copying y values
 }
 
@@ -88,7 +93,7 @@ kernel void bin_rasterize(
     const uint bin_width,
     const uint bin_height,
     const uint bin_queue_size,
-    global atomic_uint* has_overflow,
+    global uint* has_overflow,
     global Index* bin_queues)
 {
     local float reduced_simplices_x[BATCH_COUNT * RENDER_DIMENSION];
@@ -102,16 +107,20 @@ kernel void bin_rasterize(
 
     private event_t batch_acquisition = 0;
     
-    private uchar bin_queue_index = 0;
+    private uint bin_queue_index = 0;
+    private const uint bins_count_x = ceil(((float) dim.width) / bin_width);
+    private const uint bins_count_y = ceil(((float) dim.height) / bin_height);
+    private uint bin_queue_base = bin_queue_size * (bins_count_x * bins_count_y * (get_group_id(1) * get_num_groups(0) + get_group_id(0)) + bins_count_x * index_y + index_x); 
+    private uint current_queue_index  = bin_queue_base + 1;
 
-    private uint bin_queue_base      = get_group_id(0) * bin_queue_size * (ceil(((float) dim.width) / bin_width) * index_y + index_x); 
-    private uint current_queue_index = bin_queue_base + 1;
+    private uint batch_actual_size;
 
     private const Bin current_bin = make_bin(dim, index_x, index_y, bin_width, bin_height);
 
-    if (get_global_id(0) == 0)
+    if (!get_global_id(0) && !get_global_id(1))
     {
         atomic_init(&total_batch_index, 0);
+        DEBUG2_ONCE("Group count: (%d, %d)\n", get_num_groups(0), get_num_groups(1));
     }
 
     if (is_init_manager)
@@ -127,36 +136,58 @@ kernel void bin_rasterize(
 
     while (true)
     {
+        work_group_barrier(CLK_LOCAL_MEM_FENCE);
+
         // Aquire a batch (update the local and global batch index)
         if (is_init_manager)
         {
-            current_batch_index = atomic_fetch_add(&total_batch_index, BATCH_COUNT) - BATCH_COUNT;
+            current_batch_index = atomic_fetch_add(&total_batch_index, BATCH_COUNT);
         }
 
         work_group_barrier(CLK_LOCAL_MEM_FENCE);
 
-        if (atomic_load(has_overflow))
+        if (*has_overflow)
         {
+            DEBUG_MESSAGE("An overflowing queue was detected\n");
             return;
         }
-
+        
         // no more batches to process, this work group has no more work to do
-        if (current_batch_index >= total_simplex_count) return;
+        if (current_batch_index >= total_simplex_count)
+        {
+            DEBUG_MESSAGE2("all batches proccessed, leaving: current - %d, max - %d\n", current_batch_index, total_simplex_count);
+            return;
+        }
+        else
+        {
+            DEBUG_MESSAGE1("processing batch %d\n", current_batch_index);
+        }
+
+        batch_actual_size = min((uint) BATCH_COUNT, total_simplex_count - current_batch_index);
 
         // Copying x values of each point
-        batch_acquisition = reduce_simplex_buffer(simplex_data, BATCH_COUNT, current_batch_index, 0, reduced_simplices_x, reduced_simplices_y);
+        batch_acquisition = reduce_simplex_buffer(simplex_data, batch_actual_size, current_batch_index, 0, reduced_simplices_x, reduced_simplices_y);
         wait_group_events(1, &batch_acquisition);
 
-        for (private uint i = 0; i < BATCH_COUNT; ++i)
+        for (private uint i = 0; i < batch_actual_size; ++i)
         {
-            if (is_simplex_in_bin(reduced_simplices_x + i * RENDER_DIMENSION, reduced_simplices_y + i * RENDER_DIMENSION, current_bin, dim))
-            {
-                bin_queues[current_queue_index++] = i;
+            if (
+                is_simplex_in_bin(
+                    reduced_simplices_x + i * RENDER_DIMENSION, 
+                    reduced_simplices_y + i * RENDER_DIMENSION, 
+                    current_bin, 
+                    dim))
+            {   
+                bin_queues[current_queue_index++] = current_batch_index + i;
+                DEBUG_MESSAGE3("simplex in bin (%d, %d): %d\n", index_x, index_y, i);
             }
 
-            if (current_queue_index >= bin_queue_size)
+            // An overflowing queue was detected
+            if (current_queue_index >= bin_queue_size + bin_queue_base + 1)
             {
-                atomic_exchange(has_overflow, true);
+                *has_overflow = true;
+                DEBUG_MESSAGE3("Overflow detected in work group (%d, %d) at index %d\n", index_x, index_y, i);
+                break;
             }
         }
 
