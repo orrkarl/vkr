@@ -16,7 +16,7 @@ using namespace nr;
 using namespace nr::__internal;
 using namespace testing;
 
-TEST(Binning, BinRasterizer)
+TEST(Binning, Rasterizer)
 {
     cl_int err = CL_SUCCESS; 
     Error error = Error::NO_ERROR;
@@ -75,21 +75,6 @@ TEST(Binning, BinRasterizer)
     ASSERT_EQ(CL_SUCCESS, q.finish());
     ASSERT_FALSE(testee.params.isOverflowing(q, &err));
     ASSERT_EQ(CL_SUCCESS, err);
-
-    for (NRuint i = 0; i < sizeof(h_result) / sizeof(NRuint); i += binQueueSize)
-    {
-        printf("%d ", h_result[i]);
-        for (NRuint j = 1; j < binQueueSize; ++j)
-            printf("%d ", h_result[i + j]);
-    
-        printf("\n");
-    }
-
-    printf("relevnt queue:\n");
-    printf("%d ", destBinQueueBase[0]);
-    for (NRuint j = 1; j < binQueueSize; ++j)
-        printf("%d ", destBinQueueBase[j]);
-    printf("\n");
 
     ASSERT_EQ(0, h_result[0]);  // queue for bin (0, 0) is not empty
     ASSERT_EQ(0, h_result[1]);  // the first simplex is in it
