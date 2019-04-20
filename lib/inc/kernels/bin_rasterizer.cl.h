@@ -84,7 +84,7 @@ event_t reduce_simplex_buffer(
 
 kernel void bin_rasterize(
     const global Simplex* simplex_data,
-    const uint total_simplex_count,
+    const uint simplex_count,
     const ScreenDimension dim,
     const uint bin_width,
     const uint bin_height,
@@ -150,12 +150,12 @@ kernel void bin_rasterize(
         }
         
         // no more batches to process, this work group has no more work to do
-        if (current_batch_index >= total_simplex_count)
+        if (current_batch_index >= simplex_count)
         {
             return;
         }
         
-        batch_actual_size = min((uint) BATCH_COUNT, total_simplex_count - current_batch_index);
+        batch_actual_size = min((uint) BATCH_COUNT, simplex_count - current_batch_index);
 
         // Copying x values of each point
         batch_acquisition = reduce_simplex_buffer(simplex_data, batch_actual_size, current_batch_index, 0, reduced_simplices_x, reduced_simplices_y);
