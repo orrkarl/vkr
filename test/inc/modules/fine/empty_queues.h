@@ -97,6 +97,8 @@ TEST(Fine, EmptyQueues)
     kernel.params.dim = screenDim;
     kernel.params.binQueues = d_binQueues;
     kernel.params.frameBuffer = frame;
+    kernel.params.workGroupCountX = workGroupCount[0];
+    kernel.params.workGroupCountY = workGroupCount[1]; 
 
     kernel.global = cl::NDRange(binQueueCount[0], binQueueCount[1]);
     kernel.local  = cl::NDRange(binQueueCount[0] / workGroupCount[0], binQueueCount[1] / workGroupCount[0]);

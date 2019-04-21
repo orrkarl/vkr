@@ -18,9 +18,9 @@ struct ColorRGB
 {
     NRfloat r, g, b;
 
-    bool operator==(const ColorRGB& other)
+    friend bool operator==(const ColorRGB& self, const ColorRGB& other)
     {
-        return r == other.r && g == other.g && b == other.b;
+        return self.r == other.r && self.g == other.g && self.b == other.b;
     }
 };
 

@@ -33,6 +33,8 @@ public:
     // Bin Queues
     BinQueueConfig binQueueConfig;
     Buffer binQueues;
+    NRuint workGroupCountX;
+    NRuint workGroupCountY;
 
     // Quad queues
     FrameBuffer frameBuffer;
