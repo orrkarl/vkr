@@ -15,8 +15,6 @@ const string base = R"__CODE__(
 
 // -------------------------------------- Types -------------------------------------- 
 
-// #define RENDER_DIMENSION 4
-
 #ifndef RENDER_DIMENSION 
     #error "RENDER_DIMENSION has to be defined!"
 #endif
@@ -120,11 +118,11 @@ void screen_from_signed(const SignedScreenPosition pos, const ScreenDimension di
     // Prints only from the first work item in a work group
     // Prints once PER GROUP
     #define DEBUG_ONCE(msg) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg); } else {} 
-    #define DEBUG1_ONCE(msg, arg1) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1); } else {} 
-    #define DEBUG2_ONCE(msg, arg1, arg2) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1, arg2); } else {} 
-    #define DEBUG3_ONCE(msg, arg1, arg2, arg3) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1, arg2, arg3); } else {} 
-    #define DEBUG4_ONCE(msg, arg1, arg2, arg3, arg4) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1, arg2, arg3, arg4); } else {} 
-    #define DEBUG5_ONCE(msg, arg1, arg2, arg3, arg4, arg5) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1, arg2, arg3, arg4, arg5); } else {} 
+    #define DEBUG_ONCE1(msg, arg1) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1); } else {} 
+    #define DEBUG_ONCE2(msg, arg1, arg2) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1, arg2); } else {} 
+    #define DEBUG_ONCE3(msg, arg1, arg2, arg3) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1, arg2, arg3); } else {} 
+    #define DEBUG_ONCE4(msg, arg1, arg2, arg3, arg4) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1, arg2, arg3, arg4); } else {} 
+    #define DEBUG_ONCE5(msg, arg1, arg2, arg3, arg4, arg5) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1, arg2, arg3, arg4, arg5); } else {} 
 
 #else
 
@@ -136,11 +134,11 @@ void screen_from_signed(const SignedScreenPosition pos, const ScreenDimension di
     #define DEBUG_MESSAGE5(msg, arg1, arg2, arg3, arg4, arg5)     
 
     #define DEBUG_ONCE(msg) 
-    #define DEBUG1_ONCE(msg, arg1) 
-    #define DEBUG2_ONCE(msg, arg1, arg2)
-    #define DEBUG3_ONCE(msg, arg1, arg2, arg3)
-    #define DEBUG4_ONCE(msg, arg1, arg2, arg3, arg4)
-    #define DEBUG5_ONCE(msg, arg1, arg2, arg3, arg4, arg5) 
+    #define DEBUG_ONCE1(msg, arg1) 
+    #define DEBUG_ONCE2(msg, arg1, arg2)
+    #define DEBUG_ONCE3(msg, arg1, arg2, arg3)
+    #define DEBUG_ONCE4(msg, arg1, arg2, arg3, arg4)
+    #define DEBUG_ONCE5(msg, arg1, arg2, arg3, arg4, arg5) 
 
 #endif // _DEBUG
 

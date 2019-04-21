@@ -25,10 +25,8 @@ TEST(Binning, RasterizerOverflow)
     const NRuint simplexCount = 400;
 
     const NRuint workGroupCount = 2;
-    const NRuint binWidth = 2;
-    const NRuint binHeight = 2;
     const ScreenDimension screenDim = {4, 10};
-    const NRuint binQueueSize = 10;
+    const BinQueueConfig config = {32, 32, 10};
 
     const auto q = cl::CommandQueue::getDefault();
 
@@ -53,8 +51,12 @@ TEST(Binning, RasterizerOverflow)
     Buffer d_simplices(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, simplexCount * sizeof(Simplex<dim>), (float*) h_simplices, &error);
     ASSERT_PRED1(error::isSuccess, error);
 
-    ASSERT_PRED1(error::isSuccess, testee.params.allocateBinQueues(workGroupCount, screenDim, binWidth, binHeight, binQueueSize));
+    Buffer d_overflow(CL_MEM_READ_WRITE, sizeof(cl_bool), nullptr, &error);
+    ASSERT_PRED1(error::isSuccess, error);
+
+    ASSERT_PRED1(error::isSuccess, testee.params.allocateBinQueues(workGroupCount, screenDim, config));
     testee.params.configureSimplexBuffer(d_simplices, simplexCount);
+    testee.params.setOverflowBuffer(d_overflow);
 
     testee.global = cl::NDRange(workGroupCount * screenDim.width, 1);
     testee.local  = cl::NDRange(screenDim.width, screenDim.height);

@@ -3,13 +3,20 @@
 #include "../general/predefs.h"
 #include "../base/Buffer.h"
 #include "../base/Kernel.h"
-#include "../rendering/RenderState.h"
+#include "../rendering/Render.h"
 
 namespace nr
 {
 
 namespace __internal
 {
+
+struct BinQueueConfig
+{
+    NRuint binWidth;
+    NRuint binHeight;
+    NRuint queueSize;
+};
 
 class BinRasterizerParams
 {
@@ -21,27 +28,23 @@ public:
     }
     
     BinRasterizerParams()
-        : m_binQueues(Type::UINT), m_hasOverflow(Type::BOOL), m_simplexData(Type::FLOAT)
     {
     }
 
-    cl_int init(cl::CommandQueue queue);
+    cl_int init(cl::CommandQueue queue) { return CL_SUCCESS; }
 
     cl_int load(cl::Kernel kernel);
 
-    Error allocateBinQueues(const NRuint workGroupCount, const ScreenDimension& dim, const NRuint& binWidth, const NRuint& binHeight, const NRuint binQueueSize)
+    Error allocateBinQueues(const NRuint workGroupCount, const ScreenDimension& dim, const BinQueueConfig& config)
     {
         Error ret = Error::NO_ERROR;
-        ret = m_binQueues.resize(CL_MEM_READ_WRITE, getTotalBinQueueSize(workGroupCount, dim, binWidth, binHeight, binQueueSize));
+        ret = m_binQueues.resize(CL_MEM_READ_WRITE, getTotalBinQueueSize(workGroupCount, dim, config.binWidth, config.binHeight, config.queueSize));
         if (error::isFailure(ret)) return ret;
         ret = m_hasOverflow.resize(CL_MEM_READ_WRITE, sizeof(cl_bool));
         if (error::isFailure(ret)) return ret;
         
-        m_binQueueSize = binQueueSize;
         m_dim = dim;
-
-        m_binWidth = binWidth;
-        m_binHeight = binHeight;
+        m_binQueueConfig = config;
 
         return ret;
     }
@@ -52,17 +55,21 @@ public:
         m_simplexCount = count;
     }
 
-    NRbool isOverflowing(cl::CommandQueue queue, cl_int* err = nullptr)
-    {
-        cl_bool ret;
-        cl_int error = queue.enqueueReadBuffer(m_hasOverflow.getBuffer(), CL_TRUE, 0, sizeof(cl_bool), &ret);
-        if (error != CL_SUCCESS && err != nullptr) *err = error;
-        return ret;
-    }
-
     Buffer getBinQueues()
     {
         return m_binQueues;
+    }
+
+    void setOverflowBuffer(Buffer overflow)
+    {
+        m_hasOverflow = overflow;
+    }
+
+    NRbool isOverflowing(cl::CommandQueue q, cl_int* err)
+    {
+        NRbool ret = false;
+        if (err != nullptr) *err = q.enqueueReadBuffer(m_hasOverflow.getBuffer(), CL_TRUE, 0, sizeof(cl_bool), &ret);
+        return ret;
     }
 
 private:
@@ -73,18 +80,12 @@ private:
         return xCount * yCount;
     }
 
-    static const NRuint ZERO;
-
     // Screen Dimensions
     ScreenDimension m_dim;
 
     // Bin Queues Data
-    NRuint m_binQueueSize;
+    BinQueueConfig m_binQueueConfig;
     Buffer m_binQueues;
-
-    // Bin data
-    NRuint m_binWidth;
-    NRuint m_binHeight;
 
     // Simplex data
     Buffer m_simplexData;

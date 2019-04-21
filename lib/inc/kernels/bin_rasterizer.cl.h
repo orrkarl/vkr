@@ -15,10 +15,10 @@ const string bin_rasterizer = R"__CODE__(
 
 // -------------------------------------- Types and defines -------------------------------------- 
 
-// DON'T CHANGE THIS - SOME VARS ARE byte INSTEAD OF int BEACUSE OF THIS SMALL VALUE
+// DON'T CHANGE THIS 
 #define BATCH_COUNT (256)
 
-global atomic_uint total_batch_index;
+global atomic_uint g_batch_index;
 
 typedef struct _Bin
 {
@@ -27,6 +27,13 @@ typedef struct _Bin
     uint x;
     uint y;
 } Bin;
+
+typedef struct _BinQueueConfig
+{
+    uint bin_width;
+    uint bin_height;
+    uint queue_size;
+} BinQueueConfig;
 
 // ----------------------------------------------------------------------------
 
@@ -86,9 +93,7 @@ kernel void bin_rasterize(
     const global Simplex* simplex_data,
     const uint simplex_count,
     const ScreenDimension dim,
-    const uint bin_width,
-    const uint bin_height,
-    const uint bin_queue_size,
+    const BinQueueConfig config,
     global uint* has_overflow,
     global Index* bin_queues)
 {
@@ -107,18 +112,19 @@ kernel void bin_rasterize(
     private event_t batch_acquisition = 0;
     
     private uint bin_queue_index = 0;
-    private const uint bins_count_x = ceil(((float) screenDim.width) / bin_width);
-    private const uint bins_count_y = ceil(((float) screenDim.height) / bin_height);
-    private uint bin_queue_base = bin_queue_size * (bins_count_x * bins_count_y * (get_group_id(1) * get_num_groups(0) + get_group_id(0)) + bins_count_x * index_y + index_x); 
+    private const uint bins_count_x = ceil(((float) screenDim.width) / config.bin_width);
+    private const uint bins_count_y = ceil(((float) screenDim.height) / config.bin_height);
+    private uint bin_queue_base = config.queue_size * (bins_count_x * bins_count_y * (get_group_id(1) * get_num_groups(0) + get_group_id(0)) + bins_count_x * index_y + index_x); 
     private uint current_queue_index  = bin_queue_base + 1;
 
     private uint batch_actual_size;
 
-    private const Bin current_bin = make_bin(screenDim, index_x, index_y, bin_width, bin_height);
+    private const Bin current_bin = make_bin(screenDim, index_x, index_y, config.bin_width, config.bin_height);
 
     if (!get_global_id(0) && !get_global_id(1))
     {
-        atomic_init(&total_batch_index, 0);
+        atomic_init(&g_batch_index, 0);
+        *has_overflow = false;
     }
 
     if (is_init_manager)
@@ -139,7 +145,7 @@ kernel void bin_rasterize(
         // Aquire a batch (update the local and global batch index)
         if (is_init_manager)
         {
-            current_batch_index = atomic_fetch_add(&total_batch_index, BATCH_COUNT);
+            current_batch_index = atomic_fetch_add(&g_batch_index, BATCH_COUNT);
         }
 
         work_group_barrier(CLK_LOCAL_MEM_FENCE);
@@ -174,7 +180,7 @@ kernel void bin_rasterize(
             }
 
             // An overflowing queue was detected
-            if (current_queue_index >= bin_queue_size + bin_queue_base + 1)
+            if (current_queue_index >= config.queue_size + bin_queue_base + 1)
             {
                 *has_overflow = true;
                 break;
@@ -182,7 +188,7 @@ kernel void bin_rasterize(
         }
 
         bin_queues[bin_queue_base] = current_queue_index == bin_queue_base + 1;
-        if (current_queue_index != bin_queue_base + 1 + bin_queue_size)
+        if (current_queue_index != bin_queue_base + 1 + config.queue_size)
         {
             bin_queues[current_queue_index] = 0;
         }

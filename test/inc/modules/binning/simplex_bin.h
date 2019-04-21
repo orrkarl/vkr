@@ -8,7 +8,7 @@
 #include <kernels/base.cl.h>
 #include <kernels/bin_rasterizer.cl.h>
 #include <base/Buffer.h>
-#include <rendering/RenderState.h>
+#include <rendering/Render.h>
 
 using namespace nr;
 using namespace nr::__internal;
@@ -30,11 +30,11 @@ public:
         return kernel.setArg(argc++, result.getBuffer());
     }
 
-    Buffer simplex_x = Buffer(Type::FLOAT);
-    Buffer simplex_y = Buffer(Type::FLOAT);
+    Buffer simplex_x;
+    Buffer simplex_y;
     Bin bin;
     ScreenDimension dim;
-    Buffer result = Buffer(Type::BOOL);
+    Buffer result;
 };
 
 void testBin(Kernel<SimplexInBinParams> testee, cl::CommandQueue q, const NRuint dimension, const Bin& bin, const ScreenDimension& dim, NRfloat* simplex_x, NRfloat* simplex_y)

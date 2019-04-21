@@ -25,9 +25,9 @@ public:
         return kernel.setArg(2, result.getBuffer());
     }
 
-    Buffer simplices = Buffer(Type::FLOAT);
+    Buffer simplices;
     NRuint offset;
-    Buffer result = Buffer(Type::BOOL);
+    Buffer result;
 };
 
 template<NRuint dim>
@@ -93,7 +93,7 @@ TEST(Binning, ReduceSimplexBuffer)
 
     Buffer d_simplex(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_simplices_raw), (float*) h_simplices_raw, &error);
     ASSERT_PRED1(error::isSuccess, error);
-    Buffer d_result(CL_MEM_WRITE_ONLY, 2 * simplicesSize / dim, Type::FLOAT, &error);
+    Buffer d_result(CL_MEM_WRITE_ONLY, 2 * simplicesSize / dim, &error);
     ASSERT_PRED1(error::isSuccess, error);
     
     Kernel<ReduceSimplexBufferParams> test = code.makeKernel<ReduceSimplexBufferParams>("reduce_simplex_buffer_test", &err);

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <inc/includes.h>
-#include <rendering/RenderState.h>
+#include <rendering/Render.h>
 
 using namespace nr;
 using namespace testing;
