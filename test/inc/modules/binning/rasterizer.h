@@ -30,7 +30,7 @@ TEST(Binning, Rasterizer)
     const ScreenDimension screenDim = {64, 64};
     const BinQueueConfig config = {32, 32, 10};
 
-    NRuint h_result[BinRasterizerParams::getTotalBinQueueSize(workGroupCount, screenDim, config.binWidth, config.binHeight, config.queueSize) / sizeof(NRuint)];
+    NRuint h_result[BinRasterizerParams::getTotalBinQueueSize(workGroupCount, screenDim, config) / sizeof(NRuint)];
 
     NRbool isOverflowing = false;
 
