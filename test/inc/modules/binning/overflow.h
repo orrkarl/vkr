@@ -69,7 +69,7 @@ TEST(Binning, RasterizerOverflow)
     testee.local  = cl::NDRange(screenDim.width, screenDim.height);
 
     ASSERT_EQ(CL_SUCCESS, testee(q));
-    ASSERT_EQ(CL_SUCCESS, q.enqueueReadBuffer(d_overflow, CL_FALSE, 0, sizeof(cl_bool), &isOverflowing));
+    ASSERT_EQ(CL_SUCCESS, q.enqueueReadBuffer(d_overflow, CL_FALSE, 0, sizeof(isOverflowing), &isOverflowing));
     ASSERT_EQ(CL_SUCCESS, q.finish());
     ASSERT_TRUE(isOverflowing);
     ASSERT_EQ(CL_SUCCESS, err);

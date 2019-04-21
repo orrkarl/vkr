@@ -75,6 +75,7 @@ TEST(Binning, Rasterizer)
     testee.params.simplexData = d_simplices;
     testee.params.simplexCount = simplexCount;
     testee.params.hasOverflow = d_overflow;
+    testee.params.binQueues = d_binQueues;
 
     testee.global = cl::NDRange(workGroupCount * binCountX, binCountY);
     testee.local  = cl::NDRange(binCountX, binCountY);

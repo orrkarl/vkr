@@ -88,7 +88,7 @@ kernel void bin_rasterize(
     const uint simplex_count,
     const ScreenDimension dim,
     const BinQueueConfig config,
-    global uint* has_overflow,
+    global bool* has_overflow,
     global Index* bin_queues)
 {
     local float reduced_simplices_x[BATCH_COUNT * RENDER_DIMENSION];
