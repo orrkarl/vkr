@@ -28,6 +28,8 @@ TEST(Binning, RasterizerOverflow)
     const ScreenDimension screenDim = {4, 10};
     const BinQueueConfig config = {32, 32, 10};
 
+    NRbool isOverflowing = false;
+
     const auto q = cl::CommandQueue::getDefault();
 
     Simplex<dim> h_simplices[simplexCount];
@@ -54,15 +56,21 @@ TEST(Binning, RasterizerOverflow)
     Buffer d_overflow(CL_MEM_READ_WRITE, sizeof(cl_bool), nullptr, &error);
     ASSERT_PRED1(error::isSuccess, error);
 
-    ASSERT_PRED1(error::isSuccess, testee.params.allocateBinQueues(workGroupCount, screenDim, config));
-    testee.params.configureSimplexBuffer(d_simplices, simplexCount);
-    testee.params.setOverflowBuffer(d_overflow);
+    Buffer d_binQueues(CL_MEM_READ_WRITE, BinRasterizerParams::getTotalBinQueueSize(workGroupCount, screenDim, config), &error);
+    ASSERT_PRED1(error::isSuccess, error);
+
+    testee.params.binQueueConfig = config;
+    testee.params.dimension = screenDim;
+    testee.params.simplexData = d_simplices;
+    testee.params.simplexCount = simplexCount;
+    testee.params.hasOverflow = d_overflow;
 
     testee.global = cl::NDRange(workGroupCount * screenDim.width, 1);
     testee.local  = cl::NDRange(screenDim.width, screenDim.height);
 
     ASSERT_EQ(CL_SUCCESS, testee(q));
+    ASSERT_EQ(CL_SUCCESS, q.enqueueReadBuffer(d_overflow, CL_FALSE, 0, sizeof(cl_bool), &isOverflowing));
     ASSERT_EQ(CL_SUCCESS, q.finish());
-    ASSERT_TRUE(testee.params.isOverflowing(q, &err));
+    ASSERT_TRUE(isOverflowing);
     ASSERT_EQ(CL_SUCCESS, err);
 }

@@ -18,8 +18,6 @@ const string bin_rasterizer = R"__CODE__(
 // DON'T CHANGE THIS 
 #define BATCH_COUNT (256)
 
-global atomic_uint g_batch_index;
-
 typedef struct _Bin
 {
     uint width;
@@ -28,12 +26,6 @@ typedef struct _Bin
     uint y;
 } Bin;
 
-typedef struct _BinQueueConfig
-{
-    uint bin_width;
-    uint bin_height;
-    uint queue_size;
-} BinQueueConfig;
 
 // ----------------------------------------------------------------------------
 
@@ -88,6 +80,8 @@ event_t reduce_simplex_buffer(
 }
 
 // ----------------------------------------------------------------------------
+
+global atomic_uint g_batch_index;
 
 kernel void bin_rasterize(
     const global Simplex* simplex_data,

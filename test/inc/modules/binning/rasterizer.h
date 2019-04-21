@@ -32,6 +32,8 @@ TEST(Binning, Rasterizer)
 
     NRuint h_result[BinRasterizerParams::getTotalBinQueueSize(workGroupCount, screenDim, config.binWidth, config.binHeight, config.queueSize) / sizeof(NRuint)];
 
+    NRbool isOverflowing = false;
+
     const NRuint binCountX = ceil(((float) screenDim.width) / config.binWidth);
     const NRuint binCountY = ceil(((float) screenDim.height) / config.binHeight);
     const NRuint destinationBinX = 1;
@@ -62,16 +64,26 @@ TEST(Binning, Rasterizer)
     Buffer d_simplices(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, simplexCount * sizeof(Simplex<dim>), (NRfloat*) h_simplices, &error);
     ASSERT_PRED1(error::isSuccess, error);
 
-    ASSERT_PRED1(error::isSuccess, testee.params.allocateBinQueues(workGroupCount, screenDim, config));
-    testee.params.configureSimplexBuffer(d_simplices, simplexCount);
+    Buffer d_overflow(CL_MEM_READ_WRITE, sizeof(cl_bool), nullptr, &error);
+    ASSERT_PRED1(error::isSuccess, error);
+
+    Buffer d_binQueues(CL_MEM_READ_WRITE, BinRasterizerParams::getTotalBinQueueSize(workGroupCount, screenDim, config), &error);
+    ASSERT_PRED1(error::isSuccess, error);
+
+    testee.params.binQueueConfig = config;
+    testee.params.dimension = screenDim;
+    testee.params.simplexData = d_simplices;
+    testee.params.simplexCount = simplexCount;
+    testee.params.hasOverflow = d_overflow;
 
     testee.global = cl::NDRange(workGroupCount * binCountX, binCountY);
     testee.local  = cl::NDRange(binCountX, binCountY);
 
     ASSERT_EQ(CL_SUCCESS, testee(q));
-    ASSERT_EQ(CL_SUCCESS, q.enqueueReadBuffer(testee.params.getBinQueues().getBuffer(), CL_FALSE, 0, sizeof(h_result), h_result));
+    ASSERT_EQ(CL_SUCCESS, q.enqueueReadBuffer(d_binQueues, CL_FALSE, 0, sizeof(h_result), h_result));
+    ASSERT_EQ(CL_SUCCESS, q.enqueueReadBuffer(d_overflow, CL_FALSE, 0, sizeof(isOverflowing), &isOverflowing));
     ASSERT_EQ(CL_SUCCESS, q.finish());
-    ASSERT_FALSE(testee.params.isOverflowing(q, &err));
+    ASSERT_FALSE(isOverflowing);
     ASSERT_EQ(CL_SUCCESS, err);
 
     ASSERT_EQ(0, h_result[0]);  // queue for bin (0, 0) is not empty

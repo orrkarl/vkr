@@ -14,7 +14,7 @@ cl_int FineRasterizerParams::load(cl::Kernel kernel)
     if ((err = kernel.setArg(3, binQueueConfig)) != CL_SUCCESS) return err;
     if ((err = kernel.setArg(4, binQueues)) != CL_SUCCESS) return err;
     if ((err = kernel.setArg(5, overflow)) != CL_SUCCESS) return err;
-    return kernel.setArg(6, frameBuffer);
+    return kernel.setArg(6, quadQueues);
 }
 
 }

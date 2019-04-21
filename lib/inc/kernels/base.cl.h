@@ -49,16 +49,28 @@ typedef struct _FrameBuffer
     Depth*          depth;
 } FrameBuffer;
 
-typedef struct _Fragment 
+typedef struct _DepthPixel
 {
-    ColorRGB        color;
-    ScreenPosition  position;
-    Depth           depth;
-    Index           primitive;
-} Fragment;
+    ColorRGB color;
+    Depth    depth;
+} DepthPixel;
+
+typedef struct _Quad
+{
+    DepthPixel top_left, top_right, bottom_left, bottom_right;
+    Index primitive;
+    ScreenPosition position;
+} Quad;
 
 typedef float Point[RENDER_DIMENSION];   // point in n-dimensional space 
 typedef Point Simplex[RENDER_DIMENSION]; // N-1 simplex (rendering is done on an object's surface)
+
+typedef struct _BinQueueConfig
+{
+    uint bin_width;
+    uint bin_height;
+    uint queue_size;
+} BinQueueConfig;
 
 // ----------------------------------------------------------------------------
 
@@ -141,15 +153,6 @@ void screen_from_signed(const SignedScreenPosition pos, const ScreenDimension di
     #define DEBUG_ONCE5(msg, arg1, arg2, arg3, arg4, arg5) 
 
 #endif // _DEBUG
-
-// ----------------------------------------------------------------------------
-
-// -------------------------------------- Draw -------------------------------------- 
-
-void apply_fragment_full(const Fragment fragment, const ScreenDimension dim, FrameBuffer* frame)
-{ 
-    frame->color[index_from_screen(fragment.position, dim)] = fragment.color;
-}
 
 // ----------------------------------------------------------------------------
 
