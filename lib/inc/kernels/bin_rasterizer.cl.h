@@ -132,6 +132,8 @@ kernel void bin_rasterize(
     // wait for GLOBAL batch index initialization
     work_group_barrier(CLK_GLOBAL_MEM_FENCE);
 
+    bin_queues[bin_queue_base] = 1;
+
     while (true)
     {
         work_group_barrier(CLK_LOCAL_MEM_FENCE);
@@ -171,6 +173,7 @@ kernel void bin_rasterize(
                     screenDim))
             {   
                 bin_queues[current_queue_index++] = current_batch_index + i;
+                bin_queues[bin_queue_base] = 0;
             }
 
             // An overflowing queue was detected
@@ -181,7 +184,6 @@ kernel void bin_rasterize(
             }
         }
 
-        bin_queues[bin_queue_base] = current_queue_index == bin_queue_base + 1;
         if (current_queue_index != bin_queue_base + 1 + config.queue_size)
         {
             bin_queues[current_queue_index] = 0;

@@ -34,8 +34,8 @@ TEST(Binning, Rasterizer)
 
     NRbool isOverflowing = false;
 
-    const NRuint binCountX = ceil(((float) screenDim.width) / config.binWidth);
-    const NRuint binCountY = ceil(((float) screenDim.height) / config.binHeight);
+    const NRuint binCountX = ceil(((NRfloat) screenDim.width) / config.binWidth);
+    const NRuint binCountY = ceil(((NRfloat) screenDim.height) / config.binHeight);
     const NRuint destinationBinX = 1;
     const NRuint destinationBinY = 1;
     const NRuint destinationBinQueueRawIndex = config.queueSize * (destinationBinY * binCountX + destinationBinX);

@@ -34,12 +34,8 @@ public:
     BinQueueConfig binQueueConfig;
     Buffer binQueues;
 
-    // Overflow marker
-    Buffer overflow;
-
     // Quad queues
-    Buffer quadQueues;
-    NRuint quadQueueSize;
+    FrameBuffer frameBuffer;
 };
 
 typedef Kernel<FineRasterizerParams> FineRasterizer;
