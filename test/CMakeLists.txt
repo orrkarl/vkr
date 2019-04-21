@@ -1,6 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
-ADD_EXECUTABLE(NrasterTest tests.cpp)
+ADD_EXECUTABLE(NrasterTest 
+	tests.cpp
+	src/includes.cpp)
 
 TARGET_LINK_LIBRARIES(NrasterTest 
 	PRIVATE Nraster

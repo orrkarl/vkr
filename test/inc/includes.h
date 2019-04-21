@@ -19,3 +19,6 @@ struct Simplex
 {
     Point<Dim> points[Dim];
 };
+
+void testCompilation(const char* options, nr::string configurationName, std::initializer_list<nr::string> codes);
+

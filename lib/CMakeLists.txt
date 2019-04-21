@@ -3,15 +3,16 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 # main Nraster library
 
 ADD_LIBRARY(Nraster SHARED
-	src/utils/converters.cpp
-	src/utils/files.cpp
-
 	src/base/Module.cpp
 	src/base/Buffer.cpp
 
+	src/general/predefs.cpp
+	
 	src/pipeline/BinRasterizer.cpp
+	src/pipeline/FineRasterizer.cpp
 
-	src/general/predefs.cpp)
+	src/utils/converters.cpp
+	src/utils/files.cpp)
 
 TARGET_LINK_LIBRARIES(Nraster
 	PRIVATE ${OPENGL_LIBRARIES}
