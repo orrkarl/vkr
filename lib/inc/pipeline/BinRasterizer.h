@@ -68,7 +68,8 @@ public:
     NRbool isOverflowing(cl::CommandQueue q, cl_int* err)
     {
         NRbool ret = false;
-        if (err != nullptr) *err = q.enqueueReadBuffer(m_hasOverflow.getBuffer(), CL_TRUE, 0, sizeof(cl_bool), &ret);
+        auto result = q.enqueueReadBuffer(m_hasOverflow.getBuffer(), CL_TRUE, 0, sizeof(cl_bool), &ret);
+        if (err != nullptr) *err = result;
         return ret;
     }
 
