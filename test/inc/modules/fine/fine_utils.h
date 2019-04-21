@@ -16,7 +16,7 @@ struct Quad
 
 struct ColorRGB
 {
-    NRfloat r, g, b;
+    NRubyte r, g, b;
 
     friend bool operator==(const ColorRGB& self, const ColorRGB& other)
     {

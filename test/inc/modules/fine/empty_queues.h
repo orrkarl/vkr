@@ -19,18 +19,15 @@ using namespace nr;
 using namespace nr::__internal;
 using namespace testing;
 
-void initEmptyBinQueues(const BinQueueConfig& config, const NRuint workGroupCount[2], const NRuint binCount[2], NRuint* binQueues)
+void initEmptyBinQueues(const BinQueueConfig& config, const NRuint workGroupCount, const NRuint binCount[2], NRuint* binQueues)
 {
-    for (NRuint groupY = 0; groupY < workGroupCount[1]; ++groupY)
+    for (NRuint i = 0; i < workGroupCount; ++i)
     {
-        for (NRuint groupX = 0; groupX < workGroupCount[0]; ++groupX)
+        for (NRuint binY = 0; binY < binCount[1]; ++binY)
         {
-            for (NRuint binY = 0; binY < binCount[1]; ++binY)
+            for (NRuint binX = 0; binX < binCount[0]; ++binX)
             {
-                for (NRuint binX = 0; binX < binCount[0]; ++binX)
-                {
-                    binQueues[config.queueSize * (binCount[0] * binCount[1] * (workGroupCount[0] * groupY + groupX) + binCount[0] * binY + binX)] = 1;   
-                }
+                binQueues[config.queueSize * (binCount[0] * binCount[1] * i + binCount[0] * binY + binX)] = 1;   
             }
         }
     }
@@ -65,7 +62,7 @@ TEST(Fine, EmptyQueues)
     ColorRGB h_colorBuffer[screenDim.width * screenDim.height];
 
     NRuint h_binQueues[BinRasterizerParams::getTotalBinQueueSize(workGroupCount[0] * workGroupCount[1], screenDim, binQueueConfig) / sizeof(NRuint)];
-    initEmptyBinQueues(binQueueConfig, workGroupCount, binQueueCount, h_binQueues);
+    initEmptyBinQueues(binQueueConfig, workGroupCount[0] * workGroupCount[1], binQueueCount, h_binQueues);
 
     const char options_fmt[] = "-cl-std=CL2.0 -Werror -D _DEBUG -D _TEST_FINE -D RENDER_DIMENSION=%d";
     char options[sizeof(options_fmt) * 2];
@@ -97,8 +94,7 @@ TEST(Fine, EmptyQueues)
     kernel.params.dim = screenDim;
     kernel.params.binQueues = d_binQueues;
     kernel.params.frameBuffer = frame;
-    kernel.params.workGroupCountX = workGroupCount[0];
-    kernel.params.workGroupCountY = workGroupCount[1]; 
+    kernel.params.workGroupCount = workGroupCount[0] * workGroupCount[1]; 
 
     kernel.global = cl::NDRange(binQueueCount[0], binQueueCount[1]);
     kernel.local  = cl::NDRange(binQueueCount[0] / workGroupCount[0], binQueueCount[1] / workGroupCount[0]);

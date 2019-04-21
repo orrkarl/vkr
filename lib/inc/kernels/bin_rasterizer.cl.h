@@ -18,15 +18,6 @@ const string bin_rasterizer = R"__CODE__(
 // DON'T CHANGE THIS 
 #define BATCH_COUNT (256)
 
-typedef struct _Bin
-{
-    uint width;
-    uint height;
-    uint x;
-    uint y;
-} Bin;
-
-
 // ----------------------------------------------------------------------------
 
 // -------------------------------------- Utilities --------------------------------------

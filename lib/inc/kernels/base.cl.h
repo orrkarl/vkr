@@ -35,6 +35,8 @@ typedef int2 SignedScreenPosition;
 
 typedef float2 NDCPosition;
 
+typedef uchar3 RawColorRGB;
+
 typedef float3 ColorRGB;
 
 typedef float4 ColorRGBA;
@@ -44,15 +46,15 @@ typedef float Depth;
 
 typedef struct _FrameBuffer
 {
-    ColorRGB*       color;
+    RawColorRGB*    color;
     Index*          stencil;
     Depth*          depth;
 } FrameBuffer;
 
 typedef struct _DepthPixel
 {
-    ColorRGB color;
-    Depth    depth;
+    RawColorRGB color;
+    Depth       depth;
 } DepthPixel;
 
 typedef struct _Quad
@@ -61,6 +63,14 @@ typedef struct _Quad
     Index primitive;
     ScreenPosition position;
 } Quad;
+
+typedef struct _Bin
+{
+    uint width;
+    uint height;
+    uint x;
+    uint y;
+} Bin;
 
 typedef float Point[RENDER_DIMENSION];   // point in n-dimensional space 
 typedef Point Simplex[RENDER_DIMENSION]; // N-1 simplex (rendering is done on an object's surface)
@@ -73,6 +83,13 @@ typedef struct _BinQueueConfig
 } BinQueueConfig;
 
 // ----------------------------------------------------------------------------
+
+// -------------------------------------- Globals -------------------------------------- 
+
+#define RED (255, 0, 0)
+
+// ----------------------------------------------------------------------------
+
 
 // -------------------------------------- Utilities -------------------------------------- 
 
