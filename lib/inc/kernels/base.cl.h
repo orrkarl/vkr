@@ -42,7 +42,7 @@ typedef float3 ColorRGB;
 typedef float4 ColorRGBA;
 
 typedef uint  Index;
-typedef float Depth;
+typedef float Depth[RENDER_DIMENSION - 2];
 
 typedef struct _FrameBuffer
 {
@@ -86,7 +86,7 @@ typedef struct _BinQueueConfig
 
 // -------------------------------------- Globals -------------------------------------- 
 
-#define RED (255, 0, 0)
+#define RAW_RED (255, 0, 0)
 
 // ----------------------------------------------------------------------------
 

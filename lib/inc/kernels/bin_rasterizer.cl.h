@@ -125,7 +125,7 @@ kernel void bin_rasterize(
 
     bin_queues[bin_queue_base] = 1;
 
-    while (true)
+    for(;;)
     {
         work_group_barrier(CLK_LOCAL_MEM_FENCE);
 
