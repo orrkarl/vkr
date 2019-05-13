@@ -23,6 +23,10 @@ const string base = R"__CODE__(
     #error "RENDER_DIMENSION has to be at least 3!"
 #endif
 
+#ifndef MAX_WORK_GROUP_COUNT
+    #define MAX_WORK_GROUP_COUNT (16)
+#endif
+
 typedef struct _ScreenDimension
 {
     uint width;
@@ -42,7 +46,7 @@ typedef float3 ColorRGB;
 typedef float4 ColorRGBA;
 
 typedef uint  Index;
-typedef float Depth[RENDER_DIMENSION - 2];
+typedef float Depth;
 
 typedef struct _FrameBuffer
 {
@@ -51,18 +55,13 @@ typedef struct _FrameBuffer
     Depth*          depth;
 } FrameBuffer;
 
-typedef struct _DepthPixel
+typedef struct _Fragment
 {
-    RawColorRGB color;
-    Depth       depth;
-} DepthPixel;
-
-typedef struct _Quad
-{
-    DepthPixel top_left, top_right, bottom_left, bottom_right;
-    Index primitive;
     ScreenPosition position;
-} Quad;
+    RawColorRGB color;
+    Index stencil;
+    Depth depth;
+} Fragment;
 
 typedef struct _Bin
 {
@@ -103,6 +102,11 @@ uint from_continuous(const float continuous)
     return floor(continuous);
 }
 
+float from_discrete(const uint discrete)
+{
+    return discrete + 0.5;
+}
+
 uint axis_screen_from_ndc(const float pos, const uint length)
 {
     return from_continuous((pos + 1) * (length - 1) / 2);
@@ -129,6 +133,17 @@ void screen_from_signed(const SignedScreenPosition pos, const ScreenDimension di
 {
     screen->x = pos.x + dim.width / 2;
     screen->y = pos.y + dim.height / 2;
+}
+
+float axis_ndc_from_screen(const uint pos, const uint length)
+{
+    return from_discrete(pos) * 2 / (length - 1) - 1;
+}
+
+void ndc_from_screen(const ScreenPosition screen, const ScreenDimension dim, NDCPosition* result)
+{
+    result->x = axis_ndc_from_screen(screen.x, dim.width);
+    result->y = axis_ndc_from_screen(screen.y, dim.height);
 }
 
 // ----------------------------------------------------------------------------

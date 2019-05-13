@@ -87,7 +87,7 @@ kernel void bin_rasterize(
     local uint current_batch_index;
 
     // Workaround for that wierd compiler bug
-    private const ScreenDimension screenDim = dim;
+    private const ScreenDimension screen_dim = dim;
     
     private uint index_x = get_local_id(0);
     private uint index_y = get_local_id(1);
@@ -97,14 +97,14 @@ kernel void bin_rasterize(
     private event_t batch_acquisition = 0;
     
     private uint bin_queue_index = 0;
-    private const uint bins_count_x = ceil(((float) screenDim.width) / config.bin_width);
-    private const uint bins_count_y = ceil(((float) screenDim.height) / config.bin_height);
+    private const uint bins_count_x = ceil(((float) screen_dim.width) / config.bin_width);
+    private const uint bins_count_y = ceil(((float) screen_dim.height) / config.bin_height);
     private uint bin_queue_base = config.queue_size * (bins_count_x * bins_count_y * (get_group_id(1) * get_num_groups(0) + get_group_id(0)) + bins_count_x * index_y + index_x); 
     private uint current_queue_index  = bin_queue_base + 1;
 
     private uint batch_actual_size;
 
-    private const Bin current_bin = make_bin(screenDim, index_x, index_y, config.bin_width, config.bin_height);
+    private const Bin current_bin = make_bin(screen_dim, index_x, index_y, config.bin_width, config.bin_height);
 
     if (!get_global_id(0) && !get_global_id(1))
     {
@@ -150,7 +150,6 @@ kernel void bin_rasterize(
         
         batch_actual_size = min((uint) BATCH_COUNT, simplex_count - current_batch_index);
 
-        // Copying x values of each point
         batch_acquisition = reduce_simplex_buffer(simplex_data, batch_actual_size, current_batch_index, 0, reduced_simplices_x, reduced_simplices_y);
         wait_group_events(1, &batch_acquisition);
 
@@ -161,7 +160,7 @@ kernel void bin_rasterize(
                     reduced_simplices_x + i * RENDER_DIMENSION, 
                     reduced_simplices_y + i * RENDER_DIMENSION, 
                     current_bin, 
-                    screenDim))
+                    screen_dim))
             {   
                 bin_queues[current_queue_index++] = current_batch_index + i;
                 bin_queues[bin_queue_base] = 0;
