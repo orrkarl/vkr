@@ -12,6 +12,7 @@ namespace clcode
 {
 
 const string fine_rasterizer = R"__CODE__(
+
 void apply_fragment(
     const Fragment fragment, const uint buffer_index,
     RawColorRGB* color, Depth* depth, Index* stencil)
@@ -37,16 +38,18 @@ void shade(
 
 float area(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2)
 {
-    float2 a = (p1.x - p0.x, p1.y - p0.y);
-    float2 b = (p0.x - p2.x, p0.y - p2.y);
+    float2 a = (float2)(p1.x - p0.x, p1.y - p0.y);
+    float2 b = (float2)(p0.x - p2.x, p0.y - p2.y);
+
     return a.x * b.y - a.y * b.x;
 }
 
 void barycentric2d(const generic Triangle triangle, NDCPosition position, float* result)
 {
-    NDCPosition p0 = (triangle[0][0], triangle[0][1]);
-    NDCPosition p1 = (triangle[1][0], triangle[1][1]);
-    NDCPosition p2 = (triangle[2][0], triangle[2][1]);
+    NDCPosition p0, p1, p2;
+    p0 = (float2)(triangle[0][0], triangle[0][1]);
+    p1 = (float2)(triangle[1][0], triangle[1][1]);
+    p2 = (float2)(triangle[2][0], triangle[2][1]);
     
     float area_total = area(p0, p1, p2);
     

@@ -175,7 +175,6 @@ void ndc_from_screen(const ScreenPosition screen, const ScreenDimension dim, NDC
 #define DEBUG_ONCE4(msg, arg1, arg2, arg3, arg4)        DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1, arg2, arg3, arg4); } else {})
 #define DEBUG_ONCE5(msg, arg1, arg2, arg3, arg4, arg5)  DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1, arg2, arg3, arg4, arg5); } else {})
 
-
 // ----------------------------------------------------------------------------
 
 // -------------------------------------- Testing -------------------------------------- 
