@@ -9,7 +9,7 @@ namespace __internal
 cl_int FineRasterizerParams::load(cl::Kernel kernel)
 {
     cl_int err = CL_SUCCESS;
-    if ((err = kernel.setArg(0, simplexData.getBuffer())) != CL_SUCCESS) return err;
+    if ((err = kernel.setArg(0, triangleData.getBuffer())) != CL_SUCCESS) return err;
     if ((err = kernel.setArg(1, binQueues.getBuffer())) != CL_SUCCESS) return err;
     if ((err = kernel.setArg(2, dim)) != CL_SUCCESS) return err;
     if ((err = kernel.setArg(3, binQueueConfig)) != CL_SUCCESS) return err;

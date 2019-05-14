@@ -35,33 +35,19 @@ void shade(
     apply_fragment(fragment, buffer_index, color, depth, stencil);
 }
 
-void barycentric_reduced(const generic Simplex simplex, NDCPosition position, float* result)
+void barycentric_reduced(const generic Triangle triangle, NDCPosition position, float* result)
 {
-
-}
-
-Depth depth_at_point(const generic Simplex simplex, float* barycentric)
-{
-    Depth ret = 0;
     
-    __attribute__((opencl_unroll_hint))
-    for (uint i = 0; i < RENDER_DIMENSION; ++i)
-    {
-        ret += simplex[i][2] * barycentric[i];
-    }
-
-    return ret;
 }
 
-bool is_point_in_simplex(const NDCPosition position, float* barycentric)
+Depth depth_at_point(const generic Triangle triangle, float* barycentric)
 {
-    bool ret = true;
-    __attribute__((opencl_unroll_hint))
-    for (uint i = 0; i < RENDER_DIMENSION - 1; ++i)
-    {
-        ret &= barycentric[i] >= 0;
-    }
-    return ret;
+    return triangle[0][2] * barycentric[0] + triangle[1][2] * barycentric[1] + triangle[2][2] * barycentric[2];
+}
+
+bool is_point_in_triangle(const NDCPosition position, float* barycentric)
+{
+    return barycentric[0] >= 0 && barycentric[1] >= 0 && barycentric[2] >= 0;
 }
 
 bool is_queue_ended(const Index* queues, uint* indices, uint index)
@@ -92,7 +78,7 @@ uint pick_queue(const Index** queues, uint* indices, const uint work_group_count
 }
 
 kernel void fine_rasterize(
-    const global Simplex* simplex_data,
+    const global Triangle* triangle_data,
     const global Index* bin_queues,
     const ScreenDimension screen_dim,
     const BinQueueConfig config,
@@ -102,7 +88,7 @@ kernel void fine_rasterize(
     global Index* stencil)
 {
     Fragment current_frag;
-    float barycentric[RENDER_DIMENSION];
+    float barycentric[3];
     uint current_queue_elements[MAX_WORK_GROUP_COUNT];
     const Index* current_queue_bases[MAX_WORK_GROUP_COUNT];
 
@@ -147,10 +133,10 @@ kernel void fine_rasterize(
                 
                 ndc_from_screen(current_frag.position, screen_dim, &current_position_ndc);
 
-                barycentric_reduced(simplex_data[current_queue_element], current_position_ndc, barycentric);                
-                if (is_point_in_simplex(current_position_ndc, barycentric))
+                barycentric_reduced(triangle_data[current_queue_element], current_position_ndc, barycentric);                
+                if (is_point_in_triangle(current_position_ndc, barycentric))
                 {
-                    current_frag.depth = depth_at_point(simplex_data[current_queue_element], barycentric);
+                    current_frag.depth = depth_at_point(triangle_data[current_queue_element], barycentric);
                     shade(current_frag, screen_dim, color, depth, stencil);
                 }
             }
@@ -165,28 +151,28 @@ kernel void fine_rasterize(
 #ifdef _TEST_FINE
 
 kernel void shade_test(
-    const global Simplex* simplex_data, const Index simplex_index,
+    const global Triangle* triangle_data, const Index triangle_index,
     const Fragment fragment,
     const ScreenDimension dim,
     global RawColorRGB* color, global Depth* depth, global Index* stencil)
 {
-    shade_test(simplex_data, simplex_index, fragment, dim, color, depth, stencil);
+    shade_test(triangle_data, triangle_index, fragment, dim, color, depth, stencil);
 }
 
-kernel void barycentric_reduced_test(const global Simplex simplex, NDCPosition position, global float* result)
+kernel void barycentric_reduced_test(const global Triangle triangle, NDCPosition position, global float* result)
 {
-    barycentric_reduced(simplex, position, result);
+    barycentric_reduced(triangle, position, result);
 }
 
-kernel void is_point_in_simplex_test(const global Simplex simplex, const ScreenPosition position, const ScreenDimension dim, global bool* result)
+kernel void is_point_in_triangle_test(const global Triangle triangle, const ScreenPosition position, const ScreenDimension dim, global bool* result)
 {
     NDCPosition pos;
     ndc_from_screen(position, dim, &pos);
 
     float barycentric[RENDER_DIMENSION];
-    barycentric_reduced(simplex, pos, barycentric);
+    barycentric_reduced(triangle, pos, barycentric);
 
-    *result = is_point_in_simplex(pos, barycentric);
+    *result = is_point_in_triangle(pos, barycentric);
 }
 
 #endif // _TEST_FINE

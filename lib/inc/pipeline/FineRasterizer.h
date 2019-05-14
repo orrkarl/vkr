@@ -25,7 +25,7 @@ public:
     cl_int load(cl::Kernel kernel);
 
     // Simplex buffer
-    Buffer simplexData;
+    Buffer triangleData;
 
     // Screen Dimensions [size in pixels]
     ScreenDimension dim;

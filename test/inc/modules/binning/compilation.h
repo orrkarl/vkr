@@ -14,6 +14,6 @@ using namespace testing;
 TEST(Binning, Compilation)
 {
     testCompilation("-cl-std=CL2.0 -Werror -D RENDER_DIMENSION=3", "production 3d", {clcode::base, clcode::bin_rasterizer});
-    testCompilation("-cl-std=CL2.0 -Werror -D _DEBUG -D _TEST_BINNING -D RENDER_DIMENSION=5 -D SIMPLEX_TEST_COUNT=3", "debug/testing 5d", {clcode::base, clcode::bin_rasterizer});
+    testCompilation("-cl-std=CL2.0 -Werror -D _DEBUG -D _TEST_BINNING -D RENDER_DIMENSION=5 -D TRIANGLE_TEST_COUNT=3", "debug/testing 5d", {clcode::base, clcode::bin_rasterizer});
 }
 

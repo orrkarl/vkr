@@ -12,7 +12,7 @@ using namespace nr::__internal;
 using namespace testing;
 
 
-class ReduceSimplexBufferParams
+class ReduceTriangleBufferParams
 {
 public:
     cl_int init(cl::CommandQueue queue) { return CL_SUCCESS; }
@@ -20,25 +20,25 @@ public:
     cl_int load(cl::Kernel kernel)
     {
         cl_int err = CL_SUCCESS;
-        if ((err = kernel.setArg(0, simplices.getBuffer())) != CL_SUCCESS) return err;
+        if ((err = kernel.setArg(0, triangles.getBuffer())) != CL_SUCCESS) return err;
         if ((err = kernel.setArg(1, offset)) != CL_SUCCESS) return err;
         return kernel.setArg(2, result.getBuffer());
     }
 
-    Buffer simplices;
+    Buffer triangles;
     NRuint offset;
     Buffer result;
 };
 
 template<NRuint dim>
-void generateSimplexData(const NRuint simplexCount, Simplex<dim>* buffer)
+void generateTriangleData(const NRuint triangleCount, Triangle<dim>* buffer)
 {
-    NRfloat diff = 2.0 / (simplexCount - 1);
+    NRfloat diff = 2.0 / (triangleCount - 1);
     NRfloat base = -1;
 
-    for (NRuint i = 0; i < simplexCount; ++i)
+    for (NRuint i = 0; i < triangleCount; ++i)
     {
-        for (NRuint j = 0; j < dim; ++j)
+        for (NRuint j = 0; j < 3; ++j)
         {
             buffer[i].points[j].values[0] = base + i * diff;
             buffer[i].points[j].values[1] = base + i * diff;
@@ -52,9 +52,9 @@ void generateSimplexData(const NRuint simplexCount, Simplex<dim>* buffer)
 }
 
 template<NRuint dim>
-void extractNDCPosition(const NRuint simplexCount, const Simplex<dim>* buffer, NRfloat* result)
+void extractNDCPosition(const NRuint triangleCount, const Triangle<dim>* buffer, NRfloat* result)
 {
-    for (NRuint i = 0; i < simplexCount * dim; ++i)
+    for (NRuint i = 0; i < triangleCount * 3; ++i)
     {
         result[2 * i] = ((const Point<dim>*) buffer)[i].values[0];
         result[2 * i + 1] = ((const Point<dim>*) buffer)[i].values[1];
@@ -62,17 +62,17 @@ void extractNDCPosition(const NRuint simplexCount, const Simplex<dim>* buffer, N
 }
 
 
-TEST(Binning, ReduceSimplexBuffer)
+TEST(Binning, ReduceTriangleBuffer)
 {
     const NRuint dim = 5;
-    const NRuint simplexCount = 3;
+    const NRuint triangleCount = 3;
     const NRuint offset = 2;
 
-    const char options_fmt[] = "-cl-std=CL2.0 -Werror -D _DEBUG -D _TEST_BINNING -D RENDER_DIMENSION=%d -D SIMPLEX_TEST_COUNT=%d";
+    const char options_fmt[] = "-cl-std=CL2.0 -Werror -D _DEBUG -D _TEST_BINNING -D RENDER_DIMENSION=%d -D TRIANGLE_TEST_COUNT=%d";
     char options[sizeof(options_fmt) * 2];
     memset(options, 0, sizeof(options));
 
-    sprintf(options, options_fmt, dim, simplexCount);
+    sprintf(options, options_fmt, dim, triangleCount);
 
     cl_int err = CL_SUCCESS; 
     Error error = Error::NO_ERROR;
@@ -80,27 +80,27 @@ TEST(Binning, ReduceSimplexBuffer)
     Module code({clcode::base, clcode::bin_rasterizer}, options, &err);
     ASSERT_EQ(CL_SUCCESS, err);
 
-    Simplex<dim> h_simplices_raw[simplexCount + offset];
-    Simplex<dim>* h_simplices = h_simplices_raw + offset;
-    const NRuint simplicesSize = sizeof(h_simplices_raw) - offset * sizeof(Simplex<dim>);
+    Triangle<dim> h_triangles_raw[triangleCount + offset];
+    Triangle<dim>* h_triangles = h_triangles_raw + offset;
+    const NRuint trianglesSize = sizeof(h_triangles_raw) - offset * sizeof(Triangle<dim>);
 
-    generateSimplexData<dim>(simplexCount, h_simplices);
+    generateTriangleData<dim>(triangleCount, h_triangles);
 
-    NRfloat h_expected[simplexCount * dim * 2];
-    extractNDCPosition<dim>(simplexCount, h_simplices, h_expected);
+    NRfloat h_expected[triangleCount * 3 * 2];
+    extractNDCPosition<dim>(triangleCount, h_triangles, h_expected);
 
-    std::vector<NRfloat> h_actual(simplexCount * dim * 2);
+    std::vector<NRfloat> h_actual(triangleCount * 3 * 2);
 
-    Buffer d_simplex(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_simplices_raw), (float*) h_simplices_raw, &error);
+    Buffer d_triangle(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_triangles_raw), (float*) h_triangles_raw, &error);
     ASSERT_PRED1(error::isSuccess, error);
-    Buffer d_result(CL_MEM_WRITE_ONLY, 2 * simplicesSize / dim, &error);
+    Buffer d_result(CL_MEM_WRITE_ONLY, 2 * trianglesSize / dim, &error);
     ASSERT_PRED1(error::isSuccess, error);
     
-    Kernel<ReduceSimplexBufferParams> test = code.makeKernel<ReduceSimplexBufferParams>("reduce_simplex_buffer_test", &err);
+    Kernel<ReduceTriangleBufferParams> test = code.makeKernel<ReduceTriangleBufferParams>("reduce_triangle_buffer_test", &err);
     ASSERT_EQ(CL_SUCCESS, err) << utils::stringFromCLError(err);
 
-    test.params.simplices = d_simplex;
-    test.params.offset    = offset * sizeof(Simplex<dim>) / sizeof(NRfloat);
+    test.params.triangles = d_triangle;
+    test.params.offset    = offset * sizeof(Triangle<dim>) / sizeof(NRfloat);
     test.params.result    = d_result;
     test.local  = cl::NDRange(30);
     test.global = cl::NDRange(1);

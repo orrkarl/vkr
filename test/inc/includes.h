@@ -20,5 +20,11 @@ struct Simplex
     Point<Dim> points[Dim];
 };
 
+template<NRuint dim>
+struct Triangle
+{
+    Point<dim> points[3];
+};
+
 void testCompilation(const char* options, nr::string configurationName, std::initializer_list<nr::string> codes);
 

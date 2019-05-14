@@ -48,8 +48,8 @@ struct BinRasterizerParams
     Buffer binQueues;
 
     // Simplex data
-    Buffer simplexData;
-    NRuint simplexCount;
+    Buffer triangleData;
+    NRuint triangleCount;
 
     // Overflow handling
     Buffer hasOverflow;
