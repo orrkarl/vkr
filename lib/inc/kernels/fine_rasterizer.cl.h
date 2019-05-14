@@ -35,9 +35,24 @@ void shade(
     apply_fragment(fragment, buffer_index, color, depth, stencil);
 }
 
-void barycentric_reduced(const generic Triangle triangle, NDCPosition position, float* result)
+float area(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2)
 {
+    float2 a = (p1.x - p0.x, p1.y - p0.y);
+    float2 b = (p0.x - p2.x, p0.y - p2.y);
+    return a.x * b.y - a.y * b.x;
+}
+
+void barycentric2d(const generic Triangle triangle, NDCPosition position, float* result)
+{
+    NDCPosition p0 = (triangle[0][0], triangle[0][1]);
+    NDCPosition p1 = (triangle[1][0], triangle[1][1]);
+    NDCPosition p2 = (triangle[2][0], triangle[2][1]);
     
+    float area_total = area(p0, p1, p2);
+    
+    result[0] = area(position, p1, p2) / area_total;
+    result[1] = area(p0, position, p2) / area_total;
+    result[2] = area(p0, p1, position) / area_total;
 }
 
 Depth depth_at_point(const generic Triangle triangle, float* barycentric)
@@ -133,7 +148,7 @@ kernel void fine_rasterize(
                 
                 ndc_from_screen(current_frag.position, screen_dim, &current_position_ndc);
 
-                barycentric_reduced(triangle_data[current_queue_element], current_position_ndc, barycentric);                
+                barycentric2d(triangle_data[current_queue_element], current_position_ndc, barycentric);                
                 if (is_point_in_triangle(current_position_ndc, barycentric))
                 {
                     current_frag.depth = depth_at_point(triangle_data[current_queue_element], barycentric);
@@ -159,9 +174,9 @@ kernel void shade_test(
     shade_test(triangle_data, triangle_index, fragment, dim, color, depth, stencil);
 }
 
-kernel void barycentric_reduced_test(const global Triangle triangle, NDCPosition position, global float* result)
+kernel void barycentric2d_test(const global Triangle triangle, NDCPosition position, global float* result)
 {
-    barycentric_reduced(triangle, position, result);
+    barycentric2d(triangle, position, result);
 }
 
 kernel void is_point_in_triangle_test(const global Triangle triangle, const ScreenPosition position, const ScreenDimension dim, global bool* result)
@@ -170,7 +185,7 @@ kernel void is_point_in_triangle_test(const global Triangle triangle, const Scre
     ndc_from_screen(position, dim, &pos);
 
     float barycentric[RENDER_DIMENSION];
-    barycentric_reduced(triangle, pos, barycentric);
+    barycentric2d(triangle, pos, barycentric);
 
     *result = is_point_in_triangle(pos, barycentric);
 }
