@@ -89,6 +89,8 @@ kernel void bin_rasterize(
     global bool* has_overflow,
     global Index* bin_queues)
 {
+    DEBUG(if (get_num_groups(0) * get_num_groups(1) > MAX_WORK_GROUP_COUNT) return);
+
     local float reduced_triangles_x[BATCH_COUNT * RENDER_DIMENSION];
     local float reduced_triangles_y[BATCH_COUNT * RENDER_DIMENSION];
     local uint current_batch_index;

@@ -152,40 +152,29 @@ void ndc_from_screen(const ScreenPosition screen, const ScreenDimension dim, NDC
 // -------------------------------------- Debugging -------------------------------------- 
 
 #ifdef _DEBUG
-
-    #define DEBUG_MESSAGE(msg) printf(msg)
-    #define DEBUG_MESSAGE1(msg, arg1) printf(msg, arg1)
-    #define DEBUG_MESSAGE2(msg, arg1, arg2) printf(msg, arg1, arg2)
-    #define DEBUG_MESSAGE3(msg, arg1, arg2, arg3) printf(msg, arg1, arg2, arg3)
-    #define DEBUG_MESSAGE4(msg, arg1, arg2, arg3, arg4) printf(msg, arg1, arg2, arg3, arg4)
-    #define DEBUG_MESSAGE5(msg, arg1, arg2, arg3, arg4, arg5) printf(msg, arg1, arg2, arg3, arg4, arg5)
-
-    // Prints only from the first work item in a work group
-    // Prints once PER GROUP
-    #define DEBUG_ONCE(msg) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg); } else {} 
-    #define DEBUG_ONCE1(msg, arg1) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1); } else {} 
-    #define DEBUG_ONCE2(msg, arg1, arg2) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1, arg2); } else {} 
-    #define DEBUG_ONCE3(msg, arg1, arg2, arg3) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1, arg2, arg3); } else {} 
-    #define DEBUG_ONCE4(msg, arg1, arg2, arg3, arg4) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1, arg2, arg3, arg4); } else {} 
-    #define DEBUG_ONCE5(msg, arg1, arg2, arg3, arg4, arg5) if (!get_local_id(0) && !get_local_id(1) && !get_local_id(2)) { printf(msg, arg1, arg2, arg3, arg4, arg5); } else {} 
-
+    #define DEBUG(code) code
 #else
-
-    #define DEBUG_MESSAGE(msg) 
-    #define DEBUG_MESSAGE1(msg, arg1)
-    #define DEBUG_MESSAGE2(msg, arg1, arg2) 
-    #define DEBUG_MESSAGE3(msg, arg1, arg2, arg3) 
-    #define DEBUG_MESSAGE4(msg, arg1, arg2, arg3, arg4)
-    #define DEBUG_MESSAGE5(msg, arg1, arg2, arg3, arg4, arg5)     
-
-    #define DEBUG_ONCE(msg) 
-    #define DEBUG_ONCE1(msg, arg1) 
-    #define DEBUG_ONCE2(msg, arg1, arg2)
-    #define DEBUG_ONCE3(msg, arg1, arg2, arg3)
-    #define DEBUG_ONCE4(msg, arg1, arg2, arg3, arg4)
-    #define DEBUG_ONCE5(msg, arg1, arg2, arg3, arg4, arg5) 
-
+    #define DEBUG(code)
 #endif // _DEBUG
+
+#define IS_GROUP_HEAD (!get_local_id(0) && !get_local_id(1) && !get_local_id(2))
+
+#define DEBUG_MESSAGE(msg)                                  DEBUG(printf(msg))
+#define DEBUG_MESSAGE1(msg, arg1)                           DEBUG(printf(msg, arg1))
+#define DEBUG_MESSAGE2(msg, arg1, arg2)                     DEBUG(printf(msg, arg1, arg2))
+#define DEBUG_MESSAGE3(msg, arg1, arg2, arg3)               DEBUG(printf(msg, arg1, arg2, arg3))
+#define DEBUG_MESSAGE4(msg, arg1, arg2, arg3, arg4)         DEBUG(printf(msg, arg1, arg2, arg3, arg4))
+#define DEBUG_MESSAGE5(msg, arg1, arg2, arg3, arg4, arg5)   DEBUG(printf(msg, arg1, arg2, arg3, arg4, arg5))
+
+// Prints only from the first work item in a work group
+// Prints once PER GROUP
+#define DEBUG_ONCE(msg)                                 DEBUG(if (IS_GROUP_HEAD) { printf(msg); } else {})
+#define DEBUG_ONCE1(msg, arg1)                          DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1); } else {}) 
+#define DEBUG_ONCE2(msg, arg1, arg2)                    DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1, arg2); } else {})
+#define DEBUG_ONCE3(msg, arg1, arg2, arg3)              DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1, arg2, arg3); } else {})
+#define DEBUG_ONCE4(msg, arg1, arg2, arg3, arg4)        DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1, arg2, arg3, arg4); } else {})
+#define DEBUG_ONCE5(msg, arg1, arg2, arg3, arg4, arg5)  DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1, arg2, arg3, arg4, arg5); } else {})
+
 
 // ----------------------------------------------------------------------------
 
