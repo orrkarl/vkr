@@ -45,7 +45,7 @@ TEST(Binning, Rasterizer)
 
     const NRuint x = destinationBinX * config.binWidth + config.binWidth / 2;
     const NRuint y = destinationBinY * config.binHeight + config.binHeight / 2;
-    Triangle<dim> h_triangles[triangleCount];
+    Triangle h_triangles[triangleCount];
     mkTriangleInCoords(x, y, screenDim, h_triangles);
     mkTriangleInCoords(x, y, screenDim, h_triangles + 1);
 

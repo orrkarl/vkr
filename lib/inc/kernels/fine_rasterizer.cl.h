@@ -63,7 +63,7 @@ Depth depth_at_point(const generic Triangle triangle, float* barycentric)
     return triangle[0][2] * barycentric[0] + triangle[1][2] * barycentric[1] + triangle[2][2] * barycentric[2];
 }
 
-bool is_point_in_triangle(const NDCPosition position, float* barycentric)
+bool is_point_in_triangle(float* barycentric)
 {
     return barycentric[0] >= 0 && barycentric[1] >= 0 && barycentric[2] >= 0;
 }
@@ -152,7 +152,7 @@ kernel void fine_rasterize(
                 ndc_from_screen(current_frag.position, screen_dim, &current_position_ndc);
 
                 barycentric2d(triangle_data[current_queue_element], current_position_ndc, barycentric);                
-                if (is_point_in_triangle(current_position_ndc, barycentric))
+                if (is_point_in_triangle(barycentric))
                 {
                     current_frag.depth = depth_at_point(triangle_data[current_queue_element], barycentric);
                     shade(current_frag, screen_dim, color, depth, stencil);
@@ -187,10 +187,10 @@ kernel void is_point_in_triangle_test(const global Triangle triangle, const Scre
     NDCPosition pos;
     ndc_from_screen(position, dim, &pos);
 
-    float barycentric[RENDER_DIMENSION];
+    float barycentric[3];
     barycentric2d(triangle, pos, barycentric);
 
-    *result = is_point_in_triangle(pos, barycentric);
+    *result = is_point_in_triangle(barycentric);
 }
 
 #endif // _TEST_FINE

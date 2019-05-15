@@ -32,7 +32,7 @@ TEST(Binning, RasterizerOverflow)
 
     const auto q = cl::CommandQueue::getDefault();
 
-    Triangle<dim> h_triangles[triangleCount];
+    Triangle h_triangles[triangleCount];
     for (NRuint i = 0; i < triangleCount; ++i)
     {
         mkTriangleInCoords(0, 0, screenDim, h_triangles + i);
@@ -50,7 +50,7 @@ TEST(Binning, RasterizerOverflow)
     auto testee = code.makeKernel<BinRasterizerParams>("bin_rasterize", &err);
     ASSERT_EQ(CL_SUCCESS, err);
 
-    Buffer d_triangles(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount * sizeof(Triangle<dim>), (float*) h_triangles, &error);
+    Buffer d_triangles(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount * sizeof(Triangle), (float*) h_triangles, &error);
     ASSERT_PRED1(error::isSuccess, error);
 
     Buffer d_overflow(CL_MEM_READ_WRITE, sizeof(cl_bool), nullptr, &error);

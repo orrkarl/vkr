@@ -15,17 +15,18 @@ struct Bin
     NRuint y;
 };
 
-
-template<NRuint dim>
-void mkTriangleInCoords(const NRuint x, const NRuint y, const ScreenDimension& screenDim, Triangle<dim>* result)
+void mkTriangleInCoords(const NRuint x, const NRuint y, const ScreenDimension& screenDim, Triangle* result)
 {
     result->points[0].values[0] = 2 * (x + 0.5) / (screenDim.width - 1) - 1;
     result->points[0].values[1] = 2 * (y + 0.5) / (screenDim.height - 1) - 1;
-
-    for (NRuint i = 2; i < 3 * dim; ++i)
-    {
-        ((NRfloat*) result)[i] = -1.0f;
-    }
+    
+    result->points[0].values[2] = -1.0f;
+    result->points[1].values[0] = -1.0f;
+    result->points[1].values[1] = -1.0f;
+    result->points[1].values[2] = -1.0f;
+    result->points[2].values[0] = -1.0f;
+    result->points[2].values[1] = -1.0f;
+    result->points[2].values[2] = -1.0f;    
 }
 
 void mkTriangleInCoords(const NRuint x, const NRuint y, const ScreenDimension& dim, float* triangle_x, float* triangle_y)
