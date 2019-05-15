@@ -48,6 +48,22 @@ struct NDCPosition
     NRfloat y;
 };
 
+struct RawColorRGB
+{
+    NRubyte r, g, b;
+};
+
+typedef NRuint Index;
+typedef NRfloat Depth;
+
+struct Fragment
+{
+    ScreenPosition position;
+    RawColorRGB color;
+    Index stencil;
+    Depth depth;
+};
+
 void testCompilation(const char* options, nr::string configurationName, std::initializer_list<nr::string> codes);
 
 

@@ -13,7 +13,6 @@ using namespace nr;
 using namespace nr::__internal;
 using namespace testing;
 
-template<NRuint dim>
 struct PointInTriangleParams
 {
     cl_int init(cl::CommandQueue queue) { return CL_SUCCESS; }
@@ -66,7 +65,7 @@ TEST(Fine, PointInTriangle)
     Module code({clcode::base, clcode::fine_rasterizer}, options, &err);
     ASSERT_EQ(CL_SUCCESS, err);
 
-    auto testee = code.makeKernel<PointInTriangleParams<dim>>("is_point_in_triangle_test", &err);
+    auto testee = code.makeKernel<PointInTriangleParams>("is_point_in_triangle_test", &err);
     ASSERT_EQ(CL_SUCCESS, err);
 
     Buffer d_triangle(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(triangle), &triangle, &error);

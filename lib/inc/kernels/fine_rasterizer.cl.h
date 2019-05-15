@@ -177,11 +177,6 @@ kernel void shade_test(
     shade_test(triangle_data, triangle_index, fragment, dim, color, depth, stencil);
 }
 
-kernel void barycentric2d_test(const global Triangle triangle, NDCPosition position, global float* result)
-{
-    barycentric2d(triangle, position, result);
-}
-
 kernel void is_point_in_triangle_test(const global Triangle triangle, const ScreenPosition position, const ScreenDimension dim, global bool* result)
 {
     NDCPosition pos;
