@@ -73,8 +73,8 @@ event_t reduce_triangle_buffer(
 
     const uint raw_copy_count = triangle_count * 3; // one for each point in the triangle buffer
 
-    event_t ret = async_work_group_strided_copy(dest_x, src_base, raw_copy_count, 3, 0);  // Copying x values
-    return async_work_group_strided_copy(dest_y, src_base + 1, raw_copy_count, 3, ret);   // Copying y values
+    event_t ret = async_work_group_strided_copy(dest_x, src_base, raw_copy_count, RENDER_DIMENSION, 0);  // Copying x values
+    return async_work_group_strided_copy(dest_y, src_base + 1, raw_copy_count, RENDER_DIMENSION, ret);   // Copying y values
 }
 
 // ----------------------------------------------------------------------------
@@ -91,8 +91,8 @@ kernel void bin_rasterize(
 {
     DEBUG(if (get_num_groups(0) * get_num_groups(1) > MAX_WORK_GROUP_COUNT) return);
 
-    local float reduced_triangles_x[BATCH_COUNT * 3];
-    local float reduced_triangles_y[BATCH_COUNT * 3];
+    local float reduced_triangles_x[BATCH_COUNT * RENDER_DIMENSION];
+    local float reduced_triangles_y[BATCH_COUNT * RENDER_DIMENSION];
     local uint current_batch_index;
 
     // Workaround for that wierd compiler bug

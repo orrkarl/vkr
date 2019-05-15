@@ -71,8 +71,8 @@ typedef struct _Bin
     uint y;
 } Bin;
 
-typedef float3 Triangle[3];               // Nth dimensional triangle
-typedef float Point[RENDER_DIMENSION];   // point in n-dimensional space
+typedef float Point[RENDER_DIMENSION];   // point in n-dimensional space 
+typedef Point Triangle[3];               // Nth dimensional triangle
 typedef Point Simplex[RENDER_DIMENSION]; // N-1 simplex (rendering is done on an object's surface)
 
 typedef struct _BinQueueConfig

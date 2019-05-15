@@ -30,7 +30,8 @@ public:
     Buffer result;
 };
 
-void generateTriangleData(const NRuint triangleCount, Triangle* buffer)
+template<NRuint dim>
+void generateTriangleData(const NRuint triangleCount, Triangle<dim>* buffer)
 {
     NRfloat diff = 2.0 / (triangleCount - 1);
     NRfloat base = -1;
@@ -41,17 +42,22 @@ void generateTriangleData(const NRuint triangleCount, Triangle* buffer)
         {
             buffer[i].points[j].values[0] = base + i * diff;
             buffer[i].points[j].values[1] = base + i * diff;
-            buffer[i].points[j].values[2] = -2;
+
+            for (NRuint k = 2; k < dim - 2; ++k)
+            {
+                buffer[i].points[j].values[k] = -2;
+            }
         }
     }
 }
 
-void extractNDCPosition(const NRuint triangleCount, const Triangle* buffer, NRfloat* result)
+template<NRuint dim>
+void extractNDCPosition(const NRuint triangleCount, const Triangle<dim>* buffer, NRfloat* result)
 {
     for (NRuint i = 0; i < triangleCount * 3; ++i)
     {
-        result[2 * i] = ((const Point<3>*) buffer)[i].values[0];
-        result[2 * i + 1] = ((const Point<3>*) buffer)[i].values[1];
+        result[2 * i] = ((const Point<dim>*) buffer)[i].values[0];
+        result[2 * i + 1] = ((const Point<dim>*) buffer)[i].values[1];
     }
 }
 
@@ -74,27 +80,27 @@ TEST(Binning, ReduceTriangleBuffer)
     Module code({clcode::base, clcode::bin_rasterizer}, options, &err);
     ASSERT_EQ(CL_SUCCESS, err);
 
-    Triangle h_triangles_raw[triangleCount + offset];
-    Triangle* h_triangles = h_triangles_raw + offset;
-    const NRuint trianglesSize = sizeof(h_triangles_raw) - offset * sizeof(Triangle);
+    Triangle<dim> h_triangles_raw[triangleCount + offset];
+    Triangle<dim>* h_triangles = h_triangles_raw + offset;
+    const NRuint trianglesSize = sizeof(h_triangles_raw) - offset * sizeof(Triangle<dim>);
 
-    generateTriangleData(triangleCount, h_triangles);
+    generateTriangleData<dim>(triangleCount, h_triangles);
 
     NRfloat h_expected[triangleCount * 3 * 2];
-    extractNDCPosition(triangleCount, h_triangles, h_expected);
+    extractNDCPosition<dim>(triangleCount, h_triangles, h_expected);
 
     std::vector<NRfloat> h_actual(triangleCount * 3 * 2);
 
     Buffer d_triangle(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_triangles_raw), (float*) h_triangles_raw, &error);
     ASSERT_PRED1(error::isSuccess, error);
-    Buffer d_result(CL_MEM_WRITE_ONLY, 2 * trianglesSize / 3, &error);
+    Buffer d_result(CL_MEM_WRITE_ONLY, 2 * trianglesSize / dim, &error);
     ASSERT_PRED1(error::isSuccess, error);
     
     Kernel<ReduceTriangleBufferParams> test = code.makeKernel<ReduceTriangleBufferParams>("reduce_triangle_buffer_test", &err);
     ASSERT_EQ(CL_SUCCESS, err) << utils::stringFromCLError(err);
 
     test.params.triangles = d_triangle;
-    test.params.offset    = offset * sizeof(Triangle) / sizeof(NRfloat);
+    test.params.offset    = offset * sizeof(Triangle<dim>) / sizeof(NRfloat);
     test.params.result    = d_result;
     test.local  = cl::NDRange(30);
     test.global = cl::NDRange(1);
