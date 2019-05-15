@@ -10,28 +10,6 @@
 using namespace nr;
 using namespace nr::__internal;
 
-struct ScreenPosition
-{
-    NRint x;
-    NRint y;
-
-    bool operator==(const ScreenPosition& other) const
-    {
-        return x == other.x && y == other.y;
-    }
-
-    friend std::ostream& operator<<(std::ostream& os, const ScreenPosition& pos)
-    {
-        return os << "ScreenPosition{" << pos.x << ", " << pos.y << "}";
-    }
-};
-
-struct NDCPosition
-{
-    NRfloat x;
-    NRfloat y;
-};
-
 struct ScreenFromNDCParams
 {   
 public:

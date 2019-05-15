@@ -113,6 +113,11 @@ uint axis_screen_from_ndc(const float pos, const uint length)
     return from_continuous((pos + 1) * (length - 1) / 2);
 }
 
+float axis_ndc_from_screen(const uint pos, const uint length)
+{
+    return from_discrete(pos) * 2 / (length - 1) - 1;
+}
+
 void screen_from_ndc(const NDCPosition ndc, const ScreenDimension dim, ScreenPosition* screen)
 {
     screen->x = axis_screen_from_ndc(ndc.x, dim.width);
@@ -134,11 +139,6 @@ void screen_from_signed(const SignedScreenPosition pos, const ScreenDimension di
 {
     screen->x = pos.x + dim.width / 2;
     screen->y = pos.y + dim.height / 2;
-}
-
-float axis_ndc_from_screen(const uint pos, const uint length)
-{
-    return from_discrete(pos) * 2 / (length - 1) - 1;
 }
 
 void ndc_from_screen(const ScreenPosition screen, const ScreenDimension dim, NDCPosition* result)

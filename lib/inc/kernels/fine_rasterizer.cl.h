@@ -187,7 +187,7 @@ kernel void is_point_in_triangle_test(const global Triangle triangle, const Scre
     NDCPosition pos;
     ndc_from_screen(position, dim, &pos);
 
-    float barycentric[RENDER_DIMENSION];
+    float barycentric[3];
     barycentric2d(triangle, pos, barycentric);
 
     *result = is_point_in_triangle(barycentric);

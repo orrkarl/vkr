@@ -8,16 +8,16 @@
 const float TOLERANCE = 0.00001f;
 const double DOUBLE_TOLERANCE = 0.000000001;
 
-template<NRuint Dim>
+template<NRuint dim>
 struct Point
 {
-    NRfloat values[Dim];
+    NRfloat values[dim];
 };
 
-template<NRuint Dim>
+template<NRuint dim>
 struct Simplex
 {
-    Point<Dim> points[Dim];
+    Point<dim> points[dim];
 };
 
 template<NRuint dim>
@@ -26,5 +26,28 @@ struct Triangle
     Point<dim> points[3];
 };
 
+struct ScreenPosition
+{
+    NRuint x;
+    NRuint y;
+
+    bool operator==(const ScreenPosition& other) const
+    {
+        return x == other.x && y == other.y;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const ScreenPosition& pos)
+    {
+        return os << "ScreenPosition{" << pos.x << ", " << pos.y << "}";
+    }
+};
+
+struct NDCPosition
+{
+    NRfloat x;
+    NRfloat y;
+};
+
 void testCompilation(const char* options, nr::string configurationName, std::initializer_list<nr::string> codes);
+
 
