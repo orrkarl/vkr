@@ -52,7 +52,7 @@ TEST(Fine, PointInTriangle)
     const ScreenPosition belowBottom = { (NRuint) (0.5 * 1920), (NRuint) (0.1 * 1080) };
     const ScreenPosition justInside  = { (NRuint) (0.65 * 1920), (NRuint) (0.4 * 1080) };
 
-    cl_bool h_result;
+    cl_bool h_result = CL_FALSE;
 
     auto q = cl::CommandQueue::getDefault();
 
@@ -71,7 +71,7 @@ TEST(Fine, PointInTriangle)
     Buffer d_triangle(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(triangle), &triangle, &error);
     ASSERT_PRED1(error::isSuccess, error);
 
-    Buffer d_result(CL_MEM_WRITE_ONLY, sizeof(cl_bool), &error);
+    Buffer d_result(CL_MEM_READ_WRITE, sizeof(cl_bool), &error);
     ASSERT_PRED1(error::isSuccess, error);
 
     testee.params.triangle = d_triangle;

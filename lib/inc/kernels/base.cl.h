@@ -27,7 +27,7 @@ const string base = R"__CODE__(
     #define MAX_WORK_GROUP_COUNT (16)
 #endif
 
-typedef struct __attribute__ ((packed)) _ScreenDimension
+typedef struct _ScreenDimension
 {
     uint width;
     uint height;
@@ -46,19 +46,19 @@ typedef float4 ColorRGBA;
 typedef uint  Index;
 typedef float Depth;
 
-typedef struct __attribute__ ((packed)) _RawColorRGB
+typedef struct _RawColorRGB
 {
     uchar r, g, b;
 } RawColorRGB;
 
-typedef struct __attribute__ ((packed)) _FrameBuffer
+typedef struct _FrameBuffer
 {
     RawColorRGB*    color;
     Index*          stencil;
     Depth*          depth;
 } FrameBuffer;
 
-typedef struct __attribute__ ((packed)) _Fragment
+typedef struct _Fragment
 {
     ScreenPosition position;
     RawColorRGB color;
@@ -66,7 +66,7 @@ typedef struct __attribute__ ((packed)) _Fragment
     Depth depth;
 } Fragment;
 
-typedef struct __attribute__ ((packed)) _Bin
+typedef struct _Bin
 {
     uint width;
     uint height;
@@ -78,7 +78,7 @@ typedef float Point[RENDER_DIMENSION];   // point in n-dimensional space
 typedef Point Triangle[3];               // Nth dimensional triangle
 typedef Point Simplex[RENDER_DIMENSION]; // N-1 simplex (rendering is done on an object's surface)
 
-typedef struct __attribute__ ((packed)) _BinQueueConfig
+typedef struct _BinQueueConfig
 {
     uint bin_width;
     uint bin_height;
