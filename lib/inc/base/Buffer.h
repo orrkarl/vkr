@@ -18,12 +18,6 @@ public:
     }
 
     Buffer(cl_mem_flags flags, const NRulong& size, void* data = nullptr, Error* error = nullptr);
-    
-    template<typename T>
-    Buffer(cl_mem_flags flags, const NRulong& count, T* data, Error* err = nullptr)
-        : Buffer(flags, count * sizeof(T), (void*) data, err)
-    {
-    }
 
     cl::Buffer getBuffer() const { return m_buffer; }
 

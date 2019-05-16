@@ -6,17 +6,14 @@
 namespace nr
 {
 
-struct NR_SHARED_EXPORT ScreenDimension
+struct ScreenDimension
 {
-    NRuint width;
-    NRuint height;
+    NRuint width, height;
 };
 
-struct NR_SHARED_EXPORT FrameBuffer
+struct FrameBuffer
 {
-    Buffer color;
-    Buffer stencil;
-    Buffer depth;
+    Buffer color, depth, stencil;
 };
 
 }

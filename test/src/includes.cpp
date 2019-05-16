@@ -16,3 +16,8 @@ void testCompilation(const char* options, string configurationName, std::initial
     ASSERT_EQ(CL_SUCCESS, err);
     ASSERT_EQ("", log) << "Compiling " << configurationName << " failed:" << ":\n" << log;
 }
+
+NRuint index_from_screen(const ScreenPosition& position, const nr::ScreenDimension& dim)
+{
+    return position.y * dim.width + position.x;
+}

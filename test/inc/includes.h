@@ -2,6 +2,7 @@
 #include <gmock/gmock.h>
 
 #include <general/predefs.h>
+#include <rendering/Render.h>
 
 #pragma once
 
@@ -51,6 +52,16 @@ struct NDCPosition
 struct RawColorRGB
 {
     NRubyte r, g, b;
+
+    bool operator==(const RawColorRGB& other) const
+    {
+        return r == other.r && g == other.g && b == other.b;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const RawColorRGB& color)
+    {
+        return os << "(r=" << (NRuint) color.r << ", g=" << (NRuint) color.g << ", b=" << (NRuint) color.b << ')';
+    }
 };
 
 typedef NRuint Index;
@@ -64,6 +75,6 @@ struct Fragment
     Depth depth;
 };
 
+NRuint index_from_screen(const ScreenPosition& position, const nr::ScreenDimension& dim);
+
 void testCompilation(const char* options, nr::string configurationName, std::initializer_list<nr::string> codes);
-
-

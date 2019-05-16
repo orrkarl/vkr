@@ -27,7 +27,7 @@ const string base = R"__CODE__(
     #define MAX_WORK_GROUP_COUNT (16)
 #endif
 
-typedef struct _ScreenDimension
+typedef struct __attribute__ ((packed)) _ScreenDimension
 {
     uint width;
     uint height;
@@ -39,8 +39,6 @@ typedef int2 SignedScreenPosition;
 
 typedef float2 NDCPosition;
 
-typedef uchar3 RawColorRGB;
-
 typedef float3 ColorRGB;
 
 typedef float4 ColorRGBA;
@@ -48,14 +46,19 @@ typedef float4 ColorRGBA;
 typedef uint  Index;
 typedef float Depth;
 
-typedef struct _FrameBuffer
+typedef struct __attribute__ ((packed)) _RawColorRGB
+{
+    uchar r, g, b;
+} RawColorRGB;
+
+typedef struct __attribute__ ((packed)) _FrameBuffer
 {
     RawColorRGB*    color;
     Index*          stencil;
     Depth*          depth;
 } FrameBuffer;
 
-typedef struct _Fragment
+typedef struct __attribute__ ((packed)) _Fragment
 {
     ScreenPosition position;
     RawColorRGB color;
@@ -63,7 +66,7 @@ typedef struct _Fragment
     Depth depth;
 } Fragment;
 
-typedef struct _Bin
+typedef struct __attribute__ ((packed)) _Bin
 {
     uint width;
     uint height;
@@ -75,7 +78,7 @@ typedef float Point[RENDER_DIMENSION];   // point in n-dimensional space
 typedef Point Triangle[3];               // Nth dimensional triangle
 typedef Point Simplex[RENDER_DIMENSION]; // N-1 simplex (rendering is done on an object's surface)
 
-typedef struct _BinQueueConfig
+typedef struct __attribute__ ((packed)) _BinQueueConfig
 {
     uint bin_width;
     uint bin_height;
@@ -86,7 +89,11 @@ typedef struct _BinQueueConfig
 
 // -------------------------------------- Globals -------------------------------------- 
 
-#define RAW_RED (255, 0, 0)
+#define RAW_RED ((RawColorRGB) {255, 0, 0})
+
+#define r(vec) (vec.x)
+#define g(vec) (vec.y)
+#define b(vec) (vec.z)
 
 // ----------------------------------------------------------------------------
 
@@ -159,21 +166,26 @@ void ndc_from_screen(const ScreenPosition screen, const ScreenDimension dim, NDC
 
 #define IS_GROUP_HEAD (!get_local_id(0) && !get_local_id(1) && !get_local_id(2))
 
-#define DEBUG_MESSAGE(msg)                                  DEBUG(printf(msg))
-#define DEBUG_MESSAGE1(msg, arg1)                           DEBUG(printf(msg, arg1))
-#define DEBUG_MESSAGE2(msg, arg1, arg2)                     DEBUG(printf(msg, arg1, arg2))
-#define DEBUG_MESSAGE3(msg, arg1, arg2, arg3)               DEBUG(printf(msg, arg1, arg2, arg3))
-#define DEBUG_MESSAGE4(msg, arg1, arg2, arg3, arg4)         DEBUG(printf(msg, arg1, arg2, arg3, arg4))
-#define DEBUG_MESSAGE5(msg, arg1, arg2, arg3, arg4, arg5)   DEBUG(printf(msg, arg1, arg2, arg3, arg4, arg5))
+#define DEBUG_MESSAGE(msg)                                              DEBUG(printf(msg))
+#define DEBUG_MESSAGE1(msg, arg1)                                       DEBUG(printf(msg, arg1))
+#define DEBUG_MESSAGE2(msg, arg1, arg2)                                 DEBUG(printf(msg, arg1, arg2))
+#define DEBUG_MESSAGE3(msg, arg1, arg2, arg3)                           DEBUG(printf(msg, arg1, arg2, arg3))
+#define DEBUG_MESSAGE4(msg, arg1, arg2, arg3, arg4)                     DEBUG(printf(msg, arg1, arg2, arg3, arg4))
+#define DEBUG_MESSAGE5(msg, arg1, arg2, arg3, arg4, arg5)               DEBUG(printf(msg, arg1, arg2, arg3, arg4, arg5))
+#define DEBUG_MESSAGE6(msg, arg1, arg2, arg3, arg4, arg5, arg6)         DEBUG(printf(msg, arg1, arg2, arg3, arg4, arg5, arg6))
+#define DEBUG_MESSAGE7(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7)   DEBUG(printf(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7))
 
 // Prints only from the first work item in a work group
 // Prints once PER GROUP
-#define DEBUG_ONCE(msg)                                 DEBUG(if (IS_GROUP_HEAD) { printf(msg); } else {})
-#define DEBUG_ONCE1(msg, arg1)                          DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1); } else {}) 
-#define DEBUG_ONCE2(msg, arg1, arg2)                    DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1, arg2); } else {})
-#define DEBUG_ONCE3(msg, arg1, arg2, arg3)              DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1, arg2, arg3); } else {})
-#define DEBUG_ONCE4(msg, arg1, arg2, arg3, arg4)        DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1, arg2, arg3, arg4); } else {})
-#define DEBUG_ONCE5(msg, arg1, arg2, arg3, arg4, arg5)  DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1, arg2, arg3, arg4, arg5); } else {})
+#define DEBUG_ONCE(msg)                                             DEBUG(if (IS_GROUP_HEAD) { printf(msg); } else {})
+#define DEBUG_ONCE1(msg, arg1)                                      DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1); } else {}) 
+#define DEBUG_ONCE2(msg, arg1, arg2)                                DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1, arg2); } else {})
+#define DEBUG_ONCE3(msg, arg1, arg2, arg3)                          DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1, arg2, arg3); } else {})
+#define DEBUG_ONCE4(msg, arg1, arg2, arg3, arg4)                    DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1, arg2, arg3, arg4); } else {})
+#define DEBUG_ONCE5(msg, arg1, arg2, arg3, arg4, arg5)              DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1, arg2, arg3, arg4, arg5); } else {})
+#define DEBUG_ONCE6(msg, arg1, arg2, arg3, arg4, arg5, arg6)        DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1, arg2, arg3, arg4, arg5, arg6); } else {})
+#define DEBUG_ONCE7(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7)  DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7); } else {})
+#define DEBUG_ONCE8(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)  DEBUG(if (IS_GROUP_HEAD) { printf(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8); } else {})
 
 // ----------------------------------------------------------------------------
 

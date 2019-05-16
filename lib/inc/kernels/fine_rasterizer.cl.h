@@ -13,27 +13,22 @@ namespace clcode
 
 const string fine_rasterizer = R"__CODE__(
 
-void apply_fragment(
-    const Fragment fragment, const uint buffer_index,
-    RawColorRGB* color, Depth* depth, Index* stencil)
-{    
-    if (depth[buffer_index] > fragment.depth)
-    {
-        color[buffer_index] = fragment.color;
-        stencil[buffer_index] = fragment.stencil;
-    }
-}
-
 void shade(
     Fragment fragment,
     const ScreenDimension dim,
     RawColorRGB* color, Depth* depth, Index* stencil)
 {
-    uint buffer_index = index_from_screen(fragment.position, dim);
-
-    fragment.color = RAW_RED; // replace this when you get to the actual shading scheme
+    uint buffer_index;
+    buffer_index = index_from_screen(fragment.position, dim);
+        
+    if (fragment.depth < depth[buffer_index])
+    {
+        fragment.color = RAW_RED; // replace this when you get to the actual shading scheme
     
-    apply_fragment(fragment, buffer_index, color, depth, stencil);
+        color[buffer_index] = fragment.color;
+        stencil[buffer_index] = fragment.stencil;
+        depth[buffer_index] = fragment.depth;
+    }
 }
 
 float area(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2)
@@ -169,12 +164,11 @@ kernel void fine_rasterize(
 #ifdef _TEST_FINE
 
 kernel void shade_test(
-    const global Triangle* triangle_data, const Index triangle_index,
     const Fragment fragment,
     const ScreenDimension dim,
     global RawColorRGB* color, global Depth* depth, global Index* stencil)
 {
-    shade_test(triangle_data, triangle_index, fragment, dim, color, depth, stencil);
+    shade(fragment, dim, color, depth, stencil);
 }
 
 kernel void is_point_in_triangle_test(const global Triangle triangle, const ScreenPosition position, const ScreenDimension dim, global bool* result)
