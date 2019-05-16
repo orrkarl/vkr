@@ -15,10 +15,6 @@ namespace __internal
 class FineRasterizerParams
 {
 public:
-    static NRuint getQuadSize()
-    {
-        return 4 * sizeof(cl_float) + sizeof(cl_uint) + 2 * sizeof(cl_uint); 
-    }
 
     cl_int init(cl::CommandQueue q) { return CL_SUCCESS; }
 

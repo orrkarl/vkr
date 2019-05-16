@@ -93,6 +93,26 @@ Error fromCLError(const cl_int& err)
     }
 }
 
+const string stringFromNRError(const Error& err)
+{
+    switch(err)
+    {
+        case Error::NO_ERROR: return "NO_ERROR";
+	    case Error::INVALID_TYPE: return "INVALID_TYPE";
+	    case Error::INVALID_VALUE: return "INVALID_VALUE";
+	    case Error::INVALID_OPERATION: return "INVALID_OPERATION";
+	    case Error::HOST_OUT_OF_MEMORY: return "HOST_OUT_OF_MEMORY";
+	    case Error::DEVIDE_OUT_OF_MEMORY: return "DEVIDE_OUT_OF_MEMORY";
+	    case Error::INVALID_COMPILER_OPTIONS: return "INVALID_COMPILER_OPTIONS";
+	    case Error::COMPILATION_FAILURE: return "COMPILATION_FAILURE";
+	    case Error::INVALID_COMPILER: return "INVALID_COMPILER";
+	    case Error::INVALID_ARGS: return "INVALID_ARGS";
+        case Error::UNKNOWN_ERROR: return "UNKNOWN_ERROR";
+
+        default: return "Unrecognized error value";
+    }
+}
+
 const string stringFromCLError(const cl_int& error)
 {
 switch(error){

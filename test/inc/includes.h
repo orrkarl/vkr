@@ -2,6 +2,7 @@
 #include <gmock/gmock.h>
 
 #include <general/predefs.h>
+#include <utils/converters.h>
 #include <rendering/Render.h>
 
 #pragma once
@@ -78,3 +79,9 @@ struct Fragment
 NRuint index_from_screen(const ScreenPosition& position, const nr::ScreenDimension& dim);
 
 void testCompilation(const char* options, nr::string configurationName, std::initializer_list<nr::string> codes);
+
+NDCPosition ndcFromScreen(const ScreenPosition screen, const nr::ScreenDimension& screenDim);
+
+testing::AssertionResult isSuccess(const cl_int& err);
+
+testing::AssertionResult isSuccess(const nr::Error& err);

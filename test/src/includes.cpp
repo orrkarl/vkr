@@ -21,3 +21,24 @@ NRuint index_from_screen(const ScreenPosition& position, const nr::ScreenDimensi
 {
     return position.y * dim.width + position.x;
 }
+
+NDCPosition ndcFromScreen(const ScreenPosition screen, const nr::ScreenDimension& screenDim)
+{
+    NDCPosition ndc;
+    ndc.x = (screen.x + 0.5) * 2 / (screenDim.width - 1) - 1;
+    ndc.y = (screen.y + 0.5) * 2 / (screenDim.height - 1) - 1;
+    return ndc;
+}
+
+testing::AssertionResult isSuccess(const cl_int& err)
+{
+    if (err == CL_SUCCESS) return testing::AssertionSuccess();
+    else return testing::AssertionFailure() << nr::utils::stringFromCLError(err) << " (" << err << ')';
+}
+
+testing::AssertionResult isSuccess(const nr::Error& err)
+{
+    if (nr::error::isSuccess(err)) return testing::AssertionSuccess();
+    else return testing::AssertionFailure() << nr::utils::stringFromNRError(err) << " (" << err << ')';
+}
+

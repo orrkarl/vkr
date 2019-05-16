@@ -45,7 +45,6 @@ TEST(Fine, ShadeTest)
     const NRchar options_fmt[] = "-cl-std=CL2.0 -Werror -D _DEBUG -D _TEST_FINE -D RENDER_DIMENSION=%d";
     NRchar options[sizeof(options_fmt) * 2];
     memset(options, 0, sizeof(options));
-
     sprintf(options, options_fmt, dim);
 
     RawColorRGB h_color[screenDim.width * screenDim.height];
