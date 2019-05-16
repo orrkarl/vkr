@@ -116,6 +116,26 @@ TEST(Fine, Rasterizer)
         std::cout << std::endl;
     }
 
+    std::cout << "Depth: \n";
+    for (NRuint y = 0; y < screenDim.height; ++y)
+    {
+        for (NRuint x = 0; x < screenDim.width; ++x)
+        {
+            std::cout << h_depthBuffer[y * screenDim.width + x] << ' ';
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << "Stencil: \n";
+    for (NRuint y = 0; y < screenDim.height; ++y)
+    {
+        for (NRuint x = 0; x < screenDim.width; ++x)
+        {
+            std::cout << h_stencilBuffer[y * screenDim.width + x] << ' ';
+        }
+        std::cout << std::endl;
+    }
+
     for (NRuint y = 0; y < screenDim.height; y += config.binHeight)
     {
         for (NRuint x = 0; x < screenDim.width; x += config.binWidth)
