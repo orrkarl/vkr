@@ -71,7 +71,7 @@ TEST(Fine, PointInTriangle)
     Buffer d_triangle(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(triangle), &triangle, &error);
     ASSERT_PRED1(error::isSuccess, error);
 
-    Buffer d_result(CL_MEM_READ_WRITE, sizeof(cl_bool), &error);
+    Buffer d_result(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_bool), &h_result, &error);
     ASSERT_PRED1(error::isSuccess, error);
 
     testee.params.triangle = d_triangle;

@@ -15,6 +15,15 @@ using namespace nr;
 using namespace nr::__internal;
 using namespace testing;
 
+void validateFragment(const Fragment& fragment, const ScreenDimension& screenDim, const RawColorRGB* color, const NRfloat* depth, const NRuint* stencil)
+{
+    const NRuint idx = index_from_screen(fragment.position, screenDim);
+
+    ASSERT_EQ(fragment.color, color[idx]);
+    ASSERT_EQ(fragment.depth, depth[idx]);
+    ASSERT_EQ(fragment.stencil, stencil[idx]);
+}
+
 TEST(Fine, Rasterizer)
 {
     Error error = Error::NO_ERROR;
@@ -22,25 +31,28 @@ TEST(Fine, Rasterizer)
 
     const NRuint dim = 5;
 
-    const ScreenDimension screenDim = { 640, 480 };
+    const ScreenDimension screenDim = { 20, 10 };
     const NRuint totalScreenSize = screenDim.width * screenDim.height;
 
-    const BinQueueConfig config = { 32, 32, 256 };
+    const BinQueueConfig config = { 5, 5, 10 };
     const NRuint binCountX = ceil(((NRfloat) screenDim.width) / config.binWidth);
     const NRuint binCountY = ceil(((NRfloat) screenDim.height) / config.binHeight);
     const NRuint totalBinCount = binCountX * binCountY;
     const NRuint totalWorkGroupCount = 4;
-    const NRuint totalBinQueuesSize = totalWorkGroupCount * totalBinCount * (config.queueSize + 1);
+    const NRuint totalBinQueuesSize = totalWorkGroupCount * totalBinCount * (config.queueSize + 1); 
 
     const NRfloat expectedDepth = 0.5;
 
     const NRuint triangleCount = 3 * totalBinCount;
-    std::shared_ptr<Triangle<dim>[]> h_triangles(new Triangle<dim>[triangleCount]);
-    std::shared_ptr<NRuint[]> h_binQueues(new NRuint[totalBinQueuesSize]);
+    std::unique_ptr<Triangle<dim>[]> h_triangles(new Triangle<dim>[triangleCount]);
+    std::unique_ptr<NRuint[]> h_binQueues(new NRuint[totalBinQueuesSize]);
 
-    std::shared_ptr<RawColorRGB[]> h_colorBuffer(new RawColorRGB[totalScreenSize]);
-    std::shared_ptr<NRfloat[]> h_depthBuffer(new NRfloat[totalScreenSize]);
-    std::shared_ptr<NRuint[]> h_stencilBuffer(new NRuint[totalScreenSize]);
+    std::unique_ptr<RawColorRGB[]> h_colorBuffer(new RawColorRGB[totalScreenSize]);
+    std::unique_ptr<NRfloat[]> h_depthBuffer(new NRfloat[totalScreenSize]);
+    std::unique_ptr<NRuint[]> h_stencilBuffer(new NRuint[totalScreenSize]);
+
+    Fragment expected;
+    expected.color = RED;
 
     for (NRuint i = 0; i < totalScreenSize; ++i)
     {
@@ -92,6 +104,27 @@ TEST(Fine, Rasterizer)
     ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.color, CL_FALSE, 0, sizeof(h_colorBuffer), h_colorBuffer.get())));
     ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.depth, CL_FALSE, 0, sizeof(h_depthBuffer), h_depthBuffer.get())));
     ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.stencil, CL_FALSE, 0, sizeof(h_stencilBuffer), h_stencilBuffer.get())));
-    
     ASSERT_TRUE(isSuccess(q.finish()));
+
+    std::cout << "Color: \n";
+    for (NRuint y = 0; y < screenDim.height; ++y)
+    {
+        for (NRuint x = 0; x < screenDim.width; ++x)
+        {
+            std::cout << h_colorBuffer[y * screenDim.width + x] << ' ';
+        }
+        std::cout << std::endl;
+    }
+
+    for (NRuint y = 0; y < screenDim.height; y += config.binHeight)
+    {
+        for (NRuint x = 0; x < screenDim.width; x += config.binWidth)
+        {
+            expected.position.x = x;
+            expected.position.y = y;
+            expected.depth = expectedDepth;
+            expected.stencil = y * binCountX + x + 1;
+            validateFragment(expected, screenDim, h_colorBuffer.get(), h_depthBuffer.get(), h_stencilBuffer.get());
+        }
+    }
 }

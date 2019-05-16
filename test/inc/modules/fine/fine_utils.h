@@ -89,10 +89,9 @@ void fillTriangles(
             bin.x = x * config.binWidth;
             bin.y = y * config.binHeight;
 
-            mkTriangleFullyInBin(screenDim, bin, pow(expectedDepth, 0.5), i, triangles + i);
-            mkTriangleFullyInBin(screenDim, bin, expectedDepth, i + 1, triangles + i + 1);
-            mkTriangleFullyInBin(screenDim, bin, pow(expectedDepth, 0.3), i + 2, triangles + i + 2);
-            i += 3;
+            mkTriangleFullyInBin(screenDim, bin, pow(expectedDepth, 0.5), i, triangles);
+            mkTriangleFullyInBin(screenDim, bin, expectedDepth, i + 1, triangles);
+            mkTriangleFullyInBin(screenDim, bin, pow(expectedDepth, 0.3), i + 2, triangles);
             
             binOffset = (y * binCountX + x) * (config.queueSize + 1);
             currentQueueBase = g * elementsPerGroup + binOffset;
@@ -109,6 +108,8 @@ void fillTriangles(
                 binQueues[currentQueueBase + 4] = 0;
                 g = (i / batchSize) % totalWorkGroupCount;
             }
+
+            i += 3;
         }
     }
 }

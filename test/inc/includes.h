@@ -61,7 +61,7 @@ struct RawColorRGB
 
     friend std::ostream& operator<<(std::ostream& os, const RawColorRGB& color)
     {
-        return os << "(r=" << (NRuint) color.r << ", g=" << (NRuint) color.g << ", b=" << (NRuint) color.b << ')';
+        return os << "(" << (NRuint) color.r << "," << (NRuint) color.g << "," << (NRuint) color.b << ')';
     }
 };
 
