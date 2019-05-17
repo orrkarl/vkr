@@ -13,7 +13,7 @@ struct ScreenDimension
 
 struct FrameBuffer
 {
-    Buffer color, depth, stencil;
+    Buffer color, depth;
 };
 
 }

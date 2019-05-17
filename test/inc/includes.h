@@ -72,7 +72,6 @@ struct Fragment
 {
     ScreenPosition position;
     RawColorRGB color;
-    Index stencil;
     Depth depth;
 };
 
@@ -85,5 +84,3 @@ NDCPosition ndcFromScreen(const ScreenPosition screen, const nr::ScreenDimension
 testing::AssertionResult isSuccess(const cl_int& err);
 
 testing::AssertionResult isSuccess(const nr::Error& err);
-
-

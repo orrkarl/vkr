@@ -15,8 +15,7 @@ cl_int FineRasterizerParams::load(cl::Kernel kernel)
     if ((err = kernel.setArg(3, binQueueConfig)) != CL_SUCCESS) return err;
     if ((err = kernel.setArg(4, workGroupCount)) != CL_SUCCESS) return err;
     if ((err = kernel.setArg(5, frameBuffer.color)) != CL_SUCCESS) return err;
-    if ((err = kernel.setArg(6, frameBuffer.depth)) != CL_SUCCESS) return err;
-    return kernel.setArg(7, frameBuffer.stencil);
+    return kernel.setArg(6, frameBuffer.depth);
 }
 
 }

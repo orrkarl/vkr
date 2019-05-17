@@ -16,7 +16,7 @@ const string fine_rasterizer = R"__CODE__(
 void shade(
     Fragment fragment,
     const ScreenDimension dim,
-    RawColorRGB* color, Depth* depth, Index* stencil)
+    RawColorRGB* color, Depth* depth)
 {
     DEBUG_ONCE3("Shading [(%d, %d), %f]\n", fragment.position.x, fragment.position.y, fragment.depth);
     uint buffer_index;
@@ -28,7 +28,6 @@ void shade(
         fragment.color = RAW_RED; // replace this when you get to the actual shading scheme
     
         color[buffer_index] = fragment.color;
-        stencil[buffer_index] = fragment.stencil;
         depth[buffer_index] = fragment.depth;
 
         DEBUG_ONCE4("ColorBuffer at %d: (%d, %d, %d)\n", buffer_index, fragment.color.r, fragment.color.g, fragment.color.b);
@@ -108,8 +107,7 @@ kernel void fine_rasterize(
     const BinQueueConfig config,
     const uint work_group_count,
     global RawColorRGB* color,
-    global Depth* depth,
-    global Index* stencil)
+    global Depth* depth)
 {
     Fragment current_frag;
     float barycentric[3];
@@ -191,8 +189,7 @@ kernel void fine_rasterize(
                 if (is_point_in_triangle(barycentric))
                 {
                     current_frag.depth = depth_at_point(triangle_data[current_queue_element], barycentric);
-                    current_frag.stencil = current_queue_element;
-                    shade(current_frag, screen_dim, color, depth, stencil);
+                    shade(current_frag, screen_dim, color, depth);
                 }
             }
         }
@@ -208,9 +205,9 @@ kernel void fine_rasterize(
 kernel void shade_test(
     const Fragment fragment,
     const ScreenDimension dim,
-    global RawColorRGB* color, global Depth* depth, global Index* stencil)
+    global RawColorRGB* color, global Depth* depth)
 {
-    shade(fragment, dim, color, depth, stencil);
+    shade(fragment, dim, color, depth);
 }
 
 kernel void is_point_in_triangle_test(const global Triangle triangle, const ScreenPosition position, const ScreenDimension dim, global bool* result)
@@ -221,7 +218,6 @@ kernel void is_point_in_triangle_test(const global Triangle triangle, const Scre
     float barycentric[3];
     barycentric2d(triangle, pos, barycentric);
     *result = is_point_in_triangle(barycentric);
-    printf("Hello\n");
 }
 
 #endif // _TEST_FINE

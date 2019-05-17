@@ -54,7 +54,6 @@ typedef struct _RawColorRGB
 typedef struct _FrameBuffer
 {
     RawColorRGB*    color;
-    Index*          stencil;
     Depth*          depth;
 } FrameBuffer;
 
@@ -62,7 +61,6 @@ typedef struct _Fragment
 {
     ScreenPosition position;
     RawColorRGB color;
-    Index stencil;
     Depth depth;
 } Fragment;
 
