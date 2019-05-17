@@ -73,16 +73,19 @@ uint pick_queue(const Index** queues, uint* indices, const uint work_group_count
     uint current_queue = work_group_count;
     for (uint i = 0; i < work_group_count; ++i)
     {
-        if (current_queue >= work_group_count)
+        if (current_queue >= work_group_count && indices[i] < queue_size)
         {
+            DEBUG_ONCE1("First non-empty queue at %d!\n", i);
             current_queue = i;
             continue;
         }
 
         if (indices[i] < queue_size)
         {
+            DEBUG_ONCE2("Current Queue: %d | i: %d\n", current_queue, i);
             if (queues[i][indices[i]] < queues[current_queue][indices[current_queue]])
             {
+                DEBUG_ONCE("updating current_queue!\n");
                 current_queue = i;
             }
         }
@@ -119,25 +122,44 @@ kernel void fine_rasterize(
     uint current_queue;
     Index current_queue_element;
 
+    DEBUG_ONCE2("Handling bin (%d, %d)\n", x, y);
+
     if (work_group_count >= MAX_WORK_GROUP_COUNT) return;
 
     for (uint i = 0; i < work_group_count; ++i)
     {
         current_queue_bases[i] = bin_queues + bin_queue_offset + i * elements_per_group;
-        if (current_queue_bases[0]) current_queue_elements[i] = config.queue_size + 1;
-        else current_queue_elements[i] = 0;
+        
+        DEBUG_ONCE1("Queue %d:\t", i);
+        for (uint q = 0; q < config.queue_size + 1; ++q)
+        {
+            DEBUG_ONCE1("%d ", current_queue_bases[i][q]);
+        }
+        DEBUG_ONCE("\n");
+
+        if (current_queue_bases[i][0]) 
+        {
+            current_queue_elements[i] = config.queue_size + 1;
+            DEBUG_ONCE1("Queue %d is empty!\n", i);
+        }
+        else
+        {
+            current_queue_elements[i] = 0;
+            DEBUG_ONCE1("Content found in queue %d!\n", i);
+        }
 
         current_queue_bases[i] += 1;
     }
 
-    printf("What %%?\n");
-
     while (true)
     {
         current_queue = pick_queue(current_queue_bases, current_queue_elements, work_group_count, config.queue_size);
+        DEBUG_ONCE1("picked queue: %d\n", current_queue);
         if (current_queue >= work_group_count) break;
         
         current_queue_element = current_queue_bases[current_queue][current_queue_elements[current_queue]];
+        DEBUG_ONCE1("current queue element: %d\n", current_queue_element);
+        return;
 
         for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, frag_x + config.bin_width); ++frag_x)
         {
@@ -181,6 +203,7 @@ kernel void is_point_in_triangle_test(const global Triangle triangle, const Scre
     float barycentric[3];
     barycentric2d(triangle, pos, barycentric);
     *result = is_point_in_triangle(barycentric);
+    printf("Hello\n");
 }
 
 #endif // _TEST_FINE
