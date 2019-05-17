@@ -101,22 +101,44 @@ TEST(Fine, Rasterizer)
     ASSERT_TRUE(isSuccess(q.finish()));
 
     printf("Color: \n");
-    for (NRuint y = 0; y < screenDim.height; ++y)
+    for (NRuint binY = 0; binY < binCountY; ++binY)
     {
-        for (NRuint x = 0; x < screenDim.width; ++x)
+        for (NRuint offsetY = 0; offsetY < config.binHeight; ++offsetY)
         {
-            auto c = h_colorBuffer[y * screenDim.width + x];
-            printf("(%.3d,%d,%d) ", (NRuint) c.r, (NRuint) c.g, (NRuint) c.b);
+            for (NRuint binX = 0; binX < binCountX; ++binX)
+            {
+                for (NRuint offsetX = 0; offsetX < config.binWidth; ++offsetX)
+                {
+                    NRuint x = binX * config.binWidth + offsetX;
+                    NRuint y = binY * config.binHeight + offsetY;
+                    NRuint idx = (screenDim.height - 1 - y) * screenDim.width + x;
+                    auto c = h_colorBuffer[idx];
+                    printf("(%.3d,%d,%d)", (NRuint) c.r, (NRuint) c.g, (NRuint) c.b);
+                }
+                printf(" | ");
+            }
+            printf("\n");
         }
         printf("\n");
     }
 
     printf("Depth: \n");
-    for (NRuint y = 0; y < screenDim.height; ++y)
+    for (NRuint binY = 0; binY < binCountY; ++binY)
     {
-        for (NRuint x = 0; x < screenDim.width; ++x)
+        for (NRuint offsetY = 0; offsetY < config.binHeight; ++offsetY)
         {
-            printf("%.3f ", h_depthBuffer[y * screenDim.width + x]);
+            for (NRuint binX = 0; binX < binCountX; ++binX)
+            {
+                for (NRuint offsetX = 0; offsetX < config.binWidth; ++offsetX)
+                {
+                    NRuint x = binX * config.binWidth + offsetX;
+                    NRuint y = binY * config.binHeight + offsetY;
+                    NRuint idx = (screenDim.height - 1 - y) * screenDim.width + x;
+                    printf("%.3f ", h_depthBuffer[idx]);
+                }
+                printf("| ");
+            }
+            printf("\n");
         }
         printf("\n");
     }
@@ -136,17 +158,6 @@ TEST(Fine, Rasterizer)
                 }
                 printf("\n");
             }
-        }
-    }
-
-    for (NRuint y = 0; y < screenDim.height; y += config.binHeight)
-    {
-        for (NRuint x = 0; x < screenDim.width; x += config.binWidth)
-        {
-            expected.position.x = x;
-            expected.position.y = y;
-            expected.depth = expectedDepth;
-            validateFragment(expected, screenDim, h_colorBuffer.get(), h_depthBuffer.get());
         }
     }
 }

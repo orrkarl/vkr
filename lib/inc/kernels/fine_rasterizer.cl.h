@@ -13,28 +13,23 @@ namespace clcode
 
 const string fine_rasterizer = R"__CODE__(
 
+#define SAMPLE_X (1)
+#define SAMPLE_Y (1)
+
 void shade(
     Fragment fragment,
     const ScreenDimension dim,
     RawColorRGB* color, Depth* depth)
 {
-    DEBUG_ONCE3("Shading [(%d, %d), %f]\n", fragment.position.x, fragment.position.y, fragment.depth);
     uint buffer_index;
     buffer_index = index_from_screen(fragment.position, dim);
         
     if (fragment.depth < depth[buffer_index])
     {
-        DEBUG_ONCE("Applying fragment!\n");
         fragment.color = RAW_RED; // replace this when you get to the actual shading scheme
     
         color[buffer_index] = fragment.color;
         depth[buffer_index] = fragment.depth;
-
-        DEBUG_ONCE4("ColorBuffer at %d: (%d, %d, %d)\n", buffer_index, fragment.color.r, fragment.color.g, fragment.color.b);
-    }
-    else
-    {
-        DEBUG_ONCE3("Fragment depth (%f) is smaller than buffer depth at %d (%f)\n", fragment.depth, buffer_index, depth[buffer_index]);
     }
 }
 
@@ -70,33 +65,40 @@ bool is_point_in_triangle(float* barycentric)
     return barycentric[0] >= 0 && barycentric[1] >= 0 && barycentric[2] >= 0;
 }
 
-bool is_queue_ended(const Index* queues, uint* indices, uint index)
+bool is_queue_ended(const Index** queues, uint* indices, uint index)
 {
-    return !queues[index][indices] && !index;
+    return !queues[index][indices[index]] && indices[index];
+}
+
+bool is_queue_valid(const Index** queues, uint* indices, uint index, uint queue_size)
+{
+    return indices[index] < queue_size && !is_queue_ended(queues, indices, index);
 }
 
 uint pick_queue(const Index** queues, uint* indices, const uint work_group_count, const uint queue_size)
 {
     uint current_queue = work_group_count;
+
     for (uint i = 0; i < work_group_count; ++i)
     {
-        if (current_queue >= work_group_count && indices[i] < queue_size)
+        if (is_queue_valid(queues, indices, i, queue_size))
         {
-            DEBUG_ONCE1("First non-empty queue at %d!\n", i);
-            current_queue = i;
-            continue;
-        }
-
-        if (indices[i] < queue_size)
-        {
-            DEBUG_ONCE2("Current Queue: %d | i: %d\n", current_queue, i);
-            if (queues[i][indices[i]] < queues[current_queue][indices[current_queue]])
+            DEBUG_ITEM_SPECIFIC1(SAMPLE_X, SAMPLE_Y, 0, "Queue %d is NOT empty!\n", i);
+            if (current_queue == work_group_count)
             {
-                DEBUG_ONCE("updating current_queue!\n");
+                current_queue = i;
+            }
+            else if (queues[i][indices[i]] < queues[current_queue][indices[current_queue]])
+            {
                 current_queue = i;
             }
         }
+        else
+        {
+            DEBUG_ITEM_SPECIFIC1(SAMPLE_X, SAMPLE_Y, 0, "Queue %d is empty!\n", i);
+        }
     }
+
     return current_queue;
 }
 
@@ -128,40 +130,21 @@ kernel void fine_rasterize(
     uint current_queue;
     Index current_queue_element;
 
-    DEBUG_ONCE2("Handling bin (%d, %d)\n", x, y);
+    DEBUG_ITEM_SPECIFIC2(SAMPLE_X, SAMPLE_Y, 0, "Handling bin (%d, %d)\n", x, y);
 
     if (work_group_count >= MAX_WORK_GROUP_COUNT) return;
 
-    DEBUG_ONCE("Device depth buffer:\n");
-    for (uint j = 0; j < screen_dim.height; ++j)
-    {
-        for (uint i = 0; i < screen_dim.width; ++i)
-        {
-            DEBUG_ONCE1("%f ", depth[j * screen_dim.width + i]);
-        }
-        DEBUG_ONCE("\n");
-    }
-    
     for (uint i = 0; i < work_group_count; ++i)
     {
         current_queue_bases[i] = bin_queues + bin_queue_offset + i * elements_per_group;
-        
-        DEBUG_ONCE1("Queue %d:\t", i);
-        for (uint q = 0; q < config.queue_size + 1; ++q)
-        {
-            DEBUG_ONCE1("%d ", current_queue_bases[i][q]);
-        }
-        DEBUG_ONCE("\n");
 
         if (current_queue_bases[i][0]) 
         {
             current_queue_elements[i] = config.queue_size + 1;
-            DEBUG_ONCE1("Queue %d is empty!\n", i);
         }
         else
         {
             current_queue_elements[i] = 0;
-            DEBUG_ONCE1("Content found in queue %d!\n", i);
         }
 
         current_queue_bases[i] += 1;
@@ -170,11 +153,13 @@ kernel void fine_rasterize(
     while (true)
     {
         current_queue = pick_queue(current_queue_bases, current_queue_elements, work_group_count, config.queue_size);
-        DEBUG_ONCE1("picked queue: %d\n", current_queue);
+        DEBUG_ITEM_SPECIFIC1(SAMPLE_X, SAMPLE_Y, 0, "current index - %d\n", current_queue_elements[current_queue]);
+        DEBUG_ITEM_SPECIFIC1(SAMPLE_X, SAMPLE_Y, 0, "current queue - %d\n", current_queue);
+        
         if (current_queue >= work_group_count) break;
         
         current_queue_element = current_queue_bases[current_queue][current_queue_elements[current_queue]];
-        DEBUG_ONCE1("current queue element: %d\n", current_queue_element);
+        DEBUG_ITEM_SPECIFIC1(SAMPLE_X, SAMPLE_Y, 0, "current queue element - %d\n", current_queue_element);
 
         for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, frag_x + config.bin_width); ++frag_x)
         {

@@ -162,7 +162,10 @@ void ndc_from_screen(const ScreenPosition screen, const ScreenDimension dim, NDC
     #define DEBUG(code)
 #endif // _DEBUG
 
-#define IS_GROUP_HEAD (!get_local_id(0) && !get_local_id(1) && !get_local_id(2))
+#define IS_WORK_ITEM_GLOBAL(i, j, k) (get_global_id(0) == i && get_global_id(1) == j && get_global_id(2) == k)
+#define IS_WORK_ITEM_LOCAL(i, j, k) (get_local_id(0) == i && get_local_id(1) == j && get_local_id(2) == k)
+
+#define IS_GROUP_HEAD IS_WORK_ITEM_LOCAL(0, 0, 0)
 
 #define DEBUG_MESSAGE(msg)                                              DEBUG(printf(msg))
 #define DEBUG_MESSAGE1(msg, arg1)                                       DEBUG(printf(msg, arg1))
@@ -172,6 +175,16 @@ void ndc_from_screen(const ScreenPosition screen, const ScreenDimension dim, NDC
 #define DEBUG_MESSAGE5(msg, arg1, arg2, arg3, arg4, arg5)               DEBUG(printf(msg, arg1, arg2, arg3, arg4, arg5))
 #define DEBUG_MESSAGE6(msg, arg1, arg2, arg3, arg4, arg5, arg6)         DEBUG(printf(msg, arg1, arg2, arg3, arg4, arg5, arg6))
 #define DEBUG_MESSAGE7(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7)   DEBUG(printf(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7))
+
+#define DEBUG_ITEM_SPECIFIC(i, j, k, msg) DEBUG(if (IS_WORK_ITEM_GLOBAL(i, j, k)) { printf(msg); } else {})
+#define DEBUG_ITEM_SPECIFIC1(i, j, k, msg, arg1) DEBUG(if (IS_WORK_ITEM_GLOBAL(i, j, k)) { printf(msg, arg1); } else {})
+#define DEBUG_ITEM_SPECIFIC2(i, j, k, msg, arg1, arg2) DEBUG(if (IS_WORK_ITEM_GLOBAL(i, j, k)) { printf(msg, arg1, arg2); } else {})
+#define DEBUG_ITEM_SPECIFIC3(i, j, k, msg, arg1, arg2, arg3) DEBUG(if (IS_WORK_ITEM_GLOBAL(i, j, k)) { printf(msg, arg1, arg2, arg3); } else {})
+#define DEBUG_ITEM_SPECIFIC4(i, j, k, msg, arg1, arg2, arg3, arg4) DEBUG(if (IS_WORK_ITEM_GLOBAL(i, j, k)) { printf(msg, arg1, arg2, arg3, arg4); } else {})
+#define DEBUG_ITEM_SPECIFIC5(i, j, k, msg, arg1, arg2, arg3, arg4, arg5) DEBUG(if (IS_WORK_ITEM_GLOBAL(i, j, k)) { printf(msg, arg1, arg2, arg3, arg4, arg5); } else {})
+#define DEBUG_ITEM_SPECIFIC6(i, j, k, msg, arg1, arg2, arg3, arg4, arg5, arg6) DEBUG(if (IS_WORK_ITEM_GLOBAL(i, j, k)) { printf(msg, arg1, arg2, arg3, arg4, arg5, arg6); } else {})
+#define DEBUG_ITEM_SPECIFIC7(i, j, k, msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7) DEBUG(if (IS_WORK_ITEM_GLOBAL(i, j, k)) { printf(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7); } else {})
+#define DEBUG_ITEM_SPECIFIC8(i, j, k, msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) DEBUG(if (IS_WORK_ITEM_GLOBAL(i, j, k)) { printf(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8); } else {})
 
 // Prints only from the first work item in a work group
 // Prints once PER GROUP
