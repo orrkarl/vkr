@@ -18,16 +18,24 @@ void shade(
     const ScreenDimension dim,
     RawColorRGB* color, Depth* depth, Index* stencil)
 {
+    DEBUG_ONCE3("Shading [(%d, %d), %f]\n", fragment.position.x, fragment.position.y, fragment.depth);
     uint buffer_index;
     buffer_index = index_from_screen(fragment.position, dim);
         
     if (fragment.depth < depth[buffer_index])
     {
+        DEBUG_ONCE("Applying fragment!\n");
         fragment.color = RAW_RED; // replace this when you get to the actual shading scheme
     
         color[buffer_index] = fragment.color;
         stencil[buffer_index] = fragment.stencil;
         depth[buffer_index] = fragment.depth;
+
+        DEBUG_ONCE4("ColorBuffer at %d: (%d, %d, %d)\n", buffer_index, fragment.color.r, fragment.color.g, fragment.color.b);
+    }
+    else
+    {
+        DEBUG_ONCE3("Fragment depth (%f) is smaller than buffer depth at %d (%f)\n", fragment.depth, buffer_index, depth[buffer_index]);
     }
 }
 
@@ -50,7 +58,7 @@ void barycentric2d(const generic Triangle triangle, NDCPosition position, float*
     
     result[0] = area(position, p1, p2) / area_total;
     result[1] = area(p0, position, p2) / area_total;
-    result[2] = area(p0, p1, position) / area_total;
+    result[2] = 1 - result[0] - result[1];
 }
 
 Depth depth_at_point(const generic Triangle triangle, float* barycentric)
@@ -126,6 +134,16 @@ kernel void fine_rasterize(
 
     if (work_group_count >= MAX_WORK_GROUP_COUNT) return;
 
+    DEBUG_ONCE("Device depth buffer:\n");
+    for (uint j = 0; j < screen_dim.height; ++j)
+    {
+        for (uint i = 0; i < screen_dim.width; ++i)
+        {
+            DEBUG_ONCE1("%f ", depth[j * screen_dim.width + i]);
+        }
+        DEBUG_ONCE("\n");
+    }
+    
     for (uint i = 0; i < work_group_count; ++i)
     {
         current_queue_bases[i] = bin_queues + bin_queue_offset + i * elements_per_group;
@@ -159,7 +177,6 @@ kernel void fine_rasterize(
         
         current_queue_element = current_queue_bases[current_queue][current_queue_elements[current_queue]];
         DEBUG_ONCE1("current queue element: %d\n", current_queue_element);
-        return;
 
         for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, frag_x + config.bin_width); ++frag_x)
         {
@@ -168,12 +185,13 @@ kernel void fine_rasterize(
                 current_frag.position.x = frag_x;
                 current_frag.position.y = frag_y;
                 
-                ndc_from_screen(current_frag.position, screen_dim, &current_position_ndc);
-
+                ndc_from_screen(current_frag.position, screen_dim, &current_position_ndc); 
                 barycentric2d(triangle_data[current_queue_element], current_position_ndc, barycentric);                
+
                 if (is_point_in_triangle(barycentric))
                 {
                     current_frag.depth = depth_at_point(triangle_data[current_queue_element], barycentric);
+                    current_frag.stencil = current_queue_element;
                     shade(current_frag, screen_dim, color, depth, stencil);
                 }
             }

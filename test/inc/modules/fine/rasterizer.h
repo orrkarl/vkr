@@ -58,7 +58,7 @@ TEST(Fine, Rasterizer)
     {
         h_colorBuffer[i] = { 0, 0, 0 };
         h_depthBuffer[i] = 1.1;
-        h_stencilBuffer[i] = 0;
+        h_stencilBuffer[i] = 4,294,967,295;
     }
     
     fillTriangles<dim>(screenDim, config, totalWorkGroupCount, expectedDepth, 256, h_triangles.get(), h_binQueues.get());
@@ -78,11 +78,11 @@ TEST(Fine, Rasterizer)
     ASSERT_TRUE(isSuccess(err));
 
     FrameBuffer frame;
-    frame.color = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_colorBuffer), h_colorBuffer.get(), &error);
+    frame.color = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize * sizeof(RawColorRGB), h_colorBuffer.get(), &error);
     ASSERT_TRUE(isSuccess(error));
-    frame.depth = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_depthBuffer), h_depthBuffer.get(), &error);
+    frame.depth = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize * sizeof(NRfloat), h_depthBuffer.get(), &error);
     ASSERT_TRUE(isSuccess(error));
-    frame.stencil = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_stencilBuffer), h_stencilBuffer.get(), &error);
+    frame.stencil = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize * sizeof(NRuint), h_stencilBuffer.get(), &error);
     ASSERT_TRUE(isSuccess(error));
 
     Buffer d_triangles(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount * sizeof(Triangle<dim>), h_triangles.get(), &error);
@@ -101,39 +101,40 @@ TEST(Fine, Rasterizer)
     testee.local  = cl::NDRange(binCountX, binCountY);
 
     ASSERT_TRUE(isSuccess(testee(q)));
-    ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.color, CL_FALSE, 0, sizeof(h_colorBuffer), h_colorBuffer.get())));
-    ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.depth, CL_FALSE, 0, sizeof(h_depthBuffer), h_depthBuffer.get())));
-    ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.stencil, CL_FALSE, 0, sizeof(h_stencilBuffer), h_stencilBuffer.get())));
+    ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.color, CL_FALSE, 0, totalScreenSize * sizeof(RawColorRGB), h_colorBuffer.get())));
+    ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.depth, CL_FALSE, 0, totalScreenSize * sizeof(NRfloat), h_depthBuffer.get())));
+    ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.stencil, CL_FALSE, 0, totalScreenSize * sizeof(NRuint), h_stencilBuffer.get())));
     ASSERT_TRUE(isSuccess(q.finish()));
 
-    std::cout << "Color: \n";
+    printf("Color: \n");
     for (NRuint y = 0; y < screenDim.height; ++y)
     {
         for (NRuint x = 0; x < screenDim.width; ++x)
         {
-            std::cout << h_colorBuffer[y * screenDim.width + x] << ' ';
+            auto c = h_colorBuffer[y * screenDim.width + x];
+            printf("(%.3d,%d,%d) ", (NRuint) c.r, (NRuint) c.g, (NRuint) c.b);
         }
-        std::cout << std::endl;
+        printf("\n");
     }
 
-    std::cout << "Depth: \n";
+    printf("Depth: \n");
     for (NRuint y = 0; y < screenDim.height; ++y)
     {
         for (NRuint x = 0; x < screenDim.width; ++x)
         {
-            std::cout << h_depthBuffer[y * screenDim.width + x] << ' ';
+            printf("%.3f ", h_depthBuffer[y * screenDim.width + x]);
         }
-        std::cout << std::endl;
+        printf("\n");
     }
 
-    std::cout << "Stencil: \n";
+    printf("Stencil: \n");
     for (NRuint y = 0; y < screenDim.height; ++y)
     {
         for (NRuint x = 0; x < screenDim.width; ++x)
         {
-            std::cout << h_stencilBuffer[y * screenDim.width + x] << ' ';
+            printf("%.3d ", h_stencilBuffer[y * screenDim.width + x]);
         }
-        std::cout << std::endl;
+        printf("\n");
     }
 
     printf("Bin queues:\n");

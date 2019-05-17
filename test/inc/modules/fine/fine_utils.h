@@ -80,7 +80,7 @@ void fillTriangles(
     NRuint binOffset = 0;
     NRuint currentQueueBase;
 
-    Bin bin{ 0, 0, config.binWidth, config.binHeight };
+    Bin bin{ config.binWidth, config.binHeight, 0, 0 };
 
     for (NRuint y = 0; y < binCountY; ++y)
     {
@@ -102,10 +102,10 @@ void fillTriangles(
                 binQueues[currentQueueBase + 1] = i;
                 binQueues[currentQueueBase + 2] = i + 1;
                 binQueues[currentQueueBase + 3] = i + 2;
+                if (config.queueSize > 3) binQueues[currentQueueBase + 4] = 0;
             }
             else
             {
-                binQueues[currentQueueBase + 4] = 0;
                 g = (i / batchSize) % totalWorkGroupCount;
             }
 
