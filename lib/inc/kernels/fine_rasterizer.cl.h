@@ -161,15 +161,24 @@ kernel void fine_rasterize(
         current_queue_element = current_queue_bases[current_queue][current_queue_elements[current_queue]];
         DEBUG_ITEM_SPECIFIC1(SAMPLE_X, SAMPLE_Y, 0, "current queue element - %d\n", current_queue_element);
 
-        for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, frag_x + config.bin_width); ++frag_x)
+        for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, x * config.bin_width + config.bin_width); ++frag_x)
         {
-            for (uint frag_y = y * config.bin_height; frag_y < min(screen_dim.height, frag_y + config.bin_height); ++frag_y)
+            for (uint frag_y = y * config.bin_height; frag_y < min(screen_dim.height, y * config.bin_height + config.bin_height); ++frag_y)
             {
                 current_frag.position.x = frag_x;
                 current_frag.position.y = frag_y;
                 
                 ndc_from_screen(current_frag.position, screen_dim, &current_position_ndc); 
                 barycentric2d(triangle_data[current_queue_element], current_position_ndc, barycentric);                
+
+                DEBUG_ITEM_SPECIFIC8(
+                        SAMPLE_X, SAMPLE_Y, 0, 
+                        "Triangle: [(%f, %f), (%f, %f), (%f, %f)] | Point: (%f, %f)\n",
+                        triangle_data[current_queue_element][0][0], triangle_data[current_queue_element][0][1],
+                        triangle_data[current_queue_element][1][0], triangle_data[current_queue_element][1][1],
+                        triangle_data[current_queue_element][2][0], triangle_data[current_queue_element][2][1],
+                        current_position_ndc.x, current_position_ndc.y);
+                DEBUG_ITEM_SPECIFIC2(SAMPLE_X, SAMPLE_Y, 0, "Raw point: (%d, %d)\n", frag_x, frag_y);
 
                 if (is_point_in_triangle(barycentric))
                 {
