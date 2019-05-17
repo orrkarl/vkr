@@ -130,6 +130,8 @@ kernel void fine_rasterize(
         current_queue_bases[i] += 1;
     }
 
+    printf("What %%?\n");
+
     while (true)
     {
         current_queue = pick_queue(current_queue_bases, current_queue_elements, work_group_count, config.queue_size);
