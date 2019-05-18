@@ -1,6 +1,7 @@
 #include "inc/includes.h"
 
 #include "inc/modules/all_module_tests.h"
+#include "inc/base/all.h"
 
 int main(int argc, char **argv) 
 {

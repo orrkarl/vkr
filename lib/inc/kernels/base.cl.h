@@ -210,6 +210,14 @@ kernel void screen_from_ndc_kernel(NDCPosition pos, ScreenDimension dim, global 
     res->y = tmp.y;
 }
 
+kernel void ndc_from_screen_test(ScreenPosition pos, ScreenDimension dim, global NDCPosition* res)
+{
+    NDCPosition tmp;
+    ndc_from_screen(pos, dim, &tmp);
+    res->x = tmp.x;
+    res->y = tmp.y;
+}
+
 )__CODE__";
 
 }

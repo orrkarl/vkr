@@ -6,32 +6,6 @@ namespace nr
 namespace utils
 {
 
-GLenum fromNRType(Type type)
-{
-    switch(type)
-    {
-        case Type::BYTE:    return GL_BYTE;
-        case Type::UBYTE:   return GL_UNSIGNED_BYTE;
-        
-        case Type::SHORT:   return GL_SHORT;
-        case Type::USHORT:  return GL_UNSIGNED_SHORT;
-        
-        case Type::BOOL:    return GL_BOOL;
-
-        case Type::INT:     return GL_INT;
-        case Type::UINT:    return GL_UNSIGNED_INT;
-
-        case Type::FLOAT:   return GL_FLOAT;
-        case Type::DOUBLE:  return GL_DOUBLE;
-        
-        case Type::RAW:     
-            return 0; // this is not the default because i will probably change it in the future
-
-        default:
-            return 0; // type is not supported in core GL 
-    }
-}
-
 Error fromCLError(const cl_int& err)
 {
     switch(err)

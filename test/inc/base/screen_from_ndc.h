@@ -1,48 +1,9 @@
 #pragma once
 
-#include "../includes.h"
-
-#include <base/Module.h>
-#include <base/Kernel.h>
-#include <rendering/Render.h>
-#include <kernels/base.cl.h>
+#include "base_utils.h"
 
 using namespace nr;
 using namespace nr::__internal;
-
-struct ScreenFromNDCParams
-{   
-public:
-    ScreenFromNDCParams(cl_int* err = nullptr)
-    {
-        result = cl::Buffer(CL_MEM_WRITE_ONLY, sizeof(ScreenPosition), nullptr, err);
-    }
-
-    cl_int load(cl::Kernel kernel)
-    {
-        cl_int err = CL_SUCCESS;
-        if ((err = kernel.setArg(0, ndcPosition)) != CL_SUCCESS) return err;
-        if ((err = kernel.setArg(1, dimension)) != CL_SUCCESS) return err;        
-        err = kernel.setArg(2, result);
-        return err;
-    }
-
-    cl_int getResult(ScreenPosition* res) 
-    {
-        return cl::CommandQueue::getDefault().enqueueReadBuffer(result, CL_TRUE, 0, sizeof(ScreenPosition), res);
-    } 
-
-    cl_int init(cl::CommandQueue queue)
-    {
-        return CL_SUCCESS;
-    }
-
-    NDCPosition ndcPosition;
-    ScreenDimension dimension;
-
-private:
-    cl::Buffer result;
-};
 
 void screenFromNDCTestTemplate(Kernel<ScreenFromNDCParams> kernel, cl::CommandQueue queue, const NDCPosition& ndc, const ScreenDimension& dim, const ScreenPosition& expected)
 {
@@ -70,18 +31,6 @@ void screenFromNDCTestTemplate(Kernel<ScreenFromNDCParams> kernel, cl::CommandQu
     err = kernel.params.getResult(&result);
     ASSERT_EQ(CL_SUCCESS, err) << "could not retrive result buffer:\t" << utils::stringFromCLError(err);
     ASSERT_EQ(expected, result) << "Screen from NDC didn't return correct values";
-}
-
-
-TEST(Base, Compilation)
-{
-    cl_int err = CL_SUCCESS;
-    Module base(clcode::base, "-cl-std=CL2.0 -Werror -D RENDER_DIMENSION=3", &err);
-    ASSERT_EQ(CL_SUCCESS, err);
-
-    auto log = base.getBuildLog(&err);
-    ASSERT_EQ(CL_SUCCESS, err);
-    ASSERT_EQ("", log) << log;
 }
 
 TEST(Base, ScreenFromNDC)

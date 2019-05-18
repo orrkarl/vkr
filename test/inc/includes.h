@@ -7,6 +7,8 @@
 
 #pragma once
 
+
+
 const float TOLERANCE = 0.00001f;
 const double DOUBLE_TOLERANCE = 0.000000001;
 
@@ -48,6 +50,16 @@ struct NDCPosition
 {
     NRfloat x;
     NRfloat y;
+
+    bool operator==(const NDCPosition& other) const
+    {
+        return x == other.x && y == other.y;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const NDCPosition& pos)
+    {
+        return os << "NDCPosition{" << pos.x << ", " << pos.y << "}";
+    }
 };
 
 struct RawColorRGB
