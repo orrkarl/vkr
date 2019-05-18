@@ -142,22 +142,4 @@ TEST(Fine, Rasterizer)
         }
         printf("\n");
     }
-
-    printf("Bin queues:\n");
-    for (NRuint g = 0; g < totalWorkGroupCount; ++g)
-    {
-        printf("Group %d:\n", g);
-        for (NRuint y = 0; y < binCountY; ++y)
-        {
-            for (NRuint x = 0; x < binCountX; ++x)
-            {
-                printf("Queue for bin (%d, %d):\t", x, y);
-                for (NRuint i = 0; i < config.queueSize + 1; ++i)
-                {
-                    printf("%.3d ", h_binQueues[g * totalBinCount * (config.queueSize + 1) + (y * binCountX + x) * (config.queueSize + 1) + i]);
-                }
-                printf("\n");
-            }
-        }
-    }
 }

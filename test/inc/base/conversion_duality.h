@@ -26,7 +26,7 @@ void checkDuality(
     ASSERT_TRUE(isSuccess(error));
 
     ASSERT_TRUE(isSuccess(ndcFromScreen(q)));
-    ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(ndcFromScreen.params.result, CL_FALSE, 0, sizeof(ndcResult), &ndcResult)));
+    ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(ndcFromScreen.params.result.getBuffer(), CL_FALSE, 0, sizeof(ndcResult), &ndcResult)));
     ASSERT_TRUE(isSuccess(q.finish()));
 
     screenFromNDC.global = cl::NDRange(1);
@@ -37,7 +37,7 @@ void checkDuality(
     ASSERT_TRUE(isSuccess(err));
 
     ASSERT_TRUE(isSuccess(screenFromNDC(q)));
-    ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(ndcFromScreen.params.result, CL_FALSE, 0, sizeof(screenResult), &screenResult)));
+    ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(screenFromNDC.params.result, CL_FALSE, 0, sizeof(screenResult), &screenResult)));
     ASSERT_TRUE(isSuccess(q.finish()));
 
     ASSERT_EQ(screen, screenResult) << "Conversion: " << screen << " -> " << ndcResult << " -> " << screenResult << " | Screen dim: " << screenDim;
@@ -97,4 +97,12 @@ TEST(Base, ConversionDuality)
 
     checkDuality(q, testeeNDC, testeeScreen, ScreenDimension{10, 10}, NDCPosition{0.3, -0.44});
     checkDuality(q, testeeNDC, testeeScreen, ScreenDimension{1366, 123}, ScreenPosition{12, 122});
+
+    for (NRuint x = 0; x < 100; ++x)
+    {
+        for (NRuint y = 0; y < 100; ++y)
+        {
+            checkDuality(q, testeeNDC, testeeScreen, ScreenDimension{100, 100}, ScreenPosition{x, y});            
+        }
+    }
 }

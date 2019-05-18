@@ -115,12 +115,12 @@ float from_discrete(const uint discrete)
 
 uint axis_screen_from_ndc(const float pos, const uint length)
 {
-    return from_continuous((pos + 1) * (length - 1) / 2);
+    return round((float) ((pos + 1.0) * (length - 1) * 0.5));
 }
 
 float axis_ndc_from_screen(const uint pos, const uint length)
 {
-    return from_discrete(pos) * 2 / (length - 1) - 1;
+    return ((float) pos) * 2.0 / (length - 1) - 1.0;
 }
 
 void screen_from_ndc(const NDCPosition ndc, const ScreenDimension dim, ScreenPosition* screen)
@@ -204,18 +204,12 @@ void ndc_from_screen(const ScreenPosition screen, const ScreenDimension dim, NDC
 
 kernel void screen_from_ndc_kernel(NDCPosition pos, ScreenDimension dim, global ScreenPosition* res)
 {
-    ScreenPosition tmp;
-    screen_from_ndc(pos, dim, &tmp);
-    res->x = tmp.x;
-    res->y = tmp.y;
+    screen_from_ndc(pos, dim, res);
 }
 
 kernel void ndc_from_screen_test(ScreenPosition pos, ScreenDimension dim, global NDCPosition* res)
 {
-    NDCPosition tmp;
-    ndc_from_screen(pos, dim, &tmp);
-    res->x = tmp.x;
-    res->y = tmp.y;
+    ndc_from_screen(pos, dim, res);
 }
 
 )__CODE__";
