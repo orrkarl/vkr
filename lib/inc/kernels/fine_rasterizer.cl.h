@@ -22,7 +22,7 @@ void shade(
     RawColorRGB* color, Depth* depth)
 {
     uint buffer_index;
-    buffer_index = pixel_mid_point_from_screen(fragment.position, dim);
+    buffer_index = index_from_screen(fragment.position, dim);
         
     if (fragment.depth < depth[buffer_index])
     {
@@ -42,13 +42,8 @@ float area(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2)
     return a.x * b.y - a.y * b.x;
 }
 
-void barycentric2d(const generic Triangle triangle, NDCPosition position, float* result)
+void barycentric2d(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, NDCPosition position, float* result)
 {
-    NDCPosition p0, p1, p2;
-    p0 = (float2)(triangle[0][0], triangle[0][1]);
-    p1 = (float2)(triangle[1][0], triangle[1][1]);
-    p2 = (float2)(triangle[2][0], triangle[2][1]);
-    
     float area_total = area(p0, p1, p2);
     
     result[0] = area(position, p1, p2) / area_total;
@@ -61,9 +56,14 @@ Depth depth_at_point(const generic Triangle triangle, float* barycentric)
     return triangle[0][2] * barycentric[0] + triangle[1][2] * barycentric[1] + triangle[2][2] * barycentric[2];
 }
 
-bool is_point_in_triangle(float* barycentric)
+bool is_contained_top_left(const NDCPosition vec, float weight)
 {
-    return barycentric[0] >= 0 && barycentric[1] >= 0 && barycentric[2] >= 0;
+    return weight > 0 || (weight == 0 && (vec.y > 0 || (vec.y == 0 && vec.x > 0)));
+}
+
+bool is_point_in_triangle(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, float* barycentric)
+{
+    return is_contained_top_left(p0, barycentric[0]) && is_contained_top_left(p1, barycentric[1]) && is_contained_top_left(p2, barycentric[2]);
 }
 
 bool is_queue_ended(const Index** queues, uint* indices, uint index)
@@ -103,6 +103,16 @@ uint pick_queue(const Index** queues, uint* indices, const uint work_group_count
     return current_queue;
 }
 
+bool is_ccw(const generic Triangle* triangle, Index idx)
+{
+    NDCPosition p0, p1, p2;
+    p0 = (float2)(triangle[idx][0][0], triangle[idx][0][1]);
+    p1 = (float2)(triangle[idx][1][0], triangle[idx][1][1]);
+    p2 = (float2)(triangle[idx][2][0], triangle[idx][2][1]);
+
+    return area(p0, p1, p2) <= 0;
+}
+
 kernel void fine_rasterize(
     const global Triangle* triangle_data,
     const global Index* bin_queues,
@@ -130,6 +140,8 @@ kernel void fine_rasterize(
 
     uint current_queue;
     Index current_queue_element;
+    
+    NDCPosition p0, p1, p2;
 
     DEBUG_ITEM_SPECIFIC2(SAMPLE_X, SAMPLE_Y, 0, "Handling bin (%d, %d)\n", x, y);
 
@@ -160,6 +172,14 @@ kernel void fine_rasterize(
         if (current_queue >= work_group_count) break;
         
         current_queue_element = current_queue_bases[current_queue][current_queue_elements[current_queue]];
+
+        if (is_ccw(triangle_data, current_queue_element))
+        {
+            current_queue_elements[current_queue] += 1;
+            DEBUG_ITEM_SPECIFIC1(SAMPLE_X, SAMPLE_Y, 0, "Triangle %d backface culled!\n", current_queue_element);
+            continue;
+        }
+
         DEBUG_ITEM_SPECIFIC1(SAMPLE_X, SAMPLE_Y, 0, "current queue element - %d\n", current_queue_element);
 
         for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, x * config.bin_width + config.bin_width); ++frag_x)
@@ -169,8 +189,13 @@ kernel void fine_rasterize(
                 current_frag.position.x = frag_x;
                 current_frag.position.y = frag_y;
                 
-                ndc_from_screen(current_frag.position, screen_dim, &current_position_ndc); 
-                barycentric2d(triangle_data[current_queue_element], current_position_ndc, barycentric);                
+                pixel_mid_point_from_screen(current_frag.position, screen_dim, &current_position_ndc); 
+                
+                p0 = (float2)(triangle_data[current_queue_element][0][0], triangle_data[current_queue_element][0][1]);
+                p1 = (float2)(triangle_data[current_queue_element][1][0], triangle_data[current_queue_element][1][1]);
+                p2 = (float2)(triangle_data[current_queue_element][2][0], triangle_data[current_queue_element][2][1]);
+    
+                barycentric2d(p0, p1, p2, current_position_ndc, barycentric);                
 
                 DEBUG_ITEM_SPECIFIC8(
                         SAMPLE_X, SAMPLE_Y, 0, 
@@ -181,7 +206,7 @@ kernel void fine_rasterize(
                         current_position_ndc.x, current_position_ndc.y);
                 DEBUG_ITEM_SPECIFIC2(SAMPLE_X, SAMPLE_Y, 0, "Raw point: (%d, %d)\n", frag_x, frag_y);
 
-                if (is_point_in_triangle(barycentric))
+                if (is_point_in_triangle(p0, p1, p2, barycentric))
                 {
                     current_frag.depth = depth_at_point(triangle_data[current_queue_element], barycentric);
                     shade(current_frag, screen_dim, color, depth);
@@ -208,11 +233,18 @@ kernel void shade_test(
 kernel void is_point_in_triangle_test(const global Triangle triangle, const ScreenPosition position, const ScreenDimension dim, global bool* result)
 {
     NDCPosition pos;
+    
+    NDCPosition p0, p1, p2;
+    
+    p0 = (float2)(triangle[0][0], triangle[0][1]);
+    p1 = (float2)(triangle[1][0], triangle[1][1]);
+    p2 = (float2)(triangle[2][0], triangle[2][1]);
+    
     ndc_from_screen(position, dim, &pos);
 
     float barycentric[3];
-    barycentric2d(triangle, pos, barycentric);
-    *result = is_point_in_triangle(barycentric);
+    barycentric2d(p0, p1, p2, pos, barycentric);
+    *result = is_point_in_triangle(p0, p1, p2, barycentric);
 }
 
 #endif // _TEST_FINE

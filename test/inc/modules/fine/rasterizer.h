@@ -30,10 +30,10 @@ TEST(Fine, Rasterizer)
 
     const NRuint dim = 5;
 
-    const ScreenDimension screenDim = { 20, 10 };
+    const ScreenDimension screenDim = { 640, 480 };
     const NRuint totalScreenSize = screenDim.width * screenDim.height;
 
-    const BinQueueConfig config = { 5, 5, 10 };
+    const BinQueueConfig config = { 32, 32, 100 };
     const NRuint binCountX = ceil(((NRfloat) screenDim.width) / config.binWidth);
     const NRuint binCountY = ceil(((NRfloat) screenDim.height) / config.binHeight);
     const NRuint totalBinCount = binCountX * binCountY;
@@ -60,7 +60,7 @@ TEST(Fine, Rasterizer)
     
     fillTriangles<dim>(screenDim, config, totalWorkGroupCount, expectedDepth, 256, h_triangles.get(), h_binQueues.get());
 
-    const NRchar options_fmt[] = "-cl-std=CL2.0 -Werror -D _DEBUG -D _TEST_FINE -D RENDER_DIMENSION=%d";
+    const NRchar options_fmt[] = "-cl-std=CL2.0 -Werror -D _TEST_FINE -D RENDER_DIMENSION=%d";
     NRchar options[sizeof(options_fmt) * 2];
     memset(options, 0, sizeof(options));
     sprintf(options, options_fmt, dim);
@@ -99,65 +99,4 @@ TEST(Fine, Rasterizer)
     ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.color, CL_FALSE, 0, totalScreenSize * sizeof(RawColorRGB), h_colorBuffer.get())));
     ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.depth, CL_FALSE, 0, totalScreenSize * sizeof(NRfloat), h_depthBuffer.get())));
     ASSERT_TRUE(isSuccess(q.finish()));
-
-    printf("Color: \n");
-    for (NRuint binY = 0; binY < binCountY; ++binY)
-    {
-        for (NRuint offsetY = 0; offsetY < config.binHeight; ++offsetY)
-        {
-            for (NRuint binX = 0; binX < binCountX; ++binX)
-            {
-                for (NRuint offsetX = 0; offsetX < config.binWidth; ++offsetX)
-                {
-                    NRuint x = binX * config.binWidth + offsetX;
-                    NRuint y = binY * config.binHeight + offsetY;
-                    NRuint idx = (screenDim.height - 1 - y) * screenDim.width + x;
-                    auto c = h_colorBuffer[idx];
-                    printf("(%.3d,%d,%d)", (NRuint) c.r, (NRuint) c.g, (NRuint) c.b);
-                }
-                printf(" | ");
-            }
-            printf("\n");
-        }
-        printf("\n");
-    }
-
-    printf("Depth: \n");
-    for (NRuint binY = 0; binY < binCountY; ++binY)
-    {
-        for (NRuint offsetY = 0; offsetY < config.binHeight; ++offsetY)
-        {
-            for (NRuint binX = 0; binX < binCountX; ++binX)
-            {
-                for (NRuint offsetX = 0; offsetX < config.binWidth; ++offsetX)
-                {
-                    NRuint x = binX * config.binWidth + offsetX;
-                    NRuint y = binY * config.binHeight + offsetY;
-                    NRuint idx = (screenDim.height - 1 - y) * screenDim.width + x;
-                    printf("%.3f ", h_depthBuffer[idx]);
-                }
-                printf("| ");
-            }
-            printf("\n");
-        }
-        printf("\n");
-    }
-
-    printf("Bin queues:\n");
-    for (NRuint g = 0; g < totalWorkGroupCount; ++g)
-    {
-        printf("Group %d:\n", g);
-        for (NRuint y = 0; y < binCountY; ++y)
-        {
-            for (NRuint x = 0; x < binCountX; ++x)
-            {
-                printf("Queue for bin (%d, %d):\t", x, y);
-                for (NRuint i = 0; i < config.queueSize + 1; ++i)
-                {
-                    printf("%.3d ", h_binQueues[g * totalBinCount * (config.queueSize + 1) + (y * binCountX + x) * (config.queueSize + 1) + i]);
-                }
-                printf("\n");
-            }
-        }
-    }
 }
