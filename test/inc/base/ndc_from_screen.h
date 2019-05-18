@@ -64,10 +64,10 @@ TEST(Base, NDCFromScreen)
 
     ndcFromScreenTestTemplate(ndc_from_screen, q, ScreenPosition{0, 0}, ScreenDimension{100, 100}, NDCPosition{-1, -1});
     ndcFromScreenTestTemplate(ndc_from_screen, q, ScreenPosition{49, 49}, ScreenDimension{100, 100}, NDCPosition{0, 0});
-    ndcFromScreenTestTemplate(ndc_from_screen, q, ScreenPosition{99, 99}, ScreenDimension{100, 100}, NDCPosition{1, 1});
-    ndcFromScreenTestTemplate(ndc_from_screen, q, ScreenPosition{0, 0}, ScreenDimension{99, 99}, NDCPosition{-1, -1});
+    ndcFromScreenTestTemplate(ndc_from_screen, q, ScreenPosition{99, 99}, ScreenDimension{100, 100}, NDCPosition{0.99, 0.99});
+    ndcFromScreenTestTemplate(ndc_from_screen, q, ScreenPosition{0, 0}, ScreenDimension{99, 99}, NDCPosition{-0.99, -0.99});
     ndcFromScreenTestTemplate(ndc_from_screen, q, ScreenPosition{49, 49}, ScreenDimension{99, 99}, NDCPosition{0, 0});
-    ndcFromScreenTestTemplate(ndc_from_screen, q, ScreenPosition{98, 98}, ScreenDimension{99, 99}, NDCPosition{1, 1});
+    ndcFromScreenTestTemplate(ndc_from_screen, q, ScreenPosition{98, 98}, ScreenDimension{99, 99}, NDCPosition{0.99, 0.99});
     
     checkConversionBounded(ndc_from_screen, q, ScreenPosition{5, 9}, ScreenDimension{20, 10});
     checkConversionBounded(ndc_from_screen, q, ScreenPosition{40, 9}, ScreenDimension{400, 10});

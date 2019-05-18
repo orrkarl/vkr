@@ -115,12 +115,22 @@ float from_discrete(const uint discrete)
 
 uint axis_screen_from_ndc(const float pos, const uint length)
 {
-    return round((float) ((pos + 1.0) * (length - 1) * 0.5));
+    return (pos + 1) * length * 0.5;
 }
 
 float axis_ndc_from_screen(const uint pos, const uint length)
 {
-    return ((float) pos) * 2.0 / (length - 1) - 1.0;
+    return pos * 2.0 / length - 1;
+}
+
+float axis_pixel_mid_point(const uint pos, const uint length)
+{
+    return (pos + 0.5) * 2.0 / length - 1.0;
+}
+
+int axis_signed_from_ndc(const float pos, const uint length)
+{
+    return axis_screen_from_ndc(pos, length) - length / 2;
 }
 
 void screen_from_ndc(const NDCPosition ndc, const ScreenDimension dim, ScreenPosition* screen)
@@ -129,9 +139,16 @@ void screen_from_ndc(const NDCPosition ndc, const ScreenDimension dim, ScreenPos
     screen->y = axis_screen_from_ndc(ndc.y, dim.height);
 }
 
-int axis_signed_from_ndc(const float pos, const uint length)
+void ndc_from_screen(const ScreenPosition screen, const ScreenDimension dim, NDCPosition* result)
 {
-    return axis_screen_from_ndc(pos, length) - length / 2;
+    result->x = axis_ndc_from_screen(screen.x, dim.width);
+    result->y = axis_ndc_from_screen(screen.y, dim.height);
+}
+
+void pixel_mid_point_from_screen(const ScreenPosition screen, const ScreenDimension dim, NDCPosition* result)
+{
+    result->x = axis_pixel_mid_point(screen.x, dim.width);
+    result->y = axis_pixel_mid_point(screen.y, dim.height);
 }
 
 void signed_from_ndc(const NDCPosition ndc, const ScreenDimension dim, SignedScreenPosition* screen)
@@ -146,11 +163,6 @@ void screen_from_signed(const SignedScreenPosition pos, const ScreenDimension di
     screen->y = pos.y + dim.height / 2;
 }
 
-void ndc_from_screen(const ScreenPosition screen, const ScreenDimension dim, NDCPosition* result)
-{
-    result->x = axis_ndc_from_screen(screen.x, dim.width);
-    result->y = axis_ndc_from_screen(screen.y, dim.height);
-}
 
 // ----------------------------------------------------------------------------
 

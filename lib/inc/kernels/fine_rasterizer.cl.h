@@ -22,7 +22,7 @@ void shade(
     RawColorRGB* color, Depth* depth)
 {
     uint buffer_index;
-    buffer_index = index_from_screen(fragment.position, dim);
+    buffer_index = pixel_mid_point_from_screen(fragment.position, dim);
         
     if (fragment.depth < depth[buffer_index])
     {

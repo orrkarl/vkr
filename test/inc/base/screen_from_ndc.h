@@ -47,9 +47,9 @@ TEST(Base, ScreenFromNDC)
 
     screenFromNDCTestTemplate(screen_from_ndc, queue, NDCPosition{-1, -1}, ScreenDimension{100, 100}, ScreenPosition{0, 0});
     screenFromNDCTestTemplate(screen_from_ndc, queue, NDCPosition{0, 0}, ScreenDimension{100, 100}, ScreenPosition{50, 50});
-    screenFromNDCTestTemplate(screen_from_ndc, queue, NDCPosition{1, 1}, ScreenDimension{100, 100}, ScreenPosition{99, 99});
+    screenFromNDCTestTemplate(screen_from_ndc, queue, NDCPosition{0.99, 0.99}, ScreenDimension{100, 100}, ScreenPosition{99, 99});
 
     screenFromNDCTestTemplate(screen_from_ndc, queue, NDCPosition{-1, -1}, ScreenDimension{99, 99}, ScreenPosition{0, 0});
     screenFromNDCTestTemplate(screen_from_ndc, queue, NDCPosition{0, 0}, ScreenDimension{99, 99}, ScreenPosition{49, 49});
-    screenFromNDCTestTemplate(screen_from_ndc, queue, NDCPosition{1, 1}, ScreenDimension{99, 99}, ScreenPosition{98, 98});
+    screenFromNDCTestTemplate(screen_from_ndc, queue, NDCPosition{0.99, 0.99}, ScreenDimension{99, 99}, ScreenPosition{98, 98});
 }

@@ -43,9 +43,9 @@ void mkTriangleInExactCoordinates(const NDCPosition p0, const NDCPosition p1, co
 template<NRuint dim>
 void mkTriangleFullyInBin(const ScreenDimension& screenDim, const Bin& bin, const NRfloat distance, const NRuint index, Triangle<dim>* triangle)
 {
-    ScreenPosition top_left_screen     = { bin.x, bin.y + bin.height };
+    ScreenPosition top_left_screen     = { bin.x, bin.y + bin.height - 1 };
     ScreenPosition bottom_left_screen  = { bin.x, bin.y };
-    ScreenPosition bottom_right_screen = { bin.x + bin.width, bin.y };
+    ScreenPosition bottom_right_screen = { bin.x + bin.width - 1, bin.y };
 
     NDCPosition top_left     = ndcFromScreen(top_left_screen, screenDim);
     NDCPosition bottom_left  = ndcFromScreen(bottom_left_screen, screenDim);

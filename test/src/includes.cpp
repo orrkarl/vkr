@@ -13,8 +13,8 @@ void testCompilation(const char* options, string configurationName, std::initial
     ASSERT_EQ(CL_SUCCESS, err);
 
     auto log = code.getBuildLog(&err);
-    ASSERT_EQ(CL_SUCCESS, err);
-    ASSERT_EQ("", log) << "Compiling " << configurationName << " failed:" << ":\n" << log;
+    ASSERT_TRUE(isSuccess(err));
+    ASSERT_EQ("", log) << "Compiling " << configurationName << " failed:" << "\n" << log;
 }
 
 NRuint index_from_screen(const ScreenPosition& position, const nr::ScreenDimension& dim)

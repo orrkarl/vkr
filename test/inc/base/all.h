@@ -3,4 +3,3 @@
 #include "compilation.h"
 #include "screen_from_ndc.h"
 #include "ndc_from_screen.h"
-#include "conversion_duality.h"

@@ -82,5 +82,5 @@ AssertionResult comparePoints(const NDCPosition& p1, const NDCPosition& p2, cons
     if (x) return AssertionFailure() << "Points" << p1 << ", " << p2 << " not in the same bin (X too far)";
     if (y) return AssertionFailure() << "Points" << p1 << ", " << p2 << " not in the same bin (y too far)";
 
-    return AssertionFailure() << "Points" << p1 << ", " << p2 << " not in the same bin (X and Y too far)";
+    return AssertionFailure() << "Points " << p1 << ", " << p2 << " not in the same pixel (X and Y too far)";
 }
