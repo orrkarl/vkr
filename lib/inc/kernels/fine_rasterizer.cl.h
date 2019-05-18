@@ -26,6 +26,7 @@ void shade(
         
     if (fragment.depth < depth[buffer_index])
     {
+        DEBUG_ITEM_SPECIFIC2(SAMPLE_X, SAMPLE_Y, 0, "Applying fragment at (%u, %u)\n", fragment.position.x, fragment.position.y);
         fragment.color = RAW_RED; // replace this when you get to the actual shading scheme
     
         color[buffer_index] = fragment.color;
