@@ -13,7 +13,7 @@ namespace clcode
 
 const string fine_rasterizer = R"__CODE__(
 
-#define SAMPLE_X (1)
+#define SAMPLE_X (0)
 #define SAMPLE_Y (1)
 
 void shade(

@@ -11,8 +11,7 @@ ADD_LIBRARY(Nraster SHARED
 	src/pipeline/BinRasterizer.cpp
 	src/pipeline/FineRasterizer.cpp
 
-	src/utils/converters.cpp
-	src/utils/files.cpp)
+	src/utils/converters.cpp)
 
 TARGET_LINK_LIBRARIES(Nraster
 	PRIVATE OpenCL::OpenCL)

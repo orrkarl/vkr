@@ -25,8 +25,8 @@ NRuint index_from_screen(const ScreenPosition& position, const nr::ScreenDimensi
 NDCPosition ndcFromScreen(const ScreenPosition screen, const nr::ScreenDimension& screenDim)
 {
     NDCPosition ndc;
-    ndc.x = (screen.x + 0.5) * 2 / (screenDim.width - 1) - 1;
-    ndc.y = (screen.y + 0.5) * 2 / (screenDim.height - 1) - 1;
+    ndc.x = ((NRfloat) screen.x) * 2.0 / (screenDim.width - 1) - 1;
+    ndc.y = ((NRfloat) screen.y) * 2.0 / (screenDim.height - 1) - 1;
     return ndc;
 }
 
