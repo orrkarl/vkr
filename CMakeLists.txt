@@ -11,9 +11,7 @@ OPTION(BUILD_DEMOS "builds the demo directory" OFF)
 
 OPTION(FIND_GTEST "find installed gtest instead of building it" OFF)
 
-FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(OpenCL REQUIRED)
-FIND_PACKAGE(GLEW REQUIRED)
 
 SET(CMAKE_CXX_STANDARD 17)
 

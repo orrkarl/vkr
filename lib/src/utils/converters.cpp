@@ -32,25 +32,6 @@ GLenum fromNRType(Type type)
     }
 }
 
-Error fromGLError(GLenum err)
-{
-    switch(err)
-    {
-        case GL_INVALID_ENUM:       return Error::INVALID_TYPE;
-        case GL_INVALID_VALUE:      return Error::INVALID_VALUE;
-        case GL_INVALID_OPERATION:  return Error::INVALID_OPERATION;
-        case GL_NO_ERROR:           return Error::NO_ERROR;
-
-        default:
-            return Error::UNKNOWN_ERROR;
-    }
-}
-
-Error getLastGLError()
-{
-    return fromGLError(glGetError());
-}
-
 Error fromCLError(const cl_int& err)
 {
     switch(err)
