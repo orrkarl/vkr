@@ -16,6 +16,27 @@ template<NRuint dim>
 struct Point
 {
     NRfloat values[dim];
+
+    bool operator==(const Point& other) const
+    {
+        for (auto i = 0; i < dim; ++i) 
+            if (values[i] != other[i])
+                return false;
+
+        return true;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Point<dim>& self)
+    {
+        os << "Point<" << dim << ">{ ";
+        for (auto i = 0; i < dim - 1; ++i)
+        {
+            os << self[i] << ", ";
+        }
+        return os << self[dim - 1] << " }";
+    }
+
+    NRfloat operator[](const NRuint index) const { return values[index]; }
 };
 
 template<NRuint dim>

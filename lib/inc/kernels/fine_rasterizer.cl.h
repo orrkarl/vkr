@@ -24,7 +24,7 @@ void shade(
     uint buffer_index;
     buffer_index = index_from_screen(fragment.position, dim);
         
-    if (fragment.depth < depth[buffer_index])
+    if (fragment.depth > depth[buffer_index])
     {
         DEBUG_ITEM_SPECIFIC2(SAMPLE_X, SAMPLE_Y, 0, "Applying fragment at (%u, %u)\n", fragment.position.x, fragment.position.y);
         fragment.color = RAW_RED; // replace this when you get to the actual shading scheme
@@ -53,7 +53,7 @@ void barycentric2d(const NDCPosition p0, const NDCPosition p1, const NDCPosition
 
 Depth depth_at_point(const generic Triangle triangle, float* barycentric)
 {
-    return triangle[0][2] * barycentric[0] + triangle[1][2] * barycentric[1] + triangle[2][2] * barycentric[2];
+    return 1 / triangle[0][2] * barycentric[0] + 1 / triangle[1][2] * 1 / barycentric[1] + 1 / triangle[2][2] * barycentric[2];
 }
 
 bool is_contained_top_left(const NDCPosition vec, float weight)

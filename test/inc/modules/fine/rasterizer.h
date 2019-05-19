@@ -30,10 +30,12 @@ TEST(Fine, Rasterizer)
 
     const NRuint dim = 5;
 
-    const ScreenDimension screenDim = { 640, 480 };
+    const NRfloat defaultDepth = 0.9;
+
+    const ScreenDimension screenDim = { 1366, 768 };
     const NRuint totalScreenSize = screenDim.width * screenDim.height;
 
-    const BinQueueConfig config = { 32, 32, 100 };
+    const BinQueueConfig config = { 32, 32, 256 };
     const NRuint binCountX = ceil(((NRfloat) screenDim.width) / config.binWidth);
     const NRuint binCountY = ceil(((NRfloat) screenDim.height) / config.binHeight);
     const NRuint totalBinCount = binCountX * binCountY;
@@ -55,7 +57,7 @@ TEST(Fine, Rasterizer)
     for (NRuint i = 0; i < totalScreenSize; ++i)
     {
         h_colorBuffer[i] = { 0, 0, 0 };
-        h_depthBuffer[i] = 1.1;
+        h_depthBuffer[i] = defaultDepth;
     }
     
     fillTriangles<dim>(screenDim, config, totalWorkGroupCount, expectedDepth, 256, h_triangles.get(), h_binQueues.get());
@@ -93,10 +95,18 @@ TEST(Fine, Rasterizer)
     testee.params.frameBuffer = frame;
 
     testee.global = cl::NDRange(binCountX, binCountY);
-    testee.local  = cl::NDRange(binCountX, binCountY);
+    testee.local  = cl::NDRange(binCountX, binCountY / totalWorkGroupCount);
 
     ASSERT_TRUE(isSuccess(testee(q)));
     ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.color, CL_FALSE, 0, totalScreenSize * sizeof(RawColorRGB), h_colorBuffer.get())));
     ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.depth, CL_FALSE, 0, totalScreenSize * sizeof(NRfloat), h_depthBuffer.get())));
     ASSERT_TRUE(isSuccess(q.finish()));
+
+    for (NRuint y = 0; y < screenDim.height; ++y)
+    {
+        for (NRuint x = 0; x < screenDim.width; ++x)
+        {
+            ASSERT_TRUE(h_depthBuffer[y * screenDim.width + x] == defaultDepth || h_depthBuffer[y * screenDim.width + x] == 1 / expectedDepth);
+        }
+    }
 }
