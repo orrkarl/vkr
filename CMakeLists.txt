@@ -7,7 +7,7 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF()
 
 OPTION(BUILD_TESTS "builds the test directory and gtest" ON)
-OPTION(BUILD_DEMOS "builds the demo directory" OFF)
+OPTION(BUILD_DEMOS "builds the demo directory" ON)
 
 OPTION(FIND_GTEST "find installed gtest instead of building it" OFF)
 
@@ -23,17 +23,18 @@ ADD_SUBDIRECTORY(dependencies)
 
 ADD_SUBDIRECTORY(lib)
 
+SET(NRASTER_ALL_INCLUDES ${PROJECT_SOURCE_DIR}/lib/inc)
+
 IF(BUILD_DEMOS)
 	ADD_SUBDIRECTORY(demo)
 ENDIF()
 
 IF(BUILD_TESTS)
-	SET(NRASTER_ALL_INCLUDES ${PROJECT_SOURCE_DIR}/lib/inc)
 	
 	ADD_SUBDIRECTORY(test)
 	ENABLE_TESTING()
 	ADD_TEST(NAME AllTests COMMAND NrasterTest) # run the executable itself for a better log as it uses GTest
 
-	UNSET(NRASTER_ALL_INCLUDES)
 ENDIF()
 
+UNSET(NRASTER_ALL_INCLUDES)
