@@ -37,47 +37,50 @@ int main()
     cl_int cl_err = CL_SUCCESS;
     nr::Error nr_err = nr::Error::NO_ERROR;
 
-    if (!init("Nraster Demo 3d", error_callback, key_callback, wnd)) return EXIT_FAILURE;
+    nr::ScreenDimension screenDim = { 640, 480 };
+    const NRuint dim = 3;
+    nr::__internal::BinQueueConfig config = { 32, 32, 10 };
+    cl::CommandQueue q = cl::CommandQueue::getDefault();
 
-    nr::__internal::Module nr_code(
-        {nr::__internal::clcode::base,
-         nr::__internal::clcode::bin_rasterizer,
-         nr::__internal::clcode::fine_rasterizer,
-         nr::__internal::clcode::vertex_shading},
-         "-cl-std=CL2.0 -Werror -D RENDER_DIMENSION=3",
-         &cl_err);
-    
+    if (!init("Nraster Demo 3d", screenDim, error_callback, key_callback, wnd)) return EXIT_FAILURE;
+
+    nr::__internal::Module nr_code = mkFullModule(dim, &cl_err);
     if (cl_err != CL_SUCCESS)
     {
-        std::cout << "Could not create nr_code: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")";
+        std::cout << "Could not create nr_code: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
         return EXIT_FAILURE;
     }
 
-    // Creating Kernels
-    auto vertex_shader = nr_code.makeKernel<nr::__internal::VertexShadingParams>("shade_vertex", &cl_err);
-    if (cl_err != CL_SUCCESS)
+    nr::FrameBuffer frame = mkFrameBuffer(screenDim, &nr_err);
+    if (nr::error::isFailure(nr_err))
     {
-        std::cout << "Could not create vertex shader kernel: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")";
+        std::cout << "Could not create frame buffer: " << nr::utils::stringFromNRError(nr_err) << "(" << nr_err << ")\n";
         return EXIT_FAILURE;
     }
 
-    auto bin_rasterizer = nr_code.makeKernel<nr::__internal::BinRasterizerParams>("bin_rasterize", &cl_err);
+    auto pipeline = FullPipeline(nr_code, &cl_err);
     if (cl_err != CL_SUCCESS)
     {
-        std::cout << "Could not create bin rasterizer kernel: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")";
+        std::cout << "Could not create pipeline: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
         return EXIT_FAILURE;
     }
 
-    auto fine_rasterizer = nr_code.makeKernel<nr::__internal::FineRasterizerParams>("fine_rasterize", &cl_err);
-    if (cl_err != CL_SUCCESS)
+    if (nr::error::isFailure(nr_err = pipeline.setup(dim, 1, h_triangle, h_near, h_far, screenDim, config, 1, frame)))
     {
-        std::cout << "Could not create fine rasterizer kernel: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")";
+        std::cout << "Failed to setup pipeline: " << nr::utils::stringFromNRError(nr_err) << "(" << nr_err << ")\n";
         return EXIT_FAILURE;
     }
 
+    if ((cl_err = pipeline(q)) != CL_SUCCESS)
+    {
+        std::cout << "Failed to execute pipeline: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
+        return EXIT_FAILURE;
+    }
+
+    pipeline.writeToGL();
+    glfwSwapBuffers(wnd);
 
     while (!glfwWindowShouldClose(wnd))
     {
-
     }
 }

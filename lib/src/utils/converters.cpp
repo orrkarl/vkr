@@ -44,6 +44,7 @@ Error fromCLError(const cl_int& err)
             return Error::INVALID_COMPILER;
 
         default:
+            printf("Unknown OpenCL error: ")
             return Error::UNKNOWN_ERROR;
     }
 }

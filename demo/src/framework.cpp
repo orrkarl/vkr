@@ -1,6 +1,6 @@
 #include <framework.h>
 
-bool init(const nr::string name, GLFWerrorfun errorCallback, GLFWkeyfun keyCallback, GLFWwindow* wnd)
+bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWerrorfun errorCallback, GLFWkeyfun keyCallback, GLFWwindow* wnd)
 {
     glfwSetErrorCallback(errorCallback);
     if (!glfwInit()) return false;
@@ -9,7 +9,7 @@ bool init(const nr::string name, GLFWerrorfun errorCallback, GLFWkeyfun keyCallb
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
-    wnd = glfwCreateWindow(640, 480, name.c_str(), NULL, NULL);
+    wnd = glfwCreateWindow(dim.width, dim.height, name.c_str(), NULL, NULL);
     if (!wnd)
     {
         glfwTerminate();
@@ -49,12 +49,14 @@ _nr::Module mkFullModule(const NRuint dim, cl_int* err)
                  err);
 }
 
-nr::FrameBuffer mkFrameBuffer(const NRuint w, const NRuint h, nr::Error* err)
+nr::FrameBuffer mkFrameBuffer(const nr::ScreenDimension& dim, nr::Error* err)
 {
+    const NRuint totalScreenSize = dim.width * dim.height;
+
     nr::FrameBuffer ret;
-    ret.color = nr::Buffer(CL_MEM_READ_WRITE, 3 * sizeof(NRubyte) * w * h, err);  
-    if (nr::error::isFailure(*err)) return;
-    ret.depth = nr::Buffer(CL_MEM_READ_WRITE, sizeof(NRfloat) * w * h, err);
+    ret.color = nr::Buffer(CL_MEM_READ_WRITE, 3 * sizeof(NRubyte) * totalScreenSize, err);  
+    if (nr::error::isFailure(*err)) return ret;
+    ret.depth = nr::Buffer(CL_MEM_READ_WRITE, sizeof(NRfloat) * totalScreenSize, err);
     return ret;
 }
 
@@ -67,33 +69,79 @@ FullPipeline::FullPipeline(_nr::Module module, cl_int* err)
     fineRasterizer = module.makeKernel<_nr::FineRasterizerParams>("fine_rasterize", err);
 }
 
-nr::Error setupPipeline(
-    FullPipeline pipeline,
+nr::Error FullPipeline::setup(
     const NRuint dim,
-    const NRuint triangleCount,         
+    const NRuint triangleCount, NRfloat* vertecies, NRfloat* near, NRfloat* far,
     nr::ScreenDimension screenDim, _nr::BinQueueConfig config,                  
     const NRuint binRasterWorkGroupCount, nr::FrameBuffer frameBuffer)
 {
     nr::Error ret = nr::Error::NO_ERROR;
+
+    const NRuint binCountX = ceil(((NRfloat) screenDim.width) / config.binWidth);
+    const NRuint binCountY = ceil(((NRfloat) screenDim.height) / config.binHeight);
+    const NRuint totalBinCount = binCountX * binCountY;
+    const NRuint totalScreenDim = screenDim.width * screenDim.height;
     
     // Vertex Shader
-    pipeline.vertexShader.params.points = nr::Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * 3 * sizeof(NRfloat) * triangleCount, &ret);
+    vertexShader.params.points = nr::Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * 3 * sizeof(NRfloat) * triangleCount, vertecies, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
-    pipeline.vertexShader.params.near = nr::Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * sizeof(NRfloat), &ret);
+    vertexShader.params.near   = nr::Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * sizeof(NRfloat), near, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
-    pipeline.vertexShader.params.far = nr::Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * sizeof(NRfloat), &ret);
+    vertexShader.params.far    = nr::Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * sizeof(NRfloat), far, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
-    pipeline.vertexShader.params.result = nr::Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * 3 * sizeof(NRfloat) * triangleCount, &ret);
+    vertexShader.params.result = nr::Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * 3 * sizeof(NRfloat) * triangleCount, &ret);
     if (nr::error::isFailure(ret)) return ret;
+
+    vertexShader.global = cl::NDRange(triangleCount);
+    vertexShader.local  = cl::NDRange(1);
 
 
     // Bin rasterizer
-    pipeline.binRasterizer.params.triangleData = pipeline.vertexShader.params.result;
-    pipeline.binRasterizer.params.triangleCount = triangleCount;
-    pipeline.binRasterizer.params.dimension = screenDim;
-    pipeline.binRasterizer.params.binQueueConfig = config;
+    binRasterizer.params.triangleData   = vertexShader.params.result;
+    binRasterizer.params.triangleCount  = triangleCount;
+    binRasterizer.params.dimension      = screenDim;
+    binRasterizer.params.binQueueConfig = config;
+    binRasterizer.params.hasOverflow    = nr::Buffer(CL_MEM_WRITE_ONLY, sizeof(cl_bool), &ret);
+    if (nr::error::isFailure(ret)) return ret;
+    binRasterizer.params.binQueues = nr::Buffer(CL_MEM_READ_WRITE, 3 * dim * binRasterWorkGroupCount * totalBinCount * (config.queueSize + 1), &ret);
+    if (nr::error::isFailure(ret)) return ret;
+
+    binRasterizer.global = cl::NDRange(binRasterWorkGroupCount * binCountX, binCountY);
+    binRasterizer.local  = cl::NDRange(binCountX, binCountY);
+
+    // Fine rasterizer
+    fineRasterizer.params.triangleData   = vertexShader.params.result;
+    fineRasterizer.params.workGroupCount = binRasterWorkGroupCount;
+    fineRasterizer.params.dim            = screenDim;
+    fineRasterizer.params.binQueueConfig = config;
+    fineRasterizer.params.binQueues      = binRasterizer.params.binQueues;
+    fineRasterizer.params.frameBuffer    = frameBuffer;
+
+    fineRasterizer.global = cl::NDRange(binCountX, binCountY);
+    fineRasterizer.local  = cl::NDRange(binCountX / binRasterWorkGroupCount, binCountY);
+
+    // Bitmap allocation
+    bitmap = std::make_unique<GLubyte>(totalScreenDim);
+
+    return nr::Error::NO_ERROR;
+}
+
+cl_int FullPipeline::operator()(cl::CommandQueue q)
+{
+    const NRuint totalScreenDim = fineRasterizer.params.dim.width * fineRasterizer.params.dim.height;
+    cl_int cl_err = CL_SUCCESS;
+    
+    if ((cl_err = vertexShader(q)) != CL_SUCCESS)   return cl_err;
+    if ((cl_err = binRasterizer(q)) != CL_SUCCESS)  return cl_err;
+    if ((cl_err = fineRasterizer(q)) != CL_SUCCESS) return cl_err;
+    return q.enqueueReadBuffer(fineRasterizer.params.frameBuffer.color.getBuffer(), CL_FALSE, 0, 3 * sizeof(NRubyte) * totalScreenDim, bitmap.get());
+}
+
+void FullPipeline::writeToGL()
+{
+    glDrawPixels(fineRasterizer.params.dim.width, fineRasterizer.params.dim.height, GL_RGB, GL_UNSIGNED_BYTE, bitmap.get());
 }
 
