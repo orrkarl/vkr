@@ -15,7 +15,6 @@ using namespace testing;
 TEST(VertexShader, Perspective)
 {
     cl_int err = CL_SUCCESS;
-    Error error = Error::NO_ERROR;
 
     const NRuint dim = 3;
 
@@ -46,13 +45,13 @@ TEST(VertexShader, Perspective)
     auto q = cl::CommandQueue::getDefault(&err);
     ASSERT_TRUE(isSuccess(err));
 
-    Buffer d_point(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(p.values), p.values, &error);
+    Buffer d_point(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(p.values), p.values, &err);
     ASSERT_TRUE(isSuccess(err));
-    Buffer d_near(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(near), near, &error);
+    Buffer d_near(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(near), near, &err);
     ASSERT_TRUE(isSuccess(err));
-    Buffer d_far(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(far), far, &error);
+    Buffer d_far(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(far), far, &err);
     ASSERT_TRUE(isSuccess(err));
-    Buffer d_result(CL_MEM_READ_WRITE, sizeof(result.values), &error);
+    Buffer d_result(CL_MEM_READ_WRITE, sizeof(result.values), &err);
     ASSERT_TRUE(isSuccess(err));
 
     testee.params.points = d_point;

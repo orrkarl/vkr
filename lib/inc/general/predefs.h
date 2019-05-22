@@ -47,33 +47,10 @@ namespace type
 	NR_SHARED_EXPORT NRuint getByteSize(const Type& type);
 }
 
-enum class NR_SHARED_EXPORT Error : NRint
-{
-	NO_ERROR=0,
-	
-	INVALID_TYPE		= 1,
-	INVALID_VALUE		= 2,
-	INVALID_OPERATION	= 3,
-	
-	HOST_OUT_OF_MEMORY		= 4,
-	DEVIDE_OUT_OF_MEMORY	= 5,
-
-	INVALID_COMPILER_OPTIONS	= 6,
-	COMPILATION_FAILURE			= 7,
-	INVALID_COMPILER			= 8,
-
-	INVALID_ARGS	= 9,
-	
-	UNKNOWN_ERROR	= 10
-};
-
-
-std::ostream& operator<<(std::ostream& os, const Error& error);
-
 namespace error
 {
-	NR_SHARED_EXPORT NRbool isSuccess(const Error& err);
-	NR_SHARED_EXPORT NRbool isFailure(const Error& err);
+	NR_SHARED_EXPORT NRbool isSuccess(const cl_int& err);
+	NR_SHARED_EXPORT NRbool isFailure(const cl_int& err);
 }
 
 }

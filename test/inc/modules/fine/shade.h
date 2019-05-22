@@ -35,7 +35,6 @@ struct ShadeTestParams
 
 TEST(Fine, ShadeTest)
 {
-    Error error = Error::NO_ERROR;
     cl_int err = CL_SUCCESS;
 
     const NRuint dim = 6;
@@ -68,10 +67,10 @@ TEST(Fine, ShadeTest)
     const NRuint idx = index_from_screen(firstFrag.position, screenDim);
 
     FrameBuffer frame;
-    frame.color = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_color), h_color, &error);
-    ASSERT_PRED1(error::isSuccess, error);
-    frame.depth = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_depth), h_depth, &error);
-    ASSERT_PRED1(error::isSuccess, error);
+    frame.color = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_color), h_color, &err);
+    ASSERT_PRED1(error::isSuccess, err);
+    frame.depth = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_depth), h_depth, &err);
+    ASSERT_PRED1(error::isSuccess, err);
     
     Module code({clcode::base, clcode::fine_rasterizer}, options, &err);
     ASSERT_TRUE(isSuccess(err));

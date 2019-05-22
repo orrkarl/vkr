@@ -39,21 +39,20 @@ public:
 
 void testBin(Kernel<TriangleInBinParams> testee, cl::CommandQueue q, const NRuint dimension, const Bin& bin, const ScreenDimension& dim, NRfloat* triangle_x, NRfloat* triangle_y)
 {
-    Error error = Error::NO_ERROR;
     cl_int err = CL_SUCCESS;
 
     cl_bool h_result = CL_FALSE;
-    Buffer d_result(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(cl_bool), &h_result, &error);
-    ASSERT_PRED1(error::isSuccess, error);
+    Buffer d_result(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(cl_bool), &h_result, &err);
+    ASSERT_PRED1(error::isSuccess, err);
 
     NRfloat defaultValue = -2.0;
     NRint defaultValueAsInt = * (NRint*) &defaultValue; 
     memset(triangle_x, defaultValueAsInt, 3 * sizeof(NRfloat));
     memset(triangle_y, defaultValueAsInt, 3 * sizeof(NRfloat));
-    Buffer d_triangle_x(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3 * sizeof(NRfloat), triangle_x, &error);
-    ASSERT_PRED1(error::isSuccess, error);
-    Buffer d_triangle_y(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3 * sizeof(NRfloat), triangle_x, &error);
-    ASSERT_PRED1(error::isSuccess, error);
+    Buffer d_triangle_x(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3 * sizeof(NRfloat), triangle_x, &err);
+    ASSERT_PRED1(error::isSuccess, err);
+    Buffer d_triangle_y(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3 * sizeof(NRfloat), triangle_x, &err);
+    ASSERT_PRED1(error::isSuccess, err);
 
     testee.params.bin = bin;
     testee.params.dim = dim;
@@ -108,7 +107,6 @@ TEST(Binning, IsSimplexInBin)
     sprintf(options, options_fmt, dim);
 
     cl_int err = CL_SUCCESS; 
-    Error error = Error::NO_ERROR;
 
     NRfloat triangle_x[3];
     NRfloat triangle_y[3];

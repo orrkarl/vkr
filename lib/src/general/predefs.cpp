@@ -3,11 +3,6 @@
 namespace nr
 {
 
-std::ostream& operator<<(std::ostream& os, const Error& error)
-{
-	return os << (NRint) error;
-}
-
 namespace type
 {
 	NRuint getByteSize(const Type& type)
@@ -52,8 +47,8 @@ namespace type
 
 namespace error
 {
-	NRbool isSuccess(const Error& err) { return err == Error::NO_ERROR; }
-	NRbool isFailure(const Error& err) { return err != Error::NO_ERROR; }
+	NRbool isSuccess(const cl_int& err) { return err == CL_SUCCESS; }
+	NRbool isFailure(const cl_int& err) { return err != CL_SUCCESS; }
 }
 
 

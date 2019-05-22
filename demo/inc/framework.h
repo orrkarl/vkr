@@ -34,7 +34,7 @@ struct FullPipeline
 
     FullPipeline(_nr::Module module, cl_int* err);
 
-    nr::Error setup(
+    cl_int setup(
         const NRuint dim,
         const NRuint simplexCount, NRfloat* vertecies, NRfloat* near, NRfloat* far,     // Vertex shader
         nr::ScreenDimension screenDim, _nr::BinQueueConfig config,                      // Bin rasterizer
@@ -47,5 +47,5 @@ struct FullPipeline
 
 _nr::Module mkFullModule(const NRuint dim, cl_int* err);
 
-nr::FrameBuffer mkFrameBuffer(const nr::ScreenDimension& dim, nr::Error* err);
+nr::FrameBuffer mkFrameBuffer(const nr::ScreenDimension& dim, cl_int* err);
 

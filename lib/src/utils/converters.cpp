@@ -6,69 +6,6 @@ namespace nr
 namespace utils
 {
 
-Error fromCLError(const cl_int& err)
-{
-    switch(err)
-    {
-        case CL_SUCCESS:
-            return Error::NO_ERROR;
-
-        case CL_INVALID_PROGRAM:
-        case CL_INVALID_PROGRAM_EXECUTABLE:
-        case CL_INVALID_KERNEL_NAME:
-        case CL_INVALID_VALUE:
-        case CL_INVALID_COMMAND_QUEUE:
-        case CL_INVALID_CONTEXT:
-        case CL_INVALID_MEM_OBJECT:
-            return Error::INVALID_VALUE;
-
-        case CL_INVALID_KERNEL_ARGS:
-            return Error::INVALID_ARGS;
-
-        case CL_INVALID_KERNEL_DEFINITION:
-            return Error::INVALID_TYPE;
-
-        case CL_OUT_OF_RESOURCES:
-            return Error::DEVIDE_OUT_OF_MEMORY; 
-        case CL_OUT_OF_HOST_MEMORY:
-            return Error::HOST_OUT_OF_MEMORY;
-        
-        case CL_INVALID_OPERATION:
-            return Error::INVALID_OPERATION;
-
-        case CL_INVALID_BUILD_OPTIONS:
-            return Error::INVALID_COMPILER_OPTIONS;
-        case CL_BUILD_PROGRAM_FAILURE:
-            return Error::COMPILATION_FAILURE;
-        case CL_COMPILER_NOT_AVAILABLE:
-            return Error::INVALID_COMPILER;
-
-        default:
-            printf("Unknown OpenCL error: ")
-            return Error::UNKNOWN_ERROR;
-    }
-}
-
-const string stringFromNRError(const Error& err)
-{
-    switch(err)
-    {
-        case Error::NO_ERROR: return "NO_ERROR";
-	    case Error::INVALID_TYPE: return "INVALID_TYPE";
-	    case Error::INVALID_VALUE: return "INVALID_VALUE";
-	    case Error::INVALID_OPERATION: return "INVALID_OPERATION";
-	    case Error::HOST_OUT_OF_MEMORY: return "HOST_OUT_OF_MEMORY";
-	    case Error::DEVIDE_OUT_OF_MEMORY: return "DEVIDE_OUT_OF_MEMORY";
-	    case Error::INVALID_COMPILER_OPTIONS: return "INVALID_COMPILER_OPTIONS";
-	    case Error::COMPILATION_FAILURE: return "COMPILATION_FAILURE";
-	    case Error::INVALID_COMPILER: return "INVALID_COMPILER";
-	    case Error::INVALID_ARGS: return "INVALID_ARGS";
-        case Error::UNKNOWN_ERROR: return "UNKNOWN_ERROR";
-
-        default: return "Unrecognized error value";
-    }
-}
-
 const string stringFromCLError(const cl_int& error)
 {
 switch(error){

@@ -49,7 +49,7 @@ _nr::Module mkFullModule(const NRuint dim, cl_int* err)
                  err);
 }
 
-nr::FrameBuffer mkFrameBuffer(const nr::ScreenDimension& dim, nr::Error* err)
+nr::FrameBuffer mkFrameBuffer(const nr::ScreenDimension& dim, cl_int* err)
 {
     const NRuint totalScreenSize = dim.width * dim.height;
 
@@ -69,14 +69,14 @@ FullPipeline::FullPipeline(_nr::Module module, cl_int* err)
     fineRasterizer = module.makeKernel<_nr::FineRasterizerParams>("fine_rasterize", err);
 }
 
-nr::Error FullPipeline::setup(
+cl_int FullPipeline::setup(
     const NRuint dim,
     const NRuint triangleCount, NRfloat* vertecies, NRfloat* near, NRfloat* far,
     nr::ScreenDimension screenDim, _nr::BinQueueConfig config,                  
     const NRuint binRasterWorkGroupCount, nr::FrameBuffer frameBuffer)
 {
-    nr::Error ret = nr::Error::NO_ERROR;
-
+    cl_int ret = CL_SUCCESS;
+    
     const NRuint binCountX = ceil(((NRfloat) screenDim.width) / config.binWidth);
     const NRuint binCountY = ceil(((NRfloat) screenDim.height) / config.binHeight);
     const NRuint totalBinCount = binCountX * binCountY;
@@ -92,7 +92,7 @@ nr::Error FullPipeline::setup(
     vertexShader.params.far    = nr::Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * sizeof(NRfloat), far, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
-    vertexShader.params.result = nr::Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * 3 * sizeof(NRfloat) * triangleCount, &ret);
+    vertexShader.params.result = nr::Buffer(CL_MEM_READ_WRITE, dim * 3 * sizeof(NRfloat) * triangleCount, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
     vertexShader.global = cl::NDRange(triangleCount);
@@ -126,7 +126,7 @@ nr::Error FullPipeline::setup(
     // Bitmap allocation
     bitmap = std::make_unique<GLubyte>(totalScreenDim);
 
-    return nr::Error::NO_ERROR;
+    return CL_SUCCESS;
 }
 
 cl_int FullPipeline::operator()(cl::CommandQueue q)
@@ -134,9 +134,13 @@ cl_int FullPipeline::operator()(cl::CommandQueue q)
     const NRuint totalScreenDim = fineRasterizer.params.dim.width * fineRasterizer.params.dim.height;
     cl_int cl_err = CL_SUCCESS;
     
+    printf("Enqueuing vertex shader\n");
     if ((cl_err = vertexShader(q)) != CL_SUCCESS)   return cl_err;
+    printf("Enqueuing bin rasterizer\n");
     if ((cl_err = binRasterizer(q)) != CL_SUCCESS)  return cl_err;
+    printf("Enqueuing fine rasterizer\n");
     if ((cl_err = fineRasterizer(q)) != CL_SUCCESS) return cl_err;
+    printf("Enqueuing framebuffer copy\n");
     return q.enqueueReadBuffer(fineRasterizer.params.frameBuffer.color.getBuffer(), CL_FALSE, 0, 3 * sizeof(NRubyte) * totalScreenDim, bitmap.get());
 }
 

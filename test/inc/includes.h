@@ -116,4 +116,3 @@ NDCPosition ndcFromScreen(const ScreenPosition screen, const nr::ScreenDimension
 
 testing::AssertionResult isSuccess(const cl_int& err);
 
-testing::AssertionResult isSuccess(const nr::Error& err);

@@ -5,18 +5,18 @@
 namespace nr
 {
 
-Buffer::Buffer(cl_mem_flags flags, const NRulong& size, void* data, Error* error)
+Buffer::Buffer(cl_mem_flags flags, const NRulong& size, void* data, cl_int* error)
 {
     cl_int err;
     m_buffer = cl::Buffer(flags, size, data, &err);
-    if (error != nullptr) *error = utils::fromCLError(err);
+    if (error != nullptr) *error = err;
 }
 
-Error Buffer::resize(cl_mem_flags flags, const NRuint size)
+cl_int Buffer::resize(cl_mem_flags flags, const NRuint size)
 {
     cl_int err;
     m_buffer = cl::Buffer(flags, size, nullptr, &err);
-    return utils::fromCLError(err);
+    return err;
 }
 
 }

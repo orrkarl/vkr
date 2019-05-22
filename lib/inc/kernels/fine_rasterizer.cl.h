@@ -13,9 +13,6 @@ namespace clcode
 
 const string fine_rasterizer = R"__CODE__(
 
-#define SAMPLE_X (0)
-#define SAMPLE_Y (1)
-
 void shade(
     Fragment fragment,
     const ScreenDimension dim,
@@ -26,7 +23,6 @@ void shade(
         
     if (fragment.depth > depth[buffer_index])
     {
-        DEBUG_ITEM_SPECIFIC2(SAMPLE_X, SAMPLE_Y, 0, "Applying fragment at (%u, %u)\n", fragment.position.x, fragment.position.y);
         fragment.color = RAW_RED; // replace this when you get to the actual shading scheme
     
         color[buffer_index] = fragment.color;
@@ -84,7 +80,6 @@ uint pick_queue(const Index** queues, uint* indices, const uint work_group_count
     {
         if (is_queue_valid(queues, indices, i, queue_size))
         {
-            DEBUG_ITEM_SPECIFIC1(SAMPLE_X, SAMPLE_Y, 0, "Queue %d is NOT empty!\n", i);
             if (current_queue == work_group_count)
             {
                 current_queue = i;
@@ -93,10 +88,6 @@ uint pick_queue(const Index** queues, uint* indices, const uint work_group_count
             {
                 current_queue = i;
             }
-        }
-        else
-        {
-            DEBUG_ITEM_SPECIFIC1(SAMPLE_X, SAMPLE_Y, 0, "Queue %d is empty!\n", i);
         }
     }
 
@@ -122,6 +113,8 @@ kernel void fine_rasterize(
     global RawColorRGB* color,
     global Depth* depth)
 {
+    DEBUG_ONCE("Starting fine rasterizer\n");
+
     Fragment current_frag;
     float barycentric[3];
     uint current_queue_elements[MAX_WORK_GROUP_COUNT];
@@ -142,8 +135,6 @@ kernel void fine_rasterize(
     Index current_queue_element;
     
     NDCPosition p0, p1, p2;
-
-    DEBUG_ITEM_SPECIFIC2(SAMPLE_X, SAMPLE_Y, 0, "Handling bin (%d, %d)\n", x, y);
 
     if (work_group_count >= MAX_WORK_GROUP_COUNT) return;
 
@@ -166,8 +157,6 @@ kernel void fine_rasterize(
     while (true)
     {
         current_queue = pick_queue(current_queue_bases, current_queue_elements, work_group_count, config.queue_size);
-        DEBUG_ITEM_SPECIFIC1(SAMPLE_X, SAMPLE_Y, 0, "current index - %d\n", current_queue_elements[current_queue]);
-        DEBUG_ITEM_SPECIFIC1(SAMPLE_X, SAMPLE_Y, 0, "current queue - %d\n", current_queue);
         
         if (current_queue >= work_group_count) break;
         
@@ -176,11 +165,9 @@ kernel void fine_rasterize(
         if (is_ccw(triangle_data, current_queue_element))
         {
             current_queue_elements[current_queue] += 1;
-            DEBUG_ITEM_SPECIFIC1(SAMPLE_X, SAMPLE_Y, 0, "Triangle %d backface culled!\n", current_queue_element);
             continue;
         }
 
-        DEBUG_ITEM_SPECIFIC1(SAMPLE_X, SAMPLE_Y, 0, "current queue element - %d\n", current_queue_element);
 
         for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, x * config.bin_width + config.bin_width); ++frag_x)
         {
@@ -196,15 +183,6 @@ kernel void fine_rasterize(
                 p2 = (float2)(triangle_data[current_queue_element][2][0], triangle_data[current_queue_element][2][1]);
     
                 barycentric2d(p0, p1, p2, current_position_ndc, barycentric);                
-
-                DEBUG_ITEM_SPECIFIC8(
-                        SAMPLE_X, SAMPLE_Y, 0, 
-                        "Triangle: [(%f, %f), (%f, %f), (%f, %f)] | Point: (%f, %f)\n",
-                        triangle_data[current_queue_element][0][0], triangle_data[current_queue_element][0][1],
-                        triangle_data[current_queue_element][1][0], triangle_data[current_queue_element][1][1],
-                        triangle_data[current_queue_element][2][0], triangle_data[current_queue_element][2][1],
-                        current_position_ndc.x, current_position_ndc.y);
-                DEBUG_ITEM_SPECIFIC2(SAMPLE_X, SAMPLE_Y, 0, "Raw point: (%d, %d)\n", frag_x, frag_y);
 
                 if (is_point_in_triangle(p0, p1, p2, barycentric))
                 {

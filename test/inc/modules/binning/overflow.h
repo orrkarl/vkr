@@ -19,7 +19,6 @@ using namespace testing;
 TEST(Binning, RasterizerOverflow)
 {
     cl_int err = CL_SUCCESS; 
-    Error error = Error::NO_ERROR;
 
     const NRuint dim = 4;
     const NRuint triangleCount = 400;
@@ -49,15 +48,15 @@ TEST(Binning, RasterizerOverflow)
 
     auto testee = code.makeKernel<BinRasterizerParams>("bin_rasterize", &err);
     ASSERT_EQ(CL_SUCCESS, err);
+    
+    Buffer d_triangles(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount * sizeof(Triangle<dim>), (float*) h_triangles, &err);
+    ASSERT_PRED1(error::isSuccess, err);
 
-    Buffer d_triangles(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount * sizeof(Triangle<dim>), (float*) h_triangles, &error);
-    ASSERT_PRED1(error::isSuccess, error);
+    Buffer d_overflow(CL_MEM_READ_WRITE, sizeof(cl_bool), nullptr, &err);
+    ASSERT_PRED1(error::isSuccess, err);
 
-    Buffer d_overflow(CL_MEM_READ_WRITE, sizeof(cl_bool), nullptr, &error);
-    ASSERT_PRED1(error::isSuccess, error);
-
-    Buffer d_binQueues(CL_MEM_READ_WRITE, BinRasterizerParams::getTotalBinQueueSize(workGroupCount, screenDim, config), &error);
-    ASSERT_PRED1(error::isSuccess, error);
+    Buffer d_binQueues(CL_MEM_READ_WRITE, BinRasterizerParams::getTotalBinQueueSize(workGroupCount, screenDim, config), &err);
+    ASSERT_PRED1(error::isSuccess, err);
 
     testee.params.binQueueConfig = config;
     testee.params.dimension = screenDim;

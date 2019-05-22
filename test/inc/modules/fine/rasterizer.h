@@ -25,7 +25,6 @@ void validateFragment(const Fragment& fragment, const ScreenDimension& screenDim
 
 TEST(Fine, Rasterizer)
 {
-    Error error = Error::NO_ERROR;
     cl_int err = CL_SUCCESS;
 
     const NRuint dim = 5;
@@ -77,15 +76,15 @@ TEST(Fine, Rasterizer)
     ASSERT_TRUE(isSuccess(err));
 
     FrameBuffer frame;
-    frame.color = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize * sizeof(RawColorRGB), h_colorBuffer.get(), &error);
-    ASSERT_TRUE(isSuccess(error));
-    frame.depth = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize * sizeof(NRfloat), h_depthBuffer.get(), &error);
-    ASSERT_TRUE(isSuccess(error));
+    frame.color = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize * sizeof(RawColorRGB), h_colorBuffer.get(), &err);
+    ASSERT_TRUE(isSuccess(err));
+    frame.depth = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize * sizeof(NRfloat), h_depthBuffer.get(), &err);
+    ASSERT_TRUE(isSuccess(err));
 
-    Buffer d_triangles(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount * sizeof(Triangle<dim>), h_triangles.get(), &error);
-    ASSERT_TRUE(isSuccess(error));
-    Buffer d_binQueues(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, totalBinQueuesSize * sizeof(NRuint), h_binQueues.get(), &error);
-    ASSERT_TRUE(isSuccess(error));
+    Buffer d_triangles(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount * sizeof(Triangle<dim>), h_triangles.get(), &err);
+    ASSERT_TRUE(isSuccess(err));
+    Buffer d_binQueues(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, totalBinQueuesSize * sizeof(NRuint), h_binQueues.get(), &err);
+    ASSERT_TRUE(isSuccess(err));
 
     testee.params.triangleData = d_triangles;
     testee.params.dim = screenDim;

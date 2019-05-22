@@ -35,7 +35,6 @@ int main()
 {
     GLFWwindow* wnd;
     cl_int cl_err = CL_SUCCESS;
-    nr::Error nr_err = nr::Error::NO_ERROR;
 
     nr::ScreenDimension screenDim = { 640, 480 };
     const NRuint dim = 3;
@@ -51,10 +50,10 @@ int main()
         return EXIT_FAILURE;
     }
 
-    nr::FrameBuffer frame = mkFrameBuffer(screenDim, &nr_err);
-    if (nr::error::isFailure(nr_err))
+    nr::FrameBuffer frame = mkFrameBuffer(screenDim, &cl_err);
+    if (nr::error::isFailure(cl_err))
     {
-        std::cout << "Could not create frame buffer: " << nr::utils::stringFromNRError(nr_err) << "(" << nr_err << ")\n";
+        std::cout << "Could not create frame buffer: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
         return EXIT_FAILURE;
     }
 
@@ -65,9 +64,9 @@ int main()
         return EXIT_FAILURE;
     }
 
-    if (nr::error::isFailure(nr_err = pipeline.setup(dim, 1, h_triangle, h_near, h_far, screenDim, config, 1, frame)))
+    if (nr::error::isFailure(cl_err = pipeline.setup(dim, 1, h_triangle, h_near, h_far, screenDim, config, 1, frame)))
     {
-        std::cout << "Failed to setup pipeline: " << nr::utils::stringFromNRError(nr_err) << "(" << nr_err << ")\n";
+        std::cout << "Failed to setup pipeline: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
         return EXIT_FAILURE;
     }
 
@@ -76,7 +75,13 @@ int main()
         std::cout << "Failed to execute pipeline: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
         return EXIT_FAILURE;
     }
-
+    
+    if ((cl_err = q.finish()) != CL_SUCCESS)
+    {
+        std::cout << "Failed to execute pipeline: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
+        return EXIT_FAILURE;
+    }
+    
     pipeline.writeToGL();
     glfwSwapBuffers(wnd);
 

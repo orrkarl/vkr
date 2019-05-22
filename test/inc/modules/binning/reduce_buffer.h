@@ -75,7 +75,6 @@ TEST(Binning, ReduceTriangleBuffer)
     sprintf(options, options_fmt, dim, triangleCount);
 
     cl_int err = CL_SUCCESS; 
-    Error error = Error::NO_ERROR;
 
     Module code({clcode::base, clcode::bin_rasterizer}, options, &err);
     ASSERT_EQ(CL_SUCCESS, err);
@@ -91,10 +90,10 @@ TEST(Binning, ReduceTriangleBuffer)
 
     std::vector<NRfloat> h_actual(triangleCount * 3 * 2);
 
-    Buffer d_triangle(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_triangles_raw), (float*) h_triangles_raw, &error);
-    ASSERT_PRED1(error::isSuccess, error);
-    Buffer d_result(CL_MEM_WRITE_ONLY, 2 * trianglesSize / dim, &error);
-    ASSERT_PRED1(error::isSuccess, error);
+    Buffer d_triangle(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_triangles_raw), (float*) h_triangles_raw, &err);
+    ASSERT_PRED1(error::isSuccess, err);
+    Buffer d_result(CL_MEM_WRITE_ONLY, 2 * trianglesSize / dim, &err);
+    ASSERT_PRED1(error::isSuccess, err);
     
     Kernel<ReduceTriangleBufferParams> test = code.makeKernel<ReduceTriangleBufferParams>("reduce_triangle_buffer_test", &err);
     ASSERT_EQ(CL_SUCCESS, err) << utils::stringFromCLError(err);

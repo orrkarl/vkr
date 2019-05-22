@@ -8,7 +8,7 @@ namespace nr
 class Buffer
 {
 public:
-    Buffer(cl_mem_flags flags, const NRulong& size, Error* err = nullptr)
+    Buffer(cl_mem_flags flags, const NRulong& size, cl_int* err = nullptr)
         : Buffer(flags, size, nullptr, err)
     {
     }
@@ -17,13 +17,13 @@ public:
     {
     }
 
-    Buffer(cl_mem_flags flags, const NRulong& size, void* data = nullptr, Error* error = nullptr);
+    Buffer(cl_mem_flags flags, const NRulong& size, void* data = nullptr, cl_int* error = nullptr);
 
     cl::Buffer getBuffer() const { return m_buffer; }
 
     operator cl::Buffer() { return m_buffer; }
 
-    Error resize(cl_mem_flags flags, const NRuint size);
+    cl_int resize(cl_mem_flags flags, const NRuint size);
 
 private:
     cl::Buffer m_buffer;

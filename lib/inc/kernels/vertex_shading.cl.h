@@ -59,6 +59,8 @@ kernel void shade_vertex(
     const global float near[RENDER_DIMENSION], const global float far[RENDER_DIMENSION],
     global Point* result)
 {
+    DEBUG_ONCE("Starting vertex shader\n");
+
     const uint index = get_global_id(0);
     
     __attribute__((opencl_unroll_hint))

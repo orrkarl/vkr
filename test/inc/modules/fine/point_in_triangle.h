@@ -36,7 +36,6 @@ struct PointInTriangleParams
 
 TEST(Fine, PointInTriangle)
 {
-    Error error = Error::NO_ERROR;
     cl_int err = CL_SUCCESS;
 
     const NRuint dim = 6;
@@ -67,11 +66,11 @@ TEST(Fine, PointInTriangle)
     auto testee = code.makeKernel<PointInTriangleParams>("is_point_in_triangle_test", &err);
     ASSERT_EQ(CL_SUCCESS, err);
 
-    Buffer d_triangle(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(triangle), &triangle, &error);
-    ASSERT_PRED1(error::isSuccess, error);
+    Buffer d_triangle(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(triangle), &triangle, &err);
+    ASSERT_PRED1(error::isSuccess, err);
 
-    Buffer d_result(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_bool), &h_result, &error);
-    ASSERT_PRED1(error::isSuccess, error);
+    Buffer d_result(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_bool), &h_result, &err);
+    ASSERT_PRED1(error::isSuccess, err);
 
     testee.params.triangle = d_triangle;
     testee.params.screenDim = screenDim;

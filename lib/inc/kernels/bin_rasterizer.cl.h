@@ -91,6 +91,8 @@ kernel void bin_rasterize(
 {
     DEBUG(if (get_num_groups(0) * get_num_groups(1) > MAX_WORK_GROUP_COUNT) return);
 
+    DEBUG_ONCE("Starting bin rasterizer\n");
+
     local float reduced_triangles_x[BATCH_COUNT * RENDER_DIMENSION];
     local float reduced_triangles_y[BATCH_COUNT * RENDER_DIMENSION];
     local uint current_batch_index;

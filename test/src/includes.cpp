@@ -36,9 +36,3 @@ testing::AssertionResult isSuccess(const cl_int& err)
     else return testing::AssertionFailure() << nr::utils::stringFromCLError(err) << " (" << err << ')';
 }
 
-testing::AssertionResult isSuccess(const nr::Error& err)
-{
-    if (nr::error::isSuccess(err)) return testing::AssertionSuccess();
-    else return testing::AssertionFailure() << nr::utils::stringFromNRError(err) << " (" << err << ')';
-}
-

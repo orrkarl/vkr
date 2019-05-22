@@ -10,15 +10,14 @@ void ndcFromScreenTestTemplate(Kernel<NDCFromScreenParams> kernel, cl::CommandQu
 {
     NDCPosition result;
     cl_int err = CL_SUCCESS;
-    Error error = Error::NO_ERROR;
 
     kernel.global = cl::NDRange(1);
     kernel.local  = cl::NDRange(1);
     
     kernel.params.position  = screen;
     kernel.params.dimension = dim;
-    kernel.params.result    = Buffer(CL_MEM_READ_WRITE, sizeof(result), &error);
-    ASSERT_TRUE(isSuccess(error));
+    kernel.params.result    = Buffer(CL_MEM_READ_WRITE, sizeof(result), &err);
+    ASSERT_TRUE(isSuccess(err));
 
     ASSERT_TRUE(isSuccess(kernel(q)));
     ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(kernel.params.result, CL_FALSE, 0, sizeof(NDCPosition), &result)));
@@ -31,14 +30,13 @@ void checkConversionBounded(Kernel<NDCFromScreenParams> kernel, cl::CommandQueue
 {
     NDCPosition result;
     cl_int err = CL_SUCCESS;
-    Error error = Error::NO_ERROR;
 
     kernel.global = cl::NDRange(1);
     kernel.local  = cl::NDRange(1);
     
     kernel.params.position  = screen;
     kernel.params.dimension = dim;
-    kernel.params.result    = Buffer(CL_MEM_READ_WRITE, sizeof(result), &error);
+    kernel.params.result    = Buffer(CL_MEM_READ_WRITE, sizeof(result), &err);
 
     ASSERT_TRUE(isSuccess(kernel(q)));
     ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(kernel.params.result, CL_FALSE, 0, sizeof(NDCPosition), &result)));
@@ -52,7 +50,7 @@ void checkConversionBounded(Kernel<NDCFromScreenParams> kernel, cl::CommandQueue
 
 TEST(Base, NDCFromScreen)
 {
-     cl_int err = CL_SUCCESS; 
+    cl_int err = CL_SUCCESS; 
  
     cl::CommandQueue q = cl::CommandQueue::getDefault();
 
