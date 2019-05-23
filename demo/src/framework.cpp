@@ -1,6 +1,6 @@
 #include <framework.h>
 
-bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWerrorfun errorCallback, GLFWkeyfun keyCallback, GLFWwindow* wnd)
+bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWerrorfun errorCallback, GLFWkeyfun keyCallback, GLFWwindow*& wnd)
 {
     glfwSetErrorCallback(errorCallback);
     if (!glfwInit()) return false;
@@ -12,7 +12,7 @@ bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWerrorfun er
     wnd = glfwCreateWindow(dim.width, dim.height, name.c_str(), NULL, NULL);
     if (!wnd)
     {
-        glfwTerminate();
+        glfwTerminate();    
         return false;
     }
 
@@ -95,7 +95,7 @@ cl_int FullPipeline::setup(
     vertexShader.params.result = nr::Buffer(CL_MEM_READ_WRITE, dim * 3 * sizeof(NRfloat) * triangleCount, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
-    vertexShader.global = cl::NDRange(triangleCount);
+    vertexShader.global = cl::NDRange(triangleCount * 3);
     vertexShader.local  = cl::NDRange(1);
 
 
@@ -123,9 +123,6 @@ cl_int FullPipeline::setup(
     fineRasterizer.global = cl::NDRange(binCountX, binCountY);
     fineRasterizer.local  = cl::NDRange(binCountX / binRasterWorkGroupCount, binCountY);
 
-    // Bitmap allocation
-    bitmap = std::make_unique<GLubyte>(totalScreenDim);
-
     return CL_SUCCESS;
 }
 
@@ -135,17 +132,17 @@ cl_int FullPipeline::operator()(cl::CommandQueue q)
     cl_int cl_err = CL_SUCCESS;
     
     printf("Enqueuing vertex shader\n");
-    if ((cl_err = vertexShader(q)) != CL_SUCCESS)   return cl_err;
-    printf("Enqueuing bin rasterizer\n");
-    if ((cl_err = binRasterizer(q)) != CL_SUCCESS)  return cl_err;
+    if ((cl_err = vertexShader(q)) != CL_SUCCESS) return cl_err;
+    if ((cl_err = q.finish()) != CL_SUCCESS) return cl_err;
+
+    printf("Enqueuing bin rasterizer\n");   
+    if ((cl_err = binRasterizer(q)) != CL_SUCCESS) return cl_err;
+    if ((cl_err = q.finish()) != CL_SUCCESS) return cl_err;
+     
     printf("Enqueuing fine rasterizer\n");
     if ((cl_err = fineRasterizer(q)) != CL_SUCCESS) return cl_err;
-    printf("Enqueuing framebuffer copy\n");
-    return q.enqueueReadBuffer(fineRasterizer.params.frameBuffer.color.getBuffer(), CL_FALSE, 0, 3 * sizeof(NRubyte) * totalScreenDim, bitmap.get());
-}
+    return q.finish();
 
-void FullPipeline::writeToGL()
-{
-    glDrawPixels(fineRasterizer.params.dim.width, fineRasterizer.params.dim.height, GL_RGB, GL_UNSIGNED_BYTE, bitmap.get());
+    return CL_SUCCESS;
 }
 

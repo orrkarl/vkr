@@ -15,7 +15,7 @@ const string vertex_shading = R"__CODE__(
 
 float normalize(const float value, const float near, const float far)
 {
-    return (far - value) / (far - near);
+    return (value - near) / (far - near);
 }
 
 void normalize_step(
@@ -62,7 +62,7 @@ kernel void shade_vertex(
     DEBUG_ONCE("Starting vertex shader\n");
 
     const uint index = get_global_id(0);
-    
+        
     __attribute__((opencl_unroll_hint))
     for (uint d = 0; d < RENDER_DIMENSION; ++d)
     {

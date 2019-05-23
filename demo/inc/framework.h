@@ -20,7 +20,7 @@
 
 namespace _nr = nr::__internal;
 
-bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWerrorfun errorCallback, GLFWkeyfun keyCallback, GLFWwindow* wnd);
+bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWerrorfun errorCallback, GLFWkeyfun keyCallback, GLFWwindow*& wnd);
 
 
 // Nraster utilities
@@ -30,7 +30,6 @@ struct FullPipeline
     _nr::VertexShader   vertexShader;
     _nr::BinRasterizer  binRasterizer;
     _nr::FineRasterizer fineRasterizer;
-    std::unique_ptr<GLubyte> bitmap;
 
     FullPipeline(_nr::Module module, cl_int* err);
 
@@ -41,8 +40,6 @@ struct FullPipeline
         const NRuint binRasterWorkGroupCount, nr::FrameBuffer frameBuffer);             // Fine rasterizer
 
     cl_int operator()(cl::CommandQueue q);
-
-    void writeToGL();
 };
 
 _nr::Module mkFullModule(const NRuint dim, cl_int* err);

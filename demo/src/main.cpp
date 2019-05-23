@@ -40,6 +40,7 @@ int main()
     const NRuint dim = 3;
     nr::__internal::BinQueueConfig config = { 32, 32, 10 };
     cl::CommandQueue q = cl::CommandQueue::getDefault();
+    std::unique_ptr<GLubyte> bitmap(new GLubyte[3 * screenDim.width * screenDim.height]);
 
     if (!init("Nraster Demo 3d", screenDim, error_callback, key_callback, wnd)) return EXIT_FAILURE;
 
@@ -75,17 +76,31 @@ int main()
         std::cout << "Failed to execute pipeline: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
         return EXIT_FAILURE;
     }
+
+    // printf("Reading from buffer...\n");
+    q.enqueueReadBuffer(frame.color.getBuffer(), CL_TRUE, 0, 3 * screenDim.width * screenDim.height * sizeof(GLubyte), bitmap.get());
+    q.finish();
     
-    if ((cl_err = q.finish()) != CL_SUCCESS)
+    for (auto i = 0; i < screenDim.width * screenDim.height; ++i)
     {
-        std::cout << "Failed to execute pipeline: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
-        return EXIT_FAILURE;
+        if (bitmap.get()[3 * i])
+        {
+            printf("Buffer not clear at idx %d\n", i);
+        }
     }
-    
-    pipeline.writeToGL();
+
+    // printf("Drawing pixels...\n");
+    glViewport(0, 0, screenDim.width, screenDim.height);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawPixels(screenDim.width, screenDim.height, GL_RGB, GL_UNSIGNED_BYTE, bitmap.get());
+    // printf("Swapping buffers...\n");
     glfwSwapBuffers(wnd);
 
     while (!glfwWindowShouldClose(wnd))
     {
+        glfwPollEvents();
     }
+
+    glfwDestroyWindow(wnd);
+    glfwTerminate();
 }
