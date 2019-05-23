@@ -136,7 +136,12 @@ kernel void fine_rasterize(
     
     NDCPosition p0, p1, p2;
 
-    if (work_group_count >= MAX_WORK_GROUP_COUNT) return;
+    if (work_group_count >= MAX_WORK_GROUP_COUNT)
+    {
+        return;
+    }
+    
+    DEBUG_MESSAGE4("[%d, %d] - current element %d | queue head %d\n", x, y, current_queue_element, bin_queues[bin_queue_offset]);
 
     for (uint i = 0; i < work_group_count; ++i)
     {
@@ -158,7 +163,10 @@ kernel void fine_rasterize(
     {
         current_queue = pick_queue(current_queue_bases, current_queue_elements, work_group_count, config.queue_size);
         
-        if (current_queue >= work_group_count) break;
+        if (current_queue >= work_group_count) 
+        {
+            break;
+        }
         
         current_queue_element = current_queue_bases[current_queue][current_queue_elements[current_queue]];
 
@@ -167,7 +175,6 @@ kernel void fine_rasterize(
             current_queue_elements[current_queue] += 1;
             continue;
         }
-
 
         for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, x * config.bin_width + config.bin_width); ++frag_x)
         {

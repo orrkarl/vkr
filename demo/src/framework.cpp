@@ -138,7 +138,7 @@ cl_int FullPipeline::operator()(cl::CommandQueue q)
     printf("Enqueuing bin rasterizer\n");   
     if ((cl_err = binRasterizer(q)) != CL_SUCCESS) return cl_err;
     if ((cl_err = q.finish()) != CL_SUCCESS) return cl_err;
-     
+
     printf("Enqueuing fine rasterizer\n");
     if ((cl_err = fineRasterizer(q)) != CL_SUCCESS) return cl_err;
     return q.finish();

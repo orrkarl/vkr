@@ -110,8 +110,8 @@ kernel void bin_rasterize(
     private uint bin_queue_index = 0;
     private const uint bins_count_x = ceil(((float) screen_dim.width) / config.bin_width);
     private const uint bins_count_y = ceil(((float) screen_dim.height) / config.bin_height);
-    private uint bin_queue_base = config.queue_size * (bins_count_x * bins_count_y * (get_group_id(1) * get_num_groups(0) + get_group_id(0)) + bins_count_x * index_y + index_x); 
-    private uint current_queue_index  = bin_queue_base + 1;
+    private uint bin_queue_base = (config.queue_size + 1) * (bins_count_x * bins_count_y * (get_group_id(1) * get_num_groups(0) + get_group_id(0)) + bins_count_x * index_y + index_x); 
+    private uint current_queue_index = bin_queue_base + 1;
 
     private uint batch_actual_size;
 
@@ -135,6 +135,8 @@ kernel void bin_rasterize(
     work_group_barrier(CLK_GLOBAL_MEM_FENCE);
 
     bin_queues[bin_queue_base] = 1;
+
+    // DEBUG_MESSAGE3("[%d, %d] - Bin queue base = %d\n", index_x, index_y, bin_queue_base);
 
     for(;;)
     {
@@ -163,7 +165,7 @@ kernel void bin_rasterize(
 
         batch_acquisition = reduce_triangle_buffer(triangle_data, batch_actual_size, current_batch_index, 0, reduced_triangles_x, reduced_triangles_y);
         wait_group_events(1, &batch_acquisition);
-
+                
         for (private uint i = 0; i < batch_actual_size; ++i)
         {
             if (
@@ -175,6 +177,7 @@ kernel void bin_rasterize(
             {   
                 bin_queues[current_queue_index++] = current_batch_index + i;
                 bin_queues[bin_queue_base] = 0;
+                // DEBUG_MESSAGE3("Triangle found at (%d, %d) - idx %d\n", current_bin.x, current_bin.y, current_batch_index + i);
             }
 
             // An overflowing queue was detected

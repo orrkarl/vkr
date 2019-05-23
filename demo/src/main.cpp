@@ -38,9 +38,10 @@ int main()
 
     nr::ScreenDimension screenDim = { 640, 480 };
     const NRuint dim = 3;
-    nr::__internal::BinQueueConfig config = { 32, 32, 10 };
+    nr::__internal::BinQueueConfig config = { 32, 32, 5 };
     cl::CommandQueue q = cl::CommandQueue::getDefault();
     std::unique_ptr<GLubyte> bitmap(new GLubyte[3 * screenDim.width * screenDim.height]);
+    
 
     if (!init("Nraster Demo 3d", screenDim, error_callback, key_callback, wnd)) return EXIT_FAILURE;
 
@@ -81,13 +82,31 @@ int main()
     q.enqueueReadBuffer(frame.color.getBuffer(), CL_TRUE, 0, 3 * screenDim.width * screenDim.height * sizeof(GLubyte), bitmap.get());
     q.finish();
     
-    for (auto i = 0; i < screenDim.width * screenDim.height; ++i)
+    for (auto i = 0; i < 3 * screenDim.width * screenDim.height; ++i)
     {
-        if (bitmap.get()[3 * i])
+        if (bitmap.get()[i])
         {
             printf("Buffer not clear at idx %d\n", i);
         }
     }
+
+    // std::unique_ptr<NRuint> bins(new NRuint[pipeline.binRasterizer.params.binQueues.getBuffer().getInfo<CL_MEM_SIZE>() / sizeof(cl_uint)]);
+    // q.enqueueReadBuffer(pipeline.binRasterizer.params.binQueues.getBuffer(), CL_TRUE, 0, pipeline.binRasterizer.params.binQueues.getBuffer().getInfo<CL_MEM_SIZE>(), bins.get());
+    // q.finish();
+// 
+    // for (auto y = 0; y < 2; ++y)
+    // {
+        // for (auto x = 0; x < 2; ++x)
+        // {
+            // printf("Bin (%d, %d): ", x, y);
+            // NRuint* currentQueue = bins.get() + (y * 2 + x) * (config.queueSize + 1); 
+            // for (auto i = 0; i < config.queueSize + 1; ++i)
+            // {
+                // printf("%d ", currentQueue[i]);
+            // }
+            // printf("\n");
+        // }
+    // }
 
     // printf("Drawing pixels...\n");
     glViewport(0, 0, screenDim.width, screenDim.height);
