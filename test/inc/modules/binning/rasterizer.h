@@ -39,7 +39,7 @@ TEST(Binning, Rasterizer)
     const NRuint binCountY = ceil(((NRfloat) screenDim.height) / config.binHeight);
     const NRuint destinationBinX = 1;
     const NRuint destinationBinY = 1;
-    const NRuint destinationBinQueueRawIndex = config.queueSize * (destinationBinY * binCountX + destinationBinX);
+    const NRuint destinationBinQueueRawIndex = (config.queueSize + 1) * (destinationBinY * binCountX + destinationBinX);
     const NRuint* destBinQueueBase = h_result + destinationBinQueueRawIndex;
 
     const NRuint x = destinationBinX * config.binWidth + config.binWidth / 2;

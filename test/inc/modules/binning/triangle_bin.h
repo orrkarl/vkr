@@ -85,22 +85,13 @@ void testBin(Kernel<TriangleInBinParams> testee, cl::CommandQueue q, const NRuin
     ASSERT_EQ(CL_SUCCESS, q.enqueueReadBuffer(d_result.getBuffer(), CL_TRUE, 0, sizeof(cl_bool), &h_result));
     ASSERT_EQ(CL_SUCCESS, q.finish());
     ASSERT_EQ(CL_TRUE, h_result) << "Left-Low corner of the bin";
-    
-    // Just above top-left corner of the bin
-    mkTriangleInCoords(bin.x, bin.y + bin.height + 1, dim, triangle_x, triangle_y);
-    ASSERT_EQ(CL_SUCCESS, q.enqueueWriteBuffer(d_triangle_x.getBuffer(), CL_TRUE, 0, 3 * sizeof(NRfloat), triangle_x));
-    ASSERT_EQ(CL_SUCCESS, q.enqueueWriteBuffer(d_triangle_y.getBuffer(), CL_TRUE, 0, 3 * sizeof(NRfloat), triangle_y));
-    ASSERT_EQ(CL_SUCCESS, testee(q));
-    ASSERT_EQ(CL_SUCCESS, q.enqueueReadBuffer(d_result.getBuffer(), CL_TRUE, 0, sizeof(cl_bool), &h_result));
-    ASSERT_EQ(CL_SUCCESS, q.finish());
-    ASSERT_EQ(CL_FALSE, h_result) << "Above top left corner of the bin";
 }
 
 TEST(Binning, IsSimplexInBin)
 {
     const NRuint dim = 5;
 
-    const char options_fmt[] = "-cl-std=CL2.0 -Werror -D _TEST_BINNING -D RENDER_DIMENSION=%d -D TRIANGLE_TEST_COUNT=1";
+    const char options_fmt[] = "-cl-std=CL2.0 -Werror -D _DEBUG -D _TEST_BINNING -D RENDER_DIMENSION=%d -D TRIANGLE_TEST_COUNT=1";
     char options[sizeof(options_fmt) * 2];
     memset(options, 0, sizeof(options));
 

@@ -27,26 +27,47 @@ bool is_point_in_bin(const uint x, const uint y, const Bin bin)
     return bin.x <= x && x < bin.x + bin.width && bin.y <= y && y < bin.y + bin.height; 
 }
 
+float min3(const float a, const float b, const float c)
+{
+    return min(a, min(b, c));
+}
+
+float max3(const float a, const float b, const float c)
+{
+    return max(a, max(b, c));
+}
+
+float4 mk_triangle_bounding_rect(const generic float x[3], const generic float y[3])
+{
+    return (float4)(min3(x[0], x[1], x[2]), min3(y[0], y[1], y[2]), max3(x[0], x[1], x[2]), max3(y[0], y[1], y[2]));
+}
+
+bool is_point_in_bounds(const float2 p, const float4 bounds)
+{
+    const float2 b_min = bounds.xy;
+    const float2 b_max = bounds.zw;
+    return b_min.x <= p.x && p.x <= b_max.x && b_min.y <= p.y && p.y <= b_max.y;
+}
+
+bool is_rect_intersects_bounds(const float4 rect, const float4 bounds)
+{
+    return is_point_in_bounds(rect.xy, bounds) ||
+           is_point_in_bounds(rect.xw, bounds) ||
+           is_point_in_bounds(rect.zy, bounds) ||
+           is_point_in_bounds(rect.zw, bounds);
+}
+
 bool is_triangle_in_bin(const generic float x[3], const generic float y[3], const Bin bin, const ScreenDimension dim)
 {
-    bool result = false;
-
-    result |= is_point_in_bin(
-        axis_screen_from_ndc(x[0], dim.width),
-        axis_screen_from_ndc(y[0], dim.height),
-        bin);
-
-    result |= is_point_in_bin(
-        axis_screen_from_ndc(x[1], dim.width),
-        axis_screen_from_ndc(y[1], dim.height),
-        bin);
-
-    result |= is_point_in_bin(
-        axis_screen_from_ndc(x[2], dim.width),
-        axis_screen_from_ndc(y[2], dim.height),
-        bin);
+    float4 triangle_bounds = mk_triangle_bounding_rect(x, y);
+    float4 bin_bounds = (float4)(
+        axis_ndc_from_screen(bin.x, dim.width), axis_ndc_from_screen(bin.y, dim.height),
+        axis_ndc_from_screen(bin.x + bin.width, dim.width), axis_ndc_from_screen(bin.y + bin.height, dim.height));   
     
-    return result;
+    // DEBUG_ONCE4("Triangle bounds: [(%f, %f), (%f, %f)]\n", triangle_bounds.x, triangle_bounds.y, triangle_bounds.z, triangle_bounds.w);
+    // DEBUG_ONCE4("Bin bounds: [(%f, %f), (%f, %f)]\n", bin_bounds.x, bin_bounds.y, bin_bounds.z, bin_bounds.w);
+
+    return is_rect_intersects_bounds(triangle_bounds, bin_bounds) || is_rect_intersects_bounds(bin_bounds, triangle_bounds);
 }
 
 Bin make_bin(const ScreenDimension dim, const uint index_x, const uint index_y, const uint bin_width, const uint bin_height)

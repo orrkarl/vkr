@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <chrono>
 
 NRfloat h_triangle[9]
 {
@@ -44,6 +45,10 @@ int main()
 
     if (!init("Nraster Demo 3d", screenDim, error_callback, key_callback, wnd)) return EXIT_FAILURE;
 
+    glViewport(0, 0, screenDim.width, screenDim.height);
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);    
+
     nr::__internal::Module nr_code = mkFullModule(dim, &cl_err);
     if (cl_err != CL_SUCCESS)
     {
@@ -71,54 +76,25 @@ int main()
         return EXIT_FAILURE;
     }
 
+    auto start = std::chrono::system_clock::now();
     if ((cl_err = pipeline(q)) != CL_SUCCESS)
     {
         std::cout << "Failed to execute pipeline: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
         return EXIT_FAILURE;
     }
+    auto end = std::chrono::system_clock::now();
 
-    // printf("Reading from buffer...\n");
+    std::chrono::duration<double> delta = end - start;
+
+    std::cout << "Elapsed: " << delta.count() * 1000 << "ms" << std::endl;
+
+    printf("Reading from buffer...\n");
     q.enqueueReadBuffer(frame.color.getBuffer(), CL_TRUE, 0, 3 * screenDim.width * screenDim.height * sizeof(GLubyte), bitmap.get());
     q.finish();
     
-    // for (auto i = 0; i < screenDim.width * screenDim.height; ++i)
-    // {
-        // if (bitmap.get()[3 * i])
-        // {
-            // printf("Buffer not clear at idx %d: (%d, %d, %d)\n", i, bitmap.get()[3 * i], bitmap.get()[3 * i + 1], bitmap.get()[3 * i + 2]);
-        // }
-    // }
-
-    // std::unique_ptr<NRuint> bins(new NRuint[pipeline.binRasterizer.params.binQueues.getBuffer().getInfo<CL_MEM_SIZE>() / sizeof(cl_uint)]);
-    // q.enqueueReadBuffer(pipeline.binRasterizer.params.binQueues.getBuffer(), CL_TRUE, 0, pipeline.binRasterizer.params.binQueues.getBuffer().getInfo<CL_MEM_SIZE>(), bins.get());
-    // q.finish();
-// 
-    // for (auto y = 0; y < 2; ++y)
-    // {
-        // for (auto x = 0; x < 2; ++x)
-        // {
-            // printf("Bin (%d, %d): ", x, y);
-            // NRuint* currentQueue = bins.get() + (y * 2 + x) * (config.queueSize + 1); 
-            // for (auto i = 0; i < config.queueSize + 1; ++i)
-            // {
-                // printf("%d ", currentQueue[i]);
-            // }
-            // printf("\n");
-        // }
-    // }
-
-    GLboolean b;
-    glGetBooleanv(GL_CURRENT_RASTER_POSITION_VALID, &b);
-
-    std::cout << "Result: " << (bool) b << std::endl;
-
     printf("Drawing pixels...\n");
-    glViewport(0, 0, screenDim.width, screenDim.height);
-    glClearColor(0, 0, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
-    printf("pre gl error: %x\n", glGetError());
     glDrawPixels(640, 480, GL_RGB, GL_UNSIGNED_BYTE, bitmap.get());
-    printf("post gl error: %x\n", glGetError());
+    
     printf("Swapping buffers...\n");
     glfwSwapBuffers(wnd);
 
