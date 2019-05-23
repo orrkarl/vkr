@@ -1,4 +1,4 @@
-#include <framework.h>
+#include <utils.h>
 
 #include <stdio.h>
 #include <iostream>
@@ -21,17 +21,6 @@ NRfloat h_far[3]
     3, 3, 10
 };
 
-void error_callback(int error, const char* description)
-{
-    fprintf(stderr, "Error: %s\n", description);
-}
-
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
-}
-
 int main()
 {
     GLFWwindow* wnd;
@@ -43,7 +32,7 @@ int main()
     cl::CommandQueue q = cl::CommandQueue::getDefault();
     std::unique_ptr<GLubyte> bitmap(new GLubyte[3 * screenDim.width * screenDim.height]);
 
-    if (!init("Nraster Demo 3d", screenDim, error_callback, key_callback, wnd)) return EXIT_FAILURE;
+    if (!init("Nraster Demo 3d", screenDim, wnd)) return EXIT_FAILURE;
 
     glViewport(0, 0, screenDim.width, screenDim.height);
     glClearColor(0, 0, 0, 1);

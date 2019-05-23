@@ -1,8 +1,8 @@
-#include <framework.h>
+#include <utils.h>
 
-bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWerrorfun errorCallback, GLFWkeyfun keyCallback, GLFWwindow*& wnd)
+bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWwindow*& wnd)
 {
-    glfwSetErrorCallback(errorCallback);
+    glfwSetErrorCallback(error_callback);
     if (!glfwInit()) return false;
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
@@ -28,7 +28,7 @@ bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWerrorfun er
         return false;
     }
 
-    glfwSetKeyCallback(wnd, keyCallback);
+    glfwSetKeyCallback(wnd, key_callback);
     glfwSwapInterval(1);
 
     return true;
@@ -146,3 +146,13 @@ cl_int FullPipeline::operator()(cl::CommandQueue q)
     return CL_SUCCESS;
 }
 
+void error_callback(int error, const char* description)
+{
+    fprintf(stderr, "Error: %s\n", description);
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+}

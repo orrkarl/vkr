@@ -20,8 +20,7 @@
 
 namespace _nr = nr::__internal;
 
-bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWerrorfun errorCallback, GLFWkeyfun keyCallback, GLFWwindow*& wnd);
-
+bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWwindow*& wnd);
 
 // Nraster utilities
 
@@ -45,4 +44,8 @@ struct FullPipeline
 _nr::Module mkFullModule(const NRuint dim, cl_int* err);
 
 nr::FrameBuffer mkFrameBuffer(const nr::ScreenDimension& dim, cl_int* err);
+
+void error_callback(int error, const char* description);
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
