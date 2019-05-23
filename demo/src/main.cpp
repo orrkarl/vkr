@@ -6,8 +6,8 @@
 NRfloat h_triangle[9]
 {
     -5, -2.5, 3,
-    5, -2.5, 2,
-    0, 5, 2.5
+    0, 5, 2.5,
+    5, -2.5, 2
 };
 
 NRfloat h_near[3]
@@ -41,7 +41,6 @@ int main()
     nr::__internal::BinQueueConfig config = { 32, 32, 5 };
     cl::CommandQueue q = cl::CommandQueue::getDefault();
     std::unique_ptr<GLubyte> bitmap(new GLubyte[3 * screenDim.width * screenDim.height]);
-    
 
     if (!init("Nraster Demo 3d", screenDim, error_callback, key_callback, wnd)) return EXIT_FAILURE;
 
@@ -82,13 +81,13 @@ int main()
     q.enqueueReadBuffer(frame.color.getBuffer(), CL_TRUE, 0, 3 * screenDim.width * screenDim.height * sizeof(GLubyte), bitmap.get());
     q.finish();
     
-    for (auto i = 0; i < 3 * screenDim.width * screenDim.height; ++i)
-    {
-        if (bitmap.get()[i])
-        {
-            printf("Buffer not clear at idx %d\n", i);
-        }
-    }
+    // for (auto i = 0; i < screenDim.width * screenDim.height; ++i)
+    // {
+        // if (bitmap.get()[3 * i])
+        // {
+            // printf("Buffer not clear at idx %d: (%d, %d, %d)\n", i, bitmap.get()[3 * i], bitmap.get()[3 * i + 1], bitmap.get()[3 * i + 2]);
+        // }
+    // }
 
     // std::unique_ptr<NRuint> bins(new NRuint[pipeline.binRasterizer.params.binQueues.getBuffer().getInfo<CL_MEM_SIZE>() / sizeof(cl_uint)]);
     // q.enqueueReadBuffer(pipeline.binRasterizer.params.binQueues.getBuffer(), CL_TRUE, 0, pipeline.binRasterizer.params.binQueues.getBuffer().getInfo<CL_MEM_SIZE>(), bins.get());
@@ -108,11 +107,19 @@ int main()
         // }
     // }
 
-    // printf("Drawing pixels...\n");
+    GLboolean b;
+    glGetBooleanv(GL_CURRENT_RASTER_POSITION_VALID, &b);
+
+    std::cout << "Result: " << (bool) b << std::endl;
+
+    printf("Drawing pixels...\n");
     glViewport(0, 0, screenDim.width, screenDim.height);
+    glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
-    glDrawPixels(screenDim.width, screenDim.height, GL_RGB, GL_UNSIGNED_BYTE, bitmap.get());
-    // printf("Swapping buffers...\n");
+    printf("pre gl error: %x\n", glGetError());
+    glDrawPixels(640, 480, GL_RGB, GL_UNSIGNED_BYTE, bitmap.get());
+    printf("post gl error: %x\n", glGetError());
+    printf("Swapping buffers...\n");
     glfwSwapBuffers(wnd);
 
     while (!glfwWindowShouldClose(wnd))

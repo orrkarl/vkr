@@ -5,9 +5,9 @@ bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWerrorfun er
     glfwSetErrorCallback(errorCallback);
     if (!glfwInit()) return false;
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
     wnd = glfwCreateWindow(dim.width, dim.height, name.c_str(), NULL, NULL);
     if (!wnd)

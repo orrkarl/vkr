@@ -141,8 +141,6 @@ kernel void fine_rasterize(
         return;
     }
     
-    DEBUG_MESSAGE4("[%d, %d] - current element %d | queue head %d\n", x, y, current_queue_element, bin_queues[bin_queue_offset]);
-
     for (uint i = 0; i < work_group_count; ++i)
     {
         current_queue_bases[i] = bin_queues + bin_queue_offset + i * elements_per_group;
@@ -169,9 +167,10 @@ kernel void fine_rasterize(
         }
         
         current_queue_element = current_queue_bases[current_queue][current_queue_elements[current_queue]];
-
+    
         if (is_ccw(triangle_data, current_queue_element))
         {
+            DEBUG_MESSAGE2("[%d, %d] - current triangle is ccw, ignoring it\n", x, y);
             current_queue_elements[current_queue] += 1;
             continue;
         }
