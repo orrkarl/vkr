@@ -219,16 +219,24 @@ std::ostream& operator<<(std::ostream& os, const Tetrahedron& self)
     return os << "Tetrahedron{" << self.points[0] << ", " << self.points[1] << ", " << self.points[2] << ", " << self.points[3] << "}";
 }
 
-bool isOrthgonal(const Vector4d& p1, const Vector4d& p2, const Vector4d& p3)
+bool isOrthogonal(const Vector4d& v0, const Vector4d& v1)
 {
-    auto v1 = p1 - p2;
-    auto v2 = p2 - p3;
-    return fabs(v1.dot(v2)) <= 10e-4;
+    return fabs(v0.dot(v1)) <= 10e-5;
 }
 
-bool isCubeFace(const Vector4d& p1, const Vector4d& p2, const Vector4d& p3, const Vector4d& p4)
+bool isParallel(const Vector4d& v0, const Vector4d& v1)
 {
-    return isOrthgonal(p1, p2, p3) && isOrthgonal(p2, p3, p4) && isOrthgonal(p3, p4, p1) && isOrthgonal(p4, p1, p2);
+    return fabs(fabs(v0.dot(v1)) - sqrt(v0.dot(v0) * v1.dot(v1))) <= 10e-5;
+}
+
+bool isCubeFace(const Vector4d& p0, const Vector4d& p1, const Vector4d& p2, const Vector4d& p3)
+{
+    auto v0 = p1 - p0;
+    auto v1 = p2 - p1;
+    auto v2 = p3 - p2;
+    auto v3 = p3 - p1;
+    auto v4 = p3 - p0;
+    auto v5 = p2 - p0;
 }
 
 void reduceToFaces(const Vector4d cube[8], Vector4d result[6 * 4])
@@ -248,20 +256,6 @@ void reduceToFaces(const Vector4d cube[8], Vector4d result[6 * 4])
                         result[result_idx++] = cube[j];
                         result[result_idx++] = cube[k];
                         result[result_idx++] = cube[l];
-
-                        std::cout << "Cube face:\n  ";
-                        std::cout << cube[i] << "  ";
-                        std::cout << cube[j] << "  ";
-                        std::cout << cube[k] << "  ";
-                        std::cout << cube[l] << '\n';
-                    }
-                    else
-                    {
-                        std::cout << "Non cube face:\n  ";
-                        std::cout << cube[i] << "  ";
-                        std::cout << cube[j] << "  ";
-                        std::cout << cube[k] << "  ";
-                        std::cout << cube[l] << '\n';
                     }
                 }   
             }   
@@ -273,9 +267,9 @@ bool isVertexInFace(const Vector4d& initial, const Vector4d faces[4])
 {
     for (auto vec = 0; vec < 4; ++vec)
         if (initial == faces[vec])
-            return false;
+            return true;
     
-    return true;
+    return false;
 }
 
 void getNextFace(const Vector4d& initial, const Vector4d faces[24], const NRuint lastFaceIndex, NRuint& result)
