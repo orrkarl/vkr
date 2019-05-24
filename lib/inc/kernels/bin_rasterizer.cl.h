@@ -157,8 +157,6 @@ kernel void bin_rasterize(
 
     bin_queues[bin_queue_base] = 1;
 
-    // DEBUG_MESSAGE3("[%d, %d] - Bin queue base = %d\n", index_x, index_y, bin_queue_base);
-
     for(;;)
     {
         work_group_barrier(CLK_LOCAL_MEM_FENCE);
@@ -198,7 +196,7 @@ kernel void bin_rasterize(
             {   
                 bin_queues[current_queue_index++] = current_batch_index + i;
                 bin_queues[bin_queue_base] = 0;
-                // DEBUG_MESSAGE3("Triangle found at (%d, %d) - idx %d\n", current_bin.x, current_bin.y, current_batch_index + i);
+                DEBUG_MESSAGE3("Triangle found at (%d, %d) - idx %d\n", current_bin.x, current_bin.y, current_batch_index + i);
             }
 
             // An overflowing queue was detected

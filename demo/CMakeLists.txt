@@ -12,8 +12,7 @@ INCLUDE_DIRECTORIES(
 	PUBLIC ${GLEW_INCLUDE_DIRS}
 	PUBLIC ${GLFW_INCLUDE_DIRS})
 
-
-ADD_LIBRARY(NrasterDemoUtils src/utils.cpp)
+ADD_LIBRARY(NrasterDemoUtils src/utils.cpp src/linalg.cpp)
 
 TARGET_LINK_LIBRARIES(NrasterDemoUtils 
 	PUBLIC Nraster
@@ -24,6 +23,9 @@ TARGET_LINK_LIBRARIES(NrasterDemoUtils
 
 ADD_EXECUTABLE(Triangle3d src/triangle3d.cpp)
 TARGET_LINK_LIBRARIES(Triangle3d NrasterDemoUtils)
+
+ADD_EXECUTABLE(Cube4d src/cube4d.cpp)
+TARGET_LINK_LIBRARIES(Cube4d NrasterDemoUtils)
 
 
 if(WIN32)

@@ -41,6 +41,37 @@ struct FullPipeline
     cl_int operator()(cl::CommandQueue q);
 };
 
+struct Vector4d
+{
+    NRfloat x, y, z, w;
+
+    Vector4d();
+
+    Vector4d(const NRfloat x, const NRfloat y, const NRfloat z, const NRfloat w);
+
+    NRfloat dot(const Vector4d& other) const;
+
+    Vector4d operator-(const Vector4d& other) const;
+
+    bool operator==(const Vector4d& other) const;
+
+    friend std::ostream& operator<<(std::ostream& os, const Vector4d& self);
+};
+
+struct Triangle4d
+{
+    Vector4d points[3];
+
+    friend std::ostream& operator<<(std::ostream& os, const Triangle4d& self);
+};
+
+struct Tetrahedron
+{
+    Vector4d points[4];
+
+    friend std::ostream& operator<<(std::ostream& os, const Tetrahedron& self);
+};
+
 _nr::Module mkFullModule(const NRuint dim, cl_int* err);
 
 nr::FrameBuffer mkFrameBuffer(const nr::ScreenDimension& dim, cl_int* err);
@@ -49,3 +80,7 @@ void error_callback(int error, const char* description);
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
+void reduce4Simplex(const Tetrahedron& tetrahedron, Triangle4d result[4]);
+
+// 6 tetrahedra for each cube in the 4-cube 3d net, 4 triangles for each tetrahedron
+void reduce4Cube(const Vector4d cube[16], Triangle4d result[6 * 8 * 4]); 

@@ -163,11 +163,14 @@ kernel void fine_rasterize(
         
         if (current_queue >= work_group_count) 
         {
+            // DEBUG_MESSAGE2("[%d, %d] - work item has finished!\n", x, y);
             break;
         }
         
         current_queue_element = current_queue_bases[current_queue][current_queue_elements[current_queue]];
-    
+
+        DEBUG_MESSAGE3("[%d, %d] - rasterizing triangle %d\n", x, y, current_queue_element);
+
         if (is_ccw(triangle_data, current_queue_element))
         {
             DEBUG_MESSAGE2("[%d, %d] - current triangle is ccw, ignoring it\n", x, y);
