@@ -37,19 +37,20 @@ NRfloat h_far[]
     5, 5, 10, 10
 };
 
-void setupCube(Triangle4d* triangles)
+void transform(Triangle4d triangles[48 * 4], const NRuint tick)
 {
-    Vector4d cube[16];
-    
-    Matrix r = Matrix::rotation(X, Y, M_PI / 4);
-    Matrix t = Matrix::translation(0, 0, 5, 1);
-    Matrix s = Matrix::scale(0.5);
-    Matrix ops = t * s * r;
+    Matrix rXW = Matrix::rotation(X, W, tick * M_PI / 7);
+    Matrix rYZ = Matrix::rotation(Y, Z, tick * M_PI / 20);
 
+    Matrix r = rXW * rYZ;
+    Matrix t = Matrix::translation(1.5, 1.5, 2, 0);
+    
+    Matrix op = t * r;
+
+    Vector4d cube[16];
     for (auto i = 0; i < 16; ++i)
     {
-        h_cube[i] = ops * h_cube[i];
-        h_cube[i].toVector4d(cube + i);
+        (op * h_cube[i]).toVector4d(cube + i);
     }
 
     reduce4Cube(cube, triangles);
@@ -65,11 +66,10 @@ int main()
     nr::__internal::BinQueueConfig config = { 32, 32, 256 };
     
     cl::CommandQueue q = cl::CommandQueue::getDefault();
-    
+
     std::unique_ptr<GLubyte> bitmap(new GLubyte[3 * screenDim.width * screenDim.height]);
     
     Triangle4d h_triangles[48 * 4]; 
-    setupCube(h_triangles);
 
     if (!init("Nraster Demo 4d", screenDim, wnd)) return EXIT_FAILURE;
 
@@ -104,30 +104,26 @@ int main()
         return EXIT_FAILURE;
     }
 
-    auto start = std::chrono::system_clock::now();
-    if ((cl_err = pipeline(q)) != CL_SUCCESS)
-    {
-        std::cout << "Failed to execute pipeline: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
-        return EXIT_FAILURE;
-    }
-    auto end = std::chrono::system_clock::now();
-
-    std::chrono::duration<double> delta = end - start;
-
-    std::cout << "Elapsed: " << delta.count() * 1000 << "ms" << std::endl;
-
-    printf("Reading from buffer...\n");
-    q.enqueueReadBuffer(frame.color.getBuffer(), CL_TRUE, 0, 3 * screenDim.width * screenDim.height * sizeof(GLubyte), bitmap.get());
-    q.finish();
-    
-    printf("Drawing pixels...\n");
-    glDrawPixels(640, 480, GL_RGB, GL_UNSIGNED_BYTE, bitmap.get());
-    
-    printf("Swapping buffers...\n");
-    glfwSwapBuffers(wnd);
-
+    NRuint tick = 0;
     while (!glfwWindowShouldClose(wnd))
     {
+        auto t0 = std::chrono::system_clock::now();
+        transform(h_triangles, tick++);
+        q.enqueueWriteBuffer(pipeline.vertexShader.params.points.getBuffer(), CL_FALSE, 0, sizeof(h_triangles), h_triangles);
+        q.enqueueFillBuffer(pipeline.binRasterizer.params.binQueues.getBuffer(), 0.0f, 0, pipeline.binRasterizer.params.binQueues.getBuffer().getInfo<CL_MEM_SIZE>());
+        q.enqueueFillBuffer(pipeline.fineRasterizer.params.frameBuffer.color.getBuffer(), (uint8_t) 0, 0, pipeline.fineRasterizer.params.frameBuffer.color.getBuffer().getInfo<CL_MEM_SIZE>());
+        q.enqueueFillBuffer(pipeline.fineRasterizer.params.frameBuffer.depth.getBuffer(), 0.0f, 0, pipeline.fineRasterizer.params.frameBuffer.depth.getBuffer().getInfo<CL_MEM_SIZE>());
+        q.finish();
+        pipeline(q);
+        q.enqueueReadBuffer(frame.color.getBuffer(), CL_TRUE, 0, 3 * screenDim.width * screenDim.height * sizeof(GLubyte), bitmap.get());
+        q.finish();
+        glDrawPixels(640, 480, GL_RGB, GL_UNSIGNED_BYTE, bitmap.get());
+        glfwSwapBuffers(wnd);
+        auto t1 = std::chrono::system_clock::now();
+
+        std::chrono::duration<double> diff = t1 - t0;
+        std::cout << "Elapsed: " << diff.count() * 1000 << "ms" << std::endl; 
+
         glfwPollEvents();
     }
 

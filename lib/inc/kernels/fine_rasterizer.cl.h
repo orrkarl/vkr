@@ -113,7 +113,7 @@ kernel void fine_rasterize(
     global RawColorRGB* color,
     global Depth* depth)
 {
-    DEBUG_ONCE("Starting fine rasterizer\n");
+    // DEBUG_ONCE("Starting fine rasterizer\n");
 
     Fragment current_frag;
     float barycentric[3];
@@ -169,14 +169,14 @@ kernel void fine_rasterize(
         
         current_queue_element = current_queue_bases[current_queue][current_queue_elements[current_queue]];
 
-        DEBUG_MESSAGE3("[%d, %d] - rasterizing triangle %d\n", x, y, current_queue_element);
+        // DEBUG_MESSAGE3("[%d, %d] - rasterizing triangle %d\n", x, y, current_queue_element);
 
-        if (is_ccw(triangle_data, current_queue_element))
-        {
-            DEBUG_MESSAGE2("[%d, %d] - current triangle is ccw, ignoring it\n", x, y);
-            current_queue_elements[current_queue] += 1;
-            continue;
-        }
+        // if (is_ccw(triangle_data, current_queue_element))
+        // {
+            // DEBUG_MESSAGE2("[%d, %d] - current triangle is ccw, ignoring it\n", x, y);
+            // current_queue_elements[current_queue] += 1;
+            // continue;
+        // }
 
         for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, x * config.bin_width + config.bin_width); ++frag_x)
         {

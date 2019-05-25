@@ -112,7 +112,7 @@ kernel void bin_rasterize(
 {
     DEBUG(if (get_num_groups(0) * get_num_groups(1) > MAX_WORK_GROUP_COUNT) return);
 
-    DEBUG_ONCE("Starting bin rasterizer\n");
+    // DEBUG_ONCE("Starting bin rasterizer\n");
 
     local float reduced_triangles_x[BATCH_COUNT * RENDER_DIMENSION];
     local float reduced_triangles_y[BATCH_COUNT * RENDER_DIMENSION];
@@ -196,7 +196,7 @@ kernel void bin_rasterize(
             {   
                 bin_queues[current_queue_index++] = current_batch_index + i;
                 bin_queues[bin_queue_base] = 0;
-                DEBUG_MESSAGE3("Triangle found at (%d, %d) - idx %d\n", current_bin.x, current_bin.y, current_batch_index + i);
+                // DEBUG_MESSAGE3("Triangle found at (%d, %d) - idx %d\n", current_bin.x, current_bin.y, current_batch_index + i);
             }
 
             // An overflowing queue was detected

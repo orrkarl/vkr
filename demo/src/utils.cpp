@@ -100,7 +100,6 @@ cl_int FullPipeline::setup(
     vertexShader.global = cl::NDRange(triangleCount * 3);
     vertexShader.local  = cl::NDRange(1);
 
-
     // Bin rasterizer
     binRasterizer.params.triangleData   = vertexShader.params.result;
     binRasterizer.params.triangleCount  = triangleCount;
@@ -133,19 +132,17 @@ cl_int FullPipeline::operator()(cl::CommandQueue q)
     const NRuint totalScreenDim = fineRasterizer.params.dim.width * fineRasterizer.params.dim.height;
     cl_int cl_err = CL_SUCCESS;
     
-    printf("Enqueuing vertex shader\n");
+    // printf("Enqueuing vertex shader\n");
     if ((cl_err = vertexShader(q)) != CL_SUCCESS) return cl_err;
     if ((cl_err = q.finish()) != CL_SUCCESS) return cl_err;
 
-    printf("Enqueuing bin rasterizer\n");   
+    // printf("Enqueuing bin rasterizer\n");   
     if ((cl_err = binRasterizer(q)) != CL_SUCCESS) return cl_err;
     if ((cl_err = q.finish()) != CL_SUCCESS) return cl_err;
 
-    printf("Enqueuing fine rasterizer\n");
+    // printf("Enqueuing fine rasterizer\n");
     if ((cl_err = fineRasterizer(q)) != CL_SUCCESS) return cl_err;
     return q.finish();
-
-    return CL_SUCCESS;
 }
 
 void error_callback(int error, const char* description)
@@ -198,6 +195,11 @@ Vector4d Vector4d::operator-(const Vector4d& other) const
     return Vector4d(x - other.x, y - other.y, z - other.z, w - other.w);
 }
 
+NRfloat Vector4d::distanceSquared(const Vector4d& other) const
+{
+    auto diff = *this - other;
+    return diff.dot(diff);
+}
 
 bool Vector4d::operator==(const Vector4d& other) const
 {
@@ -219,28 +221,35 @@ std::ostream& operator<<(std::ostream& os, const Tetrahedron& self)
     return os << "Tetrahedron{" << self.points[0] << ", " << self.points[1] << ", " << self.points[2] << ", " << self.points[3] << "}";
 }
 
-bool isOrthogonal(const Vector4d& v0, const Vector4d& v1)
-{
-    return fabs(v0.dot(v1)) <= 10e-5;
-}
-
-bool isParallel(const Vector4d& v0, const Vector4d& v1)
-{
-    return fabs(fabs(v0.dot(v1)) - sqrt(v0.dot(v0) * v1.dot(v1))) <= 10e-5;
-}
-
 bool isCubeFace(const Vector4d& p0, const Vector4d& p1, const Vector4d& p2, const Vector4d& p3)
 {
-    auto v0 = p1 - p0;
-    auto v1 = p2 - p1;
-    auto v2 = p3 - p2;
-    auto v3 = p3 - p1;
-    auto v4 = p3 - p0;
-    auto v5 = p2 - p0;
+    auto d01 = p0.distanceSquared(p1);
+    auto d02 = p0.distanceSquared(p2);
+    auto d03 = p0.distanceSquared(p3);
+    auto d12 = p1.distanceSquared(p2);
+    auto d13 = p1.distanceSquared(p3);
+    auto d23 = p2.distanceSquared(p3);
+
+    std::vector<NRfloat> diffs{ d01, d02, d03, d12, d13, d23 };
+    auto min = *std::min_element(diffs.cbegin(), diffs.cend());
+    auto max = *std::max_element(diffs.cbegin(), diffs.cend());
+
+    if (fabs(min - 0.5 * max) > 10e-4) return false;
+
+    auto countMin = 0, countMax = 0;
+    for (auto i = 0; i < 6; ++i)
+    {
+        if (diffs[i] - min <= 10e-4) countMin++;
+        else if (max - diffs[i] <= 10e-4) countMax++;
+        else return false;
+    }   
+
+    return countMax == 2 && countMin == 4; 
 }
 
 void reduceToFaces(const Vector4d cube[8], Vector4d result[6 * 4])
 {    
+    auto rejected = 0;
     auto result_idx = 0;
     for (auto i = 0; i < 8 && result_idx < 24; ++i)
     {
@@ -344,9 +353,11 @@ void cube4dToSimplices(const Vector4d cube[16], Tetrahedron simplices[6 * 8])
     auto result_idx = 0;
     for (auto diff = 1; diff <= 8; diff *= 2)
     {
+        // printf("Working on cube %d\n", result_idx / 6);
         generate3cube(cube, diff, 0, cube3d);
         tetrahadrlize3Cube(cube3d, simplices + result_idx);
         result_idx += 6;
+        // printf("Working on cube %d\n", result_idx / 6);
         generate3cube(cube, diff, 1, cube3d);
         tetrahadrlize3Cube(cube3d, simplices + result_idx);
         result_idx += 6;

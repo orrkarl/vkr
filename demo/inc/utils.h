@@ -55,6 +55,8 @@ struct Vector4d
 
     bool operator==(const Vector4d& other) const;
 
+    NRfloat distanceSquared(const Vector4d& other) const;
+
     friend std::ostream& operator<<(std::ostream& os, const Vector4d& self);
 };
 
