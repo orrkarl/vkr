@@ -13,6 +13,7 @@ namespace clcode
 
 const string fine_rasterizer = R"__CODE__(
 
+// Apply a fragment to the framebuffer (if it passes the depth test)
 void shade(
     Fragment fragment,
     const ScreenDimension dim,
@@ -30,6 +31,7 @@ void shade(
     }
 }
 
+// Calculate the signed area of a parallelogram
 float area(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2)
 {
     float2 a = (float2)(p1.x - p0.x, p1.y - p0.y);
@@ -38,25 +40,30 @@ float area(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2)
     return a.x * b.y - a.y * b.x;
 }
 
+// Calculate 2d barycentric coordinates
 void barycentric2d(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, NDCPosition position, float* result)
 {
     float area_total = area(p0, p1, p2);
     
     result[0] = area(position, p1, p2) / area_total;
     result[1] = area(p0, position, p2) / area_total;
-    result[2] = 1 - result[0] - result[1];
+    result[2] = area(p0, p1, position) / area_total;
 }
 
+// Calculate (according to Perspective Correct Interpolation) the inverse of the depth at point
 Depth depth_at_point(const generic Triangle triangle, float* barycentric)
 {
     return 1 / triangle[0][2] * barycentric[0] + 1 / triangle[1][2] * 1 / barycentric[1] + 1 / triangle[2][2] * barycentric[2];
 }
 
+
+// Check if point fits the top\left rule for a certain edge
 bool is_contained_top_left(const NDCPosition vec, float weight)
 {
     return weight > 0 || (weight == 0 && (vec.y > 0 || (vec.y == 0 && vec.x > 0)));
 }
 
+// Check if a point is "in" a triangle, according to the top\left rule
 bool is_point_in_triangle(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, float* barycentric)
 {
     return is_contained_top_left(p0, barycentric[0]) && is_contained_top_left(p1, barycentric[1]) && is_contained_top_left(p2, barycentric[2]);
@@ -72,6 +79,7 @@ bool is_queue_valid(const Index** queues, uint* indices, uint index, uint queue_
     return indices[index] < queue_size && !is_queue_ended(queues, indices, index);
 }
 
+// Pick the next non-empty bin queue
 uint pick_queue(const Index** queues, uint* indices, const uint work_group_count, const uint queue_size)
 {
     uint current_queue = work_group_count;
@@ -94,6 +102,7 @@ uint pick_queue(const Index** queues, uint* indices, const uint work_group_count
     return current_queue;
 }
 
+// Check if a triangle is oriented counter clock-wise
 bool is_ccw(const generic Triangle* triangle, Index idx)
 {
     NDCPosition p0, p1, p2;

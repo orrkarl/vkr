@@ -13,11 +13,13 @@ namespace clcode
 
 const string vertex_shading = R"__CODE__(
 
+// Normalizes value to [0,1], when value is expected to be in [near, far]
 float normalize(const float value, const float near, const float far)
 {
     return (value - near) / (far - near);
 }
 
+// Normalizes a given coordinate to between the relevant vnear/far values
 void normalize_step(
     const global Point p, 
     const global float near[RENDER_DIMENSION], const global float far[RENDER_DIMENSION],
@@ -27,6 +29,7 @@ void normalize_step(
     result[d] = normalize(p[d], near[d], far[d]);
 }
 
+// Applies the perspective projection (without normalization) to a vector
 void perspective_step(const uint d, global Point result)
 {
     __attribute__((opencl_unroll_hint))
@@ -36,6 +39,7 @@ void perspective_step(const uint d, global Point result)
     }
 }
 
+// Applies the perspective projection (with normalization) to a specific coordinate
 void perspective_bounded_axis(
     const float axis_value,
     const float projection_value,
@@ -45,6 +49,7 @@ void perspective_bounded_axis(
     *result = (2 * axis_value / projection_value - max - min) / (max - min);
 }
 
+// Applies the perspective projection (with normalization) to a vector
 void perspective_bounded(
     const float left, const float right, const float bottom, const float top,
     global Point result)
@@ -54,6 +59,7 @@ void perspective_bounded(
     perspective_bounded_axis(result[1], result[2], bottom, top, p_floats + 1);
 }
 
+// vertex shader "main" function. Applies all of the perspective steps to a vector.
 kernel void shade_vertex(
     const global Point* points, 
     const global float near[RENDER_DIMENSION], const global float far[RENDER_DIMENSION],

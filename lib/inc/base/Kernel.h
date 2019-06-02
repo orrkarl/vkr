@@ -8,6 +8,11 @@ namespace nr
 namespace __internal
 {
 
+/**
+ * A wrapper for cl::Kernel which changes the way arguments are loaded and executed 
+ * instead of calling a function, you first set the args up
+ * 
+ **/
 template<class Params>
 class NR_SHARED_EXPORT Kernel : public cl::Kernel
 {
@@ -25,21 +30,25 @@ public:
     {
     }
 
+    // Add this kernel to the queue, start executing it
     cl_int apply(cl::CommandQueue queue)
     {
         return queue.enqueueNDRangeKernel(*this, offset, global, local, &requirements, &notifier);
     }
 
+    // Set all of this kernel's arguments
     cl_int loadParams()
     {
         return params.load(*this);
     }
 
+    // Initialize what ever argument needs initialziation (usually write a value to a buffer)
     cl_int initParams(cl::CommandQueue queue)
     {
         return params.init(queue);
     }
 
+    // load a kernel
     cl_int operator()(cl::CommandQueue queue)
     {
         cl_int err;

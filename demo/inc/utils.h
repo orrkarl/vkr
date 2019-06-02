@@ -74,15 +74,18 @@ struct Tetrahedron
     friend std::ostream& operator<<(std::ostream& os, const Tetrahedron& self);
 };
 
+// Return a module with all of the code in it
 _nr::Module mkFullModule(const NRuint dim, cl_int* err);
 
+// Allocate buffers for a framebuffer
 nr::FrameBuffer mkFrameBuffer(const nr::ScreenDimension& dim, cl_int* err);
 
 void error_callback(int error, const char* description);
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
+// Reduce a 4-Simplex to Triangles
 void reduce4Simplex(const Tetrahedron& tetrahedron, Triangle4d result[4]);
 
-// 6 tetrahedra for each cube in the 4-cube 3d net, 4 triangles for each tetrahedron
+// Reduce a 4-cbue to Triangles
 void reduce4Cube(const Vector4d cube[16], Triangle4d result[6 * 8 * 4]); 

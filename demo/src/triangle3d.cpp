@@ -34,6 +34,7 @@ int main()
 
     if (!init("Nraster Demo 3d", screenDim, wnd)) return EXIT_FAILURE;
 
+    // Prepare to write to framebuffer
     glViewport(0, 0, screenDim.width, screenDim.height);
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);    
@@ -66,6 +67,8 @@ int main()
     }
 
     auto start = std::chrono::system_clock::now();
+    
+    // Execute the pipeline on the input
     if ((cl_err = pipeline(q)) != CL_SUCCESS)
     {
         std::cout << "Failed to execute pipeline: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
@@ -81,6 +84,7 @@ int main()
     q.enqueueReadBuffer(frame.color.getBuffer(), CL_TRUE, 0, 3 * screenDim.width * screenDim.height * sizeof(GLubyte), bitmap.get());
     q.finish();
     
+    // Write directly to back-buffer
     printf("Drawing pixels...\n");
     glDrawPixels(640, 480, GL_RGB, GL_UNSIGNED_BYTE, bitmap.get());
     

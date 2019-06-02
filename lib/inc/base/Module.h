@@ -10,6 +10,9 @@ namespace nr
 namespace __internal
 {
 
+/**
+ * Utility wrapper around cl::Module
+ **/
 class NR_SHARED_EXPORT Module
 {
 

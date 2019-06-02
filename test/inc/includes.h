@@ -7,8 +7,6 @@
 
 #pragma once
 
-
-
 const float TOLERANCE = 0.00001f;
 const double DOUBLE_TOLERANCE = 0.000000001;
 
@@ -108,11 +106,15 @@ struct Fragment
     Depth depth;
 };
 
+// convert 2d index from 2d array to 1d flat array index
 NRuint index_from_screen(const ScreenPosition& position, const nr::ScreenDimension& dim);
 
+// Test a module's compilation status
 void testCompilation(const char* options, nr::string configurationName, std::initializer_list<nr::string> codes);
 
+// Convert Screen Coordinates to NDC
 NDCPosition ndcFromScreen(const ScreenPosition screen, const nr::ScreenDimension& screenDim);
 
+// Check if a cl_int value indicates success, return well formatted message O.W
 testing::AssertionResult isSuccess(const cl_int& err);
 

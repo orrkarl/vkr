@@ -22,21 +22,25 @@ const string bin_rasterizer = R"__CODE__(
 
 // -------------------------------------- Utilities --------------------------------------
 
+// Deprecated
 bool is_point_in_bin(const uint x, const uint y, const Bin bin)
 {
     return bin.x <= x && x < bin.x + bin.width && bin.y <= y && y < bin.y + bin.height; 
 }
 
+// Finds the minimum of 3 values
 float min3(const float a, const float b, const float c)
 {
     return min(a, min(b, c));
 }
 
+// Finds the maximum of 3 values
 float max3(const float a, const float b, const float c)
 {
     return max(a, max(b, c));
 }
 
+// Returns the bounding box of a 2d triangle (x0, y0, x1, y1)
 float4 mk_triangle_bounding_rect(const generic float x[3], const generic float y[3])
 {
     return (float4)(min3(x[0], x[1], x[2]), min3(y[0], y[1], y[2]), max3(x[0], x[1], x[2]), max3(y[0], y[1], y[2]));
@@ -49,7 +53,7 @@ bool is_point_in_bounds(const float2 p, const float4 bounds)
     return b_min.x <= p.x && p.x <= b_max.x && b_min.y <= p.y && p.y <= b_max.y;
 }
 
-bool is_rect_intersects_bounds(const float4 rect, const float4 bounds)
+bool is_rect_intersecting_bounds(const float4 rect, const float4 bounds)
 {
     return is_point_in_bounds(rect.xy, bounds) ||
            is_point_in_bounds(rect.xw, bounds) ||
@@ -57,6 +61,7 @@ bool is_rect_intersects_bounds(const float4 rect, const float4 bounds)
            is_point_in_bounds(rect.zw, bounds);
 }
 
+// Calculates triangle bounding box, than checkes it it has any intersection with the bin
 bool is_triangle_in_bin(const generic float x[3], const generic float y[3], const Bin bin, const ScreenDimension dim)
 {
     float4 triangle_bounds = mk_triangle_bounding_rect(x, y);
@@ -80,6 +85,7 @@ Bin make_bin(const ScreenDimension dim, const uint index_x, const uint index_y, 
     return ret;
 }
 
+// Copies the contents of the global triangle buffer to local memory for a given batch
 event_t reduce_triangle_buffer(
     const global Triangle* triangles, 
     const uint triangle_count, 
@@ -131,12 +137,19 @@ kernel void bin_rasterize(
     private uint bin_queue_index = 0;
     private const uint bins_count_x = ceil(((float) screen_dim.width) / config.bin_width);
     private const uint bins_count_y = ceil(((float) screen_dim.height) / config.bin_height);
-    private uint bin_queue_base = (config.queue_size + 1) * (bins_count_x * bins_count_y * (get_group_id(1) * get_num_groups(0) + get_group_id(0)) + bins_count_x * index_y + index_x); 
+    private uint bin_queue_base = (config.queue_size + 1) * 
+        (bins_count_x * bins_count_y * (get_group_id(1) * get_num_groups(0) + get_group_id(0))
+         + bins_count_x * index_y + index_x); 
     private uint current_queue_index = bin_queue_base + 1;
 
     private uint batch_actual_size;
 
-    private const Bin current_bin = make_bin(screen_dim, index_x, index_y, config.bin_width, config.bin_height);
+    private const Bin current_bin = make_bin(
+        screen_dim, 
+        index_x, 
+        index_y, 
+        config.bin_width, 
+        config.bin_height);
 
     if (!get_global_id(0) && !get_global_id(1))
     {
@@ -182,7 +195,13 @@ kernel void bin_rasterize(
         
         batch_actual_size = min((uint) BATCH_COUNT, triangle_count - current_batch_index);
 
-        batch_acquisition = reduce_triangle_buffer(triangle_data, batch_actual_size, current_batch_index, 0, reduced_triangles_x, reduced_triangles_y);
+        batch_acquisition = reduce_triangle_buffer(
+            triangle_data, 
+            batch_actual_size, 
+            current_batch_index, 
+            0, 
+            reduced_triangles_x, 
+            reduced_triangles_y);
         wait_group_events(1, &batch_acquisition);
                 
         for (private uint i = 0; i < batch_actual_size; ++i)
@@ -195,8 +214,9 @@ kernel void bin_rasterize(
                     screen_dim))
             {   
                 bin_queues[current_queue_index++] = current_batch_index + i;
+
+                // Queue is not empty
                 bin_queues[bin_queue_base] = 0;
-                // DEBUG_MESSAGE3("Triangle found at (%d, %d) - idx %d\n", current_bin.x, current_bin.y, current_batch_index + i);
             }
 
             // An overflowing queue was detected
@@ -209,6 +229,7 @@ kernel void bin_rasterize(
 
         if (current_queue_index != bin_queue_base + 1 + config.queue_size)
         {
+            // Queue is finished
             bin_queues[current_queue_index] = 0;
         }
     }     

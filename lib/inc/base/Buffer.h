@@ -5,6 +5,11 @@
 namespace nr
 {
 
+/**
+ * Simple wrapper for cl::Buffer, may be removed in the next refactor as it isn't really neccessary
+ * 
+ * 
+ **/
 class Buffer
 {
 public:

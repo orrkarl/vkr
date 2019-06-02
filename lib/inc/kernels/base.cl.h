@@ -11,6 +11,7 @@ namespace __internal
 namespace clcode
 {
 
+// All of the cross-file utilities and types used in my cl code are here
 const string base = R"__CODE__(
 
 // -------------------------------------- Types -------------------------------------- 
@@ -98,65 +99,78 @@ typedef struct _BinQueueConfig
 
 // -------------------------------------- Utilities -------------------------------------- 
 
+// Returns the 1d index of pos in a 2d array with width and height as in dim
 uint index_from_screen(const ScreenPosition pos, const ScreenDimension dim)
 {
     return pos.y * dim.width + pos.x;
 }
 
+// Deprecated
 uint from_continuous(const float continuous)
 {
     return floor(continuous);
 }
 
+// Deprecated
 float from_discrete(const uint discrete)
 {
     return discrete + 0.5;
 }
 
+// Convertes NDC to Screen Coordinates for one axis
 uint axis_screen_from_ndc(const float pos, const uint length)
 {
     return (pos + 1) * length * 0.5;
 }
 
+// Convertes Screen Coordinates to NDC for one axis
 float axis_ndc_from_screen(const uint pos, const uint length)
 {
     return pos * 2.0 / length - 1;
 }
 
+// Convertes the middle of a pixel to NDC, for one axis
 float axis_pixel_mid_point(const uint pos, const uint length)
 {
     return (pos + 0.5) * 2.0 / length - 1.0;
 }
 
+
+// Deprecated
 int axis_signed_from_ndc(const float pos, const uint length)
 {
     return axis_screen_from_ndc(pos, length) - length / 2;
 }
 
+// Convertes NDC to Screen Coordinates
 void screen_from_ndc(const NDCPosition ndc, const ScreenDimension dim, ScreenPosition* screen)
 {
     screen->x = axis_screen_from_ndc(ndc.x, dim.width);
     screen->y = axis_screen_from_ndc(ndc.y, dim.height);
 }
 
+// Convertes Screen Coordinates to NDC
 void ndc_from_screen(const ScreenPosition screen, const ScreenDimension dim, NDCPosition* result)
 {
     result->x = axis_ndc_from_screen(screen.x, dim.width);
     result->y = axis_ndc_from_screen(screen.y, dim.height);
 }
 
+// Convertes the middle of a pixel to NDC
 void pixel_mid_point_from_screen(const ScreenPosition screen, const ScreenDimension dim, NDCPosition* result)
 {
     result->x = axis_pixel_mid_point(screen.x, dim.width);
     result->y = axis_pixel_mid_point(screen.y, dim.height);
 }
 
+// Deprecated
 void signed_from_ndc(const NDCPosition ndc, const ScreenDimension dim, SignedScreenPosition* screen)
 {
     screen->x = axis_signed_from_ndc(ndc.x, dim.width);
     screen->y = axis_signed_from_ndc(ndc.y, dim.height);
 }
 
+// Deprecated
 void screen_from_signed(const SignedScreenPosition pos, const ScreenDimension dim, ScreenPosition* screen)
 {
     screen->x = pos.x + dim.width / 2;
@@ -199,7 +213,7 @@ void screen_from_signed(const SignedScreenPosition pos, const ScreenDimension di
 #define DEBUG_ITEM_SPECIFIC7(i, j, k, msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7) DEBUG(if (IS_WORK_ITEM_GLOBAL(i, j, k)) { printf(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7); } else {})
 #define DEBUG_ITEM_SPECIFIC8(i, j, k, msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) DEBUG(if (IS_WORK_ITEM_GLOBAL(i, j, k)) { printf(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8); } else {})
 
-// Prints only from the first work item
+// Prints only from the globally first work item
 #define DEBUG_ONCE(msg)                                             DEBUG(if (IS_GLOBAL_HEAD) { printf(msg); } else {})
 #define DEBUG_ONCE1(msg, arg1)                                      DEBUG(if (IS_GLOBAL_HEAD) { printf(msg, arg1); } else {}) 
 #define DEBUG_ONCE2(msg, arg1, arg2)                                DEBUG(if (IS_GLOBAL_HEAD) { printf(msg, arg1, arg2); } else {})
@@ -214,11 +228,13 @@ void screen_from_signed(const SignedScreenPosition pos, const ScreenDimension di
 
 // -------------------------------------- Testing -------------------------------------- 
 
+// Unit testing screen_from_ndc
 kernel void screen_from_ndc_kernel(NDCPosition pos, ScreenDimension dim, global ScreenPosition* res)
 {
     screen_from_ndc(pos, dim, res);
 }
 
+// Unit testing ndc_from_screen
 kernel void ndc_from_screen_test(ScreenPosition pos, ScreenDimension dim, global NDCPosition* res)
 {
     ndc_from_screen(pos, dim, res);
