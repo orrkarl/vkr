@@ -74,7 +74,7 @@ kernel void shade_vertex(
     {
         result[index][d] = points[index][d];
     }
-    
+
     __attribute__((opencl_unroll_hint))
     for (uint d = RENDER_DIMENSION - 1; d > 2; --d)
     {

@@ -217,6 +217,8 @@ kernel void bin_rasterize(
 
                 // Queue is not empty
                 bin_queues[bin_queue_base] = 0;
+
+                DEBUG_MESSAGE3("[%d, %d] - Triangle detected (%d)\n", index_x * config.bin_width, index_y * config.bin_height, current_batch_index + i);
             }
 
             // An overflowing queue was detected

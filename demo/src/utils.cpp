@@ -249,7 +249,6 @@ bool isCubeFace(const Vector4d& p0, const Vector4d& p1, const Vector4d& p2, cons
 
 void reduceToFaces(const Vector4d cube[8], Vector4d result[6 * 4])
 {    
-    auto rejected = 0;
     auto result_idx = 0;
     for (auto i = 0; i < 8 && result_idx < 24; ++i)
     {
