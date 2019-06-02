@@ -6,7 +6,6 @@
 #include <chrono>
 
 #include <cmath>
-#include <thread>
 
 Vector h_cube[]
 {
@@ -42,7 +41,7 @@ void transform(Triangle4d triangles[48 * 4], const NRuint tick)
 {
     auto angle = tick * M_PI / 20;
     printf("Transform angle: %f\n", angle * 180 / M_PI);
-    Matrix r = Matrix::rotation(X, W, angle);
+    Matrix r = Matrix::rotation(X, W, tick * angle);
     Matrix t = Matrix::translation(1.5, 1.5, 2, 0);
     
     Matrix op = t * r;
@@ -104,29 +103,24 @@ int main(const int argc, const char* argv[])
         return EXIT_FAILURE;
     }
 
-    NRuint i = 5;
-    
+    auto t0 = std::chrono::system_clock::now();
+    transform(h_triangles, std::stoi(argv[argc - 1]));
+    q.enqueueWriteBuffer(pipeline.vertexShader.params.points.getBuffer(), CL_FALSE, 0, sizeof(h_triangles), h_triangles);
+    q.enqueueFillBuffer(pipeline.binRasterizer.params.binQueues.getBuffer(), 0.0f, 0, pipeline.binRasterizer.params.binQueues.getBuffer().getInfo<CL_MEM_SIZE>());
+    q.enqueueFillBuffer(pipeline.fineRasterizer.params.frameBuffer.color.getBuffer(), (uint8_t) 0, 0, pipeline.fineRasterizer.params.frameBuffer.color.getBuffer().getInfo<CL_MEM_SIZE>());
+    q.enqueueFillBuffer(pipeline.fineRasterizer.params.frameBuffer.depth.getBuffer(), 0.0f, 0, pipeline.fineRasterizer.params.frameBuffer.depth.getBuffer().getInfo<CL_MEM_SIZE>());
+    q.finish();
+    pipeline(q);
+    q.enqueueReadBuffer(frame.color.getBuffer(), CL_TRUE, 0, 3 * screenDim.width * screenDim.height * sizeof(GLubyte), bitmap.get());
+    q.finish();
+    glDrawPixels(640, 480, GL_RGB, GL_UNSIGNED_BYTE, bitmap.get());
+    glfwSwapBuffers(wnd);
+    auto t1 = std::chrono::system_clock::now();
+    std::chrono::duration<double> diff = t1 - t0;
+    std::cout << "Elapsed: " << diff.count() * 1000 << "ms" << std::endl; 
+
     while (!glfwWindowShouldClose(wnd))
     {
-        if (glfwGetKey(wnd, GLFW_KEY_SPACE) == GLFW_PRESS)
-        {
-            // auto t0 = std::chrono::system_clock::now();
-            transform(h_triangles, i++);
-            q.enqueueWriteBuffer(pipeline.vertexShader.params.points.getBuffer(), CL_FALSE, 0, sizeof(h_triangles), h_triangles);
-            q.enqueueFillBuffer(pipeline.binRasterizer.params.binQueues.getBuffer(), 0.0f, 0, pipeline.binRasterizer.params.binQueues.getBuffer().getInfo<CL_MEM_SIZE>());
-            q.enqueueFillBuffer(pipeline.fineRasterizer.params.frameBuffer.color.getBuffer(), (uint8_t) 0, 0, pipeline.fineRasterizer.params.frameBuffer.color.getBuffer().getInfo<CL_MEM_SIZE>());
-            q.enqueueFillBuffer(pipeline.fineRasterizer.params.frameBuffer.depth.getBuffer(), 0.0f, 0, pipeline.fineRasterizer.params.frameBuffer.depth.getBuffer().getInfo<CL_MEM_SIZE>());
-            q.finish();
-            pipeline(q);
-            q.enqueueReadBuffer(frame.color.getBuffer(), CL_TRUE, 0, 3 * screenDim.width * screenDim.height * sizeof(GLubyte), bitmap.get());
-            q.finish();
-            auto t1 = std::chrono::system_clock::now();
-            // std::chrono::duration<double> diff = t1 - t0;
-            // std::cout << "Elapsed: " << diff.count() * 1000 << "ms" << std::endl; 
-
-            glDrawPixels(640, 480, GL_RGB, GL_UNSIGNED_BYTE, bitmap.get());
-            glfwSwapBuffers(wnd);
-        }
         glfwPollEvents();
     }
 
