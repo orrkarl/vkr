@@ -39,7 +39,9 @@ NRfloat h_far[]
 
 void transform(Triangle4d triangles[48 * 4], const NRuint tick)
 {
-    Matrix r = Matrix::rotation(X, W, tick * M_PI / 20);
+    auto angle = tick * M_PI / 20;
+    printf("Transform angle: %f\n", angle * 180 / M_PI);
+    Matrix r = Matrix::rotation(X, W, tick * angle);
     Matrix t = Matrix::translation(1.5, 1.5, 2, 0);
     
     Matrix op = t * r;

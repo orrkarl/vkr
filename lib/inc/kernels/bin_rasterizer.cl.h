@@ -72,7 +72,7 @@ bool is_triangle_in_bin(const generic float x[3], const generic float y[3], cons
     // DEBUG_ONCE4("Triangle bounds: [(%f, %f), (%f, %f)]\n", triangle_bounds.x, triangle_bounds.y, triangle_bounds.z, triangle_bounds.w);
     // DEBUG_ONCE4("Bin bounds: [(%f, %f), (%f, %f)]\n", bin_bounds.x, bin_bounds.y, bin_bounds.z, bin_bounds.w);
 
-    return is_rect_intersects_bounds(triangle_bounds, bin_bounds) || is_rect_intersects_bounds(bin_bounds, triangle_bounds);
+    return is_rect_intersecting_bounds(triangle_bounds, bin_bounds) || is_rect_intersecting_bounds(bin_bounds, triangle_bounds);
 }
 
 Bin make_bin(const ScreenDimension dim, const uint index_x, const uint index_y, const uint bin_width, const uint bin_height)
