@@ -41,19 +41,19 @@ float area(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2)
 }
 
 // Calculate 2d barycentric coordinates
-void barycentric2d(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, NDCPosition position, float* result)
+void barycentric2d(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, NDCPosition position, float3* result)
 {
     float area_total = area(p0, p1, p2);
     
-    result[0] = area(position, p1, p2) / area_total;
-    result[1] = area(p0, position, p2) / area_total;
-    result[2] = area(p0, p1, position) / area_total;
+    result->x = area(position, p1, p2) / area_total;
+    result->y = area(p0, position, p2) / area_total;
+    result->z = area(p0, p1, position) / area_total;
 }
 
 // Calculate (according to Perspective Correct Interpolation) the inverse of the depth at point
-Depth depth_at_point(const generic Triangle triangle, float* barycentric)
+Depth depth_at_point(const generic Triangle triangle, float3 barycentric)
 {
-    return 1 / triangle[0][2] * barycentric[0] + 1 / triangle[1][2] * 1 / barycentric[1] + 1 / triangle[2][2] * barycentric[2];
+    return 1 / triangle[0][2] * barycentric.x + 1 / triangle[1][2] * 1 / barycentric.y + 1 / triangle[2][2] * barycentric.z;
 }
 
 
@@ -64,9 +64,9 @@ bool is_contained_top_left(const NDCPosition vec, float weight)
 }
 
 // Check if a point is "in" a triangle, according to the top\left rule
-bool is_point_in_triangle(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, float* barycentric)
+bool is_point_in_triangle(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, float3 barycentric)
 {
-    return is_contained_top_left(p0, barycentric[0]) && is_contained_top_left(p1, barycentric[1]) && is_contained_top_left(p2, barycentric[2]);
+    return is_contained_top_left(p0, barycentric.x) && is_contained_top_left(p1, barycentric.y) && is_contained_top_left(p2, barycentric.z);
 }
 
 bool is_queue_ended(const Index** queues, uint* indices, uint index)
@@ -122,10 +122,8 @@ kernel void fine_rasterize(
     global RawColorRGB* color,
     global Depth* depth)
 {
-    // DEBUG_ONCE("Starting fine rasterizer\n");
-
     Fragment current_frag;
-    float barycentric[3];
+    float3 barycentric;
     uint current_queue_elements[MAX_WORK_GROUP_COUNT];
     const Index* current_queue_bases[MAX_WORK_GROUP_COUNT];
 
@@ -172,21 +170,11 @@ kernel void fine_rasterize(
         
         if (current_queue >= work_group_count) 
         {
-            // DEBUG_MESSAGE2("[%d, %d] - work item has finished!\n", x, y);
             break;
         }
         
         current_queue_element = current_queue_bases[current_queue][current_queue_elements[current_queue]];
-
-        // DEBUG_MESSAGE3("[%d, %d] - rasterizing triangle %d\n", x, y, current_queue_element);
-
-        // if (is_ccw(triangle_data, current_queue_element))
-        // {
-            // DEBUG_MESSAGE2("[%d, %d] - current triangle is ccw, ignoring it\n", x, y);
-            // current_queue_elements[current_queue] += 1;
-            // continue;
-        // }
-
+        
         for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, x * config.bin_width + config.bin_width); ++frag_x)
         {
             for (uint frag_y = y * config.bin_height; frag_y < min(screen_dim.height, y * config.bin_height + config.bin_height); ++frag_y)
@@ -200,7 +188,8 @@ kernel void fine_rasterize(
                 p1 = (float2)(triangle_data[current_queue_element][1][0], triangle_data[current_queue_element][1][1]);
                 p2 = (float2)(triangle_data[current_queue_element][2][0], triangle_data[current_queue_element][2][1]);
     
-                barycentric2d(p0, p1, p2, current_position_ndc, barycentric);                
+                barycentric2d(p0, p1, p2, current_position_ndc, &barycentric);                
+
 
                 if (is_point_in_triangle(p0, p1, p2, barycentric))
                 {
@@ -209,7 +198,7 @@ kernel void fine_rasterize(
                 }
             }
         }
-
+        
         current_queue_elements[current_queue] += 1;
     }
 }
@@ -238,8 +227,8 @@ kernel void is_point_in_triangle_test(const global Triangle triangle, const Scre
     
     ndc_from_screen(position, dim, &pos);
 
-    float barycentric[3];
-    barycentric2d(p0, p1, p2, pos, barycentric);
+    float3 barycentric;
+    barycentric2d(p0, p1, p2, pos, &barycentric);
     *result = is_point_in_triangle(p0, p1, p2, barycentric);
 }
 

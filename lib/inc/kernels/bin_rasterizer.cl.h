@@ -69,9 +69,6 @@ bool is_triangle_in_bin(const generic float x[3], const generic float y[3], cons
         axis_ndc_from_screen(bin.x, dim.width), axis_ndc_from_screen(bin.y, dim.height),
         axis_ndc_from_screen(bin.x + bin.width, dim.width), axis_ndc_from_screen(bin.y + bin.height, dim.height));   
     
-    // DEBUG_ONCE4("Triangle bounds: [(%f, %f), (%f, %f)]\n", triangle_bounds.x, triangle_bounds.y, triangle_bounds.z, triangle_bounds.w);
-    // DEBUG_ONCE4("Bin bounds: [(%f, %f), (%f, %f)]\n", bin_bounds.x, bin_bounds.y, bin_bounds.z, bin_bounds.w);
-
     return is_rect_intersecting_bounds(triangle_bounds, bin_bounds) || is_rect_intersecting_bounds(bin_bounds, triangle_bounds);
 }
 
@@ -116,10 +113,6 @@ kernel void bin_rasterize(
     global bool* has_overflow,
     global Index* bin_queues)
 {
-    DEBUG(if (get_num_groups(0) * get_num_groups(1) > MAX_WORK_GROUP_COUNT) return);
-
-    // DEBUG_ONCE("Starting bin rasterizer\n");
-
     local float reduced_triangles_x[BATCH_COUNT * RENDER_DIMENSION];
     local float reduced_triangles_y[BATCH_COUNT * RENDER_DIMENSION];
     local uint current_batch_index;
@@ -203,7 +196,7 @@ kernel void bin_rasterize(
             reduced_triangles_x, 
             reduced_triangles_y);
         wait_group_events(1, &batch_acquisition);
-                
+
         for (private uint i = 0; i < batch_actual_size; ++i)
         {
             if (
@@ -217,8 +210,6 @@ kernel void bin_rasterize(
 
                 // Queue is not empty
                 bin_queues[bin_queue_base] = 0;
-
-                DEBUG_MESSAGE3("[%d, %d] - Triangle detected (%d)\n", index_x * config.bin_width, index_y * config.bin_height, current_batch_index + i);
             }
 
             // An overflowing queue was detected
