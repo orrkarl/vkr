@@ -23,13 +23,29 @@ void validateFragment(const Fragment& fragment, const ScreenDimension& screenDim
     ASSERT_EQ(fragment.depth, depth[idx]);
 }
 
+AssertionResult validateDepth(const NRfloat* depthBuffer, const ScreenDimension& screenDim, const NRfloat defaultDepth, const NRfloat expectedDepth)
+{
+    for (NRuint y = 0; y < screenDim.height; ++y)
+    {
+        for (NRuint x = 0; x < screenDim.width; ++x)
+        {
+            NRfloat actualDepth = depthBuffer[y * screenDim.width + x];
+            NRfloat expected = 1 / expectedDepth;
+            if (std::abs(actualDepth - defaultDepth) > 10e-5 && std::abs(actualDepth - expected) > 10e-5)
+            {
+                return AssertionFailure() << "At: (" << x << ", " << y << "). default = " << defaultDepth << ", expected = " << expected << ", actual = " << actualDepth;
+            }
+        }
+    }
+
+    return AssertionSuccess();
+}
+
 TEST(Fine, Rasterizer)
 {
     cl_int err = CL_SUCCESS;
 
     const NRuint dim = 5;
-
-    const NRfloat defaultDepth = 0.9;
 
     const ScreenDimension screenDim = { 1366, 768 };
     const NRuint totalScreenSize = screenDim.width * screenDim.height;
@@ -41,6 +57,7 @@ TEST(Fine, Rasterizer)
     const NRuint totalWorkGroupCount = 4;
     const NRuint totalBinQueuesSize = totalWorkGroupCount * totalBinCount * (config.queueSize + 1); 
 
+    const NRfloat defaultDepth = 1;
     const NRfloat expectedDepth = 0.5;
 
     const NRuint triangleCount = 3 * totalBinCount;
@@ -61,7 +78,7 @@ TEST(Fine, Rasterizer)
     
     fillTriangles<dim>(screenDim, config, totalWorkGroupCount, expectedDepth, 256, h_triangles.get(), h_binQueues.get());
 
-    const NRchar options_fmt[] = "-cl-std=CL2.0 -Werror -D _TEST_FINE -D RENDER_DIMENSION=%d";
+    const NRchar options_fmt[] = "-cl-std=CL2.0 -Werror -D _DEBUG -D _TEST_FINE -D RENDER_DIMENSION=%d";
     NRchar options[sizeof(options_fmt) * 2];
     memset(options, 0, sizeof(options));
     sprintf(options, options_fmt, dim);
@@ -78,7 +95,7 @@ TEST(Fine, Rasterizer)
     FrameBuffer frame;
     frame.color = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize * sizeof(RawColorRGB), h_colorBuffer.get(), &err);
     ASSERT_TRUE(isSuccess(err));
-    frame.depth = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize * sizeof(NRfloat), h_depthBuffer.get(), &err);
+    frame.depth = Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, totalScreenSize * sizeof(NRfloat), h_depthBuffer.get(), &err);
     ASSERT_TRUE(isSuccess(err));
 
     Buffer d_triangles(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount * sizeof(Triangle<dim>), h_triangles.get(), &err);
@@ -100,12 +117,5 @@ TEST(Fine, Rasterizer)
     ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.color, CL_FALSE, 0, totalScreenSize * sizeof(RawColorRGB), h_colorBuffer.get())));
     ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.depth, CL_FALSE, 0, totalScreenSize * sizeof(NRfloat), h_depthBuffer.get())));
     ASSERT_TRUE(isSuccess(q.finish()));
-
-    for (NRuint y = 0; y < screenDim.height; ++y)
-    {
-        for (NRuint x = 0; x < screenDim.width; ++x)
-        {
-            ASSERT_TRUE(h_depthBuffer[y * screenDim.width + x] == defaultDepth || h_depthBuffer[y * screenDim.width + x] == 1 / expectedDepth);
-        }
-    }
+    ASSERT_TRUE(validateDepth(h_depthBuffer.get(), screenDim, defaultDepth, expectedDepth));
 }

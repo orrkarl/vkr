@@ -22,7 +22,7 @@ void shade(
     uint buffer_index;
     buffer_index = index_from_screen(fragment.position, dim);
         
-    if (fragment.depth > depth[buffer_index])
+    if (fragment.depth >= depth[buffer_index])
     {
         fragment.color = RAW_RED; // replace this when you get to the actual shading scheme
     
@@ -53,7 +53,7 @@ void barycentric2d(const NDCPosition p0, const NDCPosition p1, const NDCPosition
 // Calculate (according to Perspective Correct Interpolation) the inverse of the depth at point
 Depth depth_at_point(const generic Triangle triangle, float3 barycentric)
 {
-    return 1 / triangle[0][2] * barycentric.x + 1 / triangle[1][2] * 1 / barycentric.y + 1 / triangle[2][2] * barycentric.z;
+    return 1 / triangle[0][2] * barycentric.x + 1 / triangle[1][2] * barycentric.y + 1 / triangle[2][2] * barycentric.z;
 }
 
 
@@ -164,6 +164,8 @@ kernel void fine_rasterize(
         current_queue_bases[i] += 1;
     }
 
+    DEBUG_ONCE1("Starting depth: %f\n", depth[0]);
+
     while (true)
     {
         current_queue = pick_queue(current_queue_bases, current_queue_elements, work_group_count, config.queue_size);
@@ -188,17 +190,23 @@ kernel void fine_rasterize(
                 p1 = (float2)(triangle_data[current_queue_element][1][0], triangle_data[current_queue_element][1][1]);
                 p2 = (float2)(triangle_data[current_queue_element][2][0], triangle_data[current_queue_element][2][1]);
     
-                barycentric2d(p0, p1, p2, current_position_ndc, &barycentric);                
-
+                barycentric2d(p0, p1, p2, current_position_ndc, &barycentric);
 
                 if (is_point_in_triangle(p0, p1, p2, barycentric))
                 {
                     current_frag.depth = depth_at_point(triangle_data[current_queue_element], barycentric);
+                    if (current_frag.depth >= 100) 
+                    {
+                        DEBUG_ONCE6(
+                            "Oops! weird shit at barycentrics (%f, %f, %f). depth - (%f, %f, %f)\n",
+                            barycentric.x, barycentric.y, barycentric.z, 
+                            triangle_data[current_queue_element][0][2], triangle_data[current_queue_element][1][2], triangle_data[current_queue_element][2][2]);
+                    }
                     shade(current_frag, screen_dim, color, depth);
                 }
             }
         }
-        
+
         current_queue_elements[current_queue] += 1;
     }
 }

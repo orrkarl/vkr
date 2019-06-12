@@ -29,7 +29,7 @@ TEST(VertexShader, Perspective)
     Point<dim> expected;
     expected.values[0] = -0.5;
     expected.values[1] = -0.5;
-    expected.values[2] = 1.0 / 3;
+    expected.values[2] = 2.0 / 3;
     
     const char options_fmt[] = "-cl-std=CL2.0 -Werror -D _DEBUG -D _TEST_FINE -D RENDER_DIMENSION=%d";
     char options[sizeof(options_fmt) * 2];

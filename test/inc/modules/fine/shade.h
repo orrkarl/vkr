@@ -57,12 +57,12 @@ TEST(Fine, ShadeTest)
     Fragment firstFrag;
     firstFrag.position = { screenDim.width / 5, screenDim.height / 2 };
     firstFrag.color = { 255, 0, 0 };
-    firstFrag.depth = 0.5;
+    firstFrag.depth = 1 / 0.5;
 
     Fragment secondFrag;
     secondFrag.position = firstFrag.position;
     secondFrag.color = { 255, 0, 0 };
-    secondFrag.depth = firstFrag.depth * 1.1;
+    secondFrag.depth = firstFrag.depth / 1.1;
 
     const NRuint idx = index_from_screen(firstFrag.position, screenDim);
 
