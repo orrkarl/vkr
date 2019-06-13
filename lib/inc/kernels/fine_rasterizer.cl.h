@@ -164,8 +164,6 @@ kernel void fine_rasterize(
         current_queue_bases[i] += 1;
     }
 
-    DEBUG_ONCE1("Starting depth: %f\n", depth[0]);
-
     while (true)
     {
         current_queue = pick_queue(current_queue_bases, current_queue_elements, work_group_count, config.queue_size);
@@ -176,7 +174,9 @@ kernel void fine_rasterize(
         }
         
         current_queue_element = current_queue_bases[current_queue][current_queue_elements[current_queue]];
-        
+
+        DEBUG_ITEM_SPECIFIC1(30, 0, 0, "current queue index: %u\n", current_queue_element);
+
         for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, x * config.bin_width + config.bin_width); ++frag_x)
         {
             for (uint frag_y = y * config.bin_height; frag_y < min(screen_dim.height, y * config.bin_height + config.bin_height); ++frag_y)
@@ -189,19 +189,17 @@ kernel void fine_rasterize(
                 p0 = (float2)(triangle_data[current_queue_element][0][0], triangle_data[current_queue_element][0][1]);
                 p1 = (float2)(triangle_data[current_queue_element][1][0], triangle_data[current_queue_element][1][1]);
                 p2 = (float2)(triangle_data[current_queue_element][2][0], triangle_data[current_queue_element][2][1]);
-    
+
+                // if (triangle_data[current_queue_element][0][2] == 0 || triangle_data[current_queue_element][1][2] == 0 || triangle_data[current_queue_element][2][2] == 0)
+                // {
+                    // DEBUG_MESSAGE1("Bad triangle at index %u\n", current_queue_element);
+                // }
+
                 barycentric2d(p0, p1, p2, current_position_ndc, &barycentric);
 
                 if (is_point_in_triangle(p0, p1, p2, barycentric))
                 {
                     current_frag.depth = depth_at_point(triangle_data[current_queue_element], barycentric);
-                    if (current_frag.depth >= 100) 
-                    {
-                        DEBUG_ONCE6(
-                            "Oops! weird shit at barycentrics (%f, %f, %f). depth - (%f, %f, %f)\n",
-                            barycentric.x, barycentric.y, barycentric.z, 
-                            triangle_data[current_queue_element][0][2], triangle_data[current_queue_element][1][2], triangle_data[current_queue_element][2][2]);
-                    }
                     shade(current_frag, screen_dim, color, depth);
                 }
             }

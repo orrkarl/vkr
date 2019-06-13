@@ -47,6 +47,11 @@ template<NRuint dim>
 struct Triangle
 {
     Point<dim> points[3];
+
+    friend std::ostream& operator<<(std::ostream& os, const Triangle& tri)
+    {
+        return os << "Triangle{" << tri.points[0] << ", " << tri.points[1] << ", " << tri.points[2] << "}";
+    }
 };
 
 struct ScreenPosition

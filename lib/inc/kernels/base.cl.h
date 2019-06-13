@@ -215,6 +215,16 @@ void screen_from_signed(const SignedScreenPosition pos, const ScreenDimension di
 #define DEBUG_ITEM_SPECIFIC7(i, j, k, msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7) DEBUG(if (IS_WORK_ITEM_GLOBAL(i, j, k)) { printf(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7); } else {})
 #define DEBUG_ITEM_SPECIFIC8(i, j, k, msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) DEBUG(if (IS_WORK_ITEM_GLOBAL(i, j, k)) { printf(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8); } else {})
 
+#define DEBUG_LOCAL_ITEM_SPECIFIC(i, j, k, msg) DEBUG(if (IS_WORK_ITEM_LOCAL(i, j, k)) { printf(msg); } else {})
+#define DEBUG_LOCAL_ITEM_SPECIFIC1(i, j, k, msg, arg1) DEBUG(if (IS_WORK_ITEM_LOCAL(i, j, k)) { printf(msg, arg1); } else {})
+#define DEBUG_LOCAL_ITEM_SPECIFIC2(i, j, k, msg, arg1, arg2) DEBUG(if (IS_WORK_ITEM_LOCAL(i, j, k)) { printf(msg, arg1, arg2); } else {})
+#define DEBUG_LOCAL_ITEM_SPECIFIC3(i, j, k, msg, arg1, arg2, arg3) DEBUG(if (IS_WORK_ITEM_LOCAL(i, j, k)) { printf(msg, arg1, arg2, arg3); } else {})
+#define DEBUG_LOCAL_ITEM_SPECIFIC4(i, j, k, msg, arg1, arg2, arg3, arg4) DEBUG(if (IS_WORK_ITEM_LOCAL(i, j, k)) { printf(msg, arg1, arg2, arg3, arg4); } else {})
+#define DEBUG_LOCAL_ITEM_SPECIFIC5(i, j, k, msg, arg1, arg2, arg3, arg4, arg5) DEBUG(if (IS_WORK_ITEM_LOCAL(i, j, k)) { printf(msg, arg1, arg2, arg3, arg4, arg5); } else {})
+#define DEBUG_LOCAL_ITEM_SPECIFIC6(i, j, k, msg, arg1, arg2, arg3, arg4, arg5, arg6) DEBUG(if (IS_WORK_ITEM_LOCAL(i, j, k)) { printf(msg, arg1, arg2, arg3, arg4, arg5, arg6); } else {})
+#define DEBUG_LOCAL_ITEM_SPECIFIC7(i, j, k, msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7) DEBUG(if (IS_WORK_ITEM_LOCAL(i, j, k)) { printf(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7); } else {})
+#define DEBUG_LOCAL_ITEM_SPECIFIC8(i, j, k, msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) DEBUG(if (IS_WORK_ITEM_LOCAL(i, j, k)) { printf(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8); } else {})
+
 // Prints only from the globally first work item
 #define DEBUG_ONCE(msg)                                             DEBUG(if (IS_GLOBAL_HEAD) { printf(msg); } else {})
 #define DEBUG_ONCE1(msg, arg1)                                      DEBUG(if (IS_GLOBAL_HEAD) { printf(msg, arg1); } else {}) 
