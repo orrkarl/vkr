@@ -38,7 +38,7 @@ TEST(Fine, ShadeTest)
     cl_int err = CL_SUCCESS;
 
     const NRuint dim = 6;
-    const ScreenDimension screenDim = { 5, 2 };
+    constexpr ScreenDimension screenDim = { 5, 2 };
 
     const NRchar options_fmt[] = "-cl-std=CL2.0 -Werror -D _DEBUG -D _TEST_FINE -D RENDER_DIMENSION=%d";
     NRchar options[sizeof(options_fmt) * 2];

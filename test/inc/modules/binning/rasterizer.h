@@ -16,6 +16,13 @@ using namespace nr;
 using namespace nr::__internal;
 using namespace testing;
 
+// Because MSVC doesn't evaluate constexpr as well as GCC...
+constexpr NRuint compileTimeCeil(const NRfloat f)
+{
+	const NRuint as_uint = static_cast<NRuint>(f);
+	return as_uint == f ? as_uint : as_uint + 1;
+}
+
 TEST(Binning, Rasterizer)
 {
     cl_int err = CL_SUCCESS; 
@@ -26,17 +33,18 @@ TEST(Binning, Rasterizer)
     const NRuint triangleCount = 2;
 
     // Don't change this, may be critical for the test's determinism
-    const NRuint workGroupCount = 1;
+	constexpr NRuint workGroupCount = 1;
 
-    const ScreenDimension screenDim = {64, 64};
-    const BinQueueConfig config = {32, 32, 10};
+	constexpr ScreenDimension screenDim = {64, 64};
+    constexpr BinQueueConfig config = {32, 32, 10};
 
-    NRuint h_result[BinRasterizerParams::getTotalBinQueueSize(workGroupCount, screenDim, config) / sizeof(NRuint)];
+	constexpr NRuint binCountX = compileTimeCeil(((NRfloat) screenDim.width) / config.binWidth);
+	constexpr NRuint binCountY = compileTimeCeil(((NRfloat) screenDim.height) / config.binHeight);
+
+	NRuint h_result[workGroupCount * (config.queueSize + 1) * binCountX * binCountY];
 
     NRbool isOverflowing = false;
 
-    const NRuint binCountX = ceil(((NRfloat) screenDim.width) / config.binWidth);
-    const NRuint binCountY = ceil(((NRfloat) screenDim.height) / config.binHeight);
     const NRuint destinationBinX = 1;
     const NRuint destinationBinY = 1;
     const NRuint destinationBinQueueRawIndex = (config.queueSize + 1) * (destinationBinY * binCountX + destinationBinX);

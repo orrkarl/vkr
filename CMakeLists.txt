@@ -41,7 +41,7 @@ ENDIF()
 IF (BUILD_glfw)
 	ADD_SUBDIRECTORY(dependencies/glfw)
 	SET(glew_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/glew/include")
-	ADD_LIBRARY(glew ALIAS libglew_shared)
+	ADD_LIBRARY(glew ALIAS libglew_static)
 ENDIF()
 
 IF (FIND_OpenGL)
