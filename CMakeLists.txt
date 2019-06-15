@@ -9,8 +9,6 @@ ENDIF()
 OPTION(BUILD_TESTS "builds the test directory and gtest" ON)
 OPTION(BUILD_DEMOS "builds the demo directory" ON)
 
-OPTION(FIND_GTEST "find installed gtest instead of building it" OFF)
-
 FIND_PACKAGE(OpenCL REQUIRED)
 
 SET(CMAKE_CXX_STANDARD 17)
@@ -19,22 +17,29 @@ IF(WIN32)
 	SET(gtest_force_shared_crt ON)
 ENDIF(WIN32)
 
-ADD_SUBDIRECTORY(dependencies)
-
 ADD_SUBDIRECTORY(lib)
 
 SET(NRASTER_ALL_INCLUDES ${PROJECT_SOURCE_DIR}/lib/inc)
 
 IF(BUILD_DEMOS)
+	SET(BUILD_GLFW ON)
+	SET(BUILD_GLEW ON)
+ENDIF()
+
+IF (BUILD_TESTS)
+	SET(BUILD_GTEST ON)
+ENDIF()
+
+ADD_SUBDIRECTORY(dependencies)
+
+IF(BUILD_DEMOS)
 	ADD_SUBDIRECTORY(demo)
 ENDIF()
 
-IF(BUILD_TESTS)
-	
+IF(BUILD_TESTS)	
 	ADD_SUBDIRECTORY(test)
 	ENABLE_TESTING()
 	ADD_TEST(NAME AllTests COMMAND NrasterTest) # run the executable itself for a better log as it uses GTest
-
 ENDIF()
 
 UNSET(NRASTER_ALL_INCLUDES)
