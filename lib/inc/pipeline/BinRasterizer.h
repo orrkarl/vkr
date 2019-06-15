@@ -18,7 +18,7 @@ struct BinQueueConfig
     NRuint queueSize;
 };
 
-struct BinRasterizerParams
+struct NR_SHARED_EXPORT BinRasterizerParams
 {
     static NRuint getTotalBinQueueSize(const NRuint workGroupCount, const ScreenDimension& dim, const BinQueueConfig config)
     {

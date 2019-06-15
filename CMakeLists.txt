@@ -11,9 +11,9 @@ OPTION(BUILD_DEMOS "builds the demo directory" ON)
 
 SET(CMAKE_CXX_STANDARD 17)
 
-#IF(WIN32)
-#	SET(gtest_force_shared_crt ON)
-#ENDIF(WIN32)
+IF(WIN32)
+	SET(gtest_force_shared_crt ON)
+ENDIF(WIN32)
 
 IF(BUILD_DEMOS)
 	SET(BUILD_glew ON)

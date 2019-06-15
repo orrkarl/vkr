@@ -12,7 +12,7 @@ namespace nr
 namespace __internal
 {
 
-class FineRasterizerParams
+class NR_SHARED_EXPORT FineRasterizerParams
 {
 public:
 

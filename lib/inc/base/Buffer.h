@@ -10,7 +10,7 @@ namespace nr
  * 
  * 
  **/
-class Buffer
+class NR_SHARED_EXPORT Buffer
 {
 public:
     Buffer(cl_mem_flags flags, const NRulong& size, cl_int* err = nullptr)
