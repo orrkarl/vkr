@@ -17,9 +17,9 @@ ADD_LIBRARY(NrasterDemoUtils src/utils.cpp src/linalg.cpp)
 TARGET_LINK_LIBRARIES(NrasterDemoUtils 
 	PUBLIC Nraster
 	PUBLIC OpenCL::OpenCL
-	PUBLIC ${OPENGL_LIBRARIES}
+	PUBLIC opengl32
 	PUBLIC glfw
-	PUBLIC ${GLEW_LIBRARIES})
+	PUBLIC libglew_shared)
 
 ADD_EXECUTABLE(Triangle3d src/triangle3d.cpp)
 TARGET_LINK_LIBRARIES(Triangle3d NrasterDemoUtils)
