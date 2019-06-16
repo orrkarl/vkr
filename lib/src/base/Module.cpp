@@ -3,13 +3,20 @@
 #include <base/Module.h>
 #include <utils/converters.h>
 
+#include <numeric>
+
 namespace nr
 {
 
 namespace __internal
 {
 
-Module::Module(const string& code, const char* options, cl_int* err)
+string finalizeOptions(const Module::Options& options)
+{
+	return std::reduce(options.cbegin(), options.cend(), string(""), [](string a, string b){ return a + " " + b; });
+}
+
+Module::Module(const string& code, const Module::Options& options, cl_int* err)
 {
     cl_int error = CL_SUCCESS;
     
@@ -20,10 +27,10 @@ Module::Module(const string& code, const char* options, cl_int* err)
         return;
     }
 
-    m_module.build(options);
+    m_module.build(finalizeOptions(options).c_str());
 }
 
-Module::Module(const std::initializer_list<string> codes, const char* options, cl_int* err)
+Module::Module(const std::initializer_list<string> codes, const Module::Options& options, cl_int* err)
 {
     cl_int error = CL_SUCCESS;
     
@@ -34,8 +41,15 @@ Module::Module(const std::initializer_list<string> codes, const char* options, c
         return;
     }
     
-    m_module.build(options);
+    m_module.build(finalizeOptions(options).c_str());
 }
+
+Module::Macro DEBUG = Module::Macro("_DEBUG");
+
+Module::CLVersion CL_VERSION_20 = Module::CLVersion(2.0);
+Module::CLVersion CL_VERSION_12 = Module::CLVersion(1.2);
+
+Module::Option WARNINGS_ARE_ERRORS = Module::Option("-Werror");
 
 }
 
