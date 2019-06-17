@@ -51,16 +51,13 @@ Module::Module(const std::initializer_list<string> codes, const Module::Options&
     m_module.build(finalizeOptions(options).c_str());
 }
 
-Module::Macro DEBUG = Module::Macro("_DEBUG");
-
-Module::CLVersion CL_VERSION_20 = Module::CLVersion(2.0);
-Module::CLVersion CL_VERSION_12 = Module::CLVersion(1.2);
-
-Module::Option WARNINGS_ARE_ERRORS = Module::Option("-Werror");
-
-Module::RenderDimension _3D = Module::RenderDimension(3);
-Module::RenderDimension _4D = Module::RenderDimension(4);
-Module::RenderDimension _5D = Module::RenderDimension(5);
+const Module::Macro           Module::DEBUG               = Module::Macro("_DEBUG");
+const Module::CLVersion       Module::CL_VERSION_20       = Module::CLVersion(2.0);
+const Module::CLVersion       Module::CL_VERSION_12       = Module::CLVersion(1.2);
+const Module::Option          Module::WARNINGS_ARE_ERRORS = Module::Option("-Werror");
+const Module::RenderDimension Module::_3D                 = Module::RenderDimension(3);
+const Module::RenderDimension Module::_4D                 = Module::RenderDimension(4);
+const Module::RenderDimension Module::_5D                 = Module::RenderDimension(5);
 
 }
 

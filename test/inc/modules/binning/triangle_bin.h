@@ -91,23 +91,12 @@ TEST(Binning, IsSimplexInBin)
 {
     const NRuint dim = 5;
 
-     Module::Options options = 
-    {
-        Module::CL_VERSION_12, 
-        Module::WARNINGS_ARE_ERRORS, 
-        Module::RenderDimension(dim), 
-        Moduke::DEBUG, 
-        Module::Macro("_TEST_BINNING"), 
-        Module::Macro("TRIANGLE_TEST_COUNT", 
-        std::to_string(dim))
-    };
-
     cl_int err = CL_SUCCESS; 
 
     NRfloat triangle_x[3];
     NRfloat triangle_y[3];
 
-    Module code({clcode::base, clcode::bin_rasterizer}, options, &err);
+    auto code = mkBinningModule(dim, 1, &err);
     ASSERT_EQ(CL_SUCCESS, err);
 
     auto test = code.makeKernel<TriangleInBinParams>("is_triangle_in_bin_test", &err);

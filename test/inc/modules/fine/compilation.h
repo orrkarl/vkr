@@ -5,6 +5,8 @@
 #include <kernels/base.cl.h>
 #include <kernels/fine_rasterizer.cl.h>
 
+#include "fine_utils.h"
+
 using namespace nr;
 using namespace nr::__internal;
 using namespace testing;

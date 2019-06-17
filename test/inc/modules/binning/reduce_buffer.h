@@ -7,6 +7,8 @@
 #include <kernels/bin_rasterizer.cl.h>
 #include <base/Buffer.h>
 
+#include "bin_utils.h"
+
 using namespace nr;
 using namespace nr::__internal;
 using namespace testing;
@@ -68,20 +70,9 @@ TEST(Binning, ReduceTriangleBuffer)
     const NRuint triangleCount = 3;
     const NRuint offset = 2;
     
-    Module::Options options = 
-    {
-        Module::CL_VERSION_12, 
-        Module::WARNINGS_ARE_ERRORS, 
-        Module::RenderDimension(dim), 
-        Moduke::DEBUG, 
-        Module::Macro("_TEST_BINNING"), 
-        Module::Macro("TRIANGLE_TEST_COUNT", 
-        std::to_string(dim))
-    };
-
     cl_int err = CL_SUCCESS; 
 
-    Module code({clcode::base, clcode::bin_rasterizer}, options, &err);
+    auto code = mkBinningModule(dim, triangleCount, &err);
     ASSERT_EQ(CL_SUCCESS, err);
 
     Triangle<dim> h_triangles_raw[triangleCount + offset];

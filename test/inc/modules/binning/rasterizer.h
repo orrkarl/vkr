@@ -55,21 +55,10 @@ TEST(Binning, Rasterizer)
     Triangle<dim> h_triangles[triangleCount];
     mkTriangleInCoords(x, y, screenDim, h_triangles);
     mkTriangleInCoords(x, y, screenDim, h_triangles + 1);
-
-     Module::Options options = 
-    {
-        Module::CL_VERSION_12, 
-        Module::WARNINGS_ARE_ERRORS, 
-        Module::RenderDimension(dim), 
-        Moduke::DEBUG, 
-        Module::Macro("_TEST_BINNING"), 
-        Module::Macro("TRIANGLE_TEST_COUNT", triangleCount),
-        std::to_string(dim))
-    };
     
     cl::CommandQueue q = cl::CommandQueue::getDefault();
 
-    auto code = Module({clcode::base, clcode::bin_rasterizer}, options, &err);
+    auto code = mkBinningModule(dim, triangleCount, &err);
     ASSERT_EQ(CL_SUCCESS, err);
 
     auto testee = code.makeKernel<BinRasterizerParams>("bin_rasterize", &err);

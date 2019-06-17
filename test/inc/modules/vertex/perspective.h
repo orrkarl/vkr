@@ -36,7 +36,7 @@ TEST(VertexShader, Perspective)
         Module::CL_VERSION_12, 
         Module::WARNINGS_ARE_ERRORS, 
         Module::RenderDimension(dim), 
-        Moduke::DEBUG, 
+        Module::DEBUG, 
         Module::Macro("_TEST_FINE:"), 
         Module::Macro("TRIANGLE_TEST_COUNT", 
         std::to_string(dim))

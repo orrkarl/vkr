@@ -38,17 +38,21 @@ bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWwindow*& wn
 
 _nr::Module mkFullModule(const NRuint dim, cl_int* err)
 {
-    NRchar options_fmt[] = "-cl-std=CL2.0 -Werror -D _DEBUG -D RENDER_DIMENSION=%d";
-    NRchar options[sizeof(options_fmt) * 2];
-    sprintf(options, options_fmt, dim);
+    auto allCodes = {
+        _nr::clcode::base,
+        _nr::clcode::bin_rasterizer,
+        _nr::clcode::fine_rasterizer,
+        _nr::clcode::vertex_shading
+    };
 
-    return _nr::Module(
-                {_nr::clcode::base,
-                 _nr::clcode::bin_rasterizer,
-                 _nr::clcode::fine_rasterizer,
-                 _nr::clcode::vertex_shading},
-                 options,
-                 err);
+    auto opts = _nr::Module::Options {
+        _nr::Module::CL_VERSION_12, 
+        _nr::Module::WARNINGS_ARE_ERRORS, 
+        _nr::Module::DEBUG, 
+        _nr::Module::RenderDimension(dim)
+    };
+                
+    return _nr::Module(allCodes, opts, err);
 }
 
 nr::FrameBuffer mkFrameBuffer(const nr::ScreenDimension& dim, cl_int* err)

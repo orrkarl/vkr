@@ -119,5 +119,7 @@ void fillTriangles(
 
 _nr::Module mkFineModule(const NRuint dim, cl_int* err)
 {
-    return mkStandardModule({_nr::clcode::base, _nr::clcode::fine_rasterizer}, dim, err);
+    auto opts = mkStandardOptions(dim);
+    opts.push_back(TEST_FINE);
+    return _nr::Module({_nr::clcode::base, _nr::clcode::fine_rasterizer}, opts, err);
 }

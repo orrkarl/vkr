@@ -36,15 +36,12 @@ testing::AssertionResult isSuccess(const cl_int& err)
     else return testing::AssertionFailure() << nr::utils::stringFromCLError(err) << " (" << err << ')';
 }
 
-nr::__internal::Module mkStandardModule(const NRuint dim, const initializer_list<string>& codes, cl_int* err)
+nr::__internal::Module::Options mkStandardOptions(const NRuint dim)
 {
-    auto options = _nr::Module::Options
-    {
-        _nr::Module::CL_VERSION_12, 
-        _nr::Module::WARNINGS_ARE_ERRORS, 
-        _nr::Module::DEBUG, 
-        _nr::Module::RenderDimension(dim)
-    };
-
-    return _nr::Module(codes, options, err);
+    return nr::__internal::Module::Options{
+                Module::CL_VERSION_12, 
+                Module::WARNINGS_ARE_ERRORS, 
+                Module::DEBUG, 
+                Module::RenderDimension(dim)
+            };
 }

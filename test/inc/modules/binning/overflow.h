@@ -36,19 +36,8 @@ TEST(Binning, RasterizerOverflow)
     {
         mkTriangleInCoords(0, 0, screenDim, h_triangles + i);
     }
-
-    Module::Options options = 
-    {
-        Module::CL_VERSION_12, 
-        Module::WARNINGS_ARE_ERRORS, 
-        Module::RenderDimension(dim), 
-        Moduke::DEBUG, 
-        Module::Macro("_TEST_BINNING"), 
-        Module::Macro("TRIANGLE_TEST_COUNT", 
-        std::to_string(dim))
-    };
     
-    auto code = Module({clcode::base, clcode::bin_rasterizer}, options, &err);
+    auto code = mkBinningModule(dim, triangleCount, &err);
     ASSERT_EQ(CL_SUCCESS, err);
 
     auto testee = code.makeKernel<BinRasterizerParams>("bin_rasterize", &err);
