@@ -13,6 +13,6 @@ using namespace testing;
 
 TEST(Base, Compilation)
 {
-    testCompilation("-cl-std=CL2.0 -Werror -D RENDER_DIMENSION=3", "Production 3d", {clcode::base});
-    testCompilation("-cl-std=CL2.0 -Werror -D _DEBUG -D RENDER_DIMENSION=11", "Debug 11d", {clcode::base});
+    testCompilation(Module::Options{Module::CL_VERSION_12, Module::WARNINGS_ARE_ERRORS, Module::_3D}, "Production 3d", {clcode::base});
+    testCompilation(Module::Options{Module::CL_VERSION_12, Module::WARNINGS_ARE_ERRORS, Module::RenderDimension(11), Module::DEBUG}, "Debug 11d", {clcode::base});
 }

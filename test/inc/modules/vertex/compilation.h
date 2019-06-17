@@ -11,7 +11,7 @@ using namespace testing;
 
 TEST(VertexShader, Compilation)
 {
-    testCompilation("-cl-std=CL2.0 -Werror -D RENDER_DIMENSION=10", "production 3d", {clcode::base, clcode::vertex_shading});
-    testCompilation("-cl-std=CL2.0 -Werror -D _DEBUG -D RENDER_DIMENSION=8", "debug/testing 4d", {clcode::base, clcode::vertex_shading});
+    testCompilation(Module::Options{Module::CL_VERSION_12, Module::WARNINGS_ARE_ERRORS, Module::RenderDimension(10)}, "production 10d", {clcode::base, clcode::vertex_shading});
+    testCompilation(Module::Options{Module::CL_VERSION_12, Module::WARNINGS_ARE_ERRORS, Module::RenderDimension(4), Module::DEBUG}, "debug/testing 4d", {clcode::base, clcode::vertex_shading});
 }
 

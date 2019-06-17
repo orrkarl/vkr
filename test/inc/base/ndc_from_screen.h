@@ -54,7 +54,7 @@ TEST(Base, NDCFromScreen)
  
     cl::CommandQueue q = cl::CommandQueue::getDefault();
 
-    Module base(clcode::base, "-cl-std=CL2.0 -Werror -D RENDER_DIMENSION=3", &err);
+    Module base(clcode::base, Module::Options{Module::CL_VERSION_12, Module::WARNINGS_ARE_ERRORS, Module::_3D}, &err);
     ASSERT_TRUE(isSuccess(err));
 
     auto ndc_from_screen = base.makeKernel<NDCFromScreenParams>("ndc_from_screen_test", &err);

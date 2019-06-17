@@ -5,7 +5,7 @@
 using namespace nr;
 using namespace nr::__internal;
 
-void testCompilation(const char* options, string configurationName, std::initializer_list<string> codes)
+void testCompilation(const nr::__internal::Module::Options options, string configurationName, std::initializer_list<string> codes)
 {
     cl_int err = CL_SUCCESS;
 

@@ -13,7 +13,13 @@ namespace __internal
 
 string finalizeOptions(const Module::Options& options)
 {
-	return std::reduce(options.cbegin(), options.cend(), string(""), [](string a, string b){ return a + " " + b; });
+    string ret = "";
+    for (auto it = options.cbegin(); it != options.cend(); ++it)
+    {
+        ret += " " + it->getOption();
+    }
+
+    return ret;    
 }
 
 Module::Module(const string& code, const Module::Options& options, cl_int* err)
@@ -27,7 +33,8 @@ Module::Module(const string& code, const Module::Options& options, cl_int* err)
         return;
     }
 
-    m_module.build(finalizeOptions(options).c_str());
+    string soptions = finalizeOptions(options);
+    m_module.build(soptions.c_str());
 }
 
 Module::Module(const std::initializer_list<string> codes, const Module::Options& options, cl_int* err)
@@ -50,6 +57,10 @@ Module::CLVersion CL_VERSION_20 = Module::CLVersion(2.0);
 Module::CLVersion CL_VERSION_12 = Module::CLVersion(1.2);
 
 Module::Option WARNINGS_ARE_ERRORS = Module::Option("-Werror");
+
+Module::RenderDimension _3D = Module::RenderDimension(3);
+Module::RenderDimension _4D = Module::RenderDimension(4);
+Module::RenderDimension _5D = Module::RenderDimension(5);
 
 }
 

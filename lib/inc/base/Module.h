@@ -70,6 +70,10 @@ public:
 	
 	static const Option WARNINGS_ARE_ERRORS;
 
+	static const RenderDimension _3D;
+	static const RenderDimension _4D;
+	static const RenderDimension _5D;
+
     Module() {}
 
     Module(const string& code, const Options& options, cl_int* err);

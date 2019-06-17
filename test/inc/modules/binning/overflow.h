@@ -37,12 +37,17 @@ TEST(Binning, RasterizerOverflow)
         mkTriangleInCoords(0, 0, screenDim, h_triangles + i);
     }
 
-    const char options_fmt[] = "-cl-std=CL2.0 -Werror -D _DEBUG -D _TEST_BINNING -D RENDER_DIMENSION=%d -D TRIANGLE_TEST_COUNT=%d";
-    char options[sizeof(options_fmt) * 2];
-    memset(options, 0, sizeof(options));
-
-    sprintf(options, options_fmt, dim, triangleCount);
-
+    Module::Options options = 
+    {
+        Module::CL_VERSION_12, 
+        Module::WARNINGS_ARE_ERRORS, 
+        Module::RenderDimension(dim), 
+        Moduke::DEBUG, 
+        Module::Macro("_TEST_BINNING"), 
+        Module::Macro("TRIANGLE_TEST_COUNT", 
+        std::to_string(dim))
+    };
+    
     auto code = Module({clcode::base, clcode::bin_rasterizer}, options, &err);
     ASSERT_EQ(CL_SUCCESS, err);
 

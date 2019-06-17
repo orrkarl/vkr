@@ -4,6 +4,7 @@
 #include <general/predefs.h>
 #include <utils/converters.h>
 #include <rendering/Render.h>
+#include <base/Module.h>
 
 #pragma once
 
@@ -115,7 +116,7 @@ struct Fragment
 NRuint index_from_screen(const ScreenPosition& position, const nr::ScreenDimension& dim);
 
 // Test a module's compilation status
-void testCompilation(const char* options, nr::string configurationName, std::initializer_list<nr::string> codes);
+void testCompilation(const nr::__internal::Module::Options options, nr::string configurationName, std::initializer_list<nr::string> codes);
 
 // Convert Screen Coordinates to NDC
 NDCPosition ndcFromScreen(const ScreenPosition screen, const nr::ScreenDimension& screenDim);

@@ -31,10 +31,16 @@ TEST(VertexShader, Perspective)
     expected.values[1] = -0.5;
     expected.values[2] = 2.0 / 3;
     
-    const char options_fmt[] = "-cl-std=CL2.0 -Werror -D _DEBUG -D _TEST_FINE -D RENDER_DIMENSION=%d";
-    char options[sizeof(options_fmt) * 2];
-    memset(options, 0, sizeof(options));
-    sprintf(options, options_fmt, dim);
+    Module::Options options = 
+    {
+        Module::CL_VERSION_12, 
+        Module::WARNINGS_ARE_ERRORS, 
+        Module::RenderDimension(dim), 
+        Moduke::DEBUG, 
+        Module::Macro("_TEST_FINE:"), 
+        Module::Macro("TRIANGLE_TEST_COUNT", 
+        std::to_string(dim))
+    };
 
     Module code({clcode::base, clcode::vertex_shading}, options, &err);
     ASSERT_TRUE(isSuccess(err));
