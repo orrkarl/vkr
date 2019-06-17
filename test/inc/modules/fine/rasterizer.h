@@ -78,12 +78,7 @@ TEST(Fine, Rasterizer)
     
     fillTriangles<dim>(screenDim, config, totalWorkGroupCount, expectedDepth, 256, h_triangles.get(), h_binQueues.get());
 
-    const NRchar options_fmt[] = "-cl-std=CL2.0 -Werror -D _DEBUG -D _TEST_FINE -D RENDER_DIMENSION=%d";
-    NRchar options[sizeof(options_fmt) * 2];
-    memset(options, 0, sizeof(options));
-    sprintf(options, options_fmt, dim);
-
-    Module code({clcode::base, clcode::fine_rasterizer}, options, &err);
+    auto code = mkFineModule(dim, &err);
     ASSERT_TRUE(isSuccess(err));
 
     auto testee = code.makeKernel<FineRasterizerParams>("fine_rasterize", &err);

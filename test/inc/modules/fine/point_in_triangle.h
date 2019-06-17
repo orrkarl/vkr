@@ -55,13 +55,8 @@ TEST(Fine, PointInTriangle)
 
     auto q = cl::CommandQueue::getDefault();
 
-    const char options_fmt[] = "-cl-std=CL2.0 -Werror -D _DEBUG -D _TEST_FINE -D RENDER_DIMENSION=%d";
-    char options[sizeof(options_fmt) * 2];
-    memset(options, 0, sizeof(options));
-    sprintf(options, options_fmt, dim);
-
-    Module code({clcode::base, clcode::fine_rasterizer}, options, &err);
-    ASSERT_EQ(CL_SUCCESS, err);
+    auto code = mkFineModule(dim, &err);
+    ASSERT_TRUE(isSuccess(err));
 
     auto testee = code.makeKernel<PointInTriangleParams>("is_point_in_triangle_test", &err);
     ASSERT_EQ(CL_SUCCESS, err);

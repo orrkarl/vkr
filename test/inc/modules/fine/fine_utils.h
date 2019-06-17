@@ -5,7 +5,10 @@
 #include <rendering/Render.h>
 #include <pipeline/BinRasterizer.h>
 
+namespace _nr = nr::__internal;
+
 const RawColorRGB RED = { 255, 0, 0 };
+const _nr::Module::Option TEST_FINE("_TEST_FINE");
 
 template<NRuint dim>
 void mkTriangleInCoordinates(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, Triangle<dim>* triangle)
@@ -112,4 +115,9 @@ void fillTriangles(
             i += 3;
         }
     }
+}
+
+_nr::Module mkFineModule(const NRuint dim, cl_int* err)
+{
+    return mkStandardModule({_nr::clcode::base, _nr::clcode::fine_rasterizer}, dim, err);
 }

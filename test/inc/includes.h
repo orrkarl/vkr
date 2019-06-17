@@ -124,3 +124,4 @@ NDCPosition ndcFromScreen(const ScreenPosition screen, const nr::ScreenDimension
 // Check if a cl_int value indicates success, return well formatted message O.W
 testing::AssertionResult isSuccess(const cl_int& err);
 
+nr::__internal::Module mkStandardModule(const NRuint dim, const initializer_list<string>& codes, cl_int* err);

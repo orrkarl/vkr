@@ -11,7 +11,7 @@ using namespace testing;
 
 TEST(Fine, Compilation)
 {
-    testCompilation("-cl-std=CL2.0 -Werror -D RENDER_DIMENSION=10", "production 10d", {clcode::base, clcode::fine_rasterizer});
-    testCompilation("-cl-std=CL2.0 -Werror -D _DEBUG -D _TEST_FINE -D RENDER_DIMENSION=8", "debug/testing 8d", {clcode::base, clcode::fine_rasterizer});
+    testCompilation(Module::Options{Module::CL_VERSION_12, Module::WARNINGS_ARE_ERRORS, Module::RenderDimension(10)}, "production 10d", {clcode::base, clcode::fine_rasterizer});
+    testCompilation(Module::Options{Module::CL_VERSION_12, Module::WARNINGS_ARE_ERRORS, Module::RenderDimension(8), Module::DEBUG, TEST_FINE}, "debug/testing 8d", {clcode::base, clcode::fine_rasterizer});
 }
 

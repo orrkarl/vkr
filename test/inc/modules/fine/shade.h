@@ -40,11 +40,6 @@ TEST(Fine, ShadeTest)
     const NRuint dim = 6;
     constexpr ScreenDimension screenDim = { 5, 2 };
 
-    const NRchar options_fmt[] = "-cl-std=CL2.0 -Werror -D _DEBUG -D _TEST_FINE -D RENDER_DIMENSION=%d";
-    NRchar options[sizeof(options_fmt) * 2];
-    memset(options, 0, sizeof(options));
-    sprintf(options, options_fmt, dim);
-
     RawColorRGB h_color[screenDim.width * screenDim.height];
     Depth       h_depth[screenDim.width * screenDim.height];
 
@@ -72,7 +67,7 @@ TEST(Fine, ShadeTest)
     frame.depth = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_depth), h_depth, &err);
     ASSERT_PRED1(error::isSuccess, err);
     
-    Module code({clcode::base, clcode::fine_rasterizer}, options, &err);
+    auto code = mkFineModule(dim, &err);
     ASSERT_TRUE(isSuccess(err));
 
     auto testee = code.makeKernel<ShadeTestParams>("shade_test", &err);

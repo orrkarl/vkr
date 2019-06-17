@@ -63,7 +63,7 @@ TEST(Binning, Rasterizer)
         Module::RenderDimension(dim), 
         Moduke::DEBUG, 
         Module::Macro("_TEST_BINNING"), 
-        Module::Macro("TRIANGLE_TEST_COUNT", 
+        Module::Macro("TRIANGLE_TEST_COUNT", triangleCount),
         std::to_string(dim))
     };
     
