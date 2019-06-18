@@ -156,7 +156,7 @@ void ndc_from_screen(const ScreenPosition screen, const ScreenDimension dim, glo
     result->y = axis_ndc_from_screen(screen.y, dim.height);
 }
 
-void ndc_from_screen_p(const ScreenPosition screen, const ScreenDimension dim, private NDCPosition* result)
+void ndc_from_screen_p(const ScreenPosition screen, const ScreenDimension dim, NDCPosition* result)
 {
     result->x = axis_ndc_from_screen(screen.x, dim.width);
     result->y = axis_ndc_from_screen(screen.y, dim.height);
@@ -164,7 +164,7 @@ void ndc_from_screen_p(const ScreenPosition screen, const ScreenDimension dim, p
 
 
 // Convertes the middle of a pixel to NDC
-void pixel_mid_point_from_screen(const ScreenPosition screen, const ScreenDimension dim, private NDCPosition* result)
+void pixel_mid_point_from_screen(const ScreenPosition screen, const ScreenDimension dim, NDCPosition* result)
 {
     result->x = axis_pixel_mid_point(screen.x, dim.width);
     result->y = axis_pixel_mid_point(screen.y, dim.height);

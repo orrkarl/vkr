@@ -216,7 +216,7 @@ kernel void shade_test(
 
 kernel void is_point_in_triangle_test(const global Triangle triangle, const ScreenPosition position, const ScreenDimension dim, global bool* result)
 {
-    private NDCPosition pos;
+    NDCPosition pos;
     
     NDCPosition p0, p1, p2;
     

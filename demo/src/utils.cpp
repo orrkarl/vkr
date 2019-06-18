@@ -141,14 +141,19 @@ cl_int FullPipeline::operator()(cl::CommandQueue q)
     // printf("Enqueuing vertex shader\n");
     if ((cl_err = vertexShader(q)) != CL_SUCCESS) return cl_err;
     if ((cl_err = q.finish()) != CL_SUCCESS) return cl_err;
+    printf("Vertecies transformed!\n");
 
     // printf("Enqueuing bin rasterizer\n");   
     if ((cl_err = binRasterizer(q)) != CL_SUCCESS) return cl_err;
     if ((cl_err = q.finish()) != CL_SUCCESS) return cl_err;
+    printf("Bin filled!\n");
 
     // printf("Enqueuing fine rasterizer\n");
     if ((cl_err = fineRasterizer(q)) != CL_SUCCESS) return cl_err;
-    return q.finish();
+    if ((cl_err = q.finish()) != CL_SUCCESS) return cl_err;
+    printf("Framebuffer filled - pipeline completed!\n");
+    
+    return CL_SUCCESS;
 }
 
 void error_callback(int error, const char* description)
