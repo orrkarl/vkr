@@ -113,6 +113,8 @@ cl_int FullPipeline::setup(
     if (nr::error::isFailure(ret)) return ret;
     binRasterizer.params.binQueues = nr::Buffer(CL_MEM_READ_WRITE, 3 * dim * binRasterWorkGroupCount * totalBinCount * (config.queueSize + 1), &ret);
     if (nr::error::isFailure(ret)) return ret;
+    binRasterizer.params.batchIndex = nr::Buffer(CL_MEM_READ_WRITE, sizeof(cl_uint), &ret);
+    if (nr::error::isFailure(ret)) return ret;
 
     binRasterizer.global = cl::NDRange(binRasterWorkGroupCount * binCountX, binCountY);
     binRasterizer.local  = cl::NDRange(binCountX, binCountY);
