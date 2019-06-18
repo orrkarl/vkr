@@ -15,7 +15,7 @@ struct Bin
     NRuint y;
 };
 
-const Module::Option TEST_BINNING("_TEST_BINNING");
+const Module::Macro TEST_BINNING("_TEST_BINNING");
 
 template<NRuint dim>
 void mkTriangleInCoords(const NRuint x, const NRuint y, const ScreenDimension& screenDim, Triangle<dim>* result)

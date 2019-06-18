@@ -8,7 +8,7 @@
 namespace _nr = nr::__internal;
 
 const RawColorRGB RED = { 255, 0, 0 };
-const _nr::Module::Option TEST_FINE("_TEST_FINE");
+const _nr::Module::Macro TEST_FINE("_TEST_FINE");
 
 template<NRuint dim>
 void mkTriangleInCoordinates(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, Triangle<dim>* triangle)

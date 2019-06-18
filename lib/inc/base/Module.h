@@ -16,7 +16,7 @@ namespace __internal
  **/
 class NR_SHARED_EXPORT Module
 {
-
+// Types
 public:
 	struct NR_SHARED_EXPORT Option
 	{
@@ -33,14 +33,6 @@ public:
 	};
 
 	typedef std::vector<Option> Options;
-
-	struct NR_SHARED_EXPORT CLVersion : Option
-	{
-		CLVersion(const NRfloat& version)
-			: Option("-cl-std=CL" + std::to_string(version))
-		{
-		}
-	};
 
 	struct NR_SHARED_EXPORT Macro : Option
 	{
@@ -63,17 +55,17 @@ public:
 		}
 	};
 
-	static const Macro DEBUG;
+private:
+	struct NR_SHARED_EXPORT CLVersion : Option
+	{
+		CLVersion(const string& version)
+			: Option("-cl-std=CL" + version)
+		{
+		}
+	};
 
-	static const CLVersion CL_VERSION_20;
-	static const CLVersion CL_VERSION_12;
-	
-	static const Option WARNINGS_ARE_ERRORS;
-
-	static const RenderDimension _3D;
-	static const RenderDimension _4D;
-	static const RenderDimension _5D;
-
+// Functions
+public:
     Module() {}
 
     Module(const string& code, const Options& options, cl_int* err);
@@ -90,6 +82,22 @@ public:
         auto ret = m_module.getBuildInfo<CL_PROGRAM_BUILD_LOG>(cl::Device::getDefault(), err);
         return ret;
     }
+
+// Fields
+public:
+	static const Macro DEBUG;
+
+	static const CLVersion CL_VERSION_22;
+	static const CLVersion CL_VERSION_21;
+	static const CLVersion CL_VERSION_20;
+	static const CLVersion CL_VERSION_12;
+	static const CLVersion CL_VERSION_11;
+	
+	static const Option WARNINGS_ARE_ERRORS;
+
+	static const RenderDimension _3D;
+	static const RenderDimension _4D;
+	static const RenderDimension _5D;
 
 private:
     cl::Program m_module;
