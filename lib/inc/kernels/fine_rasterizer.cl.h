@@ -17,7 +17,7 @@ const string fine_rasterizer = R"__CODE__(
 void shade(
     Fragment fragment,
     const ScreenDimension dim,
-    RawColorRGB* color, Depth* depth)
+    global RawColorRGB* color, global Depth* depth)
 {
     uint buffer_index;
     buffer_index = index_from_screen(fragment.position, dim);
@@ -51,7 +51,7 @@ void barycentric2d(const NDCPosition p0, const NDCPosition p1, const NDCPosition
 }
 
 // Calculate (according to Perspective Correct Interpolation) the inverse of the depth at point
-Depth depth_at_point(const generic Triangle triangle, float3 barycentric)
+Depth depth_at_point(const global Triangle triangle, float3 barycentric)
 {
     return 1 / triangle[0][2] * barycentric.x + 1 / triangle[1][2] * barycentric.y + 1 / triangle[2][2] * barycentric.z;
 }
@@ -69,18 +69,18 @@ bool is_point_in_triangle(const NDCPosition p0, const NDCPosition p1, const NDCP
     return is_contained_top_left(p0, barycentric.x) && is_contained_top_left(p1, barycentric.y) && is_contained_top_left(p2, barycentric.z);
 }
 
-bool is_queue_ended(const Index** queues, uint* indices, uint index)
+bool is_queue_ended(global const Index** queues, uint* indices, uint index)
 {
     return !queues[index][indices[index]] && indices[index];
 }
 
-bool is_queue_valid(const Index** queues, uint* indices, uint index, uint queue_size)
+bool is_queue_valid(global const Index** queues, uint* indices, uint index, uint queue_size)
 {
     return indices[index] < queue_size && !is_queue_ended(queues, indices, index);
 }
 
 // Pick the next non-empty bin queue
-uint pick_queue(const Index** queues, uint* indices, const uint work_group_count, const uint queue_size)
+uint pick_queue(global const Index** queues, uint* indices, const uint work_group_count, const uint queue_size)
 {
     uint current_queue = work_group_count;
 
@@ -103,7 +103,7 @@ uint pick_queue(const Index** queues, uint* indices, const uint work_group_count
 }
 
 // Check if a triangle is oriented counter clock-wise
-bool is_ccw(const generic Triangle* triangle, Index idx)
+bool is_ccw(const global Triangle* triangle, Index idx)
 {
     NDCPosition p0, p1, p2;
     p0 = (float2)(triangle[idx][0][0], triangle[idx][0][1]);
@@ -125,9 +125,9 @@ kernel void fine_rasterize(
     Fragment current_frag;
     float3 barycentric;
     uint current_queue_elements[MAX_WORK_GROUP_COUNT];
-    const Index* current_queue_bases[MAX_WORK_GROUP_COUNT];
+    global const Index* current_queue_bases[MAX_WORK_GROUP_COUNT];
 
-    NDCPosition current_position_ndc;
+    private NDCPosition current_position_ndc;
     
     const uint x = get_global_id(0);
     const uint y = get_global_id(1);
@@ -175,8 +175,6 @@ kernel void fine_rasterize(
         
         current_queue_element = current_queue_bases[current_queue][current_queue_elements[current_queue]];
 
-        DEBUG_ITEM_SPECIFIC1(30, 0, 0, "current queue index: %u\n", current_queue_element);
-
         for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, x * config.bin_width + config.bin_width); ++frag_x)
         {
             for (uint frag_y = y * config.bin_height; frag_y < min(screen_dim.height, y * config.bin_height + config.bin_height); ++frag_y)
@@ -189,11 +187,6 @@ kernel void fine_rasterize(
                 p0 = (float2)(triangle_data[current_queue_element][0][0], triangle_data[current_queue_element][0][1]);
                 p1 = (float2)(triangle_data[current_queue_element][1][0], triangle_data[current_queue_element][1][1]);
                 p2 = (float2)(triangle_data[current_queue_element][2][0], triangle_data[current_queue_element][2][1]);
-
-                // if (triangle_data[current_queue_element][0][2] == 0 || triangle_data[current_queue_element][1][2] == 0 || triangle_data[current_queue_element][2][2] == 0)
-                // {
-                    // DEBUG_MESSAGE1("Bad triangle at index %u\n", current_queue_element);
-                // }
 
                 barycentric2d(p0, p1, p2, current_position_ndc, &barycentric);
 
@@ -223,7 +216,7 @@ kernel void shade_test(
 
 kernel void is_point_in_triangle_test(const global Triangle triangle, const ScreenPosition position, const ScreenDimension dim, global bool* result)
 {
-    NDCPosition pos;
+    private NDCPosition pos;
     
     NDCPosition p0, p1, p2;
     
@@ -231,7 +224,7 @@ kernel void is_point_in_triangle_test(const global Triangle triangle, const Scre
     p1 = (float2)(triangle[1][0], triangle[1][1]);
     p2 = (float2)(triangle[2][0], triangle[2][1]);
     
-    ndc_from_screen(position, dim, &pos);
+    ndc_from_screen_p(position, dim, &pos);
 
     float3 barycentric;
     barycentric2d(p0, p1, p2, pos, &barycentric);
