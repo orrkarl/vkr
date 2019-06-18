@@ -53,6 +53,8 @@ struct NR_SHARED_EXPORT BinRasterizerParams
 
     // Overflow handling
     Buffer hasOverflow;
+
+    Buffer batchIndex;
 };
 
 typedef Kernel<BinRasterizerParams> BinRasterizer;

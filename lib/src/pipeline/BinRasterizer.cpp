@@ -14,7 +14,8 @@ cl_int BinRasterizerParams::load(cl::Kernel kernel)
     if ((err = kernel.setArg(2, dimension)) != CL_SUCCESS) return err;
     if ((err = kernel.setArg(3, binQueueConfig)) != CL_SUCCESS) return err;
     if ((err = kernel.setArg(4, hasOverflow.getBuffer())) != CL_SUCCESS) return err;
-    return kernel.setArg(5, binQueues.getBuffer());
+    if ((err = kernel.setArg(5, binQueues.getBuffer())) != CL_SUCCESS) return err;
+    return kernel.setArg(6, batchIndex.getBuffer());
 }
 
 }

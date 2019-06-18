@@ -73,12 +73,16 @@ TEST(Binning, Rasterizer)
     Buffer d_binQueues(CL_MEM_READ_WRITE, BinRasterizerParams::getTotalBinQueueSize(workGroupCount, screenDim, config), &err);
     ASSERT_PRED1(error::isSuccess, err);
 
+    Buffer d_batchIndex(CL_MEM_READ_WRITE, sizeof(cl_uint), &err);
+    ASSERT_PRED1(error::isSuccess, err);
+
     testee.params.binQueueConfig    = config;
     testee.params.dimension         = screenDim;
     testee.params.triangleData      = d_triangles;
     testee.params.triangleCount     = triangleCount;
     testee.params.hasOverflow       = d_overflow;
     testee.params.binQueues         = d_binQueues;
+    testee.params.batchIndex = d_batchIndex;
 
     testee.global = cl::NDRange(workGroupCount * binCountX, binCountY);
     testee.local  = cl::NDRange(binCountX, binCountY);
