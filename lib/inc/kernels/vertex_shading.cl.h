@@ -44,7 +44,7 @@ void perspective_bounded_axis(
     const float axis_value,
     const float projection_value,
     const float min, const float max,
-    float* result)
+    global float* result)
 {
     *result = (2 * axis_value / projection_value - max - min) / (max - min);
 }
@@ -54,7 +54,7 @@ void perspective_bounded(
     const float left, const float right, const float bottom, const float top,
     global Point result)
 {
-    generic float* p_floats = (generic float*) result;
+    global float* p_floats = (global float*) result;
     perspective_bounded_axis(result[0], result[2], left, right, p_floats);
     perspective_bounded_axis(result[1], result[2], bottom, top, p_floats + 1);
 }
