@@ -41,7 +41,7 @@ float max3(const float a, const float b, const float c)
 }
 
 // Returns the bounding box of a 2d triangle (x0, y0, x1, y1)
-float4 mk_triangle_bounding_rect(const generic float x[3], const generic float y[3])
+float4 mk_triangle_bounding_rect(const local float x[3], const local float y[3])
 {
     return (float4)(min3(x[0], x[1], x[2]), min3(y[0], y[1], y[2]), max3(x[0], x[1], x[2]), max3(y[0], y[1], y[2]));
 }
@@ -62,7 +62,7 @@ bool is_rect_intersecting_bounds(const float4 rect, const float4 bounds)
 }
 
 // Calculates triangle bounding box, than checkes it it has any intersection with the bin
-bool is_triangle_in_bin(const generic float x[3], const generic float y[3], const Bin bin, const ScreenDimension dim)
+bool is_triangle_in_bin(const local float x[3], const local float y[3], const Bin bin, const ScreenDimension dim)
 {
     float4 triangle_bounds = mk_triangle_bounding_rect(x, y);
     float4 bin_bounds = (float4)(
@@ -103,15 +103,14 @@ event_t reduce_triangle_buffer(
 
 // ----------------------------------------------------------------------------
 
-global atomic_uint g_batch_index;
-
 kernel void bin_rasterize(
     const global Triangle* triangle_data,
     const uint triangle_count,
     const ScreenDimension dim,
     const BinQueueConfig config,
     global bool* has_overflow,
-    global Index* bin_queues)
+    global Index* bin_queues,
+    global uint* g_batch_index)
 {
     local float reduced_triangles_x[BATCH_COUNT * RENDER_DIMENSION];
     local float reduced_triangles_y[BATCH_COUNT * RENDER_DIMENSION];
@@ -146,7 +145,7 @@ kernel void bin_rasterize(
 
     if (!get_global_id(0) && !get_global_id(1))
     {
-        atomic_init(&g_batch_index, 0);
+        *g_batch_index = 0;
         *has_overflow = false;
     }
 
@@ -170,7 +169,7 @@ kernel void bin_rasterize(
         // Aquire a batch (update the local and global batch index)
         if (is_init_manager)
         {
-            current_batch_index = atomic_fetch_add(&g_batch_index, BATCH_COUNT);
+            current_batch_index = atomic_add(g_batch_index, BATCH_COUNT);
         }
 
         work_group_barrier(CLK_LOCAL_MEM_FENCE);
@@ -243,7 +242,18 @@ kernel void is_triangle_in_bin_test(
     const ScreenDimension dim,
     global bool* result)
 {
-    *result = is_triangle_in_bin(triangle_x, triangle_y, bin, dim);
+    local float x[3];
+    local float y[3];
+
+    x[0] = triangle_x[0]; 
+    x[1] = triangle_x[1]; 
+    x[2] = triangle_x[2]; 
+
+    y[0] = triangle_y[0]; 
+    y[1] = triangle_y[1]; 
+    y[2] = triangle_y[2]; 
+
+    *result = is_triangle_in_bin(x, y, bin, dim);
 }
 
 kernel void reduce_triangle_buffer_test(

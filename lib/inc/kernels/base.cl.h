@@ -143,14 +143,14 @@ int axis_signed_from_ndc(const float pos, const uint length)
 }
 
 // Convertes NDC to Screen Coordinates
-void screen_from_ndc(const NDCPosition ndc, const ScreenDimension dim, ScreenPosition* screen)
+void screen_from_ndc(const NDCPosition ndc, const ScreenDimension dim, global ScreenPosition* screen)
 {
     screen->x = axis_screen_from_ndc(ndc.x, dim.width);
     screen->y = axis_screen_from_ndc(ndc.y, dim.height);
 }
 
 // Convertes Screen Coordinates to NDC
-void ndc_from_screen(const ScreenPosition screen, const ScreenDimension dim, NDCPosition* result)
+void ndc_from_screen(const ScreenPosition screen, const ScreenDimension dim, global NDCPosition* result)
 {
     result->x = axis_ndc_from_screen(screen.x, dim.width);
     result->y = axis_ndc_from_screen(screen.y, dim.height);
