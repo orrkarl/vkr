@@ -8,7 +8,7 @@ namespace nr
 namespace utils
 {
     
-NR_SHARED_EXPORT const string stringFromCLError(const cl_int& error);
+NR_SHARED const string stringFromCLError(const cl_int& error);
 
 }
 

@@ -14,7 +14,7 @@ namespace __internal
  * 
  **/
 template<class Params>
-class NR_SHARED_EXPORT Kernel : public cl::Kernel
+class NR_SHARED Kernel : public cl::Kernel
 {
 
 public:

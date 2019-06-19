@@ -1,5 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
+include(cmake/PrecompiledHeader.cmake)
+
 project(Nraster CXX)
 
 IF(NOT CMAKE_BUILD_TYPE)

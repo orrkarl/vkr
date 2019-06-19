@@ -10,7 +10,7 @@ namespace nr
 namespace __internal
 {
 
-class NR_SHARED_EXPORT VertexShadingParams
+class NR_SHARED VertexShadingParams
 {
 public:
 

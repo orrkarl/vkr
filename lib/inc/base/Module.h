@@ -14,11 +14,11 @@ namespace __internal
 /**
  * Utility wrapper around cl::Module
  **/
-class NR_SHARED_EXPORT Module
+class NR_SHARED Module
 {
 // Types
 public:
-	struct NR_SHARED_EXPORT Option
+	struct NR_SHARED Option
 	{
 		public:
 			Option(const string& value)
@@ -34,7 +34,7 @@ public:
 
 	typedef std::vector<Option> Options;
 
-	struct NR_SHARED_EXPORT Macro : Option
+	struct NR_SHARED Macro : Option
 	{
 		Macro(const string name)
 			: Option("-D " + name)
@@ -47,7 +47,7 @@ public:
 		}
 	};
 
-	struct NR_SHARED_EXPORT RenderDimension : Macro
+	struct NR_SHARED RenderDimension : Macro
 	{
 		RenderDimension(const NRuint& dimension)
 			: Macro("RENDER_DIMENSION", std::to_string(dimension))
@@ -56,7 +56,7 @@ public:
 	};
 
 private:
-	struct NR_SHARED_EXPORT CLVersion : Option
+	struct NR_SHARED CLVersion : Option
 	{
 		CLVersion(const string& version)
 			: Option("-cl-std=CL" + version)
@@ -92,7 +92,7 @@ public:
 	static const CLVersion CL_VERSION_20;
 	static const CLVersion CL_VERSION_12;
 	static const CLVersion CL_VERSION_11;
-	
+
 	static const Option WARNINGS_ARE_ERRORS;
 
 	static const RenderDimension _3D;

@@ -26,31 +26,35 @@ typedef uint8_t NRubyte;
 typedef char NRchar;
 typedef bool NRbool;
 
+#ifndef NR_SHARED
+
 #ifdef _MSC_VER
-	#define NR_SHARED_EXPORT __declspec(dllexport)
+	#define NR_SHARED __declspec(dllimport)
 #else
-	#define NR_SHARED_EXPORT
+	#define NR_SHARED
 #endif // _MSC_VER
+
+#endif // NOT NR_SHARED
 
 namespace nr
 {
 
 typedef std::basic_string<NRchar> string;
 
-enum class NR_SHARED_EXPORT Type : NRint
+enum class NR_SHARED Type : NRint
 {
 	DOUBLE, FLOAT, ULONG, LONG, UINT, INT, USHORT, SHORT, UBYTE, BYTE, CHAR, BOOL, RAW
 };
 
 namespace type
 {
-	NR_SHARED_EXPORT NRuint getByteSize(const Type& type);
+	NR_SHARED NRuint getByteSize(const Type& type);
 }
 
 namespace error
 {
-	NR_SHARED_EXPORT NRbool isSuccess(const cl_int& err);
-	NR_SHARED_EXPORT NRbool isFailure(const cl_int& err);
+	NR_SHARED NRbool isSuccess(const cl_int& err);
+	NR_SHARED NRbool isFailure(const cl_int& err);
 }
 
 }

@@ -11,7 +11,11 @@ ADD_LIBRARY(Nraster SHARED
 	src/pipeline/BinRasterizer.cpp
 	src/pipeline/FineRasterizer.cpp
 
-	src/utils/converters.cpp)
+	src/utils/converters.cpp
+	
+	pch.cpp)
+
+ADD_PRECOMPILED_HEADER(Nraster pch.h SOURCE_CXX pch.cpp FORCEINCLUDE)
 
 TARGET_LINK_LIBRARIES(Nraster
 	PUBLIC ${OpenCL_LIBRARIES})
