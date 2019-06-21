@@ -26,6 +26,8 @@ typedef uint8_t NRubyte;
 typedef char NRchar;
 typedef bool NRbool;
 
+typedef cl_int cl_status;
+
 #ifndef NR_SHARED
 
 #ifdef _MSC_VER
