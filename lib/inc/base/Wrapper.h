@@ -16,7 +16,7 @@ public:
     {
     }
 
-    explicit Wrapper(const cl_type object, const NRbool retain)
+    explicit Wrapper(const cl_type object, const NRbool retain = false)
         : object(object)
     {
         if (retain) retain();
