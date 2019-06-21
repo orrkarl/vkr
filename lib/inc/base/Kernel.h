@@ -1,71 +1,63 @@
 #pragma once
 
 #include "../general/predefs.h"
+#include "Wrapper.h"
 
 namespace nr
 {
 
-namespace __internal
-{
-
 /**
- * A wrapper for cl::Kernel which changes the way arguments are loaded and executed 
- * instead of calling a function, you first set the args up
- * 
+ * A wrapper for kernel
  **/
-template<class Params>
-class NR_SHARED Kernel : public cl::Kernel
+class NR_SHARED Kernel : public Wrapper<cl_kernel>
 {
-
 public:
-    Kernel() {}
-
-    explicit Kernel(cl::Kernel kernel)
-        : cl::Kernel(kernel)
+    Kernel()
+        : Wrapped()
     {
     }
 
-    Kernel(const cl::Program& code, const string& name, cl_int* err)
-        : cl::Kernel(code, name.data(), err)
+    explicit Kernel(const cl_kernel& Kernel, const NRbool retain = false)
+        : Wrapped(Kernel, retain)
     {
     }
 
-    // Add this kernel to the queue, start executing it
-    cl_int apply(cl::CommandQueue queue)
+    Kernel(const Kernel& other)
+        : Wrapped(other)
     {
-        return queue.enqueueNDRangeKernel(*this, offset, global, local, &requirements, &notifier);
     }
 
-    // Set all of this kernel's arguments
-    cl_int loadParams()
+    Kernel(Kernel&& other)
+        : Wrapped(other)
     {
-        return params.load(*this);
     }
 
-    // Initialize what ever argument needs initialziation (usually write a value to a buffer)
-    cl_int initParams(cl::CommandQueue queue)
+    Kernel& operator=(const Kernel& other)
     {
-        return params.init(queue);
+        return Wrapped::operator=(other);
     }
 
-    // load a kernel
-    cl_int operator()(cl::CommandQueue queue)
+    Kernel& operator=(Kernel&& other)
     {
-        cl_int err;
-        if ((err = initParams(queue)) != CL_SUCCESS) return err;;
-        if ((err = loadParams()) != CL_SUCCESS) return err;
-        return apply(queue);
+        return Wrapped::operator=(other);
     }
 
-public:
-    cl::NDRange offset;
-    cl::NDRange global;
-    cl::NDRange local;
-    std::vector<cl::Event> requirements;
-    cl::Event notifier;
-    Params params;
+    operator cl_kernel() const 
+    {
+        return object;
+    }    
+
+    template<typename T>
+    typename std::enable_if<!std::is_pointer<T>() && std::is_pod<T>(), cl_status>::type setArg(const NRuint index, const T& value)
+    {
+        return clSetKernelArg(object, index, sizeof(T), value);
+    }
+    
+    template<typename T>
+    cl_status setArg(const NRuint index, const NRuint size, const T value)
+    {
+        return clSetKernelArg(object, index, size, value);
+    }
 };
-
-}
 
 }

@@ -69,7 +69,7 @@ public:
 
     operator cl_mem() const 
     {
-        return get();
+        return object;
     }
 };
 

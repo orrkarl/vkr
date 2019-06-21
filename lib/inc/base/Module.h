@@ -223,7 +223,6 @@ private:
     	return ret;    
 	}
 
-
 // Fields
 public:
 	static const Macro DEBUG;
