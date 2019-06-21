@@ -2,19 +2,17 @@
 
 #include "../general/predefs.h"
 #include "../utils/converters.h"
+#include "Wrapper.h"
 #include "Kernel.h"
 #include <vector>
 
 namespace nr
 {
 
-namespace __internal
-{
-
 /**
  * Utility wrapper around cl::Module
  **/
-class NR_SHARED Module
+class NR_SHARED Module : Wrapper<cl_program>
 {
 // Types
 public:
@@ -98,11 +96,6 @@ public:
 	static const RenderDimension _3D;
 	static const RenderDimension _4D;
 	static const RenderDimension _5D;
-
-private:
-    cl::Program m_module;
 };
-
-}
 
 }

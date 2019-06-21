@@ -1,39 +1,65 @@
 #pragma once
 
 #include "../general/predefs.h"
+#include "Wrapper.h"
+#include "Context.h"
 
 namespace nr
 {
 
 /**
- * Simple wrapper for cl::Buffer, may be removed in the next refactor as it isn't really neccessary
- * 
+ * Simple wrapper for opencl buffers, may be removed in the next refactor as it isn't really neccessary
  * 
  **/
-class NR_SHARED Buffer
+template<typename T>
+class NR_SHARED Buffer : Wrapper<cl_mem>
 {
-public:
-    Buffer(cl_mem_flags flags, const NRulong& size, cl_int* err = nullptr)
-        : Buffer(flags, size, nullptr, err)
+public:    
+    Buffer(const Context& context, const cl_mem_flags& flags, const NRulong& count, cl_int* err = nullptr)
+        : Buffer(context, flags, count, nullptr, err)
+    {
+    }
+
+    
+    Buffer(const Context& context, const cl_mem_flags& flags, const NRulong& count, T* data = nullptr, cl_int* error = nullptr)
+        : Wrapped(clCreateBuffer(context, flags, count * sizeof(T), data, error))
     {
     }
 
     Buffer()
+        : Wrapped()
     {
     }
 
-    Buffer(cl_mem_flags flags, const NRulong& size, void* data = nullptr, cl_int* error = nullptr);
+    explicit Buffer(const cl_mem& buffer, const NRbool retain)
+        : Wrapped(buffer, retain)
+    {
+    }
 
-    cl::Buffer getBuffer() const { return m_buffer; }
+    Buffer(const Buffer& other)
+        : Wrapped(other)
+    {
+    }
 
-    operator cl::Buffer() { return m_buffer; }
+    Buffer(Buffer&& other)
+        : Wrapped(other)
+    {
+    }
 
-    cl_int resize(cl_mem_flags flags, const NRuint size);
+    Buffer& operator=(const Buffer& other)
+    {
+        return Wrapped::operator=(other);
+    }
 
-private:
-    cl::Buffer m_buffer;
+    Buffer& operator=(Buffer&& other)
+    {
+        return Wrapped::operator=(other);
+    }
+
+    operator cl_mem() const 
+    {
+        return get();
+    }
 };
-
-#undef CTOR
 
 }

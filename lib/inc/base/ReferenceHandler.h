@@ -7,7 +7,7 @@ class ReferenceHandler { };
 
 #define ReferenceHandler(T, Name)                                           \
     template<>                                                              \
-    class ReferenceHandler<T>                                             \
+    class ReferenceHandler<T>                                               \
     {                                                                       \
     public:                                                                 \
         static cl_status retain(T obj) { return clRetain##Name(obj); }      \

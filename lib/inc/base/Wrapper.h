@@ -6,9 +6,6 @@
 namespace nr
 {
 
-namespace __internal
-{
-
 template<typename cl_type>
 class NR_SHARED Wrapper
 {
@@ -17,6 +14,17 @@ public:
     Wrapper() 
         : object(NULL)
     {
+    }
+
+    explicit Wrapper(const cl_type object, const NRbool retain)
+        : object(object)
+    {
+        if (retain) retain();
+    }
+
+    ~Wrapper()
+    {
+        release();
     }
 
     Wrapper(const Wrapper<cl_type>& other)
@@ -86,8 +94,10 @@ protected:
 // Fields
 protected:
     cl_type object;
-};
 
-}
+// Types
+protected:
+    typedef Wrapper<cl_type> Wrapped;
+};
 
 }
