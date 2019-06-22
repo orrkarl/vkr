@@ -34,7 +34,7 @@ Platform::Platform()
 {
 }
 
-Platform::Platform(const cl_platform_id& Platform, const NRbool retain = false)
+Platform::Platform(const cl_platform_id& platform, const NRbool retain = false)
     : Wrapped(Platform, retain)
 {
 }

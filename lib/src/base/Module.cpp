@@ -64,7 +64,7 @@ Module::Module(Context& context, const Sources& codes, cl_status* err = nullptr)
     object = clCreateProgramWithSource(context, codes.size(), &codes[0], sizes, err);
 }
 
-Module::Module(const cl_program& Module, const NRbool retain = false)
+Module::Module(const cl_program& module, const NRbool retain = false)
     : Wrapped(Module, retain)
 {
 }

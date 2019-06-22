@@ -15,7 +15,7 @@ class NR_SHARED CommandQueue : public Wrapper<cl_command_queue>
 public:
     CommandQueue();
 
-    explicit CommandQueue(const cl_command_queue& CommandQueue, const NRbool retain = false);
+    explicit CommandQueue(const cl_command_queue& commandQueue, const NRbool retain = false);
 
     CommandQueue(const CommandQueue& other);
 

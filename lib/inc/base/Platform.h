@@ -22,7 +22,7 @@ public:
 
     Platform();
 
-    explicit Platform(const cl_platform_id& Platform, const NRbool retain = false);
+    explicit Platform(const cl_platform_id& platform, const NRbool retain = false);
 
     Platform(const Platform& other);
 

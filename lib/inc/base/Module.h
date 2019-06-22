@@ -78,7 +78,7 @@ public:
 
 	Module(Context& context, const Sources& codes, cl_status* err = nullptr);
 
-    explicit Module(const cl_program& Module, const NRbool retain = false);
+    explicit Module(const cl_program& module, const NRbool retain = false);
 
     Module(const Module& other);
 

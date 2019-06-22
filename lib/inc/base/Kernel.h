@@ -14,7 +14,7 @@ class NR_SHARED Kernel : public Wrapper<cl_kernel>
 public:
     Kernel();
 
-    explicit Kernel(const cl_kernel& Kernel, const NRbool retain = false);
+    explicit Kernel(const cl_kernel& kernel, const NRbool retain = false);
 
     Kernel(const Kernel& other);
 
