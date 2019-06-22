@@ -18,7 +18,7 @@ Device::Device()
 {
 }
 
-Device::Device(const cl_device_id& Device, const NRbool retain = false)
+Device::Device(const cl_device_id& device, const NRbool retain = false)
     : Wrapped(Device, retain)
 {
 }

@@ -8,7 +8,7 @@ Kernel::Kernel()
 {
 }
 
-Kernel::Kernel(const cl_kernel& Kernel, const NRbool retain = false)
+Kernel::Kernel(const cl_kernel& kernel, const NRbool retain = false)
     : Wrapped(Kernel, retain)
 {
 }
