@@ -146,7 +146,7 @@ public:
 
     cl_status finish()
     {
-        return clFinish();
+        return clFinish(object);
     }
 };
 
