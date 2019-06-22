@@ -3,6 +3,16 @@
 namespace nr
 {
 
+void CommandQueue::makeDefault(const CommandQueue& provided)
+{
+    defaultQueue = provided;
+}
+
+CommandQueue CommandQueue::getDefault()
+{
+    return defaultQueue;
+}
+
 CommandQueue::CommandQueue()
     : Wrapped()
 {

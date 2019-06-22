@@ -5,12 +5,12 @@
 namespace nr
 {
 
-Platform::makeDefault(Platform provided)
+void Platform::makeDefault(const Platform& provided)
 {
     defaultPlatform = provided;
 }
 
-Platform::getDefault()
+Platform Platform::getDefault()
 {
     return defaultPlatform;
 }

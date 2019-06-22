@@ -13,6 +13,10 @@ namespace nr
 class NR_SHARED CommandQueue : public Wrapper<cl_command_queue>
 {
 public:
+    static CommandQueue getDefault();
+    
+    static void makeDefault(const CommandQueue& queue);
+
     CommandQueue();
 
     explicit CommandQueue(const cl_command_queue& commandQueue, const NRbool retain = false);
@@ -107,6 +111,10 @@ public:
     {
         return clEnqueueFillBuffer(object, buffer, value, sizeof(T), sizeof(value) * offset, sizeof(value) * count, 0, nullptr, notify);
     }
+
+// Fields
+private:
+    static CommandQueue defaultQueue;
 };
 
 }

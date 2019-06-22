@@ -13,7 +13,7 @@ namespace nr
 {
 
 /**
- * Utility wrapper around cl::Module
+ * Utility wrapper around cl_program
  **/
 class NR_SHARED Module : public Wrapper<cl_program>
 {
@@ -103,7 +103,7 @@ public:
 			object, 
 			1, &device, 
 			Module::finalizeOptions(options).c_str(), 
-			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog), (T*) data)}), 
+			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog, true), (T*) data)}), 
 			userData);
 	}
 	
@@ -114,7 +114,7 @@ public:
 			object, 
 			1, &Device::getDefault(), 
 			Module::finalizeOptions(options).c_str(), 
-			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog), (T*) data)}), 
+			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog, true), (T*) data)}), 
 			userData);
 	}
 
@@ -125,7 +125,7 @@ public:
 			object, 
 			devices.size(), &devices[0], 
 			Module::finalizeOptions(options).c_str(), 
-			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog), (T*) data)}), 
+			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog, true), (T*) data)}), 
 			userData);
 	}
 

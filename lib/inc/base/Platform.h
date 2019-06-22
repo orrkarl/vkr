@@ -14,9 +14,9 @@ class NR_SHARED Platform : public Wrapper<cl_platform_id>
 {
 // Functions and Constructors
 public:
-    static makeDefault(Platform provided);
+    static void makeDefault(const Platform& provided);
 
-    static getDefault();
+    static Platform getDefault();
 
     static std::vector<Platform> getAvailablePlatforms(cl_status* err);
 

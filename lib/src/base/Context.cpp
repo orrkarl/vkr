@@ -3,12 +3,12 @@
 namespace nr
 {
 
-static Context::makeDefault(Context provided)
+static void Context::makeDefault(const Context& provided)
 {
     defaultContext = provided;
 }
 
-static Context::getDefault()
+static Context Context::getDefault()
 {
     return defaultContext;
 }

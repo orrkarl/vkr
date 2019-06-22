@@ -11,9 +11,9 @@ class NR_SHARED Device : public Wrapper<cl_device_id>
 {
 // Functions and Constructors
 public:
-    static makeDefault(Device provided);
+    static void makeDefault(const Device& provided);
 
-    static getDefault();
+    static Device getDefault();
 
     Device();
 

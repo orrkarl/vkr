@@ -3,12 +3,12 @@
 namespace nr
 {
 
-static Device::makeDefault(Device provided)
+static void Device::makeDefault(const Device& provided)
 {
     defaultDevice = provided;
 }
 
-static Device::getDefault()
+static Device Device::getDefault()
 {
     return defaultDevice;
 }

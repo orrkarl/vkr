@@ -11,9 +11,9 @@ class NR_SHARED Context : public Wrapper<cl_context>
 {
 // Functions and Constructors
 public:
-    static makeDefault(Context provided);
+    static void makeDefault(const Context& provided);
 
-    static getDefault();
+    static Context getDefault();
 
     Context();
 
