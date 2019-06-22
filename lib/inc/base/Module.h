@@ -174,35 +174,35 @@ public:
 	}
 
 	template<typename T>
-	cl_status build(const Device& device, const Options& options, std::function<void(Module, T)> callback, T userData)
+	cl_status build(const Device& device, const Options& options, std::function<void(Module, T*)> callback, T* userData)
 	{
 		return clBuildProgram(
 			object, 
 			1, &device, 
 			Module::finalizeOptions(options).c_str(), 
-			[callback](cl_program prog, void* data){callback(Module(prog), (T) data)}, 
+			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog), (T*) data)}), 
 			userData);
 	}
 	
 	template<typename T>
-	cl_status build(const Options& options, std::function<void(Module, T)> callback, T userData)
+	cl_status build(const Options& options, std::function<void(Module, T*)> callback, T* userData)
 	{
 		return clBuildProgram(
 			object, 
 			1, &Device::getDefault(), 
 			Module::finalizeOptions(options).c_str(), 
-			[callback](cl_program prog, void* data){callback(Module(prog), (T) data)}, 
+			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog), (T*) data)}), 
 			userData);
 	}
 
 	template<typename T>
-	cl_status build(const Devices& devices, const Options& options, void(*callback)(Module, T), T userData)
+	cl_status build(const Devices& devices, const Options& options, void(*callback)(Module, T*), T* userData)
 	{
 		return clBuildProgram(
 			object, 
 			devices.size(), &devices[0], 
 			Module::finalizeOptions(options).c_str(), 
-			[callback](cl_program prog, void* data){callback(Module(prog), (T) data)}, 
+			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog), (T*) data)}), 
 			userData);
 	}
 

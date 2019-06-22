@@ -12,7 +12,7 @@ class NR_SHARED Wrapper
 // Methods and Constructors
 public:
     Wrapper() 
-        : object(NULL)
+        : object(nullptr)
     {
     }
 
@@ -36,7 +36,7 @@ public:
     Wrapper(Wrapper<cl_type>&& other)
     {
         object = other.object;
-        other.object = NULL;
+        other.object = nullptr;
     }
 
     Wrapper<cl_type>& operator=(const Wrapper<cl_type>& other)
@@ -57,7 +57,7 @@ public:
         {
             release();
             object = other.object;
-            other.object = NULL;
+            other.object = nullptr;
         }
 
         return *this;
@@ -81,8 +81,8 @@ public:
 protected:
     cl_status release() 
     { 
-        cl_status ret = object == NULL ? ReferenceHandler<cl_type>::release(object) : CL_SUCCESS; 
-        object = NULL;
+        cl_status ret = object == nullptr ? ReferenceHandler<cl_type>::release(object) : CL_SUCCESS; 
+        object = nullptr;
         return ret;
     }
 
