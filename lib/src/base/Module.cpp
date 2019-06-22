@@ -38,34 +38,34 @@ Module::Module()
 {
 }
 
-Module::Module(const string& code, cl_status* err = nullptr)
+Module::Module(const string& code, cl_status* err)
     : Module(Context::getDefault(), code, err)
 {
 }
 
-Module::Module(const Sources& codes, cl_status* err = nullptr)
+Module::Module(const Sources& codes, cl_status* err)
     : Module(Context::getDefault(), codes, err)
 {
 }
 
-Module::Module(Context& context, const string& code, cl_status* err = nullptr)
-    : Wrapped();
+Module::Module(Context context, const string& code, cl_status* err)
+    : Wrapped()
 {
-    NRuint s = code.size();
-    auto code_ptr = str.c_str();
+    size_t s = code.size();
+    auto code_ptr = code.c_str();
     object = clCreateProgramWithSource(context, 1, &code_ptr, &s, err);
 }
 
-Module::Module(Context& context, const Sources& codes, cl_status* err = nullptr)
+Module::Module(Context context, const Sources& codes, cl_status* err)
     : Wrapped() 
 {
-    std::vector<NRuint> sizes;
-    std::transform(codes.cbegin(), codes.cend(), sizes.begin(), string::size);
-    object = clCreateProgramWithSource(context, codes.size(), &codes[0], sizes, err);
+    std::vector<const NRchar*> codesRaw;
+    std::transform(codes.cbegin(), codes.cend(), codesRaw.begin(), [](const string& code){ return code.c_str(); });
+    object = clCreateProgramWithSource(context, codes.size(), &codesRaw[0], nullptr, err);
 }
 
-Module::Module(const cl_program& module, const NRbool retain = false)
-    : Wrapped(Module, retain)
+Module::Module(const cl_program& module, const NRbool retain)
+    : Wrapped(module, retain)
 {
 }
 
@@ -81,12 +81,14 @@ Module::Module(Module&& other)
 
 Module& Module::operator=(const Module& other)
 {
-    return Wrapped::operator=(other);
+    Wrapped::operator=(other);
+    return *this;
 }
 
 Module& Module::operator=(Module&& other)
 {
-    return Wrapped::operator=(other);
+    Wrapped::operator=(other);
+    return *this;
 }
 
 Module::operator cl_program() const
@@ -96,9 +98,10 @@ Module::operator cl_program() const
 
 cl_status Module::build(const Options& options)
 {
+    auto dev = static_cast<cl_device_id>(Device::getDefault());
     return clBuildProgram(
         object, 
-        1, &Device::getDefault(), 
+        1, &dev,
         Module::finalizeOptions(options).c_str(), 
         nullptr, 
         nullptr);
@@ -108,7 +111,7 @@ cl_status Module::build(const Device& device, const Options& options)
 {
     return clBuildProgram(
         object, 
-        1, &device, 
+        1, &device.get(), 
         Module::finalizeOptions(options).c_str(), 
         nullptr, 
         nullptr);
@@ -118,13 +121,13 @@ cl_status Module::build(const Devices& devices, const Options& options)
 {
     return clBuildProgram(
         object, 
-        devices.size(), &devices[0], 
+        devices.size(), (const cl_device_id*) &devices[0], 
         Module::finalizeOptions(options).c_str(), 
         nullptr, 
         nullptr);
 }
 
-Kernel Module::createKernel(const string& name, cl_status* err = nullptr)
+Kernel Module::createKernel(const string& name, cl_status* err)
 {
     return Kernel(clCreateKernel(object, name.c_str(), err));
 }

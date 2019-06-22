@@ -13,6 +13,11 @@ OPTION(BUILD_DEMOS "builds the demo directory" ON)
 
 SET(CMAKE_CXX_STANDARD 17)
 
+IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	ADD_COMPILE_OPTIONS(-Wno-ignored-attributes)
+ENDIF()
+
+
 IF(WIN32)
 	SET(gtest_force_shared_crt ON)
 ENDIF(WIN32)

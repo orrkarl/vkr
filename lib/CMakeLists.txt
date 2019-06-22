@@ -3,8 +3,13 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 # main Nraster library
 
 ADD_LIBRARY(Nraster SHARED
+	src/base/CommandQueue.cpp
+	src/base/Context.cpp
+	src/base/Device.cpp
+	src/base/Event.cpp
+	src/base/Kernel.cpp
 	src/base/Module.cpp
-	src/base/Buffer.cpp
+	src/base/Platform.cpp
 
 	src/general/predefs.cpp
 	

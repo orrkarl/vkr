@@ -16,7 +16,7 @@ class NR_SHARED Buffer : public Wrapper<cl_mem>
 {
 public:    
     Buffer(const cl_mem_flags& flags, const NRulong& count, cl_int* err = nullptr)
-        : Buffer(context, flags, count, nullptr, err)
+        : Buffer(flags, count, nullptr, err)
     {
     }
 
@@ -68,6 +68,11 @@ public:
     }
 
     operator cl_mem() const 
+    {
+        return object;
+    }
+
+    const cl_mem& get() const
     {
         return object;
     }

@@ -24,7 +24,7 @@ std::vector<Platform> Platform::getAvailablePlatforms(cl_status* err)
     clGetPlatformIDs(platformCount, &platformIDs.front(), nullptr);
 
     std::vector<Platform> ret(platformCount);
-    std::transform(platformIDs.cbegin(), platformIDs.cend(), ret.begin(), Platform::Platform);
+    std::transform(platformIDs.cbegin(), platformIDs.cend(), ret.begin(), [](const cl_platform_id& plat){ return Platform(plat); });
 
     return ret;
 }
@@ -34,8 +34,8 @@ Platform::Platform()
 {
 }
 
-Platform::Platform(const cl_platform_id& platform, const NRbool retain = false)
-    : Wrapped(Platform, retain)
+Platform::Platform(const cl_platform_id& platform, const NRbool retain)
+    : Wrapped(platform, retain)
 {
 }
 
@@ -51,12 +51,14 @@ Platform::Platform(Platform&& other)
 
 Platform& Platform::operator=(const Platform& other)
 {
-    return Wrapped::operator=(other);
+    Wrapped::operator=(other);
+    return *this;
 }
 
 Platform& Platform::operator=(Platform&& other)
 {
-    return Wrapped::operator=(other);
+    Wrapped::operator=(other);
+    return *this;
 }
 
 Platform::operator cl_platform_id() const 
@@ -73,7 +75,7 @@ std::vector<Device> Platform::getDevicesByType(cl_device_type type, cl_status* e
     clGetDeviceIDs(object, type, deviceCount, &deviceIDs.front(), nullptr);
 
     std::vector<Device> ret(deviceCount);
-    std::transform(platformIDs.cbegin(), platformIDs.cend(), ret.begin(), Device::Device);
+    std::transform(deviceIDs.cbegin(), deviceIDs.cend(), ret.begin(), [](const cl_device_id& dev){ return Device(dev); });
 
     return ret;
 }

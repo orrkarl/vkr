@@ -16,10 +16,10 @@ public:
     {
     }
 
-    explicit Wrapper(const cl_type object, const NRbool retain = false)
+    explicit Wrapper(const cl_type object, const NRbool retainObject = false)
         : object(object)
     {
-        if (retain) retain();
+        if (retainObject) retain();
     }
 
     ~Wrapper()

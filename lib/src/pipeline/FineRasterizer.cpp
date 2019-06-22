@@ -6,7 +6,7 @@ namespace nr
 namespace __internal
 {
 
-cl_status FineRasterizer::load(Kernel kernel)
+cl_status FineRasterizer::load()
 {
     cl_status err = CL_SUCCESS;
     if ((err = setArg(0, triangleData)) != CL_SUCCESS) return err;

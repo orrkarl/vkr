@@ -29,6 +29,8 @@ public:
 
     operator cl_device_id() const;
 
+    const cl_device_id& get() const;
+
 // Fields
 private:
     static Device defaultDevice;

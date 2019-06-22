@@ -3,12 +3,12 @@
 namespace nr
 {
 
-static void Device::makeDefault(const Device& provided)
+void Device::makeDefault(const Device& provided)
 {
     defaultDevice = provided;
 }
 
-static Device Device::getDefault()
+Device Device::getDefault()
 {
     return defaultDevice;
 }
@@ -18,8 +18,8 @@ Device::Device()
 {
 }
 
-Device::Device(const cl_device_id& device, const NRbool retain = false)
-    : Wrapped(Device, retain)
+Device::Device(const cl_device_id& device, const NRbool retain)
+    : Wrapped(device, retain)
 {
 }
 
@@ -35,15 +35,22 @@ Device::Device(Device&& other)
 
 Device& Device::operator=(const Device& other)
 {
-    return Wrapped::operator=(other);
+    Wrapped::operator=(other);
+    return *this;
 }
 
 Device& Device::operator=(Device&& other)
 {
-    return Wrapped::operator=(other);
+    Wrapped::operator=(other);
+    return *this;
 }
 
 Device::operator cl_device_id() const 
+{
+    return object;
+}
+
+const cl_device_id& Device::get() const
 {
     return object;
 }

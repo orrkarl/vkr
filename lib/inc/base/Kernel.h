@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../general/predefs.h"
+
 #include "Wrapper.h"
 
 namespace nr
@@ -31,15 +32,21 @@ public:
     operator cl_kernel() const;
 
     template<typename T>
-    typename std::enable_if<!std::is_pointer<T>() && std::is_pod<T>(), cl_status>::type setArg(const NRuint index, const T& value)
+    typename std::enable_if<!std::is_pointer<T>::value && !std::is_base_of<Wrapper<cl_mem>, T>::value, cl_status>::type setArg(const NRuint index, const T& value)
     {
-        return clSetKernelArg(object, index, sizeof(T), value);
+        return clSetKernelArg(object, index, sizeof(T), &value);
+    }
+
+    template<typename T>
+    typename std::enable_if<!std::is_pointer<T>::value && std::is_base_of<Wrapper<cl_mem>, T>::value, cl_status>::type setArg(const NRuint index, const T& value)
+    {
+        return clSetKernelArg(object, index, sizeof(T), &(value.get()));
     }
     
     template<typename T>
     cl_status setArg(const NRuint index, const NRuint size, const T value)
     {
-        return clSetKernelArg(object, index, size, value);
+        return clSetKernelArg(object, index, size, &value);
     }
 };
 

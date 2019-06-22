@@ -1,12 +1,16 @@
 #pragma once
 
+// #ifdef __GNUC__
+	// #pragma GCC diagnostic ignored "-Wignored-attributes"
+// #endif // __GNUC__
+
 #include <cstdint>
 #include <string>
 #include <cmath>
 #include <stdio.h>
 
-#define CL_HPP_TARGET_OPENCL_VERSION 200
-#include <CL/cl2.hpp>
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
+#include <CL/cl.h>
 
 typedef double NRdouble;
 typedef float NRfloat;
@@ -38,25 +42,19 @@ typedef cl_int cl_status;
 
 #endif // NOT NR_SHARED
 
+#ifndef CL_CALLBACK
+	#define CL_CALLBACK
+#endif // NOT CL_CALLBACK
+
 namespace nr
 {
 
 typedef std::basic_string<NRchar> string;
 
-enum class NR_SHARED Type : NRint
-{
-	DOUBLE, FLOAT, ULONG, LONG, UINT, INT, USHORT, SHORT, UBYTE, BYTE, CHAR, BOOL, RAW
-};
-
-namespace type
-{
-	NR_SHARED NRuint getByteSize(const Type& type);
-}
-
 namespace error
 {
-	NR_SHARED NRbool isSuccess(const cl_int& err);
-	NR_SHARED NRbool isFailure(const cl_int& err);
+	NR_SHARED NRbool isSuccess(const cl_status& err);
+	NR_SHARED NRbool isFailure(const cl_status& err);
 }
 
 }

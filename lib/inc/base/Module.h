@@ -60,7 +60,6 @@ public:
 	explicit Module(const string& code, cl_status* err = nullptr);
 
 	explicit Module(const Sources& codes, cl_status* err = nullptr);
-	}
 
 	template<NRuint N>
 	explicit Module(const std::array<NRchar*, N>& codes, const std::array<NRuint, N>& sizes, cl_status* err = nullptr)
@@ -74,9 +73,9 @@ public:
 	{
 	}
 
-	Module(Context& context, const string& code, cl_status* err = nullptr);
+	Module(Context context, const string& code, cl_status* err = nullptr);
 
-	Module(Context& context, const Sources& codes, cl_status* err = nullptr);
+	Module(Context context, const Sources& codes, cl_status* err = nullptr);
 
     explicit Module(const cl_program& module, const NRbool retain = false);
 
@@ -103,18 +102,19 @@ public:
 			object, 
 			1, &device, 
 			Module::finalizeOptions(options).c_str(), 
-			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog, true), (T*) data)}), 
+			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog, true), (T*) data);}), 
 			userData);
 	}
 	
 	template<typename T>
 	cl_status build(const Options& options, std::function<void(Module, T*)> callback, T* userData)
 	{
+		auto dev = static_cast<cl_device_id>(Device::getDefault());
 		return clBuildProgram(
 			object, 
-			1, &Device::getDefault(), 
+			1, &dev, 
 			Module::finalizeOptions(options).c_str(), 
-			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog, true), (T*) data)}), 
+			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog, true), (T*) data);}), 
 			userData);
 	}
 
@@ -125,7 +125,7 @@ public:
 			object, 
 			devices.size(), &devices[0], 
 			Module::finalizeOptions(options).c_str(), 
-			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog, true), (T*) data)}), 
+			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog, true), (T*) data);}), 
 			userData);
 	}
 

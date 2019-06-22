@@ -8,7 +8,7 @@ Event::Event()
 {
 }
 
-Event::Event(const cl_event& event, const NRbool retain = false)
+Event::Event(const cl_event& event, const NRbool retain)
     : Wrapped(event, retain)
 {
 }
@@ -25,12 +25,14 @@ Event::Event(Event&& other)
 
 Event& Event::operator=(const Event& other)
 {
-    return Wrapped::operator=(other);
+    Wrapped::operator=(other);
+    return *this;
 }
 
 Event& Event::operator=(Event&& other)
 {
-    return Wrapped::operator=(other);
+    Wrapped::operator=(other);
+    return *this;
 }
 
 Event::operator cl_event() const
@@ -40,7 +42,7 @@ Event::operator cl_event() const
 
 cl_status Event::await() const
 {
-    return clWaitForEvents(1, this);
+    return clWaitForEvents(1, &object);
 }
 
 cl_status Event::await(const std::vector<Event>& events)

@@ -18,8 +18,8 @@ CommandQueue::CommandQueue()
 {
 }
 
-CommandQueue::CommandQueue(const cl_command_queue& commandQueue, const NRbool retain = false)
-    : Wrapped(CommandQueue, retain)
+CommandQueue::CommandQueue(const cl_command_queue& commandQueue, const NRbool retain)
+    : Wrapped(commandQueue, retain)
 {
 }
 
@@ -33,29 +33,31 @@ CommandQueue::CommandQueue(CommandQueue&& other)
 {
 }
 
-CommandQueue::CommandQueue(Context& context, Device& device, cl_command_queue_properties& properties, cl_status* err = nullptr)
+CommandQueue::CommandQueue(Context& context, Device& device, cl_command_queue_properties& properties, cl_status* err)
     : Wrapped(clCreateCommandQueue(context, device, properties, err))
 {
 }
 
-CommandQueue::CommandQueue(Device& device, cl_command_queue_properties& properties, cl_status* err = nullptr)
+CommandQueue::CommandQueue(Device& device, cl_command_queue_properties& properties, cl_status* err)
     : Wrapped(clCreateCommandQueue(Context::getDefault(), device, properties, err))
 {
 }
 
-CommandQueue::CommandQueue(cl_command_queue_properties& properties, cl_status* err = nullptr)
-    : Wrapped(clCreateCommandQueue(Context::getDefault(), Device::GetDefault(), properties, err))
+CommandQueue::CommandQueue(cl_command_queue_properties& properties, cl_status* err)
+    : Wrapped(clCreateCommandQueue(Context::getDefault(), Device::getDefault(), properties, err))
 {
 }
 
 CommandQueue& CommandQueue::operator=(const CommandQueue& other)
 {
-    return Wrapped::CommandQueue::operator=(other);
+    Wrapped::operator=(other);
+    return *this;
 }
 
 CommandQueue& CommandQueue::operator=(CommandQueue&& other)
 {
-    return Wrapped::CommandQueue::operator=(other);
+    Wrapped::operator=(other);
+    return *this;
 }
 
 CommandQueue::operator cl_command_queue() const 

@@ -1,9 +1,12 @@
 #pragma once
 
 #include "../general/predefs.h"
-#include "Wrapper.h"
+
 #include "Buffer.h"
 #include "Context.h"
+#include "Event.h"
+#include "Kernel.h"
+#include "Wrapper.h"
 
 #include <array>
 
@@ -44,7 +47,7 @@ public:
     cl_status finish();
     
     template<typename T>
-    cl_status enqueueBufferReadCommand(const Buffer& buffer, NRbool block, NRulong count, T* data, const std::vector<Event>& wait, NRulong offset = 0, Event* notify = nullptr)
+    cl_status enqueueBufferReadCommand(const Buffer<T>& buffer, NRbool block, NRulong count, T* data, const std::vector<Event>& wait, NRulong offset = 0, Event* notify = nullptr)
     {
         return clEnqueueReadBuffer(
             object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
@@ -52,7 +55,7 @@ public:
     }
 
     template<typename T>
-    cl_status enqueueBufferReadCommand(const Buffer& buffer, NRbool block, NRulong count, T* data, NRulong offset = 0, Event* notify = nullptr)
+    cl_status enqueueBufferReadCommand(const Buffer<T>& buffer, NRbool block, NRulong count, T* data, NRulong offset = 0, Event* notify = nullptr)
     {
         return clEnqueueReadBuffer(
                 object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
@@ -76,7 +79,7 @@ public:
     }
 
     template<NRuint dim>
-    std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
+    typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
         const Kernel& kernel, 
         const std::array<NRuint, dim>& global, const std::array<NRuint, dim>& local,
         const std::vector<Event>& wait, const std::array<NRuint, dim>& offset, Event* notify = nullptr)
@@ -85,7 +88,7 @@ public:
     }
 
     template<NRuint dim>
-    std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
+    typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
         const Kernel& kernel, 
         const std::array<NRuint, dim>& global, const std::array<NRuint, dim>& local,
         const std::array<NRuint, dim> offset, Event* notify = nullptr)

@@ -1,5 +1,7 @@
 #include <base/Kernel.h>
 
+#include <base/Module.h>
+
 namespace nr
 {
 
@@ -8,12 +10,12 @@ Kernel::Kernel()
 {
 }
 
-Kernel::Kernel(const cl_kernel& kernel, const NRbool retain = false)
-    : Wrapped(Kernel, retain)
+Kernel::Kernel(const cl_kernel& kernel, const NRbool retain)
+    : Wrapped(kernel, retain)
 {
 }
 
-Kernel(Module module, const string name, cl_status* err)
+Kernel::Kernel(Module module, const string name, cl_status* err)
     : Kernel(clCreateKernel(module, name.c_str(), err))
 {
 }
@@ -31,12 +33,14 @@ Kernel::Kernel(Kernel&& other)
 
 Kernel& Kernel::operator=(const Kernel& other)
 {
-    return Wrapped::operator=(other);
+    Wrapped::operator=(other);
+    return *this;
 }
 
 Kernel& Kernel::operator=(Kernel&& other)
 {
-    return Wrapped::operator=(other);
+    Wrapped::operator=(other);
+    return *this;
 }
 
 Kernel::operator cl_kernel() const 

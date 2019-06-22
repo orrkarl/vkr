@@ -1,8 +1,12 @@
 #pragma once
 
 #include "../general/predefs.h"
+
 #include "../base/Buffer.h"
+#include "../base/CommandQueue.h"
 #include "../base/Kernel.h"
+#include "../base/Module.h"
+
 #include "../rendering/Render.h"
 
 namespace nr
@@ -37,9 +41,7 @@ struct NR_SHARED BinRasterizer : Kernel
     {
     }
 
-    cl_status init(CommandQueue queue) { return CL_SUCCESS; }
-
-    cl_status load(Kernel kernel);
+    cl_status load();
 
     // Screen Dimensions
     ScreenDimension dimension;

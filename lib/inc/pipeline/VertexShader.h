@@ -1,8 +1,13 @@
 #pragma once
 
 #include "../general/predefs.h"
+
 #include "../base/Buffer.h"
-#include "../base/h"
+#include "../base/CommandQueue.h"
+#include "../base/Kernel.h"
+#include "../base/Module.h"
+
+#include "../rendering/Render.h"
 
 namespace nr
 {
@@ -12,9 +17,12 @@ namespace __internal
 
 struct NR_SHARED VertexShader : Kernel
 {
-    cl_status init(CommandQueue q) { return CL_SUCCESS; }
-
-    cl_status load(Kernel kernel)
+    VertexShader(Module module, cl_status* err = nullptr)
+        : Kernel(module, "shade_vertex", err)
+    {
+    }
+    
+    cl_status load()
     {
         cl_status err = CL_SUCCESS;
         
@@ -24,10 +32,10 @@ struct NR_SHARED VertexShader : Kernel
         return setArg(3, result);
     }
 
-    Buffer points;
-    Buffer near;
-    Buffer far;
-    Buffer result;
+    Buffer<NRfloat> points;
+    Buffer<NRfloat> near;
+    Buffer<NRfloat> far;
+    Buffer<NRfloat> result;
 };
 
 }

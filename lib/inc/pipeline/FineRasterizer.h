@@ -1,10 +1,15 @@
 #pragma once
 
 #include "../general/predefs.h"
+
 #include "../base/Buffer.h"
+#include "../base/CommandQueue.h"
 #include "../base/Kernel.h"
-#include "../rendering/Render.h"
+#include "../base/Module.h"
+
 #include "BinRasterizer.h"
+
+#include "../rendering/Render.h"
 
 namespace nr
 {
@@ -20,9 +25,7 @@ public:
     {
     }
 
-    cl_status init(CommandQueue q) { return CL_SUCCESS; }
-
-    cl_status load(Kernel kernel);
+    cl_status load();
 
     // Simplex buffer
     Buffer<NRfloat> triangleData;

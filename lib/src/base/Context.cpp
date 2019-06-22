@@ -3,12 +3,12 @@
 namespace nr
 {
 
-static void Context::makeDefault(const Context& provided)
+void Context::makeDefault(const Context& provided)
 {
     defaultContext = provided;
 }
 
-static Context Context::getDefault()
+Context Context::getDefault()
 {
     return defaultContext;
 }
@@ -18,8 +18,8 @@ Context::Context()
 {
 }
 
-Context::Context(const cl_context& context, const NRbool retain = false)
-    : Wrapped(Context, retain)
+Context::Context(const cl_context& context, const NRbool retain)
+    : Wrapped(context, retain)
 {
 }
 
@@ -36,11 +36,11 @@ Context::Context(Context&& other)
 Context::Context(
     const cl_context_properties* properties, 
     std::vector<Device>& devices, 
-    cl_status* err = nullptr)
+    cl_status* err)
     : Wrapped(
         clCreateContext(
             properties, 
-            devices.size(), static_cast<cl_device_id*>(&devices.front()), 
+            devices.size(), &devices.front().get(), 
             nullptr, nullptr, 
             err))
 {
@@ -48,8 +48,8 @@ Context::Context(
 
 Context::Context(
     const cl_context_properties* properties, 
-    cl_device_type deviceType = CL_DEVICE_TYPE_GPU,          
-    cl_status* err = nullptr)
+    cl_device_type deviceType,          
+    cl_status* err)
     : Wrapped(
         clCreateContextFromType(
             properties, 
@@ -61,12 +61,14 @@ Context::Context(
 
 Context& Context::operator=(const Context& other)
 {
-    return Wrapped::operator=(other);
+    Wrapped::operator=(other);
+    return *this;
 }
 
 Context& Context::operator=(Context&& other)
 {
-    return Wrapped::operator=(other);
+    Wrapped::operator=(other);
+    return *this;
 }
 
 Context::operator cl_context() const 

@@ -3,6 +3,8 @@
 #include "../general/predefs.h"
 #include "../base/Buffer.h"
 
+#include <iostream>
+
 namespace nr
 {
 

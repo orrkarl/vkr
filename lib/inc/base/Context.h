@@ -2,6 +2,10 @@
 
 #include "../general/predefs.h"
 
+#include <vector>
+#include <functional>
+
+#include "Device.h"
 #include "Wrapper.h"
 
 namespace nr
@@ -35,7 +39,7 @@ public:
                 properties, 
                 devices.size(), static_cast<cl_device_id*>(&devices.front()), 
                 static_cast<void(CL_CALLBACK *)(const char*, const void*, size_t, void*)>(
-                    [callback](const char* errinfo, const void* clinfo, size_t size, void* userData){callback(errinfo, clinfo, size, (T*) uesrData)}),
+                    [callback](const char* errinfo, const void* clinfo, size_t size, void* userData){callback(errinfo, clinfo, size, (T*) userData);}),
                 userData, 
                 err))
     {
@@ -58,7 +62,7 @@ public:
                 properties, 
                 deviceType,
                 static_cast<void(CL_CALLBACK *)(const char*, const void*, size_t, void*)>(
-                    [callback](const char* errinfo, const void* clinfo, size_t size, void* userData){callback(errinfo, clinfo, size, (T*) uesrData)}),
+                    [callback](const char* errinfo, const void* clinfo, size_t size, void* userData){callback(errinfo, clinfo, size, (T*) userData);}),
                 userData, 
                 err))
     {
