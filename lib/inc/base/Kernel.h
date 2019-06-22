@@ -12,40 +12,19 @@ namespace nr
 class NR_SHARED Kernel : public Wrapper<cl_kernel>
 {
 public:
-    Kernel()
-        : Wrapped()
-    {
-    }
+    Kernel();
 
-    explicit Kernel(const cl_kernel& Kernel, const NRbool retain = false)
-        : Wrapped(Kernel, retain)
-    {
-    }
+    explicit Kernel(const cl_kernel& Kernel, const NRbool retain = false);
 
-    Kernel(const Kernel& other)
-        : Wrapped(other)
-    {
-    }
+    Kernel(const Kernel& other);
 
-    Kernel(Kernel&& other)
-        : Wrapped(other)
-    {
-    }
+    Kernel(Kernel&& other);
 
-    Kernel& operator=(const Kernel& other)
-    {
-        return Wrapped::operator=(other);
-    }
+    Kernel& operator=(const Kernel& other);
 
-    Kernel& operator=(Kernel&& other)
-    {
-        return Wrapped::operator=(other);
-    }
+    Kernel& operator=(Kernel&& other);
 
-    operator cl_kernel() const 
-    {
-        return object;
-    }    
+    operator cl_kernel() const;
 
     template<typename T>
     typename std::enable_if<!std::is_pointer<T>() && std::is_pod<T>(), cl_status>::type setArg(const NRuint index, const T& value)

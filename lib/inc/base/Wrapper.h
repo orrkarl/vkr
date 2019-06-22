@@ -63,21 +63,6 @@ public:
         return *this;
     }
 
-    const cl_type& get() const 
-    {
-        return object;
-    }
-
-    cl_type& get()
-    {
-        return object;
-    }
-
-    operator cl_type() const
-    {
-        return object;
-    }
-
 protected:
     cl_status release() 
     { 

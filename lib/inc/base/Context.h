@@ -11,35 +11,17 @@ class NR_SHARED Context : public Wrapper<cl_context>
 {
 // Functions and Constructors
 public:
-    static makeDefault(Context provided)
-    {
-        defaultContext = provided;
-    }
+    static makeDefault(Context provided);
 
-    static getDefault()
-    {
-        return defaultContext;
-    }
+    static getDefault();
 
-    Context()
-        : Wrapped()
-    {
-    }
+    Context();
 
-    explicit Context(const cl_context& Context, const NRbool retain = false)
-        : Wrapped(Context, retain)
-    {
-    }
+    explicit Context(const cl_context& Context, const NRbool retain = false);
 
-    Context(const Context& other)
-        : Wrapped(other)
-    {
-    }
+    Context(const Context& other);
 
-    Context(Context&& other)
-        : Wrapped(other)
-    {
-    }
+    Context(Context&& other);
 
     template<typename T>
     Context(
@@ -62,15 +44,7 @@ public:
     Context(
         const cl_context_properties* properties, 
         std::vector<Device>& devices, 
-        cl_status* err = nullptr)
-        : Wrapped(
-            clCreateContext(
-                properties, 
-                devices.size(), static_cast<cl_device_id*>(&devices.front()), 
-                nullptr, nullptr, 
-                err))
-    {
-    }
+        cl_status* err = nullptr);
 
     template<typename T>
     Context(
@@ -93,30 +67,13 @@ public:
     Context(
         const cl_context_properties* properties, 
         cl_device_type deviceType = CL_DEVICE_TYPE_GPU,          
-        cl_status* err = nullptr)
-        : Wrapped(
-            clCreateContextFromType(
-                properties, 
-                deviceType,
-                nullptr, nullptr, 
-                err))
-    {
-    }
+        cl_status* err = nullptr);
 
-    Context& operator=(const Context& other)
-    {
-        return Wrapped::operator=(other);
-    }
+    Context& operator=(const Context& other);
 
-    Context& operator=(Context&& other)
-    {
-        return Wrapped::operator=(other);
-    }
+    Context& operator=(Context&& other);
 
-    operator cl_context() const 
-    {
-        return object;
-    }
+    operator cl_context() const;
 
 // Fields
 private:

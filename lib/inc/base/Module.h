@@ -1,12 +1,13 @@
 #pragma once
 
 #include "../general/predefs.h"
-#include "../utils/converters.h"
-#include "Wrapper.h"
-#include "Kernel.h"
-#include "Device.h"
-#include "Context.h"
+
 #include <vector>
+
+#include "Context.h"
+#include "Device.h"
+#include "Kernel.h"
+#include "Wrapper.h"
 
 namespace nr
 {
@@ -21,12 +22,9 @@ public:
 	struct NR_SHARED Option
 	{
 		public:
-			Option(const string& value)
-				: value(value)
-			{
-			}
+			Option(const string& value);
 		
-			string getOption() const { return value; }
+			string getOption() const;
 
 		protected:
 			const string value;
@@ -36,31 +34,19 @@ public:
 
 	struct NR_SHARED Macro : Option
 	{
-		Macro(const string name)
-			: Option("-D " + name)
-		{
-		}
+		Macro(const string name);
 	
-		Macro(const string name, const string value)
-			: Option("-D " + name + "=" + value)
-		{
-		}
+		Macro(const string name, const string value);
 	};
 
 	struct NR_SHARED RenderDimension : Macro
 	{
-		RenderDimension(const NRuint& dimension)
-			: Macro("RENDER_DIMENSION", std::to_string(dimension))
-		{
-		}
+		RenderDimension(const NRuint& dimension);
 	};
 
 	struct NR_SHARED CLVersion : Option
 	{
-		CLVersion(const string& version)
-			: Option("-cl-std=CL" + version)
-		{
-		}
+		CLVersion(const string& version);
 	};
 
 	typedef std::vector<string> Sources;
@@ -69,20 +55,11 @@ public:
 	
 // Methods and Constructors
 public:
+    Module();
 
-    Module()
-        : Wrapped()
-    {
-    }
+	explicit Module(const string& code, cl_status* err = nullptr);
 
-	explicit Module(const string& code, cl_status* err = nullptr)
-		: Module(Context::getDefault(), code, err)
-	{
-	}
-
-	explicit Module(const Sources& codes, cl_status* err = nullptr)
-		: Module(Context::getDefault(), codes, err)
-	{
+	explicit Module(const Sources& codes, cl_status* err = nullptr);
 	}
 
 	template<NRuint N>
@@ -97,81 +74,27 @@ public:
 	{
 	}
 
-	Module(Context& context, const string& code, cl_status* err = nullptr)
-		: Wrapped();
-	{
-		NRuint s = code.size();
-		auto code_ptr = str.c_str();
-		object = clCreateProgramWithSource(context, 1, &code_ptr, &s, err);
-	}
+	Module(Context& context, const string& code, cl_status* err = nullptr);
 
-	Module(Context& context, const Sources& codes, cl_status* err = nullptr)
-		: Wrapped() 
-	{
-		std::vector<NRuint> sizes;
-		std::transform(codes.cbegin(), codes.cend(), sizes.begin(), string::size);
-		object = clCreateProgramWithSource(context, codes.size(), &codes[0], sizes, err);
-	}
+	Module(Context& context, const Sources& codes, cl_status* err = nullptr);
 
-    explicit Module(const cl_program& Module, const NRbool retain = false)
-        : Wrapped(Module, retain)
-    {
-    }
+    explicit Module(const cl_program& Module, const NRbool retain = false);
 
-    Module(const Module& other)
-        : Wrapped(other)
-    {
-    }
+    Module(const Module& other);
 
-    Module(Module&& other)
-        : Wrapped(other)
-    {
-    }
+    Module(Module&& other);
 
-    Module& operator=(const Module& other)
-    {
-        return Wrapped::operator=(other);
-    }
+    Module& operator=(const Module& other);
 
-    Module& operator=(Module&& other)
-    {
-        return Wrapped::operator=(other);
-    }
+    Module& operator=(Module&& other);
 
-	operator cl_program() const
-	{
-		return object;
-	}
+	operator cl_program() const;
 
-	cl_status build(const Options& options)
-	{
-		return clBuildProgram(
-			object, 
-			1, &Device::getDefault(), 
-			Module::finalizeOptions(options).c_str(), 
-			nullptr, 
-			nullptr);
-	}
+	cl_status build(const Options& options);
 
-	cl_status build(const Device& device, const Options& options)
-	{
-		return clBuildProgram(
-			object, 
-			1, &device, 
-			Module::finalizeOptions(options).c_str(), 
-			nullptr, 
-			nullptr);
-	}
+	cl_status build(const Device& device, const Options& options);
 
-	cl_status build(const Devices& devices, const Options& options)
-	{
-		return clBuildProgram(
-			object, 
-			devices.size(), &devices[0], 
-			Module::finalizeOptions(options).c_str(), 
-			nullptr, 
-			nullptr);
-	}
+	cl_status build(const Devices& devices, const Options& options);
 
 	template<typename T>
 	cl_status build(const Device& device, const Options& options, std::function<void(Module, T*)> callback, T* userData)
@@ -206,22 +129,10 @@ public:
 			userData);
 	}
 
-	Kernel createKernel(const string& name, cl_status* err = nullptr)
-	{
-		return Kernel(clCreateKernel(object, name.c_str(), err));
-	}
+	Kernel createKernel(const string& name, cl_status* err = nullptr);
 
 private:
-	static string finalizeOptions(const Options& options)
-	{
-    	string ret = "";
-    	for (auto it = options.cbegin(); it != options.cend(); ++it)
-    	{
-    	    ret += " " + it->getOption();
-    	}
-
-    	return ret;    
-	}
+	static string finalizeOptions(const Options& options);
 
 // Fields
 public:

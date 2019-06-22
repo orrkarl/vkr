@@ -11,50 +11,23 @@ class NR_SHARED Device : public Wrapper<cl_device_id>
 {
 // Functions and Constructors
 public:
-    static makeDefault(Device provided)
-    {
-        defaultDevice = provided;
-    }
+    static makeDefault(Device provided);
 
-    static getDefault()
-    {
-        return defaultDevice;
-    }
+    static getDefault();
 
-    Device()
-        : Wrapped()
-    {
-    }
+    Device();
 
-    explicit Device(const cl_device_id& Device, const NRbool retain = false)
-        : Wrapped(Device, retain)
-    {
-    }
+    explicit Device(const cl_device_id& Device, const NRbool retain = false);
 
-    Device(const Device& other)
-        : Wrapped(other)
-    {
-    }
+    Device(const Device& other);
 
-    Device(Device&& other)
-        : Wrapped(other)
-    {
-    }
+    Device(Device&& other);
 
-    Device& operator=(const Device& other)
-    {
-        return Wrapped::operator=(other);
-    }
+    Device& operator=(const Device& other);
 
-    Device& operator=(Device&& other)
-    {
-        return Wrapped::operator=(other);
-    }
+    Device& operator=(Device&& other);
 
-    operator cl_device_id() const 
-    {
-        return object;
-    }
+    operator cl_device_id() const;
 
 // Fields
 private:

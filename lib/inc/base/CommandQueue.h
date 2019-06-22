@@ -13,57 +13,32 @@ namespace nr
 class NR_SHARED CommandQueue : public Wrapper<cl_command_queue>
 {
 public:
-    CommandQueue()
-        : Wrapped()
-    {
-    }
+    CommandQueue();
 
-    explicit CommandQueue(const cl_command_queue& CommandQueue, const NRbool retain = false)
-        : Wrapped(CommandQueue, retain)
-    {
-    }
+    explicit CommandQueue(const cl_command_queue& CommandQueue, const NRbool retain = false);
 
-    CommandQueue(const CommandQueue& other)
-        : Wrapped(other)
-    {
-    }
+    CommandQueue(const CommandQueue& other);
 
-    CommandQueue(CommandQueue&& other)
-        : Wrapped(other)
-    {
-    }
+    CommandQueue(CommandQueue&& other);
 
-    CommandQueue(Context& context, Device& device, cl_command_queue_properties& properties, cl_status* err = nullptr)
-        : Wrapped(clCreateCommandQueue(context, device, properties, err));
+    CommandQueue(Context& context, Device& device, cl_command_queue_properties& properties, cl_status* err = nullptr);
 
-    {
-    }
+    CommandQueue(Device& device, cl_command_queue_properties& properties, cl_status* err = nullptr);
 
-    CommandQueue(Device& device, cl_command_queue_properties& properties, cl_status* err = nullptr)
-        : Wrapped(clCreateCommandQueue(Context::getDefault(), device, properties, err);)
-    {
-    }
+    CommandQueue(cl_command_queue_properties& properties, cl_status* err = nullptr);
 
-    CommandQueue(cl_command_queue_properties& properties, cl_status* err = nullptr)
-        : Wrapped(clCreateCommandQueue(Context::getDefault(), Device::GetDefault(), properties, err))
-    {
-    }
+    CommandQueue& operator=(const CommandQueue& other);
 
-    CommandQueue& operator=(const CommandQueue& other)
-    {
-        return Wrapped::operator=(other);
-    }
+    CommandQueue& operator=(CommandQueue&& other);
 
-    CommandQueue& operator=(CommandQueue&& other)
-    {
-        return Wrapped::operator=(other);
-    }
+    operator cl_command_queue() const;
 
-    operator cl_command_queue() const 
-    {
-        return object;
-    }    
+    cl_status flush();
 
+    cl_status await();
+
+    cl_status finish();
+    
     template<typename T>
     cl_status enqueueBufferReadCommand(const Buffer& buffer, NRbool block, NRulong count, T* data, const std::vector<Event>& wait, NRulong offset = 0, Event* notify = nullptr)
     {
@@ -79,7 +54,6 @@ public:
                 object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
                 0, nullptr, notify);
     }
-
 
     template<typename T>
     cl_status enqueueBufferWriteCommand(const Buffer<T>& buffer, NRbool block, NRulong count, T* data, const std::vector<Event>& wait, NRulong offset = 0, Event* notify = nullptr)
@@ -132,21 +106,6 @@ public:
         const NRuint& offset = 0, Event* notify = nullptr)
     {
         return clEnqueueFillBuffer(object, buffer, value, sizeof(T), sizeof(value) * offset, sizeof(value) * count, 0, nullptr, notify);
-    }
-
-    cl_status flush()
-    {
-        return clFlush(object);
-    }
-
-    cl_status await()
-    {
-        return clFinish(object);
-    }
-
-    cl_status finish()
-    {
-        return clFinish(object);
     }
 };
 
