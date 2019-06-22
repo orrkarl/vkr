@@ -25,14 +25,14 @@ public:
     cl_status load(Kernel kernel);
 
     // Simplex buffer
-    Buffer triangleData;
+    Buffer<NRfloat> triangleData;
 
     // Screen Dimensions [size in pixels]
     ScreenDimension dim;
 
     // Bin Queues
     BinQueueConfig binQueueConfig;
-    Buffer binQueues;
+    Buffer<NRuint> binQueues;
     NRuint workGroupCount;
 
     // Frame buffer

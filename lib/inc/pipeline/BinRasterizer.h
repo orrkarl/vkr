@@ -46,16 +46,16 @@ struct NR_SHARED BinRasterizer : Kernel
 
     // Bin Queues Data
     BinQueueConfig binQueueConfig;
-    Buffer binQueues;
+    Buffer<NRuint> binQueues;
 
     // Simplex data
-    Buffer triangleData;
+    Buffer<NRfloat> triangleData;
     NRuint triangleCount;
 
     // Overflow handling
-    Buffer hasOverflow;
+    Buffer<NRuint> hasOverflow;
 
-    Buffer batchIndex;
+    Buffer<NRuint> batchIndex;
 };
 
 }
