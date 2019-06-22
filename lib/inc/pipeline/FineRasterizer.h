@@ -12,13 +12,17 @@ namespace nr
 namespace __internal
 {
 
-class NR_SHARED FineRasterizerParams
+struct NR_SHARED FineRasterizer : Kernel
 {
 public:
+    FineRasterizer(Module module, cl_status* err = nullptr)
+        : Kernel(module, "fine_rasterize", err)
+    {
+    }
 
-    cl_int init(cl::CommandQueue q) { return CL_SUCCESS; }
+    cl_status init(CommandQueue q) { return CL_SUCCESS; }
 
-    cl_int load(cl::Kernel kernel);
+    cl_status load(Kernel kernel);
 
     // Simplex buffer
     Buffer triangleData;
@@ -34,8 +38,6 @@ public:
     // Frame buffer
     FrameBuffer frameBuffer;
 };
-
-typedef Kernel<FineRasterizerParams> FineRasterizer;
 
 }
 

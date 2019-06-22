@@ -6,16 +6,16 @@ namespace nr
 namespace __internal
 {
 
-cl_int BinRasterizerParams::load(cl::Kernel kernel)
+cl_status BinRasterizer::load(Kernel kernel)
 {
-    cl_int err = CL_SUCCESS;
-    if ((err = kernel.setArg(0, triangleData.getBuffer())) != CL_SUCCESS) return err;
-    if ((err = kernel.setArg(1, triangleCount)) != CL_SUCCESS) return err;
-    if ((err = kernel.setArg(2, dimension)) != CL_SUCCESS) return err;
-    if ((err = kernel.setArg(3, binQueueConfig)) != CL_SUCCESS) return err;
-    if ((err = kernel.setArg(4, hasOverflow.getBuffer())) != CL_SUCCESS) return err;
-    if ((err = kernel.setArg(5, binQueues.getBuffer())) != CL_SUCCESS) return err;
-    return kernel.setArg(6, batchIndex.getBuffer());
+    cl_status err = CL_SUCCESS;
+    if ((err = setArg(0, triangleData)) != CL_SUCCESS) return err;
+    if ((err = setArg(1, triangleCount)) != CL_SUCCESS) return err;
+    if ((err = setArg(2, dimension)) != CL_SUCCESS) return err;
+    if ((err = setArg(3, binQueueConfig)) != CL_SUCCESS) return err;
+    if ((err = setArg(4, hasOverflow)) != CL_SUCCESS) return err;
+    if ((err = setArg(5, binQueues)) != CL_SUCCESS) return err;
+    return setArg(6, batchIndex);
 }
 
 }

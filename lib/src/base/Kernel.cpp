@@ -13,6 +13,12 @@ Kernel::Kernel(const cl_kernel& kernel, const NRbool retain = false)
 {
 }
 
+Kernel(Module module, const string name, cl_status* err)
+    : Kernel(clCreateKernel(module, name.c_str(), err))
+{
+}
+
+
 Kernel::Kernel(const Kernel& other)
     : Wrapped(other)
 {

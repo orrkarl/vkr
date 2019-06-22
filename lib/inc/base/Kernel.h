@@ -6,6 +6,8 @@
 namespace nr
 {
 
+class Module;
+
 /**
  * A wrapper for kernel
  **/
@@ -15,6 +17,8 @@ public:
     Kernel();
 
     explicit Kernel(const cl_kernel& kernel, const NRbool retain = false);
+
+    Kernel(Module module, const string name, cl_status* err = nullptr);
 
     Kernel(const Kernel& other);
 

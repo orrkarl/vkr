@@ -2,7 +2,7 @@
 
 #include "../general/predefs.h"
 #include "../base/Buffer.h"
-#include "../base/Kernel.h"
+#include "../base/h"
 
 namespace nr
 {
@@ -10,21 +10,18 @@ namespace nr
 namespace __internal
 {
 
-class NR_SHARED VertexShadingParams
+struct NR_SHARED VertexShader : Kernel
 {
-public:
+    cl_status init(CommandQueue q) { return CL_SUCCESS; }
 
-    cl_int init(cl::CommandQueue q) { return CL_SUCCESS; }
-
-    cl_int load(cl::Kernel kernel)
+    cl_status load(Kernel kernel)
     {
-        cl_int err = CL_SUCCESS;
-        NRuint argc = 0;
-
-        if ((err = kernel.setArg(argc++, points.getBuffer())) != CL_SUCCESS) return err;
-        if ((err = kernel.setArg(argc++, near.getBuffer())) != CL_SUCCESS) return err;
-        if ((err = kernel.setArg(argc++, far.getBuffer())) != CL_SUCCESS) return err;
-        return kernel.setArg(argc, result.getBuffer());
+        cl_status err = CL_SUCCESS;
+        
+        if ((err = setArg(0, points)) != CL_SUCCESS) return err;
+        if ((err = setArg(1, near)) != CL_SUCCESS) return err;
+        if ((err = setArg(2, far)) != CL_SUCCESS) return err;
+        return setArg(3, result);
     }
 
     Buffer points;
@@ -32,8 +29,6 @@ public:
     Buffer far;
     Buffer result;
 };
-
-typedef Kernel<VertexShadingParams> VertexShader;
 
 }
 

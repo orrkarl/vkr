@@ -18,7 +18,7 @@ struct BinQueueConfig
     NRuint queueSize;
 };
 
-struct NR_SHARED BinRasterizerParams
+struct NR_SHARED BinRasterizer : Kernel
 {
     static NRuint getTotalBinQueueSize(const NRuint workGroupCount, const ScreenDimension& dim, const BinQueueConfig config)
     {
@@ -32,13 +32,14 @@ struct NR_SHARED BinRasterizerParams
         return xCount * yCount;
     }
     
-    BinRasterizerParams()
+    BinRasterizer(Module module, cl_status* err = nullptr)
+        : Kernel(module, "bin_rasterize", err)
     {
     }
 
-    cl_int init(cl::CommandQueue queue) { return CL_SUCCESS; }
+    cl_status init(CommandQueue queue) { return CL_SUCCESS; }
 
-    cl_int load(cl::Kernel kernel);
+    cl_status load(Kernel kernel);
 
     // Screen Dimensions
     ScreenDimension dimension;
@@ -56,8 +57,6 @@ struct NR_SHARED BinRasterizerParams
 
     Buffer batchIndex;
 };
-
-typedef Kernel<BinRasterizerParams> BinRasterizer;
 
 }
 
