@@ -2,6 +2,9 @@
 
 #include "../general/predefs.h"
 
+#include <vector>
+
+#include "Device.h"
 #include "Wrapper.h"
 
 namespace nr
@@ -11,52 +14,27 @@ class NR_SHARED Platform : public Wrapper<cl_platform_id>
 {
 // Functions and Constructors
 public:
-    static makeDefault(Platform provided)
-    {
-        defaultPlatform = provided;
-    }
+    static makeDefault(Platform provided);
 
-    static getDefault()
-    {
-        return defaultPlatform;
-    }
+    static getDefault();
 
     static std::vector<Platform> getAvailablePlatforms(cl_status* err);
 
-    Platform()
-        : Wrapped()
-    {
-    }
+    Platform();
 
-    explicit Platform(const cl_platform_id& Platform, const NRbool retain = false)
-        : Wrapped(Platform, retain)
-    {
-    }
+    explicit Platform(const cl_platform_id& Platform, const NRbool retain = false);
 
-    Platform(const Platform& other)
-        : Wrapped(other)
-    {
-    }
+    Platform(const Platform& other);
 
-    Platform(Platform&& other)
-        : Wrapped(other)
-    {
-    }
+    Platform(Platform&& other);
 
-    Platform& operator=(const Platform& other)
-    {
-        return Wrapped::operator=(other);
-    }
+    Platform& operator=(const Platform& other);
 
-    Platform& operator=(Platform&& other)
-    {
-        return Wrapped::operator=(other);
-    }
+    Platform& operator=(Platform&& other);
 
-    operator cl_platform_id() const 
-    {
-        return object;
-    }
+    operator cl_platform_id() const;
+
+    std::vector<Device> getDevicesByType(cl_device_type type, cl_status* err);
 
 // Fields
 private:
