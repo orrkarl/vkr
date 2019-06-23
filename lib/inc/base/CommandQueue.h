@@ -82,7 +82,7 @@ public:
     typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
         const Kernel& kernel, 
         const std::array<NRuint, dim>& global, const std::array<NRuint, dim>& local,
-        const std::vector<Event>& wait, const std::array<NRuint, dim>& offset, Event* notify = nullptr)
+        const std::array<NRuint, dim>& offset, const std::vector<Event>& wait, Event* notify = nullptr)
     {
         return clEnqueueNDRangeKernel(object, kernel, dim, &offset.front(), &global.front(), &local.front(), wait.size(), &wait.front(), notify);
     }
@@ -91,13 +91,13 @@ public:
     typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
         const Kernel& kernel, 
         const std::array<NRuint, dim>& global, const std::array<NRuint, dim>& local,
-        const std::array<NRuint, dim> offset, Event* notify = nullptr)
+        const std::array<NRuint, dim>& offset = std::array<NRuint, dim>{}, Event* notify = nullptr)
     {
         return clEnqueueNDRangeKernel(object, kernel, dim, &offset.front(), &global.front(), &local.front(), 0, nullptr, notify);
     }
 
     template<typename T>
-    cl_status enqueueFillBufferCommand(
+    cl_status enqueueBufferFillCommand(
         const Buffer<T>& buffer, 
         const T& value, const NRulong& count, 
         const std::vector<Event>& wait, 
@@ -107,7 +107,7 @@ public:
     }
 
     template<typename T>
-    cl_status enqueueFillBufferCommand(
+    cl_status enqueueBufferFillCommand(
         const Buffer<T>& buffer, 
         const T& value, const NRulong& count, 
         const NRuint& offset = 0, Event* notify = nullptr)

@@ -5,45 +5,37 @@
 using namespace nr;
 using namespace nr::__internal;
 
-void screenFromNDCTestTemplate(Kernel<ScreenFromNDCParams> kernel, cl::CommandQueue queue, const NDCPosition& ndc, const ScreenDimension& dim, const ScreenPosition& expected)
+void screenFromNDCTestTemplate(ScreenFromNDC kernel, CommandQueue queue, const NDCPosition& ndc, const ScreenDimension& dim, const ScreenPosition& expected)
 {
-    cl_int err;
+    cl_status err;
 
-    kernel.global = cl::NDRange(1);
-    kernel.local  = cl::NDRange(1);
+    std::array<NRuint, 1> global{1};
+    std::array<NRuint, 1> local{1};
     
-    kernel.params.ndcPosition = ndc;
-    kernel.params.dimension   = dim;
+    kernel.ndcPosition = ndc;
+    kernel.dimension   = dim;
 
-    err = kernel.initParams(queue);
-    ASSERT_EQ(CL_SUCCESS, err) << "Failed to init kernel args:\t" << utils::stringFromCLError(err);
-
-    err = kernel.loadParams();
-    ASSERT_EQ(CL_SUCCESS, err) << "Failed to load kernel args:\t" << utils::stringFromCLError(err);
-
-    err = kernel.apply(queue);
-    ASSERT_EQ(CL_SUCCESS, err) << "Could not add screen_from_ndc to command queue:\t" << utils::stringFromCLError(err);
-
-    err = queue.finish();
-    ASSERT_EQ(CL_SUCCESS, err) << "Could not finish commmand queue:\t" << utils::stringFromCLError(err);
+    ASSERT_SUCCESS(kernel.load());
+    ASSERT_SUCCESS(q.enqueueKernelCommand(kernel, global, local));
+    ASSERT_SUCCESS(q.await());
 
     ScreenPosition result;
-    err = kernel.params.getResult(&result);
-    ASSERT_EQ(CL_SUCCESS, err) << "could not retrive result buffer:\t" << utils::stringFromCLError(err);
+    ASSERT_SUCCESS(kernel.getResult(&result));
+
     ASSERT_EQ(expected, result) << "Screen from NDC didn't return correct values";
 }
 
 TEST(Base, ScreenFromNDC)
 {
-     cl_int err = CL_SUCCESS; 
+    cl_status err = CL_SUCCESS; 
  
-    cl::CommandQueue queue = cl::CommandQueue::getDefault();
+    CommandQueue queue = CommandQueue::getDefault();
 
     Module base(clcode::base, Module::Options{Module::CL_VERSION_12, Module::WARNINGS_ARE_ERRORS, Module::_3D}, &err);
-    ASSERT_EQ(CL_SUCCESS, err) << "Failed to compile base module:\t" << utils::stringFromCLError(err);
+    ASSERT_SUCCESS(err);
 
-    auto screen_from_ndc = base.makeKernel<ScreenFromNDCParams>("screen_from_ndc_kernel", &err);
-    ASSERT_EQ(CL_SUCCESS, err) << "Could not create screen_from_ndc kernel:\t" << utils::stringFromCLError(err);
+    auto screen_from_ndc = ScreenFromNDC(base, &err);
+    ASSERT_SUCCESS(err);
 
     screenFromNDCTestTemplate(screen_from_ndc, queue, NDCPosition{-1, -1}, ScreenDimension{100, 100}, ScreenPosition{0, 0});
     screenFromNDCTestTemplate(screen_from_ndc, queue, NDCPosition{0, 0}, ScreenDimension{100, 100}, ScreenPosition{50, 50});

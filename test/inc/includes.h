@@ -8,6 +8,8 @@
 
 #pragma once
 
+#define ASSERT_SUCCESS(expr) ASSERT_TRUE(isSuccess(expr))
+
 const float TOLERANCE = 0.00001f;
 const double DOUBLE_TOLERANCE = 0.000000001;
 
@@ -49,7 +51,7 @@ typedef NRfloat Depth;
 struct Fragment
 {
     ScreenPosition position;
-    RawColorRGB color;
+    nr::RawColorRGB color;
     Depth depth;
 };
 
@@ -57,7 +59,7 @@ struct Fragment
 NRuint index_from_screen(const ScreenPosition& position, const nr::ScreenDimension& dim);
 
 // Test a module's compilation status
-void testCompilation(const nr::__internal::Module::Options options, nr::string configurationName, std::initializer_list<nr::string> codes);
+void testCompilation(const nr::Module::Options options, nr::string configurationName, std::initializer_list<nr::string> codes);
 
 // Convert Screen Coordinates to NDC
 NDCPosition ndcFromScreen(const ScreenPosition screen, const nr::ScreenDimension& screenDim);
@@ -65,4 +67,6 @@ NDCPosition ndcFromScreen(const ScreenPosition screen, const nr::ScreenDimension
 // Check if a cl_int value indicates success, return well formatted message O.W
 testing::AssertionResult isSuccess(const cl_int& err);
 
-nr::__internal::Module::Options mkStandardOptions(const NRuint dim);
+nr::Module::Options mkStandardOptions(const NRuint dim);
+
+cl_status init();

@@ -45,3 +45,42 @@ nr::__internal::Module::Options mkStandardOptions(const NRuint dim)
                 Module::RenderDimension(dim)
             };
 }
+
+cl_status init()
+{
+    cl_status ret = CL_SUCCESS;
+    auto pret = &ret;
+
+
+    auto platforms = Platform::getAvailablePlatforms(pret);
+    if (error::isFailure(ret)) return ret;
+
+    if (!platforms.size())
+    {
+        std::cerr << "No OpenCL platforms found!" << std::endl;
+        return 10000;
+    }
+
+    Platform::makeDefault(platforms.front());
+    
+    
+    auto devices = platform.getDevicesByType(CL_DEVICE_TYPE_GPU, pret);
+    if (error::isFailure(ret)) return ret;
+
+    if (!devices.size())
+    {
+        std::cerr << "No OpenCL devices found!" << std::endl;
+        return 10000;
+    }
+
+    Device::makeDefault(devices.front());
+    
+
+    const cl_context_properties props[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)Platform::getDefault(), 0};
+    auto context = Context(props, CL_DEVICE_TYPE_GPU, perr);
+    if (error::isFailure(ret)) return ret;
+
+    Context::makeDefault(context);
+
+    return CL_SUCCESS;
+}

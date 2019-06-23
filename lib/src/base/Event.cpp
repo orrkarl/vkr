@@ -13,6 +13,16 @@ Event::Event(const cl_event& event, const NRbool retain)
 {
 }
 
+Event::Event(Context context, cl_status* err)
+    : Wrapped(clCreateUserEvent(context, err))
+{
+}
+
+Event::Event(cl_status* err)
+    : Event(Context::getDefault(), err)
+{
+}
+
 Event::Event(const Event& other)
     : Wrapped(other)
 {

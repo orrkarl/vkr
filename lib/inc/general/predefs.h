@@ -1,9 +1,5 @@
 #pragma once
 
-// #ifdef __GNUC__
-	// #pragma GCC diagnostic ignored "-Wignored-attributes"
-// #endif // __GNUC__
-
 #include <cstdint>
 #include <string>
 #include <cmath>

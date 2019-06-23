@@ -12,64 +12,53 @@ using namespace nr::__internal;
 using namespace testing;
 
 
-struct NDCFromScreenParams
+struct NDCFromScreen : Kernel
 {   
 public:
-
-    cl_int load(cl::Kernel kernel)
+    NDCFromScreen(Module module, cl_status* err = nullptr)
+        : Kernel(module, "ndc_from_screen_test", err)
     {
-        cl_int err = CL_SUCCESS;
-        if ((err = kernel.setArg(0, position)) != CL_SUCCESS) return err;
-        if ((err = kernel.setArg(1, dimension)) != CL_SUCCESS) return err;        
-        return kernel.setArg(2, result);
     }
 
-    cl_int init(cl::CommandQueue queue)
+    cl_status load()
     {
-        return CL_SUCCESS;
+        cl_status err = CL_SUCCESS;
+        if ((err = setArg(0, position)) != CL_SUCCESS) return err;
+        if ((err = setArg(1, dimension)) != CL_SUCCESS) return err;        
+        return setArg(2, result);
     }
 
     ScreenPosition position;
     ScreenDimension dimension;
-    Buffer result;
+    Buffer<NDCPosition> result;
 };
 
-typedef Kernel<NDCFromScreenParams> NDCFromScreen;
-
-struct ScreenFromNDCParams
+struct ScreenFromNDC : Kernel
 {   
 public:
-    ScreenFromNDCParams(cl_int* err = nullptr)
+    ScreenFromNDC(Module module, cl_status* err = nullptr)
+        : Kernel(module, "screen_from_ndc_test", err)
     {
-        result = cl::Buffer(CL_MEM_WRITE_ONLY, sizeof(ScreenPosition), nullptr, err);
     }
 
-    cl_int load(cl::Kernel kernel)
+    cl_status load()
     {
-        cl_int err = CL_SUCCESS;
-        if ((err = kernel.setArg(0, ndcPosition)) != CL_SUCCESS) return err;
-        if ((err = kernel.setArg(1, dimension)) != CL_SUCCESS) return err;        
-        err = kernel.setArg(2, result);
+        cl_status err = CL_SUCCESS;
+        if ((err = setArg(0, ndcPosition)) != CL_SUCCESS) return err;
+        if ((err = setArg(1, dimension)) != CL_SUCCESS) return err;        
+        err = setArg(2, result);
         return err;
     }
 
-    cl_int getResult(ScreenPosition* res) 
+    cl_status getResult(ScreenPosition* res) 
     {
-        return cl::CommandQueue::getDefault().enqueueReadBuffer(result, CL_TRUE, 0, sizeof(ScreenPosition), res);
+        return CommandQueue::getDefault().enqueueBufferReadCommand(result, true, 1, res);
     } 
-
-    cl_int init(cl::CommandQueue queue)
-    {
-        return CL_SUCCESS;
-    }
 
     NDCPosition ndcPosition;
     ScreenDimension dimension;
-    cl::Buffer result;
+    Buffer<ScreenPosition> result;
 };
-
-
-typedef Kernel<ScreenFromNDCParams> ScreenFromNDC;
 
 
 AssertionResult comparePoints(const NDCPosition& p1, const NDCPosition& p2, const ScreenDimension& screenDim)

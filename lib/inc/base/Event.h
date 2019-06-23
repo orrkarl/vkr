@@ -5,6 +5,7 @@
 #include <functional>
 #include <vector>
 
+#include "Context.h"
 #include "Wrapper.h"
 
 namespace nr
@@ -17,6 +18,10 @@ public:
     Event();
 
     explicit Event(const cl_event& event, const NRbool retain = false);
+
+    explicit Event(Context context, cl_status* err = nullptr);
+
+    explicit Event(cl_status* err);
 
     Event(const Event& other);
 
