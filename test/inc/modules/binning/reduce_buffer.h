@@ -14,22 +14,25 @@ using namespace nr::__internal;
 using namespace testing;
 
 
-class ReduceTriangleBufferParams
+class ReduceTriangleBuffer : Kernel
 {
 public:
-    cl_int init(cl::CommandQueue queue) { return CL_SUCCESS; }
-    
-    cl_int load(cl::Kernel kernel)
+    ReduceTriangleBuffer(Module module, cl_status* err)
+        : Kernel(module, "reduce_triangle_buffer_test", err)
     {
-        cl_int err = CL_SUCCESS;
-        if ((err = kernel.setArg(0, triangles.getBuffer())) != CL_SUCCESS) return err;
-        if ((err = kernel.setArg(1, offset)) != CL_SUCCESS) return err;
-        return kernel.setArg(2, result.getBuffer());
     }
 
-    Buffer triangles;
+    cl_status load()
+    {
+        cl_status err = CL_SUCCESS;
+        if ((err = setArg(0, triangles)) != CL_SUCCESS) return err;
+        if ((err = setArg(1, offset)) != CL_SUCCESS) return err;
+        return setArg(2, result);
+    }
+
+    Buffer<NRfloat> triangles;
     NRuint offset;
-    Buffer result;
+    Buffer<NRfloat> result;
 };
 
 template<NRuint dim>
@@ -70,41 +73,41 @@ TEST(Binning, ReduceTriangleBuffer)
     const NRuint triangleCount = 3;
     const NRuint offset = 2;
     
-    cl_int err = CL_SUCCESS; 
+    cl_status err = CL_SUCCESS; 
 
     auto code = mkBinningModule(dim, triangleCount, &err);
-    ASSERT_EQ(CL_SUCCESS, err);
+    ASSERT_SUCCESS(err);
 
     Triangle<dim> h_triangles_raw[triangleCount + offset];
     Triangle<dim>* h_triangles = h_triangles_raw + offset;
-    const NRuint trianglesSize = sizeof(h_triangles_raw) - offset * sizeof(Triangle<dim>);
+    const NRuint triangleFloatCount = (sizeof(h_triangles_raw) - offset * sizeof(Triangle<dim>)) / sizeof(NRfloat);
 
     generateTriangleData<dim>(triangleCount, h_triangles);
 
-    NRfloat h_expected[triangleCount * 3 * 2];
+    const NRuint expectedFloatCount = triangleCount * 3 * 2;
+    NRfloat h_expected[expectedFloatCount];
     extractNDCPosition<dim>(triangleCount, h_triangles, h_expected);
 
-    std::vector<NRfloat> h_actual(triangleCount * 3 * 2);
+    std::vector<NRfloat> h_actual(expectedFloatCount);
 
-    Buffer d_triangle(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_triangles_raw), (float*) h_triangles_raw, &err);
-    ASSERT_PRED1(error::isSuccess, err);
-    Buffer d_result(CL_MEM_WRITE_ONLY, 2 * trianglesSize / dim, &err);
-    ASSERT_PRED1(error::isSuccess, err);
+    Buffer<NRfloat> d_triangle(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_triangles_raw) / sizeof(NRfloat), (NRfloat*) h_triangles_raw, &err);
+    ASSERT_SUCCESS(err);
+    Buffer<NRfloat> d_result(CL_MEM_WRITE_ONLY, 2 * triangleFloatCount / dim, &err);
+    ASSERT_SUCCESS(err);
     
-    Kernel<ReduceTriangleBufferParams> test = code.makeKernel<ReduceTriangleBufferParams>("reduce_triangle_buffer_test", &err);
-    ASSERT_EQ(CL_SUCCESS, err) << utils::stringFromCLError(err);
+    auto test = ReduceTriangleBuffer(code, &err);
+    ASSERT_SUCCESS(err);
 
-    test.params.triangles = d_triangle;
-    test.params.offset    = offset * sizeof(Triangle<dim>) / sizeof(NRfloat);
-    test.params.result    = d_result;
-    test.local  = cl::NDRange(30);
-    test.global = cl::NDRange(1);
-
-    ASSERT_EQ(CL_SUCCESS, test(cl::CommandQueue::getDefault()));
-
-    ASSERT_EQ(CL_SUCCESS, cl::CommandQueue::getDefault().enqueueReadBuffer(d_result.getBuffer(), CL_FALSE, 0, sizeof(h_expected), h_actual.data()));
+    test.triangles = d_triangle;
+    test.offset    = offset * sizeof(Triangle<dim>) / sizeof(NRfloat);
+    test.result    = d_result;
     
-    ASSERT_EQ(CL_SUCCESS, cl::CommandQueue::getDefault().finish());
+    std::array<NRuint, 1> local  = { 30 };
+    std::array<NRuint, 1> global = { 1 };
+
+    ASSERT_SUCCESS(test.load());
+    ASSERT_SUCCESS(CommandQueue::getDefault().enqueueBufferReadCommand(d_result, false, expectedFloatCount, h_actual.data()));
+    ASSERT_SUCCESS(CommandQueue::getDefault().await());
 
     ASSERT_THAT(h_actual, ElementsAreArray(h_expected, sizeof(h_expected) / sizeof(NRfloat)));
 }

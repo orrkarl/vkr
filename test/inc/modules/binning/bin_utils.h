@@ -1,6 +1,8 @@
 #pragma once
 
 #include <inc/includes.h>
+#include <kernels/base.cl.h>
+#include <kernels/bin_rasterizer.cl.h>
 #include <rendering/Render.h>
 
 using namespace nr;
@@ -40,7 +42,7 @@ Module::Option mkTriangleTestCountMacro(const NRuint triangleTestCount)
     return Module::Macro("TRIANGLE_TEST_COUNT", std::to_string(triangleTestCount));
 }
 
-Module mkBinningModule(const NRuint dim, const NRuint triangleTestCount, cl_int* err)
+Module mkBinningModule(const NRuint dim, const NRuint triangleTestCount, cl_status* err)
 {
     auto opts = mkStandardOptions(dim);
     opts.push_back(TEST_BINNING);

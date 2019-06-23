@@ -5,7 +5,7 @@
 using namespace nr;
 using namespace nr::__internal;
 
-void screenFromNDCTestTemplate(ScreenFromNDC kernel, CommandQueue queue, const NDCPosition& ndc, const ScreenDimension& dim, const ScreenPosition& expected)
+void screenFromNDCTestTemplate(ScreenFromNDC kernel, CommandQueue q, const NDCPosition& ndc, const ScreenDimension& dim, const ScreenPosition& expected)
 {
     cl_status err;
 

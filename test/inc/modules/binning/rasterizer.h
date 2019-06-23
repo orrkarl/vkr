@@ -25,7 +25,7 @@ constexpr NRuint compileTimeCeil(const NRfloat f)
 
 TEST(Binning, Rasterizer)
 {
-    cl_int err = CL_SUCCESS; 
+    cl_status err = CL_SUCCESS; 
 
     const NRuint dim = 4;
     
@@ -56,43 +56,42 @@ TEST(Binning, Rasterizer)
     mkTriangleInCoords(x, y, screenDim, h_triangles);
     mkTriangleInCoords(x, y, screenDim, h_triangles + 1);
     
-    cl::CommandQueue q = cl::CommandQueue::getDefault();
+    CommandQueue q = CommandQueue::getDefault();
 
     auto code = mkBinningModule(dim, triangleCount, &err);
-    ASSERT_EQ(CL_SUCCESS, err);
+    ASSERT_SUCCESS(err);
 
-    auto testee = code.makeKernel<BinRasterizerParams>("bin_rasterize", &err);
-    ASSERT_EQ(CL_SUCCESS, err);
+    auto testee = BinRasterizer(code, &err);
+    ASSERT_SUCCESS(err);
 
-    Buffer d_triangles(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_triangles), (NRfloat*) h_triangles, &err);
-    ASSERT_PRED1(error::isSuccess, err);
+    Buffer<NRfloat> d_triangles(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_triangles) / sizeof(NRfloat), (NRfloat*) h_triangles, &err);
+    ASSERT_SUCCESS(err);
 
-    Buffer d_overflow(CL_MEM_READ_WRITE, sizeof(cl_bool), nullptr, &err);
-    ASSERT_PRED1(error::isSuccess, err);
+    Buffer<NRuint> d_overflow(CL_MEM_READ_WRITE, 1, &err);
+    ASSERT_SUCCESS(err);
 
-    Buffer d_binQueues(CL_MEM_READ_WRITE, BinRasterizerParams::getTotalBinQueueSize(workGroupCount, screenDim, config), &err);
-    ASSERT_PRED1(error::isSuccess, err);
+    Buffer<NRuint> d_binQueues(CL_MEM_READ_WRITE, BinRasterizer::getTotalBinQueueCount(workGroupCount, screenDim, config), &err);
+    ASSERT_SUCCESS(err);
 
-    Buffer d_batchIndex(CL_MEM_READ_WRITE, sizeof(cl_uint), &err);
-    ASSERT_PRED1(error::isSuccess, err);
+    Buffer<NRuint> d_batchIndex(CL_MEM_READ_WRITE, 1, &err);
+    ASSERT_SUCCESS(err);
 
-    testee.params.binQueueConfig    = config;
-    testee.params.dimension         = screenDim;
-    testee.params.triangleData      = d_triangles;
-    testee.params.triangleCount     = triangleCount;
-    testee.params.hasOverflow       = d_overflow;
-    testee.params.binQueues         = d_binQueues;
-    testee.params.batchIndex = d_batchIndex;
+    testee.binQueueConfig = config;
+    testee.dimension      = screenDim;
+    testee.triangleData   = d_triangles;
+    testee.triangleCount  = triangleCount;
+    testee.hasOverflow    = d_overflow;
+    testee.binQueues      = d_binQueues;
+    testee.batchIndex     = d_batchIndex;
 
-    testee.global = cl::NDRange(workGroupCount * binCountX, binCountY);
-    testee.local  = cl::NDRange(binCountX, binCountY);
+    std::array<NRuint, 2> global = { workGroupCount * binCountX, binCountY };
+    std::array<NRuint, 2> local  = { binCountX, binCountY };
 
-    ASSERT_EQ(CL_SUCCESS, testee(q));
-    ASSERT_EQ(CL_SUCCESS, q.enqueueReadBuffer(d_binQueues, CL_FALSE, 0, sizeof(h_result), h_result));
-    ASSERT_EQ(CL_SUCCESS, q.enqueueReadBuffer(d_overflow, CL_FALSE, 0, sizeof(isOverflowing), &isOverflowing));
-    ASSERT_EQ(CL_SUCCESS, q.finish());
+    ASSERT_SUCCESS(testee.load());
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_binQueues, false, sizeof(h_result) / sizeof(NRfloat), h_result));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_overflow, false, sizeof(isOverflowing) / sizeof(NRuint), &isOverflowing));
+    ASSERT_SUCCESS(q.await());
     ASSERT_FALSE(isOverflowing);
-    ASSERT_EQ(CL_SUCCESS, err);
 
     ASSERT_EQ(0, h_result[0]);  // queue for bin (0, 0) is not empty
     ASSERT_EQ(0, h_result[1]);  // the first triangle is in it

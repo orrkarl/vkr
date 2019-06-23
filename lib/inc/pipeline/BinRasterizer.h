@@ -24,7 +24,7 @@ struct BinQueueConfig
 
 struct NR_SHARED BinRasterizer : Kernel
 {
-    static NRuint getTotalBinQueueSize(const NRuint workGroupCount, const ScreenDimension& dim, const BinQueueConfig config)
+    static NRuint getTotalBinQueueCount(const NRuint workGroupCount, const ScreenDimension& dim, const BinQueueConfig config)
     {
         return workGroupCount * getBinCount(dim, config.binWidth, config.binHeight) * (config.queueSize + 1) * sizeof(NRuint);
     }

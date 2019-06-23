@@ -5,8 +5,6 @@
 #include "bin_utils.h"
 
 #include <base/Module.h>
-#include <kernels/base.cl.h>
-#include <kernels/bin_rasterizer.cl.h>
 #include <base/Buffer.h>
 #include <rendering/Render.h>
 
@@ -14,97 +12,102 @@ using namespace nr;
 using namespace nr::__internal;
 using namespace testing;
 
-class TriangleInBinParams
+struct TriangleInBin : Kernel
 {
-public:
-    cl_int init(cl::CommandQueue queue) { return CL_SUCCESS; }
-    
-    cl_int load(cl::Kernel kernel)
+    TriangleInBin(Module module, cl_status* err)
+        : Kernel(module, "is_triangle_in_bin_test", err)
     {
-        cl_int err = CL_SUCCESS;
-        NRuint argc = 0;
-        if ((err = kernel.setArg(argc++, triangle_x.getBuffer())) != CL_SUCCESS) return err;
-        if ((err = kernel.setArg(argc++, triangle_y.getBuffer())) != CL_SUCCESS) return err;
-        if ((err = kernel.setArg(argc++, bin)) != CL_SUCCESS) return err;
-        if ((err = kernel.setArg(argc++, dim)) != CL_SUCCESS) return err;
-        return kernel.setArg(argc++, result.getBuffer());
     }
 
-    Buffer triangle_x;
-    Buffer triangle_y;
+    cl_status load()
+    {
+        cl_status err = CL_SUCCESS;
+        NRuint argc = 0;
+        if ((err = setArg(argc++, triangle_x) != CL_SUCCESS) return err;
+        if ((err = setArg(argc++, triangle_y)) != CL_SUCCESS) return err;
+        if ((err = setArg(argc++, bin)) != CL_SUCCESS) return err;
+        if ((err = setArg(argc++, dim)) != CL_SUCCESS) return err;
+        return setArg(argc++, result;
+    }
+
+    Buffer<NRfloat> triangle_x;
+    Buffer<NRfloat> triangle_y;
     Bin bin;
     ScreenDimension dim;
-    Buffer result;
+    Buffer<cl_bool> result;
 };
 
-void testBin(Kernel<TriangleInBinParams> testee, cl::CommandQueue q, const NRuint dimension, const Bin& bin, const ScreenDimension& dim, NRfloat* triangle_x, NRfloat* triangle_y)
+void testBin(TriangleInBin testee, CommandQueue q, const NRuint dimension, const Bin& bin, const ScreenDimension& dim, NRfloat* triangle_x, NRfloat* triangle_y)
 {
-    cl_int err = CL_SUCCESS;
+    cl_status err = CL_SUCCESS;
 
     cl_bool h_result = CL_FALSE;
-    Buffer d_result(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(cl_bool), &h_result, &err);
-    ASSERT_PRED1(error::isSuccess, err);
+    Buffer<cl_bool> d_result(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, 1, &h_result, &err);
+    ASSERT_SUCCESS(err);
 
     NRfloat defaultValue = -2.0;
     NRint defaultValueAsInt = * (NRint*) &defaultValue; 
     memset(triangle_x, defaultValueAsInt, 3 * sizeof(NRfloat));
     memset(triangle_y, defaultValueAsInt, 3 * sizeof(NRfloat));
-    Buffer d_triangle_x(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3 * sizeof(NRfloat), triangle_x, &err);
-    ASSERT_PRED1(error::isSuccess, err);
-    Buffer d_triangle_y(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3 * sizeof(NRfloat), triangle_x, &err);
-    ASSERT_PRED1(error::isSuccess, err);
+    Buffer<NRfloat> d_triangle_x(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3, triangle_x, &err);
+    ASSERT_SUCCESS(err);
+    Buffer<NRfloat> d_triangle_y(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3, triangle_x, &err);
+    ASSERT_SUCCESS(err);
 
-    testee.params.bin = bin;
-    testee.params.dim = dim;
-    testee.params.triangle_x = d_triangle_x;
-    testee.params.triangle_y = d_triangle_y;
-    testee.params.result     = d_result;
-    testee.global = cl::NDRange(1);
-    testee.local  = cl::NDRange(1);
+    testee.bin = bin;
+    testee.dim = dim;
+    testee.triangle_x = d_triangle_x;
+    testee.triangle_y = d_triangle_y;
+    testee.result     = d_result;
 
+    std::array<NRuint, 1> global{1};
+    std::array<NRuint, 1> local{1};
+    
     // Shouldn't be in any bin
-    ASSERT_EQ(CL_SUCCESS, testee(q));
-    ASSERT_EQ(CL_SUCCESS, q.enqueueReadBuffer(d_result.getBuffer(), CL_TRUE, 0, sizeof(cl_bool), &h_result));
-    ASSERT_EQ(CL_SUCCESS, q.finish());
-    ASSERT_EQ(CL_FALSE, h_result) << "Sanity check";
+    ASSERT_SUCCESS(testee.load());
+    ASSERT_SUCCESS(q.enqueueKernelCommand(testee, global, local));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, 1, &h_result));
+    ASSERT_SUCCESS(q.await());
 
     // Middle of bin
     mkTriangleInCoords(bin.x + bin.width / 2, bin.y + bin.height / 2, dim, triangle_x, triangle_y);
-    ASSERT_EQ(CL_SUCCESS, q.enqueueWriteBuffer(d_triangle_x.getBuffer(), CL_TRUE, 0, 3 * sizeof(NRfloat), triangle_x));
-    ASSERT_EQ(CL_SUCCESS, q.enqueueWriteBuffer(d_triangle_y.getBuffer(), CL_TRUE, 0, 3 * sizeof(NRfloat), triangle_y));
-    ASSERT_EQ(CL_SUCCESS, testee(q));
-    ASSERT_EQ(CL_SUCCESS, q.enqueueReadBuffer(d_result.getBuffer(), CL_TRUE, 0, sizeof(cl_bool), &h_result));
-    ASSERT_EQ(CL_SUCCESS, q.finish());
-    ASSERT_EQ(CL_TRUE, h_result) << "Middle of the bin";
+    ASSERT_SUCCESS(q.enqueueBufferWriteCommand(d_triangle_x, false, 3, triangle_x));
+    ASSERT_SUCCESS(q.enqueueWriteBuffer(d_triangle_y, false, 3, triangle_y));
+    ASSERT_SUCCESS(q.await());
+    ASSERT_SUCCESS(testee.load());
+    ASSERT_SUCCESS(q.enqueueKernelCommand(testee, global, local));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, 1, &h_result));
+    ASSERT_SUCCESS(q.await());
 
     // Left-Low corner
     mkTriangleInCoords(bin.x, bin.y, dim, triangle_x, triangle_y);
-    ASSERT_EQ(CL_SUCCESS, q.enqueueWriteBuffer(d_triangle_x.getBuffer(), CL_TRUE, 0, 3 * sizeof(NRfloat), triangle_x));
-    ASSERT_EQ(CL_SUCCESS, q.enqueueWriteBuffer(d_triangle_y.getBuffer(), CL_TRUE, 0, 3 * sizeof(NRfloat), triangle_y));
-    ASSERT_EQ(CL_SUCCESS, testee(q));
-    ASSERT_EQ(CL_SUCCESS, q.enqueueReadBuffer(d_result.getBuffer(), CL_TRUE, 0, sizeof(cl_bool), &h_result));
-    ASSERT_EQ(CL_SUCCESS, q.finish());
-    ASSERT_EQ(CL_TRUE, h_result) << "Left-Low corner of the bin";
+    ASSERT_SUCCESS(q.enqueueBufferWriteCommand(d_triangle_x, false, 3, triangle_x));
+    ASSERT_SUCCESS(q.enqueueWriteBuffer(d_triangle_y, false, 3, triangle_y));
+    ASSERT_SUCCESS(q.await());
+    ASSERT_SUCCESS(testee.load());
+    ASSERT_SUCCESS(q.enqueueKernelCommand(testee, global, local));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, 1, &h_result));
+    ASSERT_SUCCESS(q.await());
 }
 
 TEST(Binning, IsSimplexInBin)
 {
     const NRuint dim = 5;
 
-    cl_int err = CL_SUCCESS; 
+    cl_status err = CL_SUCCESS; 
 
     NRfloat triangle_x[3];
     NRfloat triangle_y[3];
 
     auto code = mkBinningModule(dim, 1, &err);
-    ASSERT_EQ(CL_SUCCESS, err);
+    ASSERT_SUCCESS(err);
 
-    auto test = code.makeKernel<TriangleInBinParams>("is_triangle_in_bin_test", &err);
-    ASSERT_EQ(CL_SUCCESS, err) << utils::stringFromCLError(err);
+    auto test = TriangleInBin(module, &err);
+    ASSERT_SUCCESS(err) << utils::stringFromCLError(err);
 
     const ScreenDimension screenDim{1920, 1080};
     const Bin bin{32, 32, 800, 800};
 
-    testBin(test, cl::CommandQueue::getDefault(), dim, bin, screenDim, triangle_x, triangle_y);
+    testBin(test, CommandQueue::getDefault(), dim, bin, screenDim, triangle_x, triangle_y);
 }
 

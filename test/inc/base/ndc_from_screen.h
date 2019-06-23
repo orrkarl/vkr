@@ -18,12 +18,12 @@ void ndcFromScreenTestTemplate(NDCFromScreen kernel, CommandQueue q, const Scree
     kernel.position  = screen;
     kernel.dimension = dim;
     kernel.result    = Buffer<NDCPosition>(CL_MEM_READ_WRITE, 1, &err);
-    ASSERT_TRUE(isSuccess(err));
+    ASSERT_SUCCESS(err);
 
-    ASSERT_TRUE(isSuccess(kernel.load()));
-    ASSERT_TRUE(isSuccess(q.enqueueKernelCommand(kernel, global, local)));
-    ASSERT_TRUE(isSuccess(q.enqueueBufferReadCommand(kernel.result, false, 1, &result)));
-    ASSERT_TRUE(isSuccess(q.await()));
+    ASSERT_SUCCESS(kernel.load());
+    ASSERT_SUCCESS(q.enqueueKernelCommand(kernel, global, local));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(kernel.result, false, 1, &result));
+    ASSERT_SUCCESS(q.await());
     
     ASSERT_TRUE(comparePoints(expected, result, dim));
 }
@@ -40,10 +40,10 @@ void checkConversionBounded(NDCFromScreen kernel, CommandQueue q, const ScreenPo
     kernel.dimension = dim;
     kernel.result    = Buffer<NDCPosition>(CL_MEM_READ_WRITE, 1, &err);
 
-    ASSERT_TRUE(isSuccess(kernel.load()));
-    ASSERT_TRUE(isSuccess(q.enqueueKernelCommand(kernel, global, local)));
-    ASSERT_TRUE(isSuccess(q.enqueueBufferReadCommand(kernel.result, false, 1, &result)));
-    ASSERT_TRUE(isSuccess(q.await()));
+    ASSERT_SUCCESS(kernel.load());
+    ASSERT_SUCCESS(q.enqueueKernelCommand(kernel, global, local));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(kernel.result, false, 1, &result));
+    ASSERT_SUCCESS(q.await());
     
     ASSERT_LE(result.x, 1.0f)  << "Converted X value too big! Result: "   << result << ", original: " << screen << " | Screen dim: " << dim;
     ASSERT_GE(result.x, -1.0f) << "Converted X value too small! Result: " << result << ", original: " << screen << " | Screen dim: " << dim;
@@ -58,10 +58,10 @@ TEST(Base, NDCFromScreen)
     CommandQueue q = CommandQueue::getDefault();
 
     Module base(clcode::base, Module::Options{Module::CL_VERSION_12, Module::WARNINGS_ARE_ERRORS, Module::_3D}, &err);
-    ASSERT_TRUE(isSuccess(err));
+    ASSERT_SUCCESS(err);
 
     auto ndc_from_screen = NDCFromScreen(base, &err);
-    ASSERT_TRUE(isSuccess(err));
+    ASSERT_SUCCESS(err);
 
     ndcFromScreenTestTemplate(ndc_from_screen, q, ScreenPosition{0, 0}, ScreenDimension{100, 100}, NDCPosition{-1, -1});
     ndcFromScreenTestTemplate(ndc_from_screen, q, ScreenPosition{49, 49}, ScreenDimension{100, 100}, NDCPosition{0, 0});

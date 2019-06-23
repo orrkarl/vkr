@@ -1,14 +1,21 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include <general/predefs.h>
-#include <utils/converters.h>
-#include <rendering/Render.h>
+#include <base/CommandQueue.h>
 #include <base/Module.h>
+
+#include <general/predefs.h>
+
+#include <rendering/Render.h>
+
+#include <utils/converters.h>
+
+
+#include <array>
 
 #pragma once
 
-#define ASSERT_SUCCESS(expr) ASSERT_TRUE(isSuccess(expr))
+#define ASSERT_SUCCESS(expr) ASSERT_PRED1(isSuccess, (expr))
 
 const float TOLERANCE = 0.00001f;
 const double DOUBLE_TOLERANCE = 0.000000001;

@@ -5,10 +5,8 @@
 #include <base/Module.h>
 #include <base/Kernel.h>
 #include <rendering/Render.h>
-#include <kernels/base.cl.h>
 
 using namespace nr;
-using namespace nr::__internal;
 using namespace testing;
 
 

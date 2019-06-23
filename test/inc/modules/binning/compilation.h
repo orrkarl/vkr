@@ -3,14 +3,10 @@
 #include <inc/includes.h>
 
 #include <base/Module.h>
-#include <kernels/base.cl.h>
-#include <kernels/bin_rasterizer.cl.h>
-#include <base/Buffer.h>
 
 #include "bin_utils.h"
 
 using namespace nr;
-using namespace nr::__internal;
 using namespace testing;
 
 TEST(Binning, Compilation)

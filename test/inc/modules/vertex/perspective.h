@@ -14,7 +14,7 @@ using namespace testing;
 
 TEST(VertexShader, Perspective)
 {
-    cl_int err = CL_SUCCESS;
+    cl_status err = CL_SUCCESS;
 
     const NRuint dim = 3;
 
@@ -40,34 +40,35 @@ TEST(VertexShader, Perspective)
     };
 
     Module code({clcode::base, clcode::vertex_shading}, options, &err);
-    ASSERT_TRUE(isSuccess(err));
+    ASSERT_SUCCESS(err);
 
-    VertexShader testee = code.makeKernel<VertexShadingParams>("shade_vertex", &err);
-    ASSERT_TRUE(isSuccess(err));
+    auto testee = VertexShader(code, &err);
+    ASSERT_SUCCESS(err);
 
     auto q = cl::CommandQueue::getDefault(&err);
-    ASSERT_TRUE(isSuccess(err));
+    ASSERT_SUCCESS(err);
 
-    Buffer d_point(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(p.values), p.values, &err);
-    ASSERT_TRUE(isSuccess(err));
-    Buffer d_near(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(near), near, &err);
-    ASSERT_TRUE(isSuccess(err));
-    Buffer d_far(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(far), far, &err);
-    ASSERT_TRUE(isSuccess(err));
-    Buffer d_result(CL_MEM_READ_WRITE, sizeof(result.values), &err);
-    ASSERT_TRUE(isSuccess(err));
+    Buffer<NRfloat> d_point(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, p.values, &err);
+    ASSERT_SUCCESS(err);
+    Buffer<NRfloat> d_near(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, near, &err);
+    ASSERT_SUCCESS(err);
+    Buffer<NRfloat> d_far(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, far, &err);
+    ASSERT_SUCCESS(err);
+    Buffer<NRfloat> d_result(CL_MEM_READ_WRITE, dim, &err);
+    ASSERT_SUCCESS(err);
 
-    testee.params.points = d_point;
-    testee.params.near   = d_near;
-    testee.params.far    = d_far;
-    testee.params.result = d_result;
+    testee.points = d_point;
+    testee.near   = d_near;
+    testee.far    = d_far;
+    testee.result = d_result;
 
-    testee.global = cl::NDRange(1);
-    testee.local  = cl::NDRange(1);
+    std::array<NRuint, 1> global{1};
+    std::array<NRuint, 1> local{1};
 
-    ASSERT_TRUE(isSuccess(testee(q)));
-    ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(d_result, CL_FALSE, 0, sizeof(result.values), result.values)));
-    ASSERT_TRUE(isSuccess(q.finish()));
+    ASSERT_SUCCESS(testee.load())
+    ASSERT_SUCCESS(q.enqueueKernelCommand(testee, global, local));
+    ASSERT_SUCCESS(q.enqueueBufferRead(d_result, false, dim, result.values));
+    ASSERT_SUCCESS(q.await());
 
     ASSERT_EQ(expected, result);
 }
