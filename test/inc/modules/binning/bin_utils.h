@@ -47,5 +47,7 @@ Module mkBinningModule(const NRuint dim, const NRuint triangleTestCount, cl_stat
     auto opts = mkStandardOptions(dim);
     opts.push_back(TEST_BINNING);
     opts.push_back(mkTriangleTestCountMacro(triangleTestCount));
-    return Module({clcode::base, clcode::bin_rasterizer}, opts, err);
+    auto ret = Module({clcode::base, clcode::bin_rasterizer}, err);
+    *err = ret.build(opts);
+    return ret;
 }

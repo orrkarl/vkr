@@ -23,11 +23,11 @@ struct TriangleInBin : Kernel
     {
         cl_status err = CL_SUCCESS;
         NRuint argc = 0;
-        if ((err = setArg(argc++, triangle_x) != CL_SUCCESS) return err;
+        if ((err = setArg(argc++, triangle_x)) != CL_SUCCESS) return err;
         if ((err = setArg(argc++, triangle_y)) != CL_SUCCESS) return err;
         if ((err = setArg(argc++, bin)) != CL_SUCCESS) return err;
         if ((err = setArg(argc++, dim)) != CL_SUCCESS) return err;
-        return setArg(argc++, result;
+        return setArg(argc++, result);
     }
 
     Buffer<NRfloat> triangle_x;
@@ -60,32 +60,32 @@ void testBin(TriangleInBin testee, CommandQueue q, const NRuint dimension, const
     testee.triangle_y = d_triangle_y;
     testee.result     = d_result;
 
-    std::array<NRuint, 1> global{1};
-    std::array<NRuint, 1> local{1};
+    std::array<size_t, 1> global{1};
+    std::array<size_t, 1> local{1};
     
     // Shouldn't be in any bin
     ASSERT_SUCCESS(testee.load());
-    ASSERT_SUCCESS(q.enqueueKernelCommand(testee, global, local));
+    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(testee, global, local));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, 1, &h_result));
     ASSERT_SUCCESS(q.await());
 
     // Middle of bin
     mkTriangleInCoords(bin.x + bin.width / 2, bin.y + bin.height / 2, dim, triangle_x, triangle_y);
     ASSERT_SUCCESS(q.enqueueBufferWriteCommand(d_triangle_x, false, 3, triangle_x));
-    ASSERT_SUCCESS(q.enqueueWriteBuffer(d_triangle_y, false, 3, triangle_y));
+    ASSERT_SUCCESS(q.enqueueBufferWriteCommand(d_triangle_y, false, 3, triangle_y));
     ASSERT_SUCCESS(q.await());
     ASSERT_SUCCESS(testee.load());
-    ASSERT_SUCCESS(q.enqueueKernelCommand(testee, global, local));
+    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(testee, global, local));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, 1, &h_result));
     ASSERT_SUCCESS(q.await());
 
     // Left-Low corner
     mkTriangleInCoords(bin.x, bin.y, dim, triangle_x, triangle_y);
     ASSERT_SUCCESS(q.enqueueBufferWriteCommand(d_triangle_x, false, 3, triangle_x));
-    ASSERT_SUCCESS(q.enqueueWriteBuffer(d_triangle_y, false, 3, triangle_y));
+    ASSERT_SUCCESS(q.enqueueBufferWriteCommand(d_triangle_y, false, 3, triangle_y));
     ASSERT_SUCCESS(q.await());
     ASSERT_SUCCESS(testee.load());
-    ASSERT_SUCCESS(q.enqueueKernelCommand(testee, global, local));
+    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(testee, global, local));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, 1, &h_result));
     ASSERT_SUCCESS(q.await());
 }
@@ -102,7 +102,7 @@ TEST(Binning, IsSimplexInBin)
     auto code = mkBinningModule(dim, 1, &err);
     ASSERT_SUCCESS(err);
 
-    auto test = TriangleInBin(module, &err);
+    auto test = TriangleInBin(code, &err);
     ASSERT_SUCCESS(err) << utils::stringFromCLError(err);
 
     const ScreenDimension screenDim{1920, 1080};

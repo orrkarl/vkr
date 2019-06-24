@@ -51,7 +51,7 @@ public:
     {
         return clEnqueueReadBuffer(
             object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
-            wait.size(), (const cl_event*) &wait.front(), notify);
+            wait.size(), (const cl_event*) &wait.front(), (cl_event*) notify);
     }
 
     template<typename T>
@@ -59,7 +59,7 @@ public:
     {
         return clEnqueueReadBuffer(
                 object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
-                0, nullptr, notify);
+                0, nullptr, (cl_event*) notify);
     }
 
     template<typename T>
@@ -67,7 +67,7 @@ public:
     {
         return clEnqueueWriteBuffer(
             object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
-            wait.size(), (const cl_event*) &wait.front(), notify);
+            wait.size(), (const cl_event*) &wait.front(), (cl_event*) notify);
     }
 
     template<typename T>
@@ -75,25 +75,25 @@ public:
     {
         return clEnqueueWriteBuffer(
                 object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
-                0, nullptr, notify);
+                0, nullptr, (cl_event*) notify);
     }
 
     template<NRuint dim>
     typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
         const Kernel& kernel, 
-        const std::array<NRuint, dim>& global, const std::array<NRuint, dim>& local,
-        const std::array<NRuint, dim>& offset, const std::vector<Event>& wait, Event* notify = nullptr)
+        const std::array<size_t, dim>& global, const std::array<size_t, dim>& local,
+        const std::array<size_t, dim>& offset, const std::vector<Event>& wait, Event* notify = nullptr)
     {
-        return clEnqueueNDRangeKernel(object, kernel, dim, &offset.front(), &global.front(), &local.front(), wait.size(), &wait.front(), notify);
+        return clEnqueueNDRangeKernel(object, kernel, dim, &offset.front(), &global.front(), &local.front(), wait.size(), &wait.front(), (cl_event*) notify);
     }
 
     template<NRuint dim>
     typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
         const Kernel& kernel, 
-        const std::array<NRuint, dim>& global, const std::array<NRuint, dim>& local,
-        const std::array<NRuint, dim>& offset = std::array<NRuint, dim>{}, Event* notify = nullptr)
+        const std::array<size_t, dim>& global, const std::array<size_t, dim>& local,
+        const std::array<size_t, dim>& offset = std::array<size_t, dim>{}, Event* notify = nullptr)
     {
-        return clEnqueueNDRangeKernel(object, kernel, dim, &offset.front(), &global.front(), &local.front(), 0, nullptr, notify);
+        return clEnqueueNDRangeKernel(object, kernel, dim, &offset.front(), &global.front(), &local.front(), 0, nullptr, (cl_event*) notify);
     }
 
     template<typename T>
@@ -103,7 +103,7 @@ public:
         const std::vector<Event>& wait, 
         const NRuint& offset = 0, Event* notify = nullptr)
     {
-        return clEnqueueFillBuffer(object, buffer, value, sizeof(T), sizeof(value) * offset, sizeof(value) * count, wait.size(), &wait.front(), notify);
+        return clEnqueueFillBuffer(object, buffer, value, sizeof(T), sizeof(value) * offset, sizeof(value) * count, wait.size(), &wait.front(), (cl_event*) notify);
     }
 
     template<typename T>
@@ -112,7 +112,7 @@ public:
         const T& value, const NRulong& count, 
         const NRuint& offset = 0, Event* notify = nullptr)
     {
-        return clEnqueueFillBuffer(object, buffer, value, sizeof(T), sizeof(value) * offset, sizeof(value) * count, 0, nullptr, notify);
+        return clEnqueueFillBuffer(object, buffer, value, sizeof(T), sizeof(value) * offset, sizeof(value) * count, 0, nullptr, (cl_event*) notify);
     }
 
 // Fields

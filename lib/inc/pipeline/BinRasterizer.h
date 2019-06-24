@@ -55,7 +55,7 @@ struct NR_SHARED BinRasterizer : Kernel
     NRuint triangleCount;
 
     // Overflow handling
-    Buffer<NRuint> hasOverflow;
+    Buffer<NRbool> hasOverflow;
 
     Buffer<NRuint> batchIndex;
 };

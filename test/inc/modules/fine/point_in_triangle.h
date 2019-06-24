@@ -2,41 +2,47 @@
 
 #include <inc/includes.h>
 
+#include <base/Buffer.h>
 #include <base/Module.h>
+
 #include <kernels/base.cl.h>
 #include <kernels/fine_rasterizer.cl.h>
-#include <base/Buffer.h>
+
 #include <rendering/Render.h>
+
 #include "fine_utils.h"
 
 using namespace nr;
 using namespace nr::__internal;
 using namespace testing;
 
-struct PointInTriangleParams
-{
-    cl_int init(cl::CommandQueue queue) { return CL_SUCCESS; }
-    
-    cl_int load(cl::Kernel kernel)
+struct PointInTriangle : Kernel
+{    
+    PointInTriangle(Module code, cl_status* err)
+        : Kernel(code, "is_point_in_triangle_test", err)
     {
-        cl_int err = CL_SUCCESS;
-        NRuint argc = 0;
-
-        if ((err = kernel.setArg(argc++, triangle.getBuffer())) != CL_SUCCESS) return err;
-        if ((err = kernel.setArg(argc++, position)) != CL_SUCCESS) return err;
-        if ((err = kernel.setArg(argc++, screenDim)) != CL_SUCCESS) return err;
-        return kernel.setArg(argc, result.getBuffer());
     }
 
-    Buffer triangle;
+    cl_status load()
+    {
+        cl_status err = CL_SUCCESS;
+        NRuint argc = 0;
+
+        if ((err = setArg(argc++, triangle)) != CL_SUCCESS) return err;
+        if ((err = setArg(argc++, position)) != CL_SUCCESS) return err;
+        if ((err = setArg(argc++, screenDim)) != CL_SUCCESS) return err;
+        return setArg(argc, result);
+    }
+
+    Buffer<NRfloat> triangle;
     ScreenPosition position;
     ScreenDimension screenDim;
-    Buffer result; 
+    Buffer<NRbool> result; 
 };
 
 TEST(Fine, PointInTriangle)
 {
-    cl_int err = CL_SUCCESS;
+    cl_status err = CL_SUCCESS;
 
     const NRuint dim = 6;
 
@@ -51,44 +57,47 @@ TEST(Fine, PointInTriangle)
     const ScreenPosition belowBottom = { (NRuint) (0.5 * 1920), (NRuint) (0.1 * 1080) };
     const ScreenPosition justInside  = { (NRuint) (0.65 * 1920), (NRuint) (0.4 * 1080) };
 
-    cl_bool h_result = CL_FALSE;
+    NRbool h_result = false;
 
-    auto q = cl::CommandQueue::getDefault();
+    auto q = CommandQueue::getDefault();
 
     auto code = mkFineModule(dim, &err);
-    ASSERT_TRUE(isSuccess(err));
+    ASSERT_SUCCESS(err);
 
-    auto testee = code.makeKernel<PointInTriangleParams>("is_point_in_triangle_test", &err);
-    ASSERT_EQ(CL_SUCCESS, err);
+    auto testee = PointInTriangle(code, &err);
+    ASSERT_SUCCESS(err);
 
-    Buffer d_triangle(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(triangle), &triangle, &err);
-    ASSERT_PRED1(error::isSuccess, err);
+    Buffer<NRfloat> d_triangle(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(triangle) / sizeof(NRfloat), (NRfloat*) &triangle, &err);
+    ASSERT_SUCCESS(err);
 
-    Buffer d_result(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_bool), &h_result, &err);
-    ASSERT_PRED1(error::isSuccess, err);
+    Buffer<NRbool> d_result(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, &h_result, &err);
+    ASSERT_SUCCESS(err);
 
-    testee.params.triangle = d_triangle;
-    testee.params.screenDim = screenDim;
-    testee.params.result = d_result;
+    testee.triangle = d_triangle;
+    testee.screenDim = screenDim;
+    testee.result = d_result;
 
-    testee.global = cl::NDRange(1);
-    testee.local  = cl::NDRange(1);
+    std::array<size_t, 1> global = {1};
+    std::array<size_t, 1> local  = {1};
 
-    testee.params.position = origin;
-    ASSERT_EQ(CL_SUCCESS, testee(q));
-    ASSERT_EQ(CL_SUCCESS, q.enqueueReadBuffer(d_result.getBuffer(), CL_FALSE, 0, sizeof(h_result), &h_result));
-    ASSERT_EQ(CL_SUCCESS, q.finish());
-    ASSERT_EQ(CL_TRUE, h_result);
+    testee.position = origin;
+    ASSERT_SUCCESS(testee.load());
+    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(testee, global, local));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, 1, &h_result));
+    ASSERT_SUCCESS(q.await());
+    ASSERT_EQ(true, h_result);
 
-    testee.params.position = belowBottom;
-    ASSERT_EQ(CL_SUCCESS, testee(q));
-    ASSERT_EQ(CL_SUCCESS, q.enqueueReadBuffer(d_result.getBuffer(), CL_FALSE, 0, sizeof(h_result), &h_result));
-    ASSERT_EQ(CL_SUCCESS, q.finish());
-    ASSERT_EQ(CL_FALSE, h_result);
+    testee.position = belowBottom;
+    ASSERT_SUCCESS(testee.load());
+    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(testee, global, local));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, 1, &h_result));
+    ASSERT_SUCCESS(q.await());
+    ASSERT_EQ(false, h_result);
 
-    testee.params.position = justInside;
-    ASSERT_EQ(CL_SUCCESS, testee(q));
-    ASSERT_EQ(CL_SUCCESS, q.enqueueReadBuffer(d_result.getBuffer(), CL_FALSE, 0, sizeof(h_result), &h_result));
-    ASSERT_EQ(CL_SUCCESS, q.finish());
-    ASSERT_EQ(CL_TRUE, h_result);
+    testee.position = justInside;
+    ASSERT_SUCCESS(testee.load());
+    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(testee, global, local));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, 1, &h_result));
+    ASSERT_SUCCESS(q.await());
+    ASSERT_EQ(true, h_result);
 }

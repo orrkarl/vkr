@@ -76,4 +76,6 @@ Context::operator cl_context() const
     return object;
 }
 
+Context Context::defaultContext = Context();
+
 }

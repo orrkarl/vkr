@@ -131,6 +131,10 @@ public:
 
 	Kernel createKernel(const string& name, cl_status* err = nullptr);
 
+	string getBuildLog(cl_status* err = nullptr);
+
+	string getBuildLog(Device device, cl_status* err = nullptr);
+
 private:
 	static string finalizeOptions(const Options& options);
 

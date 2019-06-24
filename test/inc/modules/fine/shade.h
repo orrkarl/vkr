@@ -13,19 +13,22 @@ using namespace nr;
 using namespace nr::__internal;
 using namespace testing;
 
-struct ShadeTestParams
+struct ShadeTest : Kernel
 {
-    cl_int init(cl::CommandQueue queue) { return CL_SUCCESS; }
-
-    cl_int load(cl::Kernel kernel)
+    ShadeTest(Module code, cl_status* err)
+        : Kernel(code, "shade_test", err)
     {
-        cl_int err = CL_SUCCESS;
+    }
+
+    cl_status load()
+    {
+        cl_status err = CL_SUCCESS;
         NRuint argc = 0;
 
-        if ((err = kernel.setArg(argc++, fragment)) != CL_SUCCESS) return err;
-        if ((err = kernel.setArg(argc++, screenDim)) != CL_SUCCESS) return err;
-        if ((err = kernel.setArg(argc++, frame.color.getBuffer())) != CL_SUCCESS) return err;
-        return kernel.setArg(argc++, frame.depth.getBuffer());
+        if ((err = setArg(argc++, fragment)) != CL_SUCCESS) return err;
+        if ((err = setArg(argc++, screenDim)) != CL_SUCCESS) return err;
+        if ((err = setArg(argc++, frame.color)) != CL_SUCCESS) return err;
+        return setArg(argc++, frame.depth);
     }
 
     Fragment fragment;
@@ -35,15 +38,16 @@ struct ShadeTestParams
 
 TEST(Fine, ShadeTest)
 {
-    cl_int err = CL_SUCCESS;
+    cl_status err = CL_SUCCESS;
 
     const NRuint dim = 6;
     constexpr ScreenDimension screenDim = { 5, 2 };
+    constexpr NRuint totalScreenSize = screenDim.width * screenDim.height;
 
-    RawColorRGB h_color[screenDim.width * screenDim.height];
-    Depth       h_depth[screenDim.width * screenDim.height];
+    RawColorRGB h_color[totalScreenSize];
+    Depth       h_depth[totalScreenSize];
 
-    for (NRuint i = 0; i < screenDim.width * screenDim.height; ++i)
+    for (NRuint i = 0; i < totalScreenSize; ++i)
     {
         h_color[i] = {0, 0, 0};
         h_depth[i] = 1;
@@ -62,40 +66,42 @@ TEST(Fine, ShadeTest)
     const NRuint idx = index_from_screen(firstFrag.position, screenDim);
 
     FrameBuffer frame;
-    frame.color = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_color), h_color, &err);
-    ASSERT_PRED1(error::isSuccess, err);
-    frame.depth = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_depth), h_depth, &err);
-    ASSERT_PRED1(error::isSuccess, err);
+    frame.color = Buffer<RawColorRGB>(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_color, &err);
+    ASSERT_SUCCESS(err);
+    frame.depth = Buffer<NRfloat>(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_depth, &err);
+    ASSERT_SUCCESS(err);
     
     auto code = mkFineModule(dim, &err);
-    ASSERT_TRUE(isSuccess(err));
+    ASSERT_SUCCESS(err);
 
-    auto testee = code.makeKernel<ShadeTestParams>("shade_test", &err);
-    ASSERT_TRUE(isSuccess(err));
+    auto testee = ShadeTest(code, &err);
+    ASSERT_SUCCESS(err);
 
-    auto q = cl::CommandQueue::getDefault(&err);
-    ASSERT_TRUE(isSuccess(err));    
+    auto q = CommandQueue::getDefault();
+    ASSERT_SUCCESS(err);
 
-    testee.params.fragment = firstFrag;
-    testee.params.screenDim = screenDim;
-    testee.params.frame = frame;
+    testee.fragment = firstFrag;
+    testee.screenDim = screenDim;
+    testee.frame = frame;
 
-    testee.global = cl::NDRange(1);
-    testee.local  = cl::NDRange(1);
+    std::array<size_t, 1> global = { 1 };
+    std::array<size_t, 1> local  = { 1 };
 
-    ASSERT_TRUE(isSuccess(testee(q)));
-    ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.color, CL_FALSE, 0, sizeof(h_color), h_color)));
-    ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.depth, CL_FALSE, 0, sizeof(h_depth), h_depth)));
-    ASSERT_TRUE(isSuccess(q.finish()));
+    ASSERT_SUCCESS(testee.load());
+    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(testee, global, local));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.color, false, totalScreenSize, h_color));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.depth, false, totalScreenSize, h_depth));
+    ASSERT_SUCCESS(q.await());
 
     ASSERT_EQ(firstFrag.color, h_color[idx]);
     ASSERT_EQ(firstFrag.depth, h_depth[idx]);
 
-    testee.params.fragment = secondFrag;
-    ASSERT_TRUE(isSuccess(testee(q)));
-    ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.color, CL_FALSE, 0, sizeof(h_color), h_color)));
-    ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.depth, CL_FALSE, 0, sizeof(h_depth), h_depth)));
-    ASSERT_TRUE(isSuccess(q.finish()));
+    testee.fragment = secondFrag;
+    ASSERT_SUCCESS(testee.load());
+    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(testee, global, local));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.color, false, totalScreenSize, h_color));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.depth, false, totalScreenSize, h_depth));
+    ASSERT_SUCCESS(q.await());
 
     ASSERT_EQ(firstFrag.color, h_color[idx]);
     ASSERT_EQ(firstFrag.depth, h_depth[idx]);

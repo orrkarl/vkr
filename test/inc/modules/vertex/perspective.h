@@ -39,13 +39,15 @@ TEST(VertexShader, Perspective)
         Module::DEBUG
     };
 
-    Module code({clcode::base, clcode::vertex_shading}, options, &err);
+    Module code({clcode::base, clcode::vertex_shading}, &err);
     ASSERT_SUCCESS(err);
+
+    ASSERT_SUCCESS(code.build(options));
 
     auto testee = VertexShader(code, &err);
     ASSERT_SUCCESS(err);
 
-    auto q = cl::CommandQueue::getDefault(&err);
+    auto q = CommandQueue::getDefault();
     ASSERT_SUCCESS(err);
 
     Buffer<NRfloat> d_point(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, p.values, &err);
@@ -62,12 +64,12 @@ TEST(VertexShader, Perspective)
     testee.far    = d_far;
     testee.result = d_result;
 
-    std::array<NRuint, 1> global{1};
-    std::array<NRuint, 1> local{1};
+    std::array<size_t, 1> global{1};
+    std::array<size_t, 1> local{1};
 
-    ASSERT_SUCCESS(testee.load())
-    ASSERT_SUCCESS(q.enqueueKernelCommand(testee, global, local));
-    ASSERT_SUCCESS(q.enqueueBufferRead(d_result, false, dim, result.values));
+    ASSERT_SUCCESS(testee.load());
+    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(testee, global, local));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, dim, result.values));
     ASSERT_SUCCESS(q.await());
 
     ASSERT_EQ(expected, result);

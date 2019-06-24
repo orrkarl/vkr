@@ -14,7 +14,7 @@ using namespace nr::__internal;
 using namespace testing;
 
 
-class ReduceTriangleBuffer : Kernel
+class ReduceTriangleBuffer : public Kernel
 {
 public:
     ReduceTriangleBuffer(Module module, cl_status* err)
@@ -78,6 +78,8 @@ TEST(Binning, ReduceTriangleBuffer)
     auto code = mkBinningModule(dim, triangleCount, &err);
     ASSERT_SUCCESS(err);
 
+    auto q = CommandQueue::getDefault();
+
     Triangle<dim> h_triangles_raw[triangleCount + offset];
     Triangle<dim>* h_triangles = h_triangles_raw + offset;
     const NRuint triangleFloatCount = (sizeof(h_triangles_raw) - offset * sizeof(Triangle<dim>)) / sizeof(NRfloat);
@@ -102,12 +104,13 @@ TEST(Binning, ReduceTriangleBuffer)
     test.offset    = offset * sizeof(Triangle<dim>) / sizeof(NRfloat);
     test.result    = d_result;
     
-    std::array<NRuint, 1> local  = { 30 };
-    std::array<NRuint, 1> global = { 1 };
+    std::array<size_t, 1> local  = { 30 };
+    std::array<size_t, 1> global = { 1 };
 
     ASSERT_SUCCESS(test.load());
-    ASSERT_SUCCESS(CommandQueue::getDefault().enqueueBufferReadCommand(d_result, false, expectedFloatCount, h_actual.data()));
-    ASSERT_SUCCESS(CommandQueue::getDefault().await());
+    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(test, global, local));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, expectedFloatCount, h_actual.data()));
+    ASSERT_SUCCESS(q.await());
 
     ASSERT_THAT(h_actual, ElementsAreArray(h_expected, sizeof(h_expected) / sizeof(NRfloat)));
 }

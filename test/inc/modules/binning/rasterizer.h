@@ -67,7 +67,7 @@ TEST(Binning, Rasterizer)
     Buffer<NRfloat> d_triangles(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_triangles) / sizeof(NRfloat), (NRfloat*) h_triangles, &err);
     ASSERT_SUCCESS(err);
 
-    Buffer<NRuint> d_overflow(CL_MEM_READ_WRITE, 1, &err);
+    Buffer<NRbool> d_overflow(CL_MEM_READ_WRITE, 1, &err);
     ASSERT_SUCCESS(err);
 
     Buffer<NRuint> d_binQueues(CL_MEM_READ_WRITE, BinRasterizer::getTotalBinQueueCount(workGroupCount, screenDim, config), &err);
@@ -84,10 +84,11 @@ TEST(Binning, Rasterizer)
     testee.binQueues      = d_binQueues;
     testee.batchIndex     = d_batchIndex;
 
-    std::array<NRuint, 2> global = { workGroupCount * binCountX, binCountY };
-    std::array<NRuint, 2> local  = { binCountX, binCountY };
+    std::array<size_t, 2> global = { workGroupCount * binCountX, binCountY };
+    std::array<size_t, 2> local  = { binCountX, binCountY };
 
     ASSERT_SUCCESS(testee.load());
+    ASSERT_SUCCESS(q.enqueueKernelCommand<2>(testee, global, local));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_binQueues, false, sizeof(h_result) / sizeof(NRfloat), h_result));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_overflow, false, sizeof(isOverflowing) / sizeof(NRuint), &isOverflowing));
     ASSERT_SUCCESS(q.await());

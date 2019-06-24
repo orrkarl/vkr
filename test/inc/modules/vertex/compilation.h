@@ -2,6 +2,8 @@
 
 #include <inc/includes.h>
 
+#include <kernels/vertex_shading.cl.h>
+
 using namespace nr;
 using namespace testing;
 

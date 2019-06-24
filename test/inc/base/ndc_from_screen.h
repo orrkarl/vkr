@@ -12,8 +12,8 @@ void ndcFromScreenTestTemplate(NDCFromScreen kernel, CommandQueue q, const Scree
     NDCPosition result;
     cl_status err = CL_SUCCESS;
 
-    std::array<NRuint, 1> global{1};
-    std::array<NRuint, 1> local{1};
+    std::array<size_t, 1> global{1};
+    std::array<size_t, 1> local{1};
     
     kernel.position  = screen;
     kernel.dimension = dim;
@@ -21,7 +21,7 @@ void ndcFromScreenTestTemplate(NDCFromScreen kernel, CommandQueue q, const Scree
     ASSERT_SUCCESS(err);
 
     ASSERT_SUCCESS(kernel.load());
-    ASSERT_SUCCESS(q.enqueueKernelCommand(kernel, global, local));
+    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(kernel, global, local));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(kernel.result, false, 1, &result));
     ASSERT_SUCCESS(q.await());
     
@@ -33,15 +33,15 @@ void checkConversionBounded(NDCFromScreen kernel, CommandQueue q, const ScreenPo
     NDCPosition result;
     cl_status err = CL_SUCCESS;
 
-    std::array<NRuint, 1> global{1};
-    std::array<NRuint, 1> local{1};
+    std::array<size_t, 1> global{1};
+    std::array<size_t, 1> local{1};
     
     kernel.position  = screen;
     kernel.dimension = dim;
     kernel.result    = Buffer<NDCPosition>(CL_MEM_READ_WRITE, 1, &err);
 
     ASSERT_SUCCESS(kernel.load());
-    ASSERT_SUCCESS(q.enqueueKernelCommand(kernel, global, local));
+    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(kernel, global, local));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(kernel.result, false, 1, &result));
     ASSERT_SUCCESS(q.await());
     
@@ -57,8 +57,10 @@ TEST(Base, NDCFromScreen)
  
     CommandQueue q = CommandQueue::getDefault();
 
-    Module base(clcode::base, Module::Options{Module::CL_VERSION_12, Module::WARNINGS_ARE_ERRORS, Module::_3D}, &err);
+    Module base(clcode::base, &err);
     ASSERT_SUCCESS(err);
+
+    ASSERT_SUCCESS(base.build(Module::Options{Module::CL_VERSION_12, Module::WARNINGS_ARE_ERRORS, Module::_3D}));
 
     auto ndc_from_screen = NDCFromScreen(base, &err);
     ASSERT_SUCCESS(err);

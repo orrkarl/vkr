@@ -43,7 +43,7 @@ AssertionResult validateDepth(const NRfloat* depthBuffer, const ScreenDimension&
 
 TEST(Fine, Rasterizer)
 {
-    cl_int err = CL_SUCCESS;
+    cl_status err = CL_SUCCESS;
 
     const NRuint dim = 5;
 
@@ -79,38 +79,38 @@ TEST(Fine, Rasterizer)
     fillTriangles<dim>(screenDim, config, totalWorkGroupCount, expectedDepth, 256, h_triangles.get(), h_binQueues.get());
 
     auto code = mkFineModule(dim, &err);
-    ASSERT_TRUE(isSuccess(err));
+    ASSERT_SUCCESS(err);
 
-    auto testee = code.makeKernel<FineRasterizerParams>("fine_rasterize", &err);
-    ASSERT_TRUE(isSuccess(err));
+    auto testee = FineRasterizer(code, &err);
+    ASSERT_SUCCESS(err);
 
-    auto q = cl::CommandQueue::getDefault(&err);
-    ASSERT_TRUE(isSuccess(err));
+    auto q = CommandQueue::getDefault();
 
     FrameBuffer frame;
-    frame.color = Buffer(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize * sizeof(RawColorRGB), h_colorBuffer.get(), &err);
-    ASSERT_TRUE(isSuccess(err));
-    frame.depth = Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, totalScreenSize * sizeof(NRfloat), h_depthBuffer.get(), &err);
-    ASSERT_TRUE(isSuccess(err));
+    frame.color = Buffer<nr::RawColorRGB>(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_colorBuffer.get(), &err);
+    ASSERT_SUCCESS(err);
+    frame.depth = Buffer<NRfloat>(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_depthBuffer.get(), &err);
+    ASSERT_SUCCESS(err);
 
-    Buffer d_triangles(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount * sizeof(Triangle<dim>), h_triangles.get(), &err);
-    ASSERT_TRUE(isSuccess(err));
-    Buffer d_binQueues(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, totalBinQueuesSize * sizeof(NRuint), h_binQueues.get(), &err);
-    ASSERT_TRUE(isSuccess(err));
+    Buffer<NRfloat> d_triangles(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount * sizeof(Triangle<dim>) / sizeof(NRfloat), (NRfloat*) h_triangles.get(), &err);
+    ASSERT_SUCCESS(err);
+    Buffer<NRuint> d_binQueues(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, totalBinQueuesSize, h_binQueues.get(), &err);
+    ASSERT_SUCCESS(err);
 
-    testee.params.triangleData = d_triangles;
-    testee.params.dim = screenDim;
-    testee.params.binQueueConfig = config;
-    testee.params.binQueues = d_binQueues;
-    testee.params.workGroupCount = totalWorkGroupCount;
-    testee.params.frameBuffer = frame;
+    testee.triangleData = d_triangles;
+    testee.dim = screenDim;
+    testee.binQueueConfig = config;
+    testee.binQueues = d_binQueues;
+    testee.workGroupCount = totalWorkGroupCount;
+    testee.frameBuffer = frame;
 
-    testee.global = cl::NDRange(binCountX, binCountY);
-    testee.local  = cl::NDRange(binCountX, binCountY / totalWorkGroupCount);
+    std::array<size_t, 2> global = { binCountX, binCountY };
+    std::array<size_t, 2> local  = { binCountX, binCountY / totalWorkGroupCount };
 
-    ASSERT_TRUE(isSuccess(testee(q)));
-    ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.color, CL_FALSE, 0, totalScreenSize * sizeof(RawColorRGB), h_colorBuffer.get())));
-    ASSERT_TRUE(isSuccess(q.enqueueReadBuffer(frame.depth, CL_FALSE, 0, totalScreenSize * sizeof(NRfloat), h_depthBuffer.get())));
-    ASSERT_TRUE(isSuccess(q.finish()));
+    ASSERT_SUCCESS(testee.load());
+    ASSERT_SUCCESS(q.enqueueKernelCommand<2>(testee, global, local));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.color, false, totalScreenSize, h_colorBuffer.get()));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.depth, false, totalScreenSize, h_depthBuffer.get()));
+    ASSERT_SUCCESS(q.await());
     ASSERT_TRUE(validateDepth(h_depthBuffer.get(), screenDim, defaultDepth, expectedDepth));
 }

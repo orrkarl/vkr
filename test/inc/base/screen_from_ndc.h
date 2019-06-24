@@ -2,6 +2,8 @@
 
 #include "base_utils.h"
 
+#include <kernels/base.cl.h>
+
 using namespace nr;
 using namespace nr::__internal;
 
@@ -9,14 +11,14 @@ void screenFromNDCTestTemplate(ScreenFromNDC kernel, CommandQueue q, const NDCPo
 {
     cl_status err;
 
-    std::array<NRuint, 1> global{1};
-    std::array<NRuint, 1> local{1};
+    std::array<size_t, 1> global{1};
+    std::array<size_t, 1> local{1};
     
     kernel.ndcPosition = ndc;
     kernel.dimension   = dim;
 
     ASSERT_SUCCESS(kernel.load());
-    ASSERT_SUCCESS(q.enqueueKernelCommand(kernel, global, local));
+    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(kernel, global, local));
     ASSERT_SUCCESS(q.await());
 
     ScreenPosition result;
@@ -25,14 +27,16 @@ void screenFromNDCTestTemplate(ScreenFromNDC kernel, CommandQueue q, const NDCPo
     ASSERT_EQ(expected, result) << "Screen from NDC didn't return correct values";
 }
 
-TEST(Base, ScreenFromNDC)
+TEST(Base, ScreenFromNDC)   
 {
     cl_status err = CL_SUCCESS; 
  
     CommandQueue queue = CommandQueue::getDefault();
 
-    Module base(clcode::base, Module::Options{Module::CL_VERSION_12, Module::WARNINGS_ARE_ERRORS, Module::_3D}, &err);
+    Module base(clcode::base, &err);
     ASSERT_SUCCESS(err);
+
+    ASSERT_SUCCESS(base.build(Module::Options{Module::CL_VERSION_12, Module::WARNINGS_ARE_ERRORS, Module::_3D}));
 
     auto screen_from_ndc = ScreenFromNDC(base, &err);
     ASSERT_SUCCESS(err);

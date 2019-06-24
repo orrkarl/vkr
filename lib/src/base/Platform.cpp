@@ -80,4 +80,6 @@ std::vector<Device> Platform::getDevicesByType(cl_device_type type, cl_status* e
     return ret;
 }
 
+Platform Platform::defaultPlatform = Platform();
+
 }

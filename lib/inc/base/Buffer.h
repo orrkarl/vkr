@@ -59,12 +59,14 @@ public:
 
     Buffer& operator=(const Buffer& other)
     {
-        return Wrapped::operator=(other);
+        Wrapped::operator=(other);
+        return *this;
     }
 
     Buffer& operator=(Buffer&& other)
     {
-        return Wrapped::operator=(other);
+        Wrapped::operator=(other);
+        return *this;
     }
 
     operator cl_mem() const 

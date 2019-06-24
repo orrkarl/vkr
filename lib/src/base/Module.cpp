@@ -143,6 +143,18 @@ string Module::finalizeOptions(const Options& options)
     return ret;    
 }
 
+string Module::getBuildLog(cl_status* err)
+{
+    return getBuildLog(Device::getDefault(), err);
+}
+
+string Module::getBuildLog(Device device, cl_status* err)
+{
+    NRchar* log;
+    *err = clGetProgramBuildInfo(object, device, CL_PROGRAM_BUILD_LOG, sizeof(log), log, nullptr);
+    return string(log);
+}
+
 const Module::Macro           Module::DEBUG               = Module::Macro("_DEBUG");
 const Module::CLVersion       Module::CL_VERSION_22       = Module::CLVersion("2.2");
 const Module::CLVersion       Module::CL_VERSION_21       = Module::CLVersion("2.1");

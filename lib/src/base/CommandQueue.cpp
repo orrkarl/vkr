@@ -78,4 +78,6 @@ cl_status CommandQueue::finish()
     return clFinish(object);
 }
 
+CommandQueue CommandQueue::defaultQueue = CommandQueue();
+
 }

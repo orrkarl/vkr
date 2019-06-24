@@ -55,4 +55,6 @@ const cl_device_id& Device::get() const
     return object;
 }
 
+Device Device::defaultDevice = Device();
+
 }
