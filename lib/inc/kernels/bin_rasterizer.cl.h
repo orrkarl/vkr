@@ -126,7 +126,6 @@ kernel void bin_rasterize(
 
     private event_t batch_acquisition = 0;
     
-    private uint bin_queue_index = 0;
     private const uint bins_count_x = ceil(((float) screen_dim.width) / config.bin_width);
     private const uint bins_count_y = ceil(((float) screen_dim.height) / config.bin_height);
     private uint bin_queue_base = (config.queue_size + 1) * 
@@ -155,16 +154,16 @@ kernel void bin_rasterize(
     }
 
     // wait for LOCAL batch index initialization
-    work_group_barrier(CLK_LOCAL_MEM_FENCE);
+    barrier(CLK_LOCAL_MEM_FENCE);
 
     // wait for GLOBAL batch index initialization
-    work_group_barrier(CLK_GLOBAL_MEM_FENCE);
+    barrier(CLK_GLOBAL_MEM_FENCE);
 
     bin_queues[bin_queue_base] = 1;
 
     for(;;)
     {
-        work_group_barrier(CLK_LOCAL_MEM_FENCE);
+        barrier(CLK_LOCAL_MEM_FENCE);
 
         // Aquire a batch (update the local and global batch index)
         if (is_init_manager)
@@ -172,7 +171,7 @@ kernel void bin_rasterize(
             current_batch_index = atomic_add(g_batch_index, BATCH_COUNT);
         }
 
-        work_group_barrier(CLK_LOCAL_MEM_FENCE);
+        barrier(CLK_LOCAL_MEM_FENCE);
 
         if (*has_overflow)
         {
@@ -268,11 +267,11 @@ kernel void reduce_triangle_buffer_test(
 
     if (get_global_id(0) == 0)
     {
-        __attribute__((opencl_unroll_hint))
         for (uint i = 0; i < TRIANGLE_TEST_COUNT * 3; ++i)
         {
             result[i].x = res_x[i];
             result[i].y = res_y[i];
+			DEBUG_MESSAGE2("(%f, %f)\n", res_x[i], res_y[i]);
         }
     }
 }

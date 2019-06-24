@@ -90,7 +90,7 @@ TEST(Binning, Rasterizer)
     ASSERT_SUCCESS(testee.load());
     ASSERT_SUCCESS(q.enqueueKernelCommand<2>(testee, global, local));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_binQueues, false, sizeof(h_result) / sizeof(nr_float), h_result));
-    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_overflow, false, sizeof(isOverflowing) / sizeof(nr_uint), &isOverflowing));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_overflow, false, 1, &isOverflowing));
     ASSERT_SUCCESS(q.await());
     ASSERT_FALSE(isOverflowing);
 

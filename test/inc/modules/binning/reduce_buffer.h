@@ -72,6 +72,7 @@ TEST(Binning, ReduceTriangleBuffer)
     const nr_uint dim = 5;
     const nr_uint triangleCount = 3;
     const nr_uint offset = 2;
+	const nr_uint floatsPerTriangle = sizeof(Triangle<dim>) / sizeof(nr_float);
     
     cl_status err = CL_SUCCESS; 
 
@@ -82,7 +83,7 @@ TEST(Binning, ReduceTriangleBuffer)
 
     Triangle<dim> h_triangles_raw[triangleCount + offset];
     Triangle<dim>* h_triangles = h_triangles_raw + offset;
-    const nr_uint triangleFloatCount = (sizeof(h_triangles_raw) - offset * sizeof(Triangle<dim>)) / sizeof(nr_float);
+    const nr_uint triangleFloatCount = triangleCount * floatsPerTriangle;
 
     generateTriangleData<dim>(triangleCount, h_triangles);
 
@@ -92,7 +93,7 @@ TEST(Binning, ReduceTriangleBuffer)
 
     std::vector<nr_float> h_actual(expectedFloatCount);
 
-    Buffer<nr_float> d_triangle(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_triangles_raw) / sizeof(nr_float), (nr_float*) h_triangles_raw, &err);
+    Buffer<nr_float> d_triangle(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, floatsPerTriangle * (offset + triangleCount), (nr_float*) h_triangles_raw, &err);
     ASSERT_SUCCESS(err);
     Buffer<nr_float> d_result(CL_MEM_WRITE_ONLY, 2 * triangleFloatCount / dim, &err);
     ASSERT_SUCCESS(err);
@@ -101,7 +102,7 @@ TEST(Binning, ReduceTriangleBuffer)
     ASSERT_SUCCESS(err);
 
     test.triangles = d_triangle;
-    test.offset    = offset * sizeof(Triangle<dim>) / sizeof(nr_float);
+    test.offset    = offset * floatsPerTriangle;
     test.result    = d_result;
     
     std::array<size_t, 1> local  = { 30 };
@@ -112,6 +113,6 @@ TEST(Binning, ReduceTriangleBuffer)
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, expectedFloatCount, h_actual.data()));
     ASSERT_SUCCESS(q.await());
 
-    ASSERT_THAT(h_actual, ElementsAreArray(h_expected, sizeof(h_expected) / sizeof(nr_float)));
+    ASSERT_THAT(h_actual, ElementsAreArray(h_expected, expectedFloatCount));
 }
 
