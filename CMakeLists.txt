@@ -1,7 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
-include(cmake/PrecompiledHeader.cmake)
-
 project(Nraster CXX)
 
 IF(NOT CMAKE_BUILD_TYPE)
@@ -12,6 +10,7 @@ OPTION(BUILD_TESTS "builds the test directory and gtest" ON)
 OPTION(BUILD_DEMOS "builds the demo directory" ON)
 
 SET(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	ADD_COMPILE_OPTIONS(-Wno-ignored-attributes)

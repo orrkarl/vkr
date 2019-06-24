@@ -15,22 +15,22 @@ using namespace nr;
 using namespace nr::__internal;
 using namespace testing;
 
-void validateFragment(const Fragment& fragment, const ScreenDimension& screenDim, const RawColorRGB* color, const NRfloat* depth)
+void validateFragment(const Fragment& fragment, const ScreenDimension& screenDim, const RawColorRGB* color, const nr_float* depth)
 {
-    const NRuint idx = index_from_screen(fragment.position, screenDim);
+    const nr_uint idx = index_from_screen(fragment.position, screenDim);
 
     ASSERT_EQ(fragment.color, color[idx]);
     ASSERT_EQ(fragment.depth, depth[idx]);
 }
 
-AssertionResult validateDepth(const NRfloat* depthBuffer, const ScreenDimension& screenDim, const NRfloat defaultDepth, const NRfloat expectedDepth)
+AssertionResult validateDepth(const nr_float* depthBuffer, const ScreenDimension& screenDim, const nr_float defaultDepth, const nr_float expectedDepth)
 {
-    for (NRuint y = 0; y < screenDim.height; ++y)
+    for (nr_uint y = 0; y < screenDim.height; ++y)
     {
-        for (NRuint x = 0; x < screenDim.width; ++x)
+        for (nr_uint x = 0; x < screenDim.width; ++x)
         {
-            NRfloat actualDepth = depthBuffer[y * screenDim.width + x];
-            NRfloat expected = 1 / expectedDepth;
+            nr_float actualDepth = depthBuffer[y * screenDim.width + x];
+            nr_float expected = 1 / expectedDepth;
             if (std::abs(actualDepth - defaultDepth) > 10e-5 && std::abs(actualDepth - expected) > 10e-5)
             {
                 return AssertionFailure() << "At: (" << x << ", " << y << "). default = " << defaultDepth << ", expected = " << expected << ", actual = " << actualDepth;
@@ -45,32 +45,32 @@ TEST(Fine, Rasterizer)
 {
     cl_status err = CL_SUCCESS;
 
-    const NRuint dim = 5;
+    const nr_uint dim = 5;
 
     const ScreenDimension screenDim = { 1366, 768 };
-    const NRuint totalScreenSize = screenDim.width * screenDim.height;
+    const nr_uint totalScreenSize = screenDim.width * screenDim.height;
 
     const BinQueueConfig config = { 32, 32, 256 };
-    const NRuint binCountX = ceil(((NRfloat) screenDim.width) / config.binWidth);
-    const NRuint binCountY = ceil(((NRfloat) screenDim.height) / config.binHeight);
-    const NRuint totalBinCount = binCountX * binCountY;
-    const NRuint totalWorkGroupCount = 4;
-    const NRuint totalBinQueuesSize = totalWorkGroupCount * totalBinCount * (config.queueSize + 1); 
+    const nr_uint binCountX = ceil(((nr_float) screenDim.width) / config.binWidth);
+    const nr_uint binCountY = ceil(((nr_float) screenDim.height) / config.binHeight);
+    const nr_uint totalBinCount = binCountX * binCountY;
+    const nr_uint totalWorkGroupCount = 4;
+    const nr_uint totalBinQueuesSize = totalWorkGroupCount * totalBinCount * (config.queueSize + 1); 
 
-    const NRfloat defaultDepth = 1;
-    const NRfloat expectedDepth = 0.5;
+    const nr_float defaultDepth = 1;
+    const nr_float expectedDepth = 0.5;
 
-    const NRuint triangleCount = 3 * totalBinCount;
+    const nr_uint triangleCount = 3 * totalBinCount;
     std::unique_ptr<Triangle<dim>[]> h_triangles(new Triangle<dim>[triangleCount]);
-    std::unique_ptr<NRuint[]> h_binQueues(new NRuint[totalBinQueuesSize]);
+    std::unique_ptr<nr_uint[]> h_binQueues(new nr_uint[totalBinQueuesSize]);
 
     std::unique_ptr<RawColorRGB[]> h_colorBuffer(new RawColorRGB[totalScreenSize]);
-    std::unique_ptr<NRfloat[]> h_depthBuffer(new NRfloat[totalScreenSize]);
+    std::unique_ptr<nr_float[]> h_depthBuffer(new nr_float[totalScreenSize]);
 
     Fragment expected;
     expected.color = RED;
 
-    for (NRuint i = 0; i < totalScreenSize; ++i)
+    for (nr_uint i = 0; i < totalScreenSize; ++i)
     {
         h_colorBuffer[i] = { 0, 0, 0 };
         h_depthBuffer[i] = defaultDepth;
@@ -89,12 +89,12 @@ TEST(Fine, Rasterizer)
     FrameBuffer frame;
     frame.color = Buffer<nr::RawColorRGB>(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_colorBuffer.get(), &err);
     ASSERT_SUCCESS(err);
-    frame.depth = Buffer<NRfloat>(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_depthBuffer.get(), &err);
+    frame.depth = Buffer<nr_float>(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_depthBuffer.get(), &err);
     ASSERT_SUCCESS(err);
 
-    Buffer<NRfloat> d_triangles(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount * sizeof(Triangle<dim>) / sizeof(NRfloat), (NRfloat*) h_triangles.get(), &err);
+    Buffer<nr_float> d_triangles(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount * sizeof(Triangle<dim>) / sizeof(nr_float), (nr_float*) h_triangles.get(), &err);
     ASSERT_SUCCESS(err);
-    Buffer<NRuint> d_binQueues(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, totalBinQueuesSize, h_binQueues.get(), &err);
+    Buffer<nr_uint> d_binQueues(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, totalBinQueuesSize, h_binQueues.get(), &err);
     ASSERT_SUCCESS(err);
 
     testee.triangleData = d_triangles;

@@ -15,11 +15,11 @@ namespace nr
 /**
  * Utility wrapper around cl_program
  **/
-class NR_SHARED Module : public Wrapper<cl_program>
+class NRAPI Module : public Wrapper<cl_program>
 {
 // Types
 public:
-	struct NR_SHARED Option
+	struct NRAPI Option
 	{
 		public:
 			Option(const string& value);
@@ -32,19 +32,19 @@ public:
 
 	typedef std::vector<Option> Options;
 
-	struct NR_SHARED Macro : Option
+	struct NRAPI Macro : Option
 	{
 		Macro(const string name);
 	
 		Macro(const string name, const string value);
 	};
 
-	struct NR_SHARED RenderDimension : Macro
+	struct NRAPI RenderDimension : Macro
 	{
-		RenderDimension(const NRuint& dimension);
+		RenderDimension(const nr_uint& dimension);
 	};
 
-	struct NR_SHARED CLVersion : Option
+	struct NRAPI CLVersion : Option
 	{
 		CLVersion(const string& version);
 	};
@@ -61,14 +61,14 @@ public:
 
 	explicit Module(const Sources& codes, cl_status* err = nullptr);
 
-	template<NRuint N>
-	explicit Module(const std::array<NRchar*, N>& codes, const std::array<NRuint, N>& sizes, cl_status* err = nullptr)
+	template<nr_uint N>
+	explicit Module(const std::array<nr_char*, N>& codes, const std::array<nr_uint, N>& sizes, cl_status* err = nullptr)
 		: Module(Context::getDefault(), codes, sizes, err)
 	{
 	}
 
-	template<NRuint N>
-	explicit Module(Context& context, const std::array<NRchar*, N>& codes, const std::array<NRuint, N>& sizes, cl_status* err = nullptr)
+	template<nr_uint N>
+	explicit Module(Context& context, const std::array<nr_char*, N>& codes, const std::array<nr_uint, N>& sizes, cl_status* err = nullptr)
 		: Wrapped(clCreateProgramWithSource(context, N, codes.data(), sizes.data(), err))
 	{
 	}
@@ -77,7 +77,7 @@ public:
 
 	Module(Context context, const Sources& codes, cl_status* err = nullptr);
 
-    explicit Module(const cl_program& module, const NRbool retain = false);
+    explicit Module(const cl_program& module, const nr_bool retain = false);
 
     Module(const Module& other);
 

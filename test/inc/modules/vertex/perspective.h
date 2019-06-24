@@ -16,14 +16,14 @@ TEST(VertexShader, Perspective)
 {
     cl_status err = CL_SUCCESS;
 
-    const NRuint dim = 3;
+    const nr_uint dim = 3;
 
     Point<dim> p;
     p.values[0] = 1;
     p.values[1] = 1;
     p.values[2] = 2;
-    NRfloat near[dim] = { 0, 0, 0 };
-    NRfloat far[dim]  = { 2, 2, 3 };
+    nr_float near[dim] = { 0, 0, 0 };
+    nr_float far[dim]  = { 2, 2, 3 };
     Point<dim> result;
 
     Point<dim> expected;
@@ -50,13 +50,13 @@ TEST(VertexShader, Perspective)
     auto q = CommandQueue::getDefault();
     ASSERT_SUCCESS(err);
 
-    Buffer<NRfloat> d_point(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, p.values, &err);
+    Buffer<nr_float> d_point(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, p.values, &err);
     ASSERT_SUCCESS(err);
-    Buffer<NRfloat> d_near(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, near, &err);
+    Buffer<nr_float> d_near(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, near, &err);
     ASSERT_SUCCESS(err);
-    Buffer<NRfloat> d_far(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, far, &err);
+    Buffer<nr_float> d_far(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, far, &err);
     ASSERT_SUCCESS(err);
-    Buffer<NRfloat> d_result(CL_MEM_READ_WRITE, dim, &err);
+    Buffer<nr_float> d_result(CL_MEM_READ_WRITE, dim, &err);
     ASSERT_SUCCESS(err);
 
     testee.points = d_point;

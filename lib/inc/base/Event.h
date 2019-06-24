@@ -11,13 +11,13 @@
 namespace nr
 {
 
-class NR_SHARED Event : public Wrapper<cl_event>
+class NRAPI Event : public Wrapper<cl_event>
 {
 // Functions and Constructors
 public:
     Event();
 
-    explicit Event(const cl_event& event, const NRbool retain = false);
+    explicit Event(const cl_event& event, const nr_bool retain = false);
 
     explicit Event(Context context, cl_status* err = nullptr);
 

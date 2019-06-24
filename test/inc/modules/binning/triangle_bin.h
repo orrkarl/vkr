@@ -22,7 +22,7 @@ struct TriangleInBin : Kernel
     cl_status load()
     {
         cl_status err = CL_SUCCESS;
-        NRuint argc = 0;
+        nr_uint argc = 0;
         if ((err = setArg(argc++, triangle_x)) != CL_SUCCESS) return err;
         if ((err = setArg(argc++, triangle_y)) != CL_SUCCESS) return err;
         if ((err = setArg(argc++, bin)) != CL_SUCCESS) return err;
@@ -30,14 +30,14 @@ struct TriangleInBin : Kernel
         return setArg(argc++, result);
     }
 
-    Buffer<NRfloat> triangle_x;
-    Buffer<NRfloat> triangle_y;
+    Buffer<nr_float> triangle_x;
+    Buffer<nr_float> triangle_y;
     Bin bin;
     ScreenDimension dim;
     Buffer<cl_bool> result;
 };
 
-void testBin(TriangleInBin testee, CommandQueue q, const NRuint dimension, const Bin& bin, const ScreenDimension& dim, NRfloat* triangle_x, NRfloat* triangle_y)
+void testBin(TriangleInBin testee, CommandQueue q, const nr_uint dimension, const Bin& bin, const ScreenDimension& dim, nr_float* triangle_x, nr_float* triangle_y)
 {
     cl_status err = CL_SUCCESS;
 
@@ -45,13 +45,13 @@ void testBin(TriangleInBin testee, CommandQueue q, const NRuint dimension, const
     Buffer<cl_bool> d_result(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, 1, &h_result, &err);
     ASSERT_SUCCESS(err);
 
-    NRfloat defaultValue = -2.0;
-    NRint defaultValueAsInt = * (NRint*) &defaultValue; 
-    memset(triangle_x, defaultValueAsInt, 3 * sizeof(NRfloat));
-    memset(triangle_y, defaultValueAsInt, 3 * sizeof(NRfloat));
-    Buffer<NRfloat> d_triangle_x(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3, triangle_x, &err);
+    nr_float defaultValue = -2.0;
+    nr_int defaultValueAsInt = * (nr_int*) &defaultValue; 
+    memset(triangle_x, defaultValueAsInt, 3 * sizeof(nr_float));
+    memset(triangle_y, defaultValueAsInt, 3 * sizeof(nr_float));
+    Buffer<nr_float> d_triangle_x(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3, triangle_x, &err);
     ASSERT_SUCCESS(err);
-    Buffer<NRfloat> d_triangle_y(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3, triangle_x, &err);
+    Buffer<nr_float> d_triangle_y(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3, triangle_x, &err);
     ASSERT_SUCCESS(err);
 
     testee.bin = bin;
@@ -92,12 +92,12 @@ void testBin(TriangleInBin testee, CommandQueue q, const NRuint dimension, const
 
 TEST(Binning, IsSimplexInBin)
 {
-    const NRuint dim = 5;
+    const nr_uint dim = 5;
 
     cl_status err = CL_SUCCESS; 
 
-    NRfloat triangle_x[3];
-    NRfloat triangle_y[3];
+    nr_float triangle_x[3];
+    nr_float triangle_y[3];
 
     auto code = mkBinningModule(dim, 1, &err);
     ASSERT_SUCCESS(err);

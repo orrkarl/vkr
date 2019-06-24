@@ -15,14 +15,11 @@ ADD_LIBRARY(Nraster SHARED
 	
 	src/pipeline/BinRasterizer.cpp
 	src/pipeline/FineRasterizer.cpp
+	src/pipeline/VertexShader.cpp
 
-	src/utils/converters.cpp
-	
-	pch.cpp)
+	src/utils/converters.cpp)
 
-IF(MSVC)
-	ADD_PRECOMPILED_HEADER(Nraster pch.h SOURCE_CXX pch.cpp FORCEINCLUDE)
-ENDIF()
+TARGET_COMPILE_DEFINITIONS(Nraster PRIVATE NR_EXPORT)
 
 TARGET_LINK_LIBRARIES(Nraster
 	PUBLIC ${OpenCL_LIBRARIES})

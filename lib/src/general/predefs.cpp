@@ -5,8 +5,8 @@ namespace nr
 
 namespace error
 {
-	NRbool isSuccess(const cl_status& err) { return err == CL_SUCCESS; }
-	NRbool isFailure(const cl_status& err) { return err != CL_SUCCESS; }
+	nr_bool isSuccess(const cl_status& err) { return err == CL_SUCCESS; }
+	nr_bool isFailure(const cl_status& err) { return err != CL_SUCCESS; }
 }
 
 

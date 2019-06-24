@@ -10,7 +10,7 @@
 namespace nr
 {
 
-class NR_SHARED Platform : public Wrapper<cl_platform_id>
+class NRAPI Platform : public Wrapper<cl_platform_id>
 {
 // Functions and Constructors
 public:
@@ -22,7 +22,7 @@ public:
 
     Platform();
 
-    explicit Platform(const cl_platform_id& platform, const NRbool retain = false);
+    explicit Platform(const cl_platform_id& platform, const nr_bool retain = false);
 
     Platform(const Platform& other);
 

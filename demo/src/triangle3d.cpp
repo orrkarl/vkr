@@ -4,19 +4,19 @@
 #include <iostream>
 #include <chrono>
 
-NRfloat h_triangle[9]
+nr_float h_triangle[9]
 {
     -5, -2.5, 3,
     0, 5, 2.5,
     5, -2.5, 2
 };
 
-NRfloat h_near[3]
+nr_float h_near[3]
 {
     -3, -3, 0.5
 };
 
-NRfloat h_far[3]
+nr_float h_far[3]
 {
     3, 3, 10
 };
@@ -27,7 +27,7 @@ int main()
     cl_int cl_err = CL_SUCCESS;
 
     nr::ScreenDimension screenDim = { 640, 480 };
-    const NRuint dim = 3;
+    const nr_uint dim = 3;
     nr::__internal::BinQueueConfig config = { 32, 32, 5 };
     cl::CommandQueue q = cl::CommandQueue::getDefault();
     std::unique_ptr<GLubyte> bitmap(new GLubyte[3 * screenDim.width * screenDim.height]);

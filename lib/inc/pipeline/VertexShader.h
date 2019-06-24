@@ -15,27 +15,16 @@ namespace nr
 namespace __internal
 {
 
-struct NR_SHARED VertexShader : Kernel
+struct NRAPI VertexShader : Kernel
 {
-    VertexShader(Module module, cl_status* err = nullptr)
-        : Kernel(module, "shade_vertex", err)
-    {
-    }
+	VertexShader(Module module, cl_status* err = nullptr);
     
-    cl_status load()
-    {
-        cl_status err = CL_SUCCESS;
-        
-        if ((err = setArg(0, points)) != CL_SUCCESS) return err;
-        if ((err = setArg(1, near)) != CL_SUCCESS) return err;
-        if ((err = setArg(2, far)) != CL_SUCCESS) return err;
-        return setArg(3, result);
-    }
+	cl_status load();
 
-    Buffer<NRfloat> points;
-    Buffer<NRfloat> near;
-    Buffer<NRfloat> far;
-    Buffer<NRfloat> result;
+    Buffer<nr_float> points;
+    Buffer<nr_float> near;
+    Buffer<nr_float> far;
+    Buffer<nr_float> result;
 };
 
 }

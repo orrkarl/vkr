@@ -1,5 +1,8 @@
 #include <base/Module.h>
 
+#include <algorithm>
+#include <memory>
+
 namespace nr
 {
 
@@ -23,7 +26,7 @@ Module::Macro::Macro(const string name, const string value)
 {
 }
 
-Module::RenderDimension::RenderDimension(const NRuint& dimension)
+Module::RenderDimension::RenderDimension(const nr_uint& dimension)
     : Module::Macro("RENDER_DIMENSION", std::to_string(dimension))
 {
 }
@@ -59,12 +62,12 @@ Module::Module(Context context, const string& code, cl_status* err)
 Module::Module(Context context, const Sources& codes, cl_status* err)
     : Wrapped() 
 {
-    std::vector<const NRchar*> codesRaw;
+    std::vector<const nr_char*> codesRaw;
     std::transform(codes.cbegin(), codes.cend(), codesRaw.begin(), [](const string& code){ return code.c_str(); });
     object = clCreateProgramWithSource(context, codes.size(), &codesRaw[0], nullptr, err);
 }
 
-Module::Module(const cl_program& module, const NRbool retain)
+Module::Module(const cl_program& module, const nr_bool retain)
     : Wrapped(module, retain)
 {
 }
@@ -150,9 +153,11 @@ string Module::getBuildLog(cl_status* err)
 
 string Module::getBuildLog(Device device, cl_status* err)
 {
-    NRchar* log;
-    *err = clGetProgramBuildInfo(object, device, CL_PROGRAM_BUILD_LOG, sizeof(log), log, nullptr);
-    return string(log);
+	nr_size len = 0;
+	*err = clGetProgramBuildInfo(object, device, CL_PROGRAM_BUILD_LOG, len, nullptr, &len);
+	std::unique_ptr<nr_char[]> str = std::make_unique<nr_char[]>(len);
+	*err = clGetProgramBuildInfo(object, device, CL_PROGRAM_BUILD_LOG, len, str.get(), nullptr);
+	return string(str.get());
 }
 
 const Module::Macro           Module::DEBUG               = Module::Macro("_DEBUG");

@@ -13,12 +13,12 @@ Matrix::Matrix()
     }
 }
 
-Matrix::Matrix(const NRfloat data[5][5])
+Matrix::Matrix(const nr_float data[5][5])
 {
-    std::memcpy(this->data, data, 5 * 5 * sizeof(NRfloat));
+    std::memcpy(this->data, data, 5 * 5 * sizeof(nr_float));
 }
 
-Matrix::Matrix(const NRfloat diagonal)
+Matrix::Matrix(const nr_float diagonal)
 {
     for (auto i = 0; i < 5; ++i)
     {
@@ -44,7 +44,7 @@ Matrix::Matrix(const Matrix&& other)
 
 Matrix& Matrix::operator=(const Matrix& other)
 {
-    std::memcpy(data, other.data, 5 * 5 * sizeof(NRfloat));
+    std::memcpy(data, other.data, 5 * 5 * sizeof(nr_float));
     return *this;
 }
 
@@ -100,12 +100,12 @@ Vector Matrix::operator*(const Vector& other) const
     return ret;
 }
 
-Matrix Matrix::rotation(const NRuint axis0, const NRuint axis1, const NRfloat radians)
+Matrix Matrix::rotation(const nr_uint axis0, const nr_uint axis1, const nr_float radians)
 {
     Matrix ret = Matrix::identity();
 
-    NRfloat cosine = cos(radians);
-    NRfloat sine   = sin(radians);
+    nr_float cosine = cos(radians);
+    nr_float sine   = sin(radians);
 
     ret.data[axis0][axis0] = cosine;
     ret.data[axis0][axis1] = -sine;
@@ -115,14 +115,14 @@ Matrix Matrix::rotation(const NRuint axis0, const NRuint axis1, const NRfloat ra
     return ret;
 }
 
-Matrix Matrix::scale(const NRfloat s)
+Matrix Matrix::scale(const nr_float s)
 {
     Matrix ret(s);
     ret.data[4][4] = 1;
     return ret;
 }
 
-Matrix Matrix::translation(const NRfloat x, const NRfloat y, const NRfloat z, const NRfloat w)
+Matrix Matrix::translation(const nr_float x, const nr_float y, const nr_float z, const nr_float w)
 {
     Matrix ret = Matrix::identity();
     ret.data[X][4] = x;
@@ -137,7 +137,7 @@ Matrix Matrix::identity()
    return Matrix(1);
 }
 
-Vector::Vector(NRfloat x, NRfloat y, NRfloat z, NRfloat w, NRfloat q)
+Vector::Vector(nr_float x, nr_float y, nr_float z, nr_float w, nr_float q)
     : data{x, y, z, w, q}
 {
 }
@@ -175,12 +175,12 @@ void Vector::toVector4d(Vector4d* vec) const
     vec->w = data[W];
 }
 
-NRfloat& Vector::operator[](const NRuint idx)
+nr_float& Vector::operator[](const nr_uint idx)
 {
     return data[idx];
 }
 
-const NRfloat& Vector::operator[](const NRuint idx) const
+const nr_float& Vector::operator[](const nr_uint idx) const
 {
     return data[idx];
 }

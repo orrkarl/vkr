@@ -8,49 +8,56 @@
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <CL/cl.h>
 
-typedef double NRdouble;
-typedef float NRfloat;
+typedef double nr_double;
+typedef float nr_float;
 
-typedef int64_t NRlong;
-typedef uint64_t NRulong;
+typedef int64_t nr_long;
+typedef uint64_t nr_ulong;
 
-typedef int32_t NRint;
-typedef uint32_t NRuint;
+typedef int32_t nr_int;
+typedef uint32_t nr_uint;
 
-typedef int16_t NRshort;
-typedef uint16_t NRushort;
+typedef int16_t nr_short;
+typedef uint16_t nr_ushort;
 
-typedef int8_t NRbyte;
-typedef uint8_t NRubyte;
+typedef int8_t nr_byte;
+typedef uint8_t nr_ubyte;
 
-typedef char NRchar;
-typedef bool NRbool;
+typedef char nr_char;
+typedef bool nr_bool;
 
 typedef cl_int cl_status;
 
-#ifndef NR_SHARED
+typedef size_t nr_size;
+
+#ifdef NR_EXPORT
 
 #ifdef _MSC_VER
-	#define NR_SHARED __declspec(dllimport)
+	#define NRAPI __declspec(dllexport)
 #else
-	#define NR_SHARED
+	#define NRAPI
 #endif // _MSC_VER
 
-#endif // NOT NR_SHARED
+#else
 
-#ifndef CL_CALLBACK
-	#define CL_CALLBACK
-#endif // NOT CL_CALLBACK
+#ifdef _MSC_VER
+	#define NRAPI __declspec(dllimport)
+#else
+	#define NRAPI
+#endif // _MSC_VER
+
+
+#endif // NR_EXPORT
 
 namespace nr
 {
 
-typedef std::basic_string<NRchar> string;
+typedef std::basic_string<nr_char> string;
 
 namespace error
 {
-	NR_SHARED NRbool isSuccess(const cl_status& err);
-	NR_SHARED NRbool isFailure(const cl_status& err);
+	NRAPI nr_bool isSuccess(const cl_status& err);
+	NRAPI nr_bool isFailure(const cl_status& err);
 }
 
 }

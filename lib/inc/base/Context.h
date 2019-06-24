@@ -11,7 +11,7 @@
 namespace nr
 {
 
-class NR_SHARED Context : public Wrapper<cl_context>
+class NRAPI Context : public Wrapper<cl_context>
 {
 // Functions and Constructors
 public:
@@ -21,7 +21,7 @@ public:
 
     Context();
 
-    explicit Context(const cl_context& context, const NRbool retain = false);
+    explicit Context(const cl_context& context, const nr_bool retain = false);
 
     Context(const Context& other);
 

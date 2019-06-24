@@ -18,7 +18,7 @@ Context::Context()
 {
 }
 
-Context::Context(const cl_context& context, const NRbool retain)
+Context::Context(const cl_context& context, const nr_bool retain)
     : Wrapped(context, retain)
 {
 }

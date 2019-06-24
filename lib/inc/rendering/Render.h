@@ -10,7 +10,7 @@ namespace nr
 
 struct ScreenDimension
 {
-    NRuint width, height;
+    nr_uint width, height;
 
     friend std::ostream& operator<<(std::ostream& os, const ScreenDimension& dim)
     {
@@ -20,7 +20,7 @@ struct ScreenDimension
 
 struct RawColorRGB
 {
-    NRubyte r, g, b;
+    nr_ubyte r, g, b;
 
     bool operator==(const RawColorRGB& other) const
     {
@@ -29,20 +29,20 @@ struct RawColorRGB
 
     friend std::ostream& operator<<(std::ostream& os, const RawColorRGB& color)
     {
-        return os << "(" << (NRuint) color.r << "," << (NRuint) color.g << "," << (NRuint) color.b << ')';
+        return os << "(" << (nr_uint) color.r << "," << (nr_uint) color.g << "," << (nr_uint) color.b << ')';
     }
 };
 
 struct FrameBuffer
 {
     Buffer<RawColorRGB> color;
-    Buffer<NRfloat> depth;
+    Buffer<nr_float> depth;
 };
 
-template<NRuint dim>
+template<nr_uint dim>
 struct Point
 {
-    NRfloat values[dim];
+    nr_float values[dim];
 
     bool operator==(const Point& other) const
     {
@@ -63,16 +63,16 @@ struct Point
         return os << self[dim - 1] << " }";
     }
 
-    NRfloat operator[](const NRuint index) const { return values[index]; }
+    nr_float operator[](const nr_uint index) const { return values[index]; }
 };
 
-template<NRuint dim>
+template<nr_uint dim>
 struct Simplex
 {
     Point<dim> points[dim];
 };
 
-template<NRuint dim>
+template<nr_uint dim>
 struct Triangle
 {
     Point<dim> points[3];

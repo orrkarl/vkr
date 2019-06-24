@@ -26,7 +26,7 @@ struct PointInTriangle : Kernel
     cl_status load()
     {
         cl_status err = CL_SUCCESS;
-        NRuint argc = 0;
+        nr_uint argc = 0;
 
         if ((err = setArg(argc++, triangle)) != CL_SUCCESS) return err;
         if ((err = setArg(argc++, position)) != CL_SUCCESS) return err;
@@ -34,17 +34,17 @@ struct PointInTriangle : Kernel
         return setArg(argc, result);
     }
 
-    Buffer<NRfloat> triangle;
+    Buffer<nr_float> triangle;
     ScreenPosition position;
     ScreenDimension screenDim;
-    Buffer<NRbool> result; 
+    Buffer<nr_bool> result; 
 };
 
 TEST(Fine, PointInTriangle)
 {
     cl_status err = CL_SUCCESS;
 
-    const NRuint dim = 6;
+    const nr_uint dim = 6;
 
     Triangle<dim> triangle;
     const NDCPosition left_bottom  = { -0.5, -0.5 };
@@ -53,11 +53,11 @@ TEST(Fine, PointInTriangle)
     mkTriangleInCoordinates(left_bottom, top, right_bottom, &triangle);
 
     const ScreenDimension screenDim  = { 1920, 1080 };
-    const ScreenPosition origin      = { (NRuint) (0.5 * 1920), (NRuint) (0.5 * 1080) };
-    const ScreenPosition belowBottom = { (NRuint) (0.5 * 1920), (NRuint) (0.1 * 1080) };
-    const ScreenPosition justInside  = { (NRuint) (0.65 * 1920), (NRuint) (0.4 * 1080) };
+    const ScreenPosition origin      = { (nr_uint) (0.5 * 1920), (nr_uint) (0.5 * 1080) };
+    const ScreenPosition belowBottom = { (nr_uint) (0.5 * 1920), (nr_uint) (0.1 * 1080) };
+    const ScreenPosition justInside  = { (nr_uint) (0.65 * 1920), (nr_uint) (0.4 * 1080) };
 
-    NRbool h_result = false;
+    nr_bool h_result = false;
 
     auto q = CommandQueue::getDefault();
 
@@ -67,10 +67,10 @@ TEST(Fine, PointInTriangle)
     auto testee = PointInTriangle(code, &err);
     ASSERT_SUCCESS(err);
 
-    Buffer<NRfloat> d_triangle(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(triangle) / sizeof(NRfloat), (NRfloat*) &triangle, &err);
+    Buffer<nr_float> d_triangle(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(triangle) / sizeof(nr_float), (nr_float*) &triangle, &err);
     ASSERT_SUCCESS(err);
 
-    Buffer<NRbool> d_result(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, &h_result, &err);
+    Buffer<nr_bool> d_result(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, &h_result, &err);
     ASSERT_SUCCESS(err);
 
     testee.triangle = d_triangle;

@@ -17,7 +17,7 @@ namespace nr
 namespace __internal
 {
 
-struct NR_SHARED FineRasterizer : Kernel
+struct NRAPI FineRasterizer : Kernel
 {
 public:
     FineRasterizer(Module module, cl_status* err = nullptr)
@@ -28,15 +28,15 @@ public:
     cl_status load();
 
     // Simplex buffer
-    Buffer<NRfloat> triangleData;
+    Buffer<nr_float> triangleData;
 
     // Screen Dimensions [size in pixels]
     ScreenDimension dim;
 
     // Bin Queues
     BinQueueConfig binQueueConfig;
-    Buffer<NRuint> binQueues;
-    NRuint workGroupCount;
+    Buffer<nr_uint> binQueues;
+    nr_uint workGroupCount;
 
     // Frame buffer
     FrameBuffer frameBuffer;

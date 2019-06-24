@@ -20,7 +20,7 @@ void testCompilation(const nr::Module::Options options, string configurationName
     ASSERT_EQ("", log) << "Compiling " << configurationName << " failed:" << "\n" << log;
 }
 
-NRuint index_from_screen(const ScreenPosition& position, const nr::ScreenDimension& dim)
+nr_uint index_from_screen(const ScreenPosition& position, const nr::ScreenDimension& dim)
 {
     return position.y * dim.width + position.x;
 }
@@ -28,8 +28,8 @@ NRuint index_from_screen(const ScreenPosition& position, const nr::ScreenDimensi
 NDCPosition ndcFromScreen(const ScreenPosition screen, const nr::ScreenDimension& screenDim)
 {
     NDCPosition ndc;
-    ndc.x = ((NRfloat) screen.x) * 2.0 / (screenDim.width - 1) - 1;
-    ndc.y = ((NRfloat) screen.y) * 2.0 / (screenDim.height - 1) - 1;
+    ndc.x = ((nr_float) screen.x) * 2.0 / (screenDim.width - 1) - 1;
+    ndc.y = ((nr_float) screen.y) * 2.0 / (screenDim.height - 1) - 1;
     return ndc;
 }
 
@@ -39,7 +39,7 @@ testing::AssertionResult isSuccess(const cl_status& err)
     else return testing::AssertionFailure() << nr::utils::stringFromCLError(err) << " (" << err << ')';
 }
 
-nr::Module::Options mkStandardOptions(const NRuint dim)
+nr::Module::Options mkStandardOptions(const nr_uint dim)
 {
     return nr::Module::Options{
                 Module::CL_VERSION_12, 

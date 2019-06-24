@@ -61,8 +61,8 @@ public:
 
 AssertionResult comparePoints(const NDCPosition& p1, const NDCPosition& p2, const ScreenDimension& screenDim)
 {
-    NRbool x = std::abs(p1.x - p2.x) <= 2.0f / screenDim.width;
-    NRbool y = std::abs(p1.y - p2.y) <= 2.0f / screenDim.height;
+    nr_bool x = std::abs(p1.x - p2.x) <= 2.0f / screenDim.width;
+    nr_bool y = std::abs(p1.y - p2.y) <= 2.0f / screenDim.height;
 
     if (x && y) return AssertionSuccess();
     

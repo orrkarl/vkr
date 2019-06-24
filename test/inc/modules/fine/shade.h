@@ -23,7 +23,7 @@ struct ShadeTest : Kernel
     cl_status load()
     {
         cl_status err = CL_SUCCESS;
-        NRuint argc = 0;
+        nr_uint argc = 0;
 
         if ((err = setArg(argc++, fragment)) != CL_SUCCESS) return err;
         if ((err = setArg(argc++, screenDim)) != CL_SUCCESS) return err;
@@ -40,14 +40,14 @@ TEST(Fine, ShadeTest)
 {
     cl_status err = CL_SUCCESS;
 
-    const NRuint dim = 6;
+    const nr_uint dim = 6;
     constexpr ScreenDimension screenDim = { 5, 2 };
-    constexpr NRuint totalScreenSize = screenDim.width * screenDim.height;
+    constexpr nr_uint totalScreenSize = screenDim.width * screenDim.height;
 
     RawColorRGB h_color[totalScreenSize];
     Depth       h_depth[totalScreenSize];
 
-    for (NRuint i = 0; i < totalScreenSize; ++i)
+    for (nr_uint i = 0; i < totalScreenSize; ++i)
     {
         h_color[i] = {0, 0, 0};
         h_depth[i] = 1;
@@ -63,12 +63,12 @@ TEST(Fine, ShadeTest)
     secondFrag.color = { 255, 0, 0 };
     secondFrag.depth = firstFrag.depth / 1.1;
 
-    const NRuint idx = index_from_screen(firstFrag.position, screenDim);
+    const nr_uint idx = index_from_screen(firstFrag.position, screenDim);
 
     FrameBuffer frame;
     frame.color = Buffer<RawColorRGB>(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_color, &err);
     ASSERT_SUCCESS(err);
-    frame.depth = Buffer<NRfloat>(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_depth, &err);
+    frame.depth = Buffer<nr_float>(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_depth, &err);
     ASSERT_SUCCESS(err);
     
     auto code = mkFineModule(dim, &err);

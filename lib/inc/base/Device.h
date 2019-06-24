@@ -7,7 +7,7 @@
 namespace nr
 {
 
-class NR_SHARED Device : public Wrapper<cl_device_id>
+class NRAPI Device : public Wrapper<cl_device_id>
 {
 // Functions and Constructors
 public:
@@ -17,7 +17,7 @@ public:
 
     Device();
 
-    explicit Device(const cl_device_id& device, const NRbool retain = false);
+    explicit Device(const cl_device_id& device, const nr_bool retain = false);
 
     Device(const Device& other);
 

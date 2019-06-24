@@ -10,7 +10,7 @@ Kernel::Kernel()
 {
 }
 
-Kernel::Kernel(const cl_kernel& kernel, const NRbool retain)
+Kernel::Kernel(const cl_kernel& kernel, const nr_bool retain)
     : Wrapped(kernel, retain)
 {
 }

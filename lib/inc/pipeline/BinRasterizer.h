@@ -17,22 +17,22 @@ namespace __internal
 
 struct BinQueueConfig
 {
-    NRuint binWidth;
-    NRuint binHeight;
-    NRuint queueSize;
+    nr_uint binWidth;
+    nr_uint binHeight;
+    nr_uint queueSize;
 };
 
-struct NR_SHARED BinRasterizer : Kernel
+struct NRAPI BinRasterizer : Kernel
 {
-    static NRuint getTotalBinQueueCount(const NRuint workGroupCount, const ScreenDimension& dim, const BinQueueConfig config)
+    static nr_uint getTotalBinQueueCount(const nr_uint workGroupCount, const ScreenDimension& dim, const BinQueueConfig config)
     {
-        return workGroupCount * getBinCount(dim, config.binWidth, config.binHeight) * (config.queueSize + 1) * sizeof(NRuint);
+        return workGroupCount * getBinCount(dim, config.binWidth, config.binHeight) * (config.queueSize + 1) * sizeof(nr_uint);
     }
 
-    static NRuint getBinCount(const ScreenDimension& dim, const NRuint& binWidth, const NRuint& binHeight)
+    static nr_uint getBinCount(const ScreenDimension& dim, const nr_uint& binWidth, const nr_uint& binHeight)
     {
-        NRuint xCount = (NRuint) ceil(((NRfloat) dim.width) / binWidth);
-        NRuint yCount = (NRuint) ceil(((NRfloat) dim.height) / binHeight);
+        nr_uint xCount = (nr_uint) ceil(((nr_float) dim.width) / binWidth);
+        nr_uint yCount = (nr_uint) ceil(((nr_float) dim.height) / binHeight);
         return xCount * yCount;
     }
     
@@ -48,16 +48,16 @@ struct NR_SHARED BinRasterizer : Kernel
 
     // Bin Queues Data
     BinQueueConfig binQueueConfig;
-    Buffer<NRuint> binQueues;
+    Buffer<nr_uint> binQueues;
 
     // Simplex data
-    Buffer<NRfloat> triangleData;
-    NRuint triangleCount;
+    Buffer<nr_float> triangleData;
+    nr_uint triangleCount;
 
     // Overflow handling
-    Buffer<NRbool> hasOverflow;
+    Buffer<nr_bool> hasOverflow;
 
-    Buffer<NRuint> batchIndex;
+    Buffer<nr_uint> batchIndex;
 };
 
 }

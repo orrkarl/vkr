@@ -13,7 +13,7 @@
 namespace nr
 {
 
-class NR_SHARED CommandQueue : public Wrapper<cl_command_queue>
+class NRAPI CommandQueue : public Wrapper<cl_command_queue>
 {
 public:
     static CommandQueue getDefault();
@@ -22,7 +22,7 @@ public:
 
     CommandQueue();
 
-    explicit CommandQueue(const cl_command_queue& commandQueue, const NRbool retain = false);
+    explicit CommandQueue(const cl_command_queue& commandQueue, const nr_bool retain = false);
 
     CommandQueue(const CommandQueue& other);
 
@@ -47,7 +47,7 @@ public:
     cl_status finish();
     
     template<typename T>
-    cl_status enqueueBufferReadCommand(const Buffer<T>& buffer, NRbool block, NRulong count, T* data, const std::vector<Event>& wait, NRulong offset = 0, Event* notify = nullptr)
+    cl_status enqueueBufferReadCommand(const Buffer<T>& buffer, nr_bool block, nr_ulong count, T* data, const std::vector<Event>& wait, nr_ulong offset = 0, Event* notify = nullptr)
     {
         return clEnqueueReadBuffer(
             object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
@@ -55,7 +55,7 @@ public:
     }
 
     template<typename T>
-    cl_status enqueueBufferReadCommand(const Buffer<T>& buffer, NRbool block, NRulong count, T* data, NRulong offset = 0, Event* notify = nullptr)
+    cl_status enqueueBufferReadCommand(const Buffer<T>& buffer, nr_bool block, nr_ulong count, T* data, nr_ulong offset = 0, Event* notify = nullptr)
     {
         return clEnqueueReadBuffer(
                 object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
@@ -63,7 +63,7 @@ public:
     }
 
     template<typename T>
-    cl_status enqueueBufferWriteCommand(const Buffer<T>& buffer, NRbool block, NRulong count, T* data, const std::vector<Event>& wait, NRulong offset = 0, Event* notify = nullptr)
+    cl_status enqueueBufferWriteCommand(const Buffer<T>& buffer, nr_bool block, nr_ulong count, T* data, const std::vector<Event>& wait, nr_ulong offset = 0, Event* notify = nullptr)
     {
         return clEnqueueWriteBuffer(
             object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
@@ -71,14 +71,14 @@ public:
     }
 
     template<typename T>
-    cl_status enqueueBufferWriteCommand(const Buffer<T>& buffer, NRbool block, NRulong count, T* data, NRulong offset = 0, Event* notify = nullptr)
+    cl_status enqueueBufferWriteCommand(const Buffer<T>& buffer, nr_bool block, nr_ulong count, T* data, nr_ulong offset = 0, Event* notify = nullptr)
     {
         return clEnqueueWriteBuffer(
                 object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
                 0, nullptr, (cl_event*) notify);
     }
 
-    template<NRuint dim>
+    template<nr_uint dim>
     typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
         const Kernel& kernel, 
         const std::array<size_t, dim>& global, const std::array<size_t, dim>& local,
@@ -87,7 +87,7 @@ public:
         return clEnqueueNDRangeKernel(object, kernel, dim, &offset.front(), &global.front(), &local.front(), wait.size(), &wait.front(), (cl_event*) notify);
     }
 
-    template<NRuint dim>
+    template<nr_uint dim>
     typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
         const Kernel& kernel, 
         const std::array<size_t, dim>& global, const std::array<size_t, dim>& local,
@@ -99,9 +99,9 @@ public:
     template<typename T>
     cl_status enqueueBufferFillCommand(
         const Buffer<T>& buffer, 
-        const T& value, const NRulong& count, 
+        const T& value, const nr_ulong& count, 
         const std::vector<Event>& wait, 
-        const NRuint& offset = 0, Event* notify = nullptr)
+        const nr_uint& offset = 0, Event* notify = nullptr)
     {
         return clEnqueueFillBuffer(object, buffer, value, sizeof(T), sizeof(value) * offset, sizeof(value) * count, wait.size(), &wait.front(), (cl_event*) notify);
     }
@@ -109,8 +109,8 @@ public:
     template<typename T>
     cl_status enqueueBufferFillCommand(
         const Buffer<T>& buffer, 
-        const T& value, const NRulong& count, 
-        const NRuint& offset = 0, Event* notify = nullptr)
+        const T& value, const nr_ulong& count, 
+        const nr_uint& offset = 0, Event* notify = nullptr)
     {
         return clEnqueueFillBuffer(object, buffer, value, sizeof(T), sizeof(value) * offset, sizeof(value) * count, 0, nullptr, (cl_event*) notify);
     }

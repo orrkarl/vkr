@@ -8,20 +8,20 @@
 const RawColorRGB RED = { 255, 0, 0 };
 const nr::Module::Macro TEST_FINE("_TEST_FINE");
 
-template<NRuint dim>
+template<nr_uint dim>
 void mkTriangleInCoordinates(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, Triangle<dim>* triangle)
 {
     mkTriangleInCoordinates(p0, p1, p2, 0, triangle);
 }
 
-template<NRuint dim>
-void mkTriangleInCoordinates(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, const NRfloat minDistance, Triangle<dim>* triangle)
+template<nr_uint dim>
+void mkTriangleInCoordinates(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, const nr_float minDistance, Triangle<dim>* triangle)
 {
     mkTriangleInExactCoordinates(p0, p1, p2, minDistance + (1 - minDistance) * rand() / RAND_MAX, triangle);
 }
 
-template<NRuint dim>
-void mkTriangleInExactCoordinates(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, const NRfloat distance, Triangle<dim>* triangle)
+template<nr_uint dim>
+void mkTriangleInExactCoordinates(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, const nr_float distance, Triangle<dim>* triangle)
 {
     triangle->points[0].values[0] = p0.x;
     triangle->points[0].values[1] = p0.y;
@@ -32,17 +32,17 @@ void mkTriangleInExactCoordinates(const NDCPosition p0, const NDCPosition p1, co
     triangle->points[2].values[0] = p2.x;
     triangle->points[2].values[1] = p2.y;
 
-    for (NRuint i = 0; i < 3; ++i)
+    for (nr_uint i = 0; i < 3; ++i)
     {
-        for (NRuint j = 2; j < dim; ++j)
+        for (nr_uint j = 2; j < dim; ++j)
         {
             triangle->points[i].values[j] = distance;
         }
     }
 }
 
-template<NRuint dim>
-void mkTriangleFullyInBin(const ScreenDimension& screenDim, const Bin& bin, const NRfloat distance, const NRuint index, Triangle<dim>* triangle)
+template<nr_uint dim>
+void mkTriangleFullyInBin(const ScreenDimension& screenDim, const Bin& bin, const nr_float distance, const nr_uint index, Triangle<dim>* triangle)
 {
     ScreenPosition top_left_screen     = { bin.x, bin.y + bin.height - 1 };
     ScreenPosition bottom_left_screen  = { bin.x, bin.y };
@@ -55,37 +55,37 @@ void mkTriangleFullyInBin(const ScreenDimension& screenDim, const Bin& bin, cons
     mkTriangleInExactCoordinates<dim>(top_left, bottom_right, bottom_left, distance, triangle + index);
 }
 
-template<NRuint dim>
+template<nr_uint dim>
 void fillTriangles(
     const ScreenDimension& screenDim, 
     const BinQueueConfig config,
-    const NRuint totalWorkGroupCount,
-    const NRfloat expectedDepth,
-    const NRuint batchSize, 
+    const nr_uint totalWorkGroupCount,
+    const nr_float expectedDepth,
+    const nr_uint batchSize, 
     Triangle<dim>* triangles,
-    NRuint* binQueues)
+    nr_uint* binQueues)
 {
-    const NRuint binCountX = ceil(((NRfloat) screenDim.width) / config.binWidth);
-    const NRuint binCountY = ceil(((NRfloat) screenDim.height) / config.binHeight);
-    const NRuint totalBinCount = binCountX * binCountY;
+    const nr_uint binCountX = ceil(((nr_float) screenDim.width) / config.binWidth);
+    const nr_uint binCountY = ceil(((nr_float) screenDim.height) / config.binHeight);
+    const nr_uint totalBinCount = binCountX * binCountY;
 
-    const NRuint elementsPerGroup = totalBinCount * (config.queueSize + 1);
+    const nr_uint elementsPerGroup = totalBinCount * (config.queueSize + 1);
 
-    for (NRuint i = 0; i < elementsPerGroup * totalWorkGroupCount; i += config.queueSize + 1)
+    for (nr_uint i = 0; i < elementsPerGroup * totalWorkGroupCount; i += config.queueSize + 1)
     {
         binQueues[i] = 1;
     }
 
-    NRuint i = 0;
-    NRuint g = 0;
-    NRuint binOffset = 0;
-    NRuint currentQueueBase;
+    nr_uint i = 0;
+    nr_uint g = 0;
+    nr_uint binOffset = 0;
+    nr_uint currentQueueBase;
 
     Bin bin{ config.binWidth, config.binHeight, 0, 0 };
 
-    for (NRuint y = 0; y < binCountY; ++y)
+    for (nr_uint y = 0; y < binCountY; ++y)
     {
-        for (NRuint x = 0; x < binCountX; ++x)
+        for (nr_uint x = 0; x < binCountX; ++x)
         {
             bin.x = x * config.binWidth;
             bin.y = y * config.binHeight;
@@ -115,7 +115,7 @@ void fillTriangles(
     }
 }
 
-nr::Module mkFineModule(const NRuint dim, cl_status* err)
+nr::Module mkFineModule(const nr_uint dim, cl_status* err)
 {
     auto opts = mkStandardOptions(dim);
     opts.push_back(TEST_FINE);

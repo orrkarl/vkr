@@ -22,8 +22,8 @@ const double DOUBLE_TOLERANCE = 0.000000001;
 
 struct ScreenPosition
 {
-    NRuint x;
-    NRuint y;
+    nr_uint x;
+    nr_uint y;
 
     bool operator==(const ScreenPosition& other) const
     {
@@ -38,8 +38,8 @@ struct ScreenPosition
 
 struct NDCPosition
 {
-    NRfloat x;
-    NRfloat y;
+    nr_float x;
+    nr_float y;
 
     bool operator==(const NDCPosition& other) const
     {
@@ -52,8 +52,8 @@ struct NDCPosition
     }
 };
 
-typedef NRuint Index;
-typedef NRfloat Depth;
+typedef nr_uint Index;
+typedef nr_float Depth;
 
 struct Fragment
 {
@@ -63,7 +63,7 @@ struct Fragment
 };
 
 // convert 2d index from 2d array to 1d flat array index
-NRuint index_from_screen(const ScreenPosition& position, const nr::ScreenDimension& dim);
+nr_uint index_from_screen(const ScreenPosition& position, const nr::ScreenDimension& dim);
 
 // Test a module's compilation status
 void testCompilation(const nr::Module::Options options, nr::string configurationName, std::initializer_list<nr::string> codes);
@@ -74,6 +74,6 @@ NDCPosition ndcFromScreen(const ScreenPosition screen, const nr::ScreenDimension
 // Check if a cl_int value indicates success, return well formatted message O.W
 testing::AssertionResult isSuccess(const cl_int& err);
 
-nr::Module::Options mkStandardOptions(const NRuint dim);
+nr::Module::Options mkStandardOptions(const nr_uint dim);
 
 cl_status init();

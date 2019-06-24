@@ -7,7 +7,7 @@ namespace nr
 {
 
 template<typename cl_type>
-class NR_SHARED Wrapper
+class Wrapper
 {
 // Methods and Constructors
 public:
@@ -16,7 +16,7 @@ public:
     {
     }
 
-    explicit Wrapper(const cl_type object, const NRbool retainObject = false)
+    explicit Wrapper(const cl_type object, const nr_bool retainObject = false)
         : object(object)
     {
         if (retainObject) retain();

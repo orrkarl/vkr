@@ -28,17 +28,17 @@ Vector h_cube[]
     Vector( 1,  1,  1,  1, 1),
 };
 
-NRfloat h_near[]
+nr_float h_near[]
 {
     -5, -5, 0.5, 0.5
 };
 
-NRfloat h_far[]
+nr_float h_far[]
 {
     5, 5, 10, 10
 };
 
-void transform(Triangle4d triangles[48 * 4], const NRuint tick)
+void transform(Triangle4d triangles[48 * 4], const nr_uint tick)
 {
     auto angle = tick * M_PI / 20;
 
@@ -66,12 +66,12 @@ void profilePipeline(
     const std::chrono::system_clock::time_point& framebufferWrite,
     const std::chrono::system_clock::time_point& bufferSwap)
 {
-    std::chrono::duration<NRdouble> dt_transform = transform - t0;
-    std::chrono::duration<NRdouble> dt_buffers = buffers - transform;
-    std::chrono::duration<NRdouble> dt_pipeline = pipeline - buffers;
-    std::chrono::duration<NRdouble> dt_frameBufferRead = framebufferRead - pipeline;
-    std::chrono::duration<NRdouble> dt_frameBufferWrite = framebufferWrite - framebufferRead;
-    std::chrono::duration<NRdouble> dt_bufferSwap = bufferSwap - framebufferWrite;
+    std::chrono::duration<nr_double> dt_transform = transform - t0;
+    std::chrono::duration<nr_double> dt_buffers = buffers - transform;
+    std::chrono::duration<nr_double> dt_pipeline = pipeline - buffers;
+    std::chrono::duration<nr_double> dt_frameBufferRead = framebufferRead - pipeline;
+    std::chrono::duration<nr_double> dt_frameBufferWrite = framebufferWrite - framebufferRead;
+    std::chrono::duration<nr_double> dt_bufferSwap = bufferSwap - framebufferWrite;
 
     std::printf("Pipeline profile:\n");
     std::printf("\ttotal transform time - %fms\n",          dt_transform.count()        * 1000);
@@ -88,7 +88,7 @@ int main(const int argc, const char* argv[])
     cl_int cl_err = CL_SUCCESS;
 
     nr::ScreenDimension screenDim = { 640, 480 };
-    const NRuint dim = 4;
+    const nr_uint dim = 4;
     nr::__internal::BinQueueConfig config = { 32, 32, 256 };
     
     cl::CommandQueue q = cl::CommandQueue::getDefault();
@@ -124,13 +124,13 @@ int main(const int argc, const char* argv[])
         return EXIT_FAILURE;
     }
 
-    if (nr::error::isFailure(cl_err = pipeline.setup(dim, 48 * 4, (NRfloat*) h_triangles, h_near, h_far, screenDim, config, 1, frame)))
+    if (nr::error::isFailure(cl_err = pipeline.setup(dim, 48 * 4, (nr_float*) h_triangles, h_near, h_far, screenDim, config, 1, frame)))
     {
         std::cout << "Failed to setup pipeline: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
         return EXIT_FAILURE;
     }    
 
-    NRuint tick = 0;
+    nr_uint tick = 0;
     while (!glfwWindowShouldClose(wnd))
     {
         auto t0 = std::chrono::system_clock::now();

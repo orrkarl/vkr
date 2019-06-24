@@ -12,9 +12,9 @@
 
 struct Vector
 {
-    NRfloat data[5];
+    nr_float data[5];
     
-    explicit Vector(NRfloat x, NRfloat y, NRfloat z, NRfloat w, NRfloat q);
+    explicit Vector(nr_float x, nr_float y, nr_float z, nr_float w, nr_float q);
     explicit Vector();
     explicit Vector(const Vector4d& other);
 
@@ -22,19 +22,19 @@ struct Vector
     void toVector4d(Vector4d& vec) const;
     void toVector4d(Vector4d* vec) const;
 
-    NRfloat& operator[](const NRuint idx);
-    const NRfloat& operator[](const NRuint idx) const;
+    nr_float& operator[](const nr_uint idx);
+    const nr_float& operator[](const nr_uint idx) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Vector& vec);
 };
 
 struct Matrix
 {
-    NRfloat data[5][5];
+    nr_float data[5][5];
 
     Matrix();
-    Matrix(const NRfloat data[5][5]);
-    Matrix(const NRfloat diagonal);
+    Matrix(const nr_float data[5][5]);
+    Matrix(const nr_float diagonal);
     Matrix(const Matrix& other);
     Matrix(const Matrix&& other);
 
@@ -48,8 +48,8 @@ struct Matrix
 
     Vector operator*(const Vector& vec) const;
 
-    static Matrix rotation(const NRuint axis0, const NRuint axis1, const NRfloat radians);
-    static Matrix scale(const NRfloat s);
-    static Matrix translation(const NRfloat x, const NRfloat y, const NRfloat z, const NRfloat w);
+    static Matrix rotation(const nr_uint axis0, const nr_uint axis1, const nr_float radians);
+    static Matrix scale(const nr_float s);
+    static Matrix translation(const nr_float x, const nr_float y, const nr_float z, const nr_float w);
     static Matrix identity();
 };

@@ -36,7 +36,7 @@ bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWwindow*& wn
     return true;
 }
 
-_nr::Module mkFullModule(const NRuint dim, cl_int* err)
+_nr::Module mkFullModule(const nr_uint dim, cl_int* err)
 {
     auto allCodes = {
         _nr::clcode::base,
@@ -57,12 +57,12 @@ _nr::Module mkFullModule(const NRuint dim, cl_int* err)
 
 nr::FrameBuffer mkFrameBuffer(const nr::ScreenDimension& dim, cl_int* err)
 {
-    const NRuint totalScreenSize = dim.width * dim.height;
+    const nr_uint totalScreenSize = dim.width * dim.height;
 
     nr::FrameBuffer ret;
-    ret.color = nr::Buffer(CL_MEM_READ_WRITE, 3 * sizeof(NRubyte) * totalScreenSize, err);  
+    ret.color = nr::Buffer(CL_MEM_READ_WRITE, 3 * sizeof(nr_ubyte) * totalScreenSize, err);  
     if (nr::error::isFailure(*err)) return ret;
-    ret.depth = nr::Buffer(CL_MEM_READ_WRITE, sizeof(NRfloat) * totalScreenSize, err);
+    ret.depth = nr::Buffer(CL_MEM_READ_WRITE, sizeof(nr_float) * totalScreenSize, err);
     return ret;
 }
 
@@ -76,29 +76,29 @@ FullPipeline::FullPipeline(_nr::Module module, cl_int* err)
 }
 
 cl_int FullPipeline::setup(
-    const NRuint dim,
-    const NRuint triangleCount, NRfloat* vertecies, NRfloat* near, NRfloat* far,
+    const nr_uint dim,
+    const nr_uint triangleCount, nr_float* vertecies, nr_float* near, nr_float* far,
     nr::ScreenDimension screenDim, _nr::BinQueueConfig config,                  
-    const NRuint binRasterWorkGroupCount, nr::FrameBuffer frameBuffer)
+    const nr_uint binRasterWorkGroupCount, nr::FrameBuffer frameBuffer)
 {
     cl_int ret = CL_SUCCESS;
     
-    const NRuint binCountX = ceil(((NRfloat) screenDim.width) / config.binWidth);
-    const NRuint binCountY = ceil(((NRfloat) screenDim.height) / config.binHeight);
-    const NRuint totalBinCount = binCountX * binCountY;
-    const NRuint totalScreenDim = screenDim.width * screenDim.height;
+    const nr_uint binCountX = ceil(((nr_float) screenDim.width) / config.binWidth);
+    const nr_uint binCountY = ceil(((nr_float) screenDim.height) / config.binHeight);
+    const nr_uint totalBinCount = binCountX * binCountY;
+    const nr_uint totalScreenDim = screenDim.width * screenDim.height;
     
     // Vertex Shader
-    vertexShader.params.points = nr::Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * 3 * sizeof(NRfloat) * triangleCount, vertecies, &ret);
+    vertexShader.params.points = nr::Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * 3 * sizeof(nr_float) * triangleCount, vertecies, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
-    vertexShader.params.near   = nr::Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * sizeof(NRfloat), near, &ret);
+    vertexShader.params.near   = nr::Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * sizeof(nr_float), near, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
-    vertexShader.params.far    = nr::Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * sizeof(NRfloat), far, &ret);
+    vertexShader.params.far    = nr::Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * sizeof(nr_float), far, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
-    vertexShader.params.result = nr::Buffer(CL_MEM_READ_WRITE, dim * 3 * sizeof(NRfloat) * triangleCount, &ret);
+    vertexShader.params.result = nr::Buffer(CL_MEM_READ_WRITE, dim * 3 * sizeof(nr_float) * triangleCount, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
     vertexShader.global = cl::NDRange(triangleCount * 3);
@@ -135,7 +135,7 @@ cl_int FullPipeline::setup(
 
 cl_int FullPipeline::operator()(cl::CommandQueue q)
 {
-    const NRuint totalScreenDim = fineRasterizer.params.dim.width * fineRasterizer.params.dim.height;
+    const nr_uint totalScreenDim = fineRasterizer.params.dim.width * fineRasterizer.params.dim.height;
     cl_int cl_err = CL_SUCCESS;
     
     // printf("Enqueuing vertex shader\n");
@@ -186,7 +186,7 @@ void reduce4Simplex(const Tetrahedron& tetrahedron, Triangle4d result[4])
     result[3].points[2] = tetrahedron.points[3];
 }
 
-Vector4d::Vector4d(const NRfloat x, const NRfloat y, const NRfloat z, const NRfloat w)
+Vector4d::Vector4d(const nr_float x, const nr_float y, const nr_float z, const nr_float w)
     : x(x), y(y), z(z), w(w)
 {
 }
@@ -196,7 +196,7 @@ Vector4d::Vector4d()
 {
 }
 
-NRfloat Vector4d::dot(const Vector4d& other) const
+nr_float Vector4d::dot(const Vector4d& other) const
 {
     return x * other.x + y * other.y + z * other.z + w * other.w;
 }
@@ -206,7 +206,7 @@ Vector4d Vector4d::operator-(const Vector4d& other) const
     return Vector4d(x - other.x, y - other.y, z - other.z, w - other.w);
 }
 
-NRfloat Vector4d::distanceSquared(const Vector4d& other) const
+nr_float Vector4d::distanceSquared(const Vector4d& other) const
 {
     auto diff = *this - other;
     return diff.dot(diff);
@@ -241,7 +241,7 @@ bool isCubeFace(const Vector4d& p0, const Vector4d& p1, const Vector4d& p2, cons
     auto d13 = p1.distanceSquared(p3);
     auto d23 = p2.distanceSquared(p3);
 
-    std::vector<NRfloat> diffs{ d01, d02, d03, d12, d13, d23 };
+    std::vector<nr_float> diffs{ d01, d02, d03, d12, d13, d23 };
     auto min = *std::min_element(diffs.cbegin(), diffs.cend());
     auto max = *std::max_element(diffs.cbegin(), diffs.cend());
 
@@ -291,7 +291,7 @@ bool isVertexInFace(const Vector4d& initial, const Vector4d faces[4])
     return false;
 }
 
-void getNextFace(const Vector4d& initial, const Vector4d faces[24], const NRuint lastFaceIndex, NRuint& result)
+void getNextFace(const Vector4d& initial, const Vector4d faces[24], const nr_uint lastFaceIndex, nr_uint& result)
 {
     for (auto face = lastFaceIndex + 1; face < 6; ++face)
     {
@@ -308,7 +308,7 @@ void tetrahadrlize3Cube(const Vector4d cube[8], Tetrahedron result[6])
     Vector4d faces[24];
     reduceToFaces(cube, faces);
 
-    NRuint i0, i1, i2;
+    nr_uint i0, i1, i2;
     getNextFace(faces[0], faces, 0, i0);
     getNextFace(faces[0], faces, i0, i1);
     getNextFace(faces[0], faces, i1, i2);
@@ -344,7 +344,7 @@ void tetrahadrlize3Cube(const Vector4d cube[8], Tetrahedron result[6])
     result[5].points[3] = faces[i2 * 4];
 }
 
-void generate3cube(const Vector4d cube[16], const NRuint diff, const NRuint offset, Vector4d cube3d[8])
+void generate3cube(const Vector4d cube[16], const nr_uint diff, const nr_uint offset, Vector4d cube3d[8])
 {
     auto cube3_idx = 0;
     for (auto i = offset * diff; i < 16; i += 2 * diff)

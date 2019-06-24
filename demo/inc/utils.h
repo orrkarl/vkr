@@ -33,29 +33,29 @@ struct FullPipeline
     FullPipeline(_nr::Module module, cl_int* err);
 
     cl_int setup(
-        const NRuint dim,
-        const NRuint simplexCount, NRfloat* vertecies, NRfloat* near, NRfloat* far,     // Vertex shader
+        const nr_uint dim,
+        const nr_uint simplexCount, nr_float* vertecies, nr_float* near, nr_float* far,     // Vertex shader
         nr::ScreenDimension screenDim, _nr::BinQueueConfig config,                      // Bin rasterizer
-        const NRuint binRasterWorkGroupCount, nr::FrameBuffer frameBuffer);             // Fine rasterizer
+        const nr_uint binRasterWorkGroupCount, nr::FrameBuffer frameBuffer);             // Fine rasterizer
 
     cl_int operator()(cl::CommandQueue q);
 };
 
 struct Vector4d
 {
-    NRfloat x, y, z, w;
+    nr_float x, y, z, w;
 
     Vector4d();
 
-    Vector4d(const NRfloat x, const NRfloat y, const NRfloat z, const NRfloat w);
+    Vector4d(const nr_float x, const nr_float y, const nr_float z, const nr_float w);
 
-    NRfloat dot(const Vector4d& other) const;
+    nr_float dot(const Vector4d& other) const;
 
     Vector4d operator-(const Vector4d& other) const;
 
     bool operator==(const Vector4d& other) const;
 
-    NRfloat distanceSquared(const Vector4d& other) const;
+    nr_float distanceSquared(const Vector4d& other) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Vector4d& self);
 };
@@ -75,7 +75,7 @@ struct Tetrahedron
 };
 
 // Return a module with all of the code in it
-_nr::Module mkFullModule(const NRuint dim, cl_int* err);
+_nr::Module mkFullModule(const nr_uint dim, cl_int* err);
 
 // Allocate buffers for a framebuffer
 nr::FrameBuffer mkFrameBuffer(const nr::ScreenDimension& dim, cl_int* err);
