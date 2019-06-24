@@ -22,8 +22,8 @@ const Module::Macro TEST_BINNING("_TEST_BINNING");
 template<nr_uint dim>
 void mkTriangleInCoords(const nr_uint x, const nr_uint y, const ScreenDimension& screenDim, Triangle<dim>* result)
 {
-    result->points[0].values[0] = 2 * (x + 0.5) / (screenDim.width - 1) - 1;
-    result->points[0].values[1] = 2 * (y + 0.5) / (screenDim.height - 1) - 1;
+    result->points[0].values[0] = 2 * (x + 0.5f) / (screenDim.width - 1) - 1;
+    result->points[0].values[1] = 2 * (y + 0.5f) / (screenDim.height - 1) - 1;
 
     for (nr_uint i = 2; i < 3 * dim; ++i)
     {
@@ -33,8 +33,8 @@ void mkTriangleInCoords(const nr_uint x, const nr_uint y, const ScreenDimension&
 
 void mkTriangleInCoords(const nr_uint x, const nr_uint y, const ScreenDimension& dim, float* triangle_x, float* triangle_y)
 {
-    triangle_x[0] = 2 * (x + 0.5) / (dim.width - 1) - 1;
-    triangle_y[0] = 2 * (y + 0.5) / (dim.height - 1) - 1;
+    triangle_x[0] = 2.0f * (x + 0.5f) / (dim.width - 1) - 1;
+    triangle_y[0] = 2.0f * (y + 0.5f) / (dim.height - 1) - 1;
 }
 
 Module::Option mkTriangleTestCountMacro(const nr_uint triangleTestCount)

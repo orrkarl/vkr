@@ -12,12 +12,13 @@ void testCompilation(const nr::Module::Options options, string configurationName
     Module code(codes, &err);
     ASSERT_SUCCESS(err);
 
-    ASSERT_SUCCESS(code.build(options));
+    cl_status buildErr = code.build(options);
 
     auto log = code.getBuildLog(&err);
     ASSERT_SUCCESS(err);
 
-    ASSERT_EQ("", log) << "Compiling " << configurationName << " failed:" << "\n" << log;
+    ASSERT_EQ(0, log.size()) << "Compiling " << configurationName << " failed:" << "\n" << log;
+	ASSERT_SUCCESS(buildErr);
 }
 
 nr_uint index_from_screen(const ScreenPosition& position, const nr::ScreenDimension& dim)
@@ -28,8 +29,8 @@ nr_uint index_from_screen(const ScreenPosition& position, const nr::ScreenDimens
 NDCPosition ndcFromScreen(const ScreenPosition screen, const nr::ScreenDimension& screenDim)
 {
     NDCPosition ndc;
-    ndc.x = ((nr_float) screen.x) * 2.0 / (screenDim.width - 1) - 1;
-    ndc.y = ((nr_float) screen.y) * 2.0 / (screenDim.height - 1) - 1;
+    ndc.x = ((nr_float) screen.x) * 2.0f / (screenDim.width - 1) - 1;
+    ndc.y = ((nr_float) screen.y) * 2.0f / (screenDim.height - 1) - 1;
     return ndc;
 }
 
@@ -84,6 +85,11 @@ cl_status init()
     if (error::isFailure(ret)) return ret;
 
     Context::makeDefault(context);
+
+	auto q = CommandQueue(context, devices.front(), (cl_command_queue_properties) CL_QUEUE_PROFILING_ENABLE, pret);
+	if (error::isFailure(ret)) return ret;
+
+	CommandQueue::makeDefault(q);
 
     return CL_SUCCESS;
 }

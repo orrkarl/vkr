@@ -38,7 +38,7 @@ public:
 template<nr_uint dim>
 void generateTriangleData(const nr_uint triangleCount, Triangle<dim>* buffer)
 {
-    nr_float diff = 2.0 / (triangleCount - 1);
+    nr_float diff = 2.0f / (triangleCount - 1);
     nr_float base = -1;
 
     for (nr_uint i = 0; i < triangleCount; ++i)

@@ -34,15 +34,30 @@ typedef struct _ScreenDimension
     uint height;
 } ScreenDimension;
 
-typedef uint2 ScreenPosition;
+typedef struct _ScreenPosition
+{
+	uint x, y;
+} ScreenPosition;
 
-typedef int2 SignedScreenPosition;
+typedef struct _SignedScreenPosition
+{
+	int x, y;
+} SignedScreenPosition;
 
-typedef float2 NDCPosition;
+typedef struct _NDCPosition
+{
+	float x, y;
+} NDCPosition;
 
-typedef float3 ColorRGB;
+typedef struct _ColorRGB
+{
+	float r, g, b;
+} ColorRGB;
 
-typedef float4 ColorRGBA;
+typedef struct _ColorRGBA
+{
+	float r, g, b, a;
+} ColorRGBA;
 
 typedef uint  Index;
 typedef float Depth;
@@ -248,7 +263,7 @@ void screen_from_signed(const SignedScreenPosition pos, const ScreenDimension di
 // -------------------------------------- Testing -------------------------------------- 
 
 // Unit testing screen_from_ndc
-kernel void screen_from_ndc_kernel(NDCPosition pos, ScreenDimension dim, global ScreenPosition* res)
+kernel void screen_from_ndc_test(NDCPosition pos, ScreenDimension dim, global ScreenPosition* res)
 {
     screen_from_ndc(pos, dim, res);
 }

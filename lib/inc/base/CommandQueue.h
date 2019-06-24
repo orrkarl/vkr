@@ -28,11 +28,11 @@ public:
 
     CommandQueue(CommandQueue&& other);
 
-    CommandQueue(Context& context, Device& device, cl_command_queue_properties& properties, cl_status* err = nullptr);
+    CommandQueue(Context context, Device device, cl_command_queue_properties properties, cl_status* err = nullptr);
 
-    CommandQueue(Device& device, cl_command_queue_properties& properties, cl_status* err = nullptr);
+    CommandQueue(Device device, cl_command_queue_properties properties, cl_status* err = nullptr);
 
-    CommandQueue(cl_command_queue_properties& properties, cl_status* err = nullptr);
+    CommandQueue(cl_command_queue_properties properties, cl_status* err = nullptr);
 
     CommandQueue& operator=(const CommandQueue& other);
 

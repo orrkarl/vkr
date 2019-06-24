@@ -29,7 +29,7 @@ TEST(VertexShader, Perspective)
     Point<dim> expected;
     expected.values[0] = -0.5;
     expected.values[1] = -0.5;
-    expected.values[2] = 2.0 / 3;
+    expected.values[2] = 2.0f / 3;
     
     Module::Options options = 
     {

@@ -62,7 +62,7 @@ Module::Module(Context context, const string& code, cl_status* err)
 Module::Module(Context context, const Sources& codes, cl_status* err)
     : Wrapped() 
 {
-    std::vector<const nr_char*> codesRaw;
+    std::vector<const nr_char*> codesRaw(codes.size());
     std::transform(codes.cbegin(), codes.cend(), codesRaw.begin(), [](const string& code){ return code.c_str(); });
     object = clCreateProgramWithSource(context, codes.size(), &codesRaw[0], nullptr, err);
 }
