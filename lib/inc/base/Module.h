@@ -148,8 +148,6 @@ public:
 	static const CLVersion CL_VERSION_12;
 	static const CLVersion CL_VERSION_11;
 
-	static const Option WARNINGS_ARE_ERRORS;
-
 	static const RenderDimension _3D;
 	static const RenderDimension _4D;
 	static const RenderDimension _5D;

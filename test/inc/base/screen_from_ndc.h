@@ -37,7 +37,7 @@ TEST(Base, ScreenFromNDC)
     Module base(clcode::base, &err);
     ASSERT_SUCCESS(err);
 
-    ASSERT_SUCCESS(base.build(Module::Options{Module::CL_VERSION_12, Module::WARNINGS_ARE_ERRORS, Module::_3D}));
+    ASSERT_SUCCESS(base.build(Module::Options{Module::CL_VERSION_12, Module::_3D}));
 
     auto screen_from_ndc = ScreenFromNDC(base, &err);
     ASSERT_SUCCESS(err);

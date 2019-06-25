@@ -77,3 +77,5 @@ testing::AssertionResult isSuccess(const cl_int& err);
 nr::Module::Options mkStandardOptions(const nr_uint dim);
 
 cl_status init();
+
+cl_status destroy();

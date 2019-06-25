@@ -15,6 +15,14 @@ int main(int argc, char **argv)
     }
 
     ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+
+	auto ret = RUN_ALL_TESTS();
+
+	if ((initStatus = destroy()) != CL_SUCCESS)
+	{
+		std::cerr << "Destroy failed: " << utils::stringFromCLError(initStatus) << std::endl;
+	}
+
+    return ret;
 }
 

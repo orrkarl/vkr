@@ -16,9 +16,8 @@ void testCompilation(const nr::Module::Options options, string configurationName
 
     auto log = code.getBuildLog(&err);
     ASSERT_SUCCESS(err);
-
-    ASSERT_EQ(0, log.size()) << "Compiling " << configurationName << " failed:" << "\n" << log;
-	ASSERT_SUCCESS(buildErr);
+	
+	ASSERT_SUCCESS(buildErr) << "Compiling " << configurationName << " failed:" << "\n" << log;
 }
 
 nr_uint index_from_screen(const ScreenPosition& position, const nr::ScreenDimension& dim)
@@ -44,7 +43,6 @@ nr::Module::Options mkStandardOptions(const nr_uint dim)
 {
     return nr::Module::Options{
                 Module::CL_VERSION_12, 
-                Module::WARNINGS_ARE_ERRORS, 
                 Module::DEBUG, 
                 Module::RenderDimension(dim)
             };
@@ -65,10 +63,10 @@ cl_status init()
         return 10000;
     }
 
-    Platform::makeDefault(platforms.front());
+    Platform::makeDefault(platforms[0]);
     
     
-    auto devices = platforms.front().getDevicesByType(CL_DEVICE_TYPE_GPU, pret);
+    auto devices = platforms[0].getDevicesByType(CL_DEVICE_TYPE_GPU, pret);
     if (error::isFailure(ret)) return ret;
 
     if (!devices.size())
@@ -77,7 +75,7 @@ cl_status init()
         return 10000;
     }
 
-    Device::makeDefault(devices.front());
+    Device::makeDefault(devices[0]);
     
 
     const cl_context_properties props[3] = { CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>((cl_platform_id) Platform::getDefault()), 0};
@@ -86,10 +84,16 @@ cl_status init()
 
     Context::makeDefault(context);
 
-	auto q = CommandQueue(context, devices.front(), (cl_command_queue_properties) CL_QUEUE_PROFILING_ENABLE, pret);
+	auto q = CommandQueue(context, devices[0], (cl_command_queue_properties) CL_QUEUE_PROFILING_ENABLE, pret);
 	if (error::isFailure(ret)) return ret;
 
 	CommandQueue::makeDefault(q);
 
     return CL_SUCCESS;
 }
+
+cl_status destroy()
+{
+	return CommandQueue::getDefault().finish();
+}
+

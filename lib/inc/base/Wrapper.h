@@ -66,14 +66,14 @@ public:
 protected:
     cl_status release() 
     { 
-        cl_status ret = object == nullptr ? ReferenceHandler<cl_type>::release(object) : CL_SUCCESS; 
+        cl_status ret = object != nullptr ? ReferenceHandler<cl_type>::release(object) : CL_SUCCESS; 
         object = nullptr;
         return ret;
     }
 
     cl_status retain() 
     { 
-        return ReferenceHandler<cl_type>::retain(object); 
+        return object != nullptr ? ReferenceHandler<cl_type>::retain(object) : CL_SUCCESS; 
     }
 
 // Fields

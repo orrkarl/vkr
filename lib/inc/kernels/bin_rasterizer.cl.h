@@ -271,7 +271,7 @@ kernel void reduce_triangle_buffer_test(
         {
             result[i].x = res_x[i];
             result[i].y = res_y[i];
-			DEBUG_MESSAGE2("(%f, %f)\n", res_x[i], res_y[i]);
+			DEBUG_MESSAGE6("Triangle: [(%f, %f), (%f, %f), (%f, %f)]\n", triangle_data[i][0][0], triangle_data[i][0][1], triangle_data[i][1][0], triangle_data[i][1][1], triangle_data[i][2][0], triangle_data[i][2][1]);
         }
     }
 }

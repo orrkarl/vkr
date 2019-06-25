@@ -69,10 +69,12 @@ cl_status CommandQueue::flush()
 {
     return clFlush(object);
 }
+
 cl_status CommandQueue::await()
 {
     return clFinish(object);
 }
+
 cl_status CommandQueue::finish()
 {
     return clFinish(object);
