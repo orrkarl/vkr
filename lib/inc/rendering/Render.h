@@ -47,7 +47,7 @@ struct Point
     bool operator==(const Point& other) const
     {
         for (auto i = 0; i < dim; ++i) 
-            if (values[i] != other[i])
+            if (std::abs(values[i] - other[i]) > 10e-6)
                 return false;
 
         return true;

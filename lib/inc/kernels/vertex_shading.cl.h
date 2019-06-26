@@ -14,7 +14,7 @@ namespace clcode
 const string vertex_shading = R"__CODE__(
 
 // Normalizes value to [0,1], when value is expected to be in [near, far]
-float normalize(const float value, const float near, const float far)
+float normalize_range(const float value, const float near, const float far)
 {
     return (value - near) / (far - near);
 }
@@ -26,13 +26,13 @@ void normalize_step(
     const uint d, 
     global Point result)
 {
-    result[d] = normalize(p[d], near[d], far[d]);
+    result[d] = normalize_range(p[d], near[d], far[d]);
 }
 
 // Applies the perspective projection (without normalization) to a vector
 void perspective_step(const uint d, global Point result)
 {
-    __attribute__((opencl_unroll_hint))
+    
     for (uint coord = 0; coord < d; ++coord)
     {
         result[coord] /= result[d];
@@ -69,13 +69,13 @@ kernel void shade_vertex(
 
     const uint index = get_global_id(0);
         
-    __attribute__((opencl_unroll_hint))
+    
     for (uint d = 0; d < RENDER_DIMENSION; ++d)
     {
         result[index][d] = points[index][d];
     }
 
-    __attribute__((opencl_unroll_hint))
+    
     for (uint d = RENDER_DIMENSION - 1; d > 2; --d)
     {
         perspective_step(d, result[index]); 

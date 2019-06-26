@@ -39,7 +39,7 @@ void mkTriangleInCoords(const nr_uint x, const nr_uint y, const ScreenDimension&
 
 Module::Option mkTriangleTestCountMacro(const nr_uint triangleTestCount)
 {
-    return Module::Macro("TRIANGLE_TEST_COUNT", std::to_string(triangleTestCount));
+    return Module::Macro("TOTAL_TRIANGLE_COUNT", std::to_string(triangleTestCount));
 }
 
 Module mkBinningModule(const nr_uint dim, const nr_uint triangleTestCount, cl_status* err)

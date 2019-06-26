@@ -44,10 +44,8 @@ float area(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2)
 void barycentric2d(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, NDCPosition position, float3* result)
 {
     float area_total = area(p0, p1, p2);
-    
-    result->x = area(position, p1, p2) / area_total;
-    result->y = area(p0, position, p2) / area_total;
-    result->z = area(p0, p1, position) / area_total;
+
+	*result = (float3)(area(position, p1, p2) / area_total, area(p0, position, p2) / area_total, area(p0, p1, position) / area_total);
 }
 
 // Calculate (according to Perspective Correct Interpolation) the inverse of the depth at point
@@ -106,9 +104,15 @@ uint pick_queue(global const Index** queues, uint* indices, const uint work_grou
 bool is_ccw(const global Triangle* triangle, Index idx)
 {
     NDCPosition p0, p1, p2;
-    p0 = (float2)(triangle[idx][0][0], triangle[idx][0][1]);
-    p1 = (float2)(triangle[idx][1][0], triangle[idx][1][1]);
-    p2 = (float2)(triangle[idx][2][0], triangle[idx][2][1]);
+
+    p0.x = triangle[idx][0][0];
+	p0.y = triangle[idx][0][1];
+
+    p1.x = triangle[idx][1][0];
+	p1.y = triangle[idx][1][1];
+
+    p2.x = triangle[idx][2][0];
+	p2.y = triangle[idx][2][1];
 
     return area(p0, p1, p2) <= 0;
 }
@@ -184,9 +188,14 @@ kernel void fine_rasterize(
                 
                 pixel_mid_point_from_screen(current_frag.position, screen_dim, &current_position_ndc); 
                 
-                p0 = (float2)(triangle_data[current_queue_element][0][0], triangle_data[current_queue_element][0][1]);
-                p1 = (float2)(triangle_data[current_queue_element][1][0], triangle_data[current_queue_element][1][1]);
-                p2 = (float2)(triangle_data[current_queue_element][2][0], triangle_data[current_queue_element][2][1]);
+				p0.x = triangle_data[current_queue_element][0][0];
+				p0.y = triangle_data[current_queue_element][0][1];
+
+				p1.x = triangle_data[current_queue_element][1][0];
+				p1.y = triangle_data[current_queue_element][1][1];
+
+				p2.x = triangle_data[current_queue_element][2][0];
+				p2.y = triangle_data[current_queue_element][2][1];
 
                 barycentric2d(p0, p1, p2, current_position_ndc, &barycentric);
 
@@ -220,9 +229,14 @@ kernel void is_point_in_triangle_test(const global Triangle triangle, const Scre
     
     NDCPosition p0, p1, p2;
     
-    p0 = (float2)(triangle[0][0], triangle[0][1]);
-    p1 = (float2)(triangle[1][0], triangle[1][1]);
-    p2 = (float2)(triangle[2][0], triangle[2][1]);
+	p0.x = triangle[0][0];
+	p0.y = triangle[0][1];
+
+    p1.x = triangle[1][0];
+	p1.y = triangle[1][1];
+
+    p2.x = triangle[2][0];
+	p2.y = triangle[2][1];
     
     ndc_from_screen_p(position, dim, &pos);
 

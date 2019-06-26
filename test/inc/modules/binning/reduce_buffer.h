@@ -76,7 +76,7 @@ TEST(Binning, ReduceTriangleBuffer)
     
     cl_status err = CL_SUCCESS; 
 
-    auto code = mkBinningModule(dim, triangleCount, &err);
+    auto code = mkBinningModule(dim, triangleCount + offset, &err);
     ASSERT_SUCCESS(err);
 
     auto q = CommandQueue::getDefault();

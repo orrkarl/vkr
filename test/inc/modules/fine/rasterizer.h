@@ -54,7 +54,7 @@ TEST(Fine, Rasterizer)
     const nr_uint binCountX = ceil(((nr_float) screenDim.width) / config.binWidth);
     const nr_uint binCountY = ceil(((nr_float) screenDim.height) / config.binHeight);
     const nr_uint totalBinCount = binCountX * binCountY;
-    const nr_uint totalWorkGroupCount = 4;
+    const nr_uint totalWorkGroupCount = 6;
     const nr_uint totalBinQueuesSize = totalWorkGroupCount * totalBinCount * (config.queueSize + 1); 
 
     const nr_float defaultDepth = 1;

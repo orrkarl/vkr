@@ -91,14 +91,20 @@ event_t reduce_triangle_buffer(
     local float* result_x, 
     local float* result_y)
 {
-    local float* dest_x = (local float*) result_x;
-    local float* dest_y = (local float*) result_y;
     const global float* src_base = ((const global float*) triangles) + offset; 
 
     const uint raw_copy_count = triangle_count * 3; // one for each point in the triangle buffer
+	
+	if (get_local_id(0) == 0)
+	{
+		for (uint i = 0; i < raw_copy_count; ++i)
+		{
+			result_x[i] = src_base[i * RENDER_DIMENSION];
+			result_y[i] = src_base[i * RENDER_DIMENSION + 1];
+		}
+	}
 
-    event_t ret = async_work_group_strided_copy(dest_x, src_base, raw_copy_count, RENDER_DIMENSION, 0);  // Copying x values
-    return async_work_group_strided_copy(dest_y, src_base + 1, raw_copy_count, RENDER_DIMENSION, ret);   // Copying y values
+	return 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -193,7 +199,7 @@ kernel void bin_rasterize(
             0, 
             reduced_triangles_x, 
             reduced_triangles_y);
-        wait_group_events(1, &batch_acquisition);
+        //wait_group_events(1, &batch_acquisition);
 
         for (private uint i = 0; i < batch_actual_size; ++i)
         {
@@ -230,8 +236,8 @@ kernel void bin_rasterize(
 
 #ifdef _TEST_BINNING
 
-#ifndef TRIANGLE_TEST_COUNT
-    #error "TRIANGLE_TEST_COUNT has to be defined in binning test configuration"
+#ifndef TOTAL_TRIANGLE_COUNT
+    #error "TOTAL_TRIANGLE_COUNT has to be defined in binning test configuration"
 #endif 
 
 kernel void is_triangle_in_bin_test(
@@ -256,22 +262,23 @@ kernel void is_triangle_in_bin_test(
 }
 
 kernel void reduce_triangle_buffer_test(
-    const global Triangle triangle_data[TRIANGLE_TEST_COUNT],
+    const global Triangle triangle_data[TOTAL_TRIANGLE_COUNT],
     const uint offset,
-    global NDCPosition result[TRIANGLE_TEST_COUNT * 3])
+    global NDCPosition result[TOTAL_TRIANGLE_COUNT * 3])
 {
-    local float res_x[TRIANGLE_TEST_COUNT * 3];
-    local float res_y[TRIANGLE_TEST_COUNT * 3];
-    event_t wait = reduce_triangle_buffer(triangle_data, TRIANGLE_TEST_COUNT, offset, 0, res_x, res_y);
+    local float res_x[TOTAL_TRIANGLE_COUNT * 3];
+    local float res_y[TOTAL_TRIANGLE_COUNT * 3];
+	const uint copiedTriangleCount = TOTAL_TRIANGLE_COUNT - offset / (RENDER_DIMENSION * 3);
+
+    event_t wait = reduce_triangle_buffer(triangle_data, copiedTriangleCount, offset, 0, res_x, res_y);
     wait_group_events(1, &wait);
 
     if (get_global_id(0) == 0)
     {
-        for (uint i = 0; i < TRIANGLE_TEST_COUNT * 3; ++i)
+        for (uint i = 0; i < 3 * TOTAL_TRIANGLE_COUNT - offset / RENDER_DIMENSION; ++i)
         {
             result[i].x = res_x[i];
             result[i].y = res_y[i];
-			DEBUG_MESSAGE6("Triangle: [(%f, %f), (%f, %f), (%f, %f)]\n", triangle_data[i][0][0], triangle_data[i][0][1], triangle_data[i][1][0], triangle_data[i][1][1], triangle_data[i][2][0], triangle_data[i][2][1]);
         }
     }
 }
