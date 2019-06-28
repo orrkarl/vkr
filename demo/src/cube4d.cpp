@@ -93,14 +93,14 @@ int main(const int argc, const char* argv[])
     const nr_uint triangleCount = 48 * 4;
     nr::__internal::BinQueueConfig config = { 32, 32, 256 };
     
-    nr::CommandQueue q = nr::CommandQueue::getDefault();
-    std::cout << (cl_command_queue) q << std::endl;
-
     std::unique_ptr<nr::RawColorRGB> bitmap(new nr::RawColorRGB[screenDim.width * screenDim.height]);
     
     Triangle4d h_triangles[triangleCount]; 
 
     if (!init("Nraster Demo 4d", screenDim, wnd)) return EXIT_FAILURE;
+
+    nr::CommandQueue q = nr::CommandQueue::getDefault();
+    std::cout << (cl_command_queue) q << std::endl;
 
     glViewport(0, 0, screenDim.width, screenDim.height);
     glClearColor(0, 0, 0, 1);

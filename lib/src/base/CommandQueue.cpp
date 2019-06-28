@@ -1,5 +1,7 @@
 #include <base/CommandQueue.h>
 
+#include <iostream>
+
 namespace nr
 {
 

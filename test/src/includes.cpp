@@ -53,7 +53,6 @@ cl_status init()
     cl_status ret = CL_SUCCESS;
     auto pret = &ret;
 
-
     auto platforms = Platform::getAvailablePlatforms(pret);
     if (error::isFailure(ret)) return ret;
 
@@ -65,7 +64,6 @@ cl_status init()
 
     Platform::makeDefault(platforms[0]);
     
-    
     auto devices = platforms[0].getDevicesByType(CL_DEVICE_TYPE_GPU, pret);
     if (error::isFailure(ret)) return ret;
 
@@ -76,7 +74,6 @@ cl_status init()
     }
 
     Device::makeDefault(devices[0]);
-    
 
     const cl_context_properties props[3] = { CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>((cl_platform_id) Platform::getDefault()), 0};
     auto context = Context(props, CL_DEVICE_TYPE_GPU, pret);
