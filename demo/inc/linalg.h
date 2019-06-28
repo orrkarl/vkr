@@ -4,11 +4,10 @@
 
 #include "utils.h"
 
-#define X (0)
-#define Y (1)
-#define Z (2)
-#define W (3)
-#define Q (4)
+typedef enum _Axis
+{
+	X = 0, Y = 1, Z = 2, W = 3, Q = 4
+} Axis;
 
 struct Vector
 {
@@ -22,8 +21,8 @@ struct Vector
     void toVector4d(Vector4d& vec) const;
     void toVector4d(Vector4d* vec) const;
 
-    nr_float& operator[](const nr_uint idx);
-    const nr_float& operator[](const nr_uint idx) const;
+    nr_float& operator[](const Axis axis);
+    const nr_float& operator[](const Axis axis) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Vector& vec);
 };
@@ -36,7 +35,7 @@ struct Matrix
     Matrix(const nr_float data[5][5]);
     Matrix(const nr_float diagonal);
     Matrix(const Matrix& other);
-    Matrix(const Matrix&& other);
+    Matrix(Matrix&& other);
 
     Matrix& operator=(const Matrix& other);
 
@@ -48,7 +47,7 @@ struct Matrix
 
     Vector operator*(const Vector& vec) const;
 
-    static Matrix rotation(const nr_uint axis0, const nr_uint axis1, const nr_float radians);
+    static Matrix rotation(const Axis source, const Axis dest, const nr_float radians);
     static Matrix scale(const nr_float s);
     static Matrix translation(const nr_float x, const nr_float y, const nr_float z, const nr_float w);
     static Matrix identity();

@@ -8,6 +8,9 @@
 namespace nr
 {
 
+// To make sure some of the more importent structs won't be allined by the compiler (e.g. RawColorRGB), as most of them are ment to be copied to/from OpenCL 
+#pragma pack(push, 1)
+
 struct ScreenDimension
 {
     nr_uint width, height;
@@ -82,5 +85,7 @@ struct Triangle
         return os << "Triangle{" << tri.points[0] << ", " << tri.points[1] << ", " << tri.points[2] << "}";
     }
 };
+
+#pragma pack(pop)
 
 }

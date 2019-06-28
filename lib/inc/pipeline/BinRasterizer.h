@@ -44,18 +44,18 @@ struct NRAPI BinRasterizer : Kernel
     cl_status load();
 
     // Screen Dimensions
-    ScreenDimension dimension;
+	ScreenDimension dimension{};
 
     // Bin Queues Data
-    BinQueueConfig binQueueConfig;
+	BinQueueConfig binQueueConfig{};
     Buffer<nr_uint> binQueues;
 
     // Simplex data
     Buffer<nr_float> triangleData;
-    nr_uint triangleCount;
+	nr_uint triangleCount{};
 
     // Overflow handling
-    Buffer<nr_bool> hasOverflow;
+	Buffer<nr_bool> hasOverflow;
 
     Buffer<nr_uint> batchIndex;
 };

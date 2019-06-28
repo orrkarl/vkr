@@ -1,8 +1,10 @@
 #include <utils.h>
 
-#include <stdio.h>
-#include <iostream>
 #include <chrono>
+#include <iostream>
+#include <stdio.h>
+
+#include <utils/converters.h>
 
 nr_float h_triangle[9]
 {
@@ -29,8 +31,8 @@ int main()
     nr::ScreenDimension screenDim = { 640, 480 };
     const nr_uint dim = 3;
     nr::__internal::BinQueueConfig config = { 32, 32, 5 };
-    cl::CommandQueue q = cl::CommandQueue::getDefault();
-    std::unique_ptr<GLubyte> bitmap(new GLubyte[3 * screenDim.width * screenDim.height]);
+    nr::CommandQueue q = nr::CommandQueue::getDefault();
+    std::unique_ptr<nr::RawColorRGB> bitmap(new nr::RawColorRGB[screenDim.width * screenDim.height]);
 
     if (!init("Nraster Demo 3d", screenDim, wnd)) return EXIT_FAILURE;
 
@@ -39,7 +41,7 @@ int main()
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);    
 
-    nr::__internal::Module nr_code = mkFullModule(dim, &cl_err);
+    nr::Module nr_code = mkFullModule(dim, &cl_err);
     if (cl_err != CL_SUCCESS)
     {
         std::cout << "Could not create nr_code: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
@@ -81,8 +83,7 @@ int main()
     std::cout << "Elapsed: " << delta.count() * 1000 << "ms" << std::endl;
 
     printf("Reading from buffer...\n");
-    q.enqueueReadBuffer(frame.color.getBuffer(), CL_TRUE, 0, 3 * screenDim.width * screenDim.height * sizeof(GLubyte), bitmap.get());
-    q.finish();
+    q.enqueueBufferReadCommand(frame.color, true, screenDim.width * screenDim.height, bitmap.get());
     
     // Write directly to back-buffer
     printf("Drawing pixels...\n");

@@ -7,18 +7,19 @@
 
 #include <general/predefs.h>
 
-#include <base/Module.h>
 #include <base/Buffer.h>
+#include <base/CommandQueue.h>
 #include <base/Kernel.h>
+#include <base/Module.h>
+
 #include <kernels/base.cl.h>
-#include <kernels/vertex_shading.cl.h>
 #include <kernels/bin_rasterizer.cl.h>
 #include <kernels/fine_rasterizer.cl.h>
-#include <pipeline/VertexShader.h>
+#include <kernels/vertex_shading.cl.h>
+
 #include <pipeline/BinRasterizer.h>
 #include <pipeline/FineRasterizer.h>
-
-namespace _nr = nr::__internal;
+#include <pipeline/VertexShader.h>
 
 bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWwindow*& wnd);
 
@@ -26,19 +27,24 @@ bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWwindow*& wn
 
 struct FullPipeline
 {
-    _nr::VertexShader   vertexShader;
-    _nr::BinRasterizer  binRasterizer;
-    _nr::FineRasterizer fineRasterizer;
+    nr::__internal::VertexShader   vertexShader;
+	nr::__internal::BinRasterizer  binRasterizer;
+	nr::__internal::FineRasterizer fineRasterizer;
 
-    FullPipeline(_nr::Module module, cl_int* err);
+    FullPipeline(nr::Module module, cl_status* err);
 
-    cl_int setup(
+    cl_status setup(
         const nr_uint dim,
-        const nr_uint simplexCount, nr_float* vertecies, nr_float* near, nr_float* far,     // Vertex shader
-        nr::ScreenDimension screenDim, _nr::BinQueueConfig config,                      // Bin rasterizer
+        const nr_uint simplexCount, nr_float* vertecies, nr_float* near, nr_float* far,  // Vertex shader
+        nr::ScreenDimension screenDim, nr::__internal::BinQueueConfig config,            // Bin rasterizer
         const nr_uint binRasterWorkGroupCount, nr::FrameBuffer frameBuffer);             // Fine rasterizer
 
-    cl_int operator()(cl::CommandQueue q);
+    cl_status operator()(nr::CommandQueue q);
+
+private:
+	std::array<nr_size, 1> vertexShaderGlobalSize, vertexShaderLocalSize{};
+	std::array<nr_size, 2> binRasterizerGlobalSize, binRasterizerLocalSize{};
+	std::array<nr_size, 2> fineRasterizerGlobalSize, fineRasterizerLocalSize{};
 };
 
 struct Vector4d
@@ -75,10 +81,10 @@ struct Tetrahedron
 };
 
 // Return a module with all of the code in it
-_nr::Module mkFullModule(const nr_uint dim, cl_int* err);
+nr::Module mkFullModule(const nr_uint dim, cl_status* err);
 
 // Allocate buffers for a framebuffer
-nr::FrameBuffer mkFrameBuffer(const nr::ScreenDimension& dim, cl_int* err);
+nr::FrameBuffer mkFrameBuffer(const nr::ScreenDimension& dim, cl_status* err);
 
 void error_callback(int error, const char* description);
 

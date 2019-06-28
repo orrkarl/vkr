@@ -44,10 +44,10 @@ typedef size_t nr_size;
 	#define NRAPI __declspec(dllimport)
 #else
 	#define NRAPI
+
 #endif // _MSC_VER
 
-
-#endif // NR_EXPORT
+#endif // NR_EXPORT	
 
 namespace nr
 {

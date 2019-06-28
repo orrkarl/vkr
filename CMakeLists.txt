@@ -36,21 +36,20 @@ IF(BUILD_TESTS)
 ENDIF()
 
 FIND_PACKAGE(OpenCL REQUIRED)
-SET(OpenCL_INCLUDE_DIRS "${OpenCL_INCLUDE_DIRS}")
 
 IF (BUILD_gtest)
 	ADD_SUBDIRECTORY(dependencies/googletest EXCLUDE_FROM_ALL)
 	SET(gtest_INCLUDE_DIRS "${gtest_SOURCE_DIR}/include ${gmock_SOURCE_DIR}/include")
 ENDIF()
 
-IF (BUILD_glew)
-	ADD_SUBDIRECTORY(dependencies/glew)
-	SET(glfw_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/glfw/include")
+IF (BUILD_glfw)
+	ADD_SUBDIRECTORY(dependencies/glfw EXCLUDE_FROM_ALL)
+	SET(glfw_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/glfw/include")
 ENDIF()
 
-IF (BUILD_glfw)
-	ADD_SUBDIRECTORY(dependencies/glfw)
-	SET(glew_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/glew/include")
+IF (BUILD_glew)
+	ADD_SUBDIRECTORY(dependencies/glew EXCLUDE_FROM_ALL)
+	SET(glew_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/glew/include")
 	ADD_LIBRARY(glew ALIAS libglew_static)
 ENDIF()
 

@@ -36,52 +36,51 @@ bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWwindow*& wn
     return true;
 }
 
-_nr::Module mkFullModule(const nr_uint dim, cl_int* err)
+nr::Module mkFullModule(const nr_uint dim, cl_status* err)
 {
     auto allCodes = {
-        _nr::clcode::base,
-        _nr::clcode::bin_rasterizer,
-        _nr::clcode::fine_rasterizer,
-        _nr::clcode::vertex_shading
+        nr::__internal::clcode::base,
+        nr::__internal::clcode::bin_rasterizer,
+        nr::__internal::clcode::fine_rasterizer,
+        nr::__internal::clcode::vertex_shading
     };
 
-    auto opts = _nr::Module::Options {
-        _nr::Module::CL_VERSION_12, 
-        _nr::Module::WARNINGS_ARE_ERRORS, 
-        _nr::Module::DEBUG, 
-        _nr::Module::RenderDimension(dim)
+    auto opts = nr::Module::Options {
+        nr::Module::CL_VERSION_12, 
+        nr::Module::DEBUG, 
+        nr::Module::RenderDimension(dim)
     };
                 
-    return _nr::Module(allCodes, opts, err);
+    auto ret = nr::Module(allCodes, err);
+	if (*err == CL_SUCCESS) return nr::Module();
+	*err = ret.build(opts);
+	
+	return ret;
 }
 
-nr::FrameBuffer mkFrameBuffer(const nr::ScreenDimension& dim, cl_int* err)
+nr::FrameBuffer mkFrameBuffer(const nr::ScreenDimension& dim, cl_status* err)
 {
     const nr_uint totalScreenSize = dim.width * dim.height;
 
     nr::FrameBuffer ret;
-    ret.color = nr::Buffer(CL_MEM_READ_WRITE, 3 * sizeof(nr_ubyte) * totalScreenSize, err);  
+    ret.color = nr::Buffer<nr::RawColorRGB>(CL_MEM_READ_WRITE, totalScreenSize, err);  
     if (nr::error::isFailure(*err)) return ret;
-    ret.depth = nr::Buffer(CL_MEM_READ_WRITE, sizeof(nr_float) * totalScreenSize, err);
+    ret.depth = nr::Buffer<nr_float>(CL_MEM_READ_WRITE, totalScreenSize, err);
     return ret;
 }
 
-FullPipeline::FullPipeline(_nr::Module module, cl_int* err)
+FullPipeline::FullPipeline(nr::Module module, cl_status* err)
+	: vertexShader(module, err), binRasterizer(module, err), fineRasterizer(module, err)
 {
-    vertexShader = module.makeKernel<_nr::VertexShadingParams>("shade_vertex", err);
-    if (*err != CL_SUCCESS) return;
-    binRasterizer = module.makeKernel<_nr::BinRasterizerParams>("bin_rasterize", err);
-    if (*err != CL_SUCCESS) return;
-    fineRasterizer = module.makeKernel<_nr::FineRasterizerParams>("fine_rasterize", err);
 }
 
-cl_int FullPipeline::setup(
+cl_status FullPipeline::setup(
     const nr_uint dim,
     const nr_uint triangleCount, nr_float* vertecies, nr_float* near, nr_float* far,
-    nr::ScreenDimension screenDim, _nr::BinQueueConfig config,                  
+    nr::ScreenDimension screenDim, nr::__internal::BinQueueConfig config,                  
     const nr_uint binRasterWorkGroupCount, nr::FrameBuffer frameBuffer)
 {
-    cl_int ret = CL_SUCCESS;
+    cl_status ret = CL_SUCCESS;
     
     const nr_uint binCountX = ceil(((nr_float) screenDim.width) / config.binWidth);
     const nr_uint binCountY = ceil(((nr_float) screenDim.height) / config.binHeight);
@@ -89,68 +88,71 @@ cl_int FullPipeline::setup(
     const nr_uint totalScreenDim = screenDim.width * screenDim.height;
     
     // Vertex Shader
-    vertexShader.params.points = nr::Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * 3 * sizeof(nr_float) * triangleCount, vertecies, &ret);
+    vertexShader.points = nr::Buffer<nr_float>(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * 3 * triangleCount, vertecies, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
-    vertexShader.params.near   = nr::Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * sizeof(nr_float), near, &ret);
+    vertexShader.near = nr::Buffer<nr_float>(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim, near, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
-    vertexShader.params.far    = nr::Buffer(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * sizeof(nr_float), far, &ret);
+    vertexShader.far = nr::Buffer<nr_float>(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim, far, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
-    vertexShader.params.result = nr::Buffer(CL_MEM_READ_WRITE, dim * 3 * sizeof(nr_float) * triangleCount, &ret);
+    vertexShader.result = nr::Buffer<nr_float>(CL_MEM_READ_WRITE, dim * 3 * triangleCount, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
-    vertexShader.global = cl::NDRange(triangleCount * 3);
-    vertexShader.local  = cl::NDRange(1);
+	vertexShaderGlobalSize = { triangleCount * 3 };
+	vertexShaderLocalSize  = { 1 };
 
     // Bin rasterizer
-    binRasterizer.params.triangleData   = vertexShader.params.result;
-    binRasterizer.params.triangleCount  = triangleCount;
-    binRasterizer.params.dimension      = screenDim;
-    binRasterizer.params.binQueueConfig = config;
-    binRasterizer.params.hasOverflow    = nr::Buffer(CL_MEM_WRITE_ONLY, sizeof(cl_bool), &ret);
+    binRasterizer.triangleData   = vertexShader.result;
+    binRasterizer.triangleCount  = triangleCount;
+    binRasterizer.dimension      = screenDim;
+    binRasterizer.binQueueConfig = config;
+    binRasterizer.hasOverflow    = nr::Buffer<nr_bool>(CL_MEM_WRITE_ONLY, 1, &ret);
     if (nr::error::isFailure(ret)) return ret;
-    binRasterizer.params.binQueues = nr::Buffer(CL_MEM_READ_WRITE, 3 * dim * binRasterWorkGroupCount * totalBinCount * (config.queueSize + 1), &ret);
+    binRasterizer.binQueues = nr::Buffer<nr_uint>(CL_MEM_READ_WRITE, 3 * dim * binRasterWorkGroupCount * totalBinCount * (config.queueSize + 1), &ret);
     if (nr::error::isFailure(ret)) return ret;
-    binRasterizer.params.batchIndex = nr::Buffer(CL_MEM_READ_WRITE, sizeof(cl_uint), &ret);
+    binRasterizer.batchIndex = nr::Buffer<nr_uint>(CL_MEM_READ_WRITE, 1, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
-    binRasterizer.global = cl::NDRange(binRasterWorkGroupCount * binCountX, binCountY);
-    binRasterizer.local  = cl::NDRange(binCountX, binCountY);
+	binRasterizerGlobalSize = { binRasterWorkGroupCount * binCountX, binCountY };
+	binRasterizerLocalSize  = { binCountX, binCountY };
 
     // Fine rasterizer
-    fineRasterizer.params.triangleData   = vertexShader.params.result;
-    fineRasterizer.params.workGroupCount = binRasterWorkGroupCount;
-    fineRasterizer.params.dim            = screenDim;
-    fineRasterizer.params.binQueueConfig = config;
-    fineRasterizer.params.binQueues      = binRasterizer.params.binQueues;
-    fineRasterizer.params.frameBuffer    = frameBuffer;
+    fineRasterizer.triangleData   = vertexShader.result;
+    fineRasterizer.workGroupCount = binRasterWorkGroupCount;
+    fineRasterizer.dim            = screenDim;
+    fineRasterizer.binQueueConfig = config;
+    fineRasterizer.binQueues      = binRasterizer.binQueues;
+    fineRasterizer.frameBuffer    = frameBuffer;
 
-    fineRasterizer.global = cl::NDRange(binCountX, binCountY);
-    fineRasterizer.local  = cl::NDRange(binCountX / binRasterWorkGroupCount, binCountY);
+	fineRasterizerGlobalSize = { binCountX, binCountY };
+	fineRasterizerLocalSize  = { binCountX / binRasterWorkGroupCount, binCountY };
 
     return CL_SUCCESS;
 }
 
-cl_int FullPipeline::operator()(cl::CommandQueue q)
+cl_status FullPipeline::operator()(nr::CommandQueue q)
 {
-    const nr_uint totalScreenDim = fineRasterizer.params.dim.width * fineRasterizer.params.dim.height;
-    cl_int cl_err = CL_SUCCESS;
+    const nr_uint totalScreenDim = fineRasterizer.dim.width * fineRasterizer.dim.height;
+    cl_status cl_err = CL_SUCCESS;
     
-    // printf("Enqueuing vertex shader\n");
-    if ((cl_err = vertexShader(q)) != CL_SUCCESS) return cl_err;
-    if ((cl_err = q.finish()) != CL_SUCCESS) return cl_err;
+    printf("Enqueuing vertex shader\n");
+	if ((cl_err = vertexShader.load()) != CL_SUCCESS) return cl_err;
+	if ((cl_err = q.enqueueKernelCommand(vertexShader, vertexShaderGlobalSize, vertexShaderLocalSize)) != CL_SUCCESS) return cl_err;
+    if ((cl_err = q.await()) != CL_SUCCESS) return cl_err;
     printf("Vertecies transformed!\n");
 
-    // printf("Enqueuing bin rasterizer\n");   
-    if ((cl_err = binRasterizer(q)) != CL_SUCCESS) return cl_err;
-    if ((cl_err = q.finish()) != CL_SUCCESS) return cl_err;
-    printf("Bin filled!\n");
+    printf("Enqueuing bin rasterizer\n");   
+	if ((cl_err = binRasterizer.load()) != CL_SUCCESS) return cl_err;
+	if ((cl_err = q.enqueueKernelCommand(binRasterizer, binRasterizerGlobalSize, binRasterizerLocalSize)) != CL_SUCCESS) return cl_err;
+	if ((cl_err = q.await()) != CL_SUCCESS) return cl_err;
+    printf("Bins filled!\n");
 
-    // printf("Enqueuing fine rasterizer\n");
-    if ((cl_err = fineRasterizer(q)) != CL_SUCCESS) return cl_err;
-    if ((cl_err = q.finish()) != CL_SUCCESS) return cl_err;
+    printf("Enqueuing fine rasterizer\n");
+	if ((cl_err = fineRasterizer.load()) != CL_SUCCESS) return cl_err;
+	if ((cl_err = q.enqueueKernelCommand(fineRasterizer, fineRasterizerGlobalSize, fineRasterizerLocalSize)) != CL_SUCCESS) return cl_err;
+	if ((cl_err = q.await()) != CL_SUCCESS) return cl_err;
     printf("Framebuffer filled - pipeline completed!\n");
     
     return CL_SUCCESS;
@@ -347,9 +349,9 @@ void tetrahadrlize3Cube(const Vector4d cube[8], Tetrahedron result[6])
 void generate3cube(const Vector4d cube[16], const nr_uint diff, const nr_uint offset, Vector4d cube3d[8])
 {
     auto cube3_idx = 0;
-    for (auto i = offset * diff; i < 16; i += 2 * diff)
+    for (nr_uint i = offset * diff; i < 16; i += 2 * diff)
     {
-        for (auto j = 0; j < diff; ++j)
+        for (nr_uint j = 0; j < diff; ++j)
         {
             cube3d[cube3_idx++] = cube[i + j];
         }

@@ -37,7 +37,7 @@ Matrix::Matrix(const Matrix& other)
 {
 }
 
-Matrix::Matrix(const Matrix&& other)
+Matrix::Matrix(Matrix&& other)
     : Matrix(other.data)
 {
 }
@@ -85,6 +85,8 @@ Matrix& Matrix::operator+=(const Matrix& other)
             data[i][j] += other.data[i][j];
         }
     }
+
+	return *this;
 }
 
 Vector Matrix::operator*(const Vector& other) const
@@ -100,17 +102,17 @@ Vector Matrix::operator*(const Vector& other) const
     return ret;
 }
 
-Matrix Matrix::rotation(const nr_uint axis0, const nr_uint axis1, const nr_float radians)
+Matrix Matrix::rotation(const Axis source, const Axis dest, const nr_float radians)
 {
     Matrix ret = Matrix::identity();
 
     nr_float cosine = cos(radians);
     nr_float sine   = sin(radians);
 
-    ret.data[axis0][axis0] = cosine;
-    ret.data[axis0][axis1] = -sine;
-    ret.data[axis1][axis0] = sine;
-    ret.data[axis1][axis1] = cosine;
+    ret.data[source][source] = cosine;
+    ret.data[source][dest] = -sine;
+    ret.data[dest][source] = sine;
+    ret.data[dest][dest] = cosine;
 
     return ret;
 }
@@ -175,12 +177,12 @@ void Vector::toVector4d(Vector4d* vec) const
     vec->w = data[W];
 }
 
-nr_float& Vector::operator[](const nr_uint idx)
+nr_float& Vector::operator[](const Axis idx)
 {
     return data[idx];
 }
 
-const nr_float& Vector::operator[](const nr_uint idx) const
+const nr_float& Vector::operator[](const Axis idx) const
 {
     return data[idx];
 }

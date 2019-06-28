@@ -31,12 +31,12 @@ public:
     Buffer<nr_float> triangleData;
 
     // Screen Dimensions [size in pixels]
-    ScreenDimension dim;
+	ScreenDimension dim{};
 
     // Bin Queues
-    BinQueueConfig binQueueConfig;
+	BinQueueConfig binQueueConfig{};
     Buffer<nr_uint> binQueues;
-    nr_uint workGroupCount;
+	nr_uint workGroupCount{};
 
     // Frame buffer
     FrameBuffer frameBuffer;
