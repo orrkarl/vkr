@@ -94,6 +94,7 @@ int main(const int argc, const char* argv[])
     nr::__internal::BinQueueConfig config = { 32, 32, 256 };
     
     nr::CommandQueue q = nr::CommandQueue::getDefault();
+    std::cout << (cl_command_queue) q << std::endl;
 
     std::unique_ptr<nr::RawColorRGB> bitmap(new nr::RawColorRGB[screenDim.width * screenDim.height]);
     
@@ -105,10 +106,16 @@ int main(const int argc, const char* argv[])
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);    
 
-    nr::Module nr_code = mkFullModule(dim, &cl_err);
+    auto nr_code = FullModule(&cl_err);
     if (cl_err != CL_SUCCESS)
     {
-        std::cout << "Could not create nr_code: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
+        std::cout << "Could not create full module: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
+        return EXIT_FAILURE;
+    }
+
+    if ((cl_err = nr_code.build(dim)) != CL_SUCCESS)
+    {
+        std::cout << "Could not create full module: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
         return EXIT_FAILURE;
     }
 
@@ -144,7 +151,13 @@ int main(const int argc, const char* argv[])
         q.enqueueBufferFillCommand(pipeline.fineRasterizer.frameBuffer.depth, 0.0f);
         q.await();
         auto t_buffers = std::chrono::system_clock::now();
-        pipeline(q);
+        
+        if (nr::error::isFailure(cl_err = pipeline(q)))
+        {
+            std::cerr << "Pipeline enqueue failed: " << nr::utils::stringFromCLError(cl_err) << std::endl;
+            return EXIT_FAILURE;
+        }
+
         q.await();
         auto t_pipeline = std::chrono::system_clock::now();
         q.enqueueBufferReadCommand(frame.color, true, screenDim.width * screenDim.height, bitmap.get());

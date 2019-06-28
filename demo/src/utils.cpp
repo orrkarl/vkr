@@ -1,6 +1,11 @@
 #include <utils.h>
-#include <cstring>
+
 #include <cmath>
+#include <cstring>
+
+#include <base/Platform.h>
+
+#include <utils/converters.h>
 
 bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWwindow*& wnd)
 {
@@ -33,29 +38,71 @@ bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWwindow*& wn
     glfwSetKeyCallback(wnd, key_callback);
     glfwSwapInterval(1);
 
+    cl_status ret = CL_SUCCESS;
+    auto pret = &ret;
+
+    auto platforms = nr::Platform::getAvailablePlatforms(pret);
+    if (nr::error::isFailure(ret))
+    {
+        std::cerr << "Could not aquire available OpenCL platforms: " << nr::utils::stringFromCLError(ret) << std::endl;
+        return false;
+    }
+
+    if (!platforms.size())
+    {
+        std::cerr << "No OpenCL platforms found!: " << nr::utils::stringFromCLError(ret) << std::endl;
+        return false;
+    }
+
+    nr::Platform::makeDefault(platforms[0]);
+    
+    auto devices = platforms[0].getDevicesByType(CL_DEVICE_TYPE_GPU, pret);
+    if (nr::error::isFailure(ret))
+    {
+        std::cerr << "Could not aquire OpenCL devices: " << nr::utils::stringFromCLError(ret) << std::endl;
+        return false;
+    }
+
+    if (!devices.size())
+    {
+        std::cerr << "No OpenCL supported GPU's found; falling back to CL_DEVICE_TYPE_ALL" << std::endl;
+
+        devices = platforms[0].getDevicesByType(CL_DEVICE_TYPE_ALL, pret);
+        if (nr::error::isFailure(err))
+        {
+            std::cerr << "Could not aquire OpenCL devices: " << nr::utils::stringFromCLError(ret) << std::endl;
+            return false;
+        }
+    }
+
+    if (!devices.size())
+    {
+        std::cerr << "No OpenCL devices found!" << std::endl;
+        return false;
+    }
+
+    nr::Device::makeDefault(devices[0]);
+    
+    const cl_context_properties props[3] = { CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>((cl_platform_id) nr::Platform::getDefault()), 0};
+    auto context = nr::Context(props, CL_DEVICE_TYPE_GPU, pret);
+    if (nr::error::isFailure(ret))
+    {
+        std::cerr << "Could not create OpenCL context: " << nr::utils::stringFromCLError(ret) << std::endl;
+        return false;
+    }
+
+    nr::Context::makeDefault(context);
+
+	auto q = nr::CommandQueue(context, devices[0], (cl_command_queue_properties) CL_QUEUE_PROFILING_ENABLE, pret);
+	if (nr::error::isFailure(ret))
+    {
+        std::cerr << "Could not create OpenCL CommandQueue: " << nr::utils::stringFromCLError(ret) << std::endl;
+        return false;       
+    }
+
+	nr::CommandQueue::makeDefault(q);
+
     return true;
-}
-
-nr::Module mkFullModule(const nr_uint dim, cl_status* err)
-{
-    auto allCodes = {
-        nr::__internal::clcode::base,
-        nr::__internal::clcode::bin_rasterizer,
-        nr::__internal::clcode::fine_rasterizer,
-        nr::__internal::clcode::vertex_shading
-    };
-
-    auto opts = nr::Module::Options {
-        nr::Module::CL_VERSION_12, 
-        nr::Module::DEBUG, 
-        nr::Module::RenderDimension(dim)
-    };
-                
-    auto ret = nr::Module(allCodes, err);
-	if (*err == CL_SUCCESS) return nr::Module();
-	*err = ret.build(opts);
-	
-	return ret;
 }
 
 nr::FrameBuffer mkFrameBuffer(const nr::ScreenDimension& dim, cl_status* err)
@@ -69,7 +116,35 @@ nr::FrameBuffer mkFrameBuffer(const nr::ScreenDimension& dim, cl_status* err)
     return ret;
 }
 
-FullPipeline::FullPipeline(nr::Module module, cl_status* err)
+FullModule::FullModule(cl_status* err)
+    : nr::Module(STANDARD_MODULE_KERNELS, err)
+{
+    auto allCodes = {
+        nr::__internal::clcode::base,
+        nr::__internal::clcode::bin_rasterizer,
+        nr::__internal::clcode::fine_rasterizer,
+        nr::__internal::clcode::vertex_shading
+    };
+}
+
+cl_status FullModule::build(const nr_uint dim)
+{
+    auto opts = nr::Module::Options {
+        nr::Module::CL_VERSION_12, 
+        nr::Module::DEBUG, 
+        nr::Module::RenderDimension(dim)
+    };
+    return nr::Module::build(opts);
+}
+
+const nr::Module::Sources FullModule::STANDARD_MODULE_KERNELS = {
+    nr::__internal::clcode::base,
+    nr::__internal::clcode::bin_rasterizer,
+    nr::__internal::clcode::fine_rasterizer,
+    nr::__internal::clcode::vertex_shading
+};
+
+FullPipeline::FullPipeline(FullModule module, cl_status* err)
 	: vertexShader(module, err), binRasterizer(module, err), fineRasterizer(module, err)
 {
 }

@@ -25,13 +25,22 @@ bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWwindow*& wn
 
 // Nraster utilities
 
+struct FullModule : nr::Module
+{
+    FullModule(cl_status* err);
+
+    cl_status build(const nr_uint dim);
+
+    static const nr::Module::Sources STANDARD_MODULE_KERNELS;
+};
+
 struct FullPipeline
 {
     nr::__internal::VertexShader   vertexShader;
 	nr::__internal::BinRasterizer  binRasterizer;
 	nr::__internal::FineRasterizer fineRasterizer;
 
-    FullPipeline(nr::Module module, cl_status* err);
+    FullPipeline(FullModule module, cl_status* err);
 
     cl_status setup(
         const nr_uint dim,

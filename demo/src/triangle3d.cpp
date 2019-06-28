@@ -42,10 +42,16 @@ int main()
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);    
 
-    nr::Module nr_code = mkFullModule(dim, &cl_err);
+    auto nr_code = FullModule(&cl_err);
     if (cl_err != CL_SUCCESS)
     {
         std::cout << "Could not create nr_code: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
+        return EXIT_FAILURE;
+    }
+
+    if ((cl_err = nr_code.build(dim)) != CL_SUCCESS)
+    {
+        std::cout << "Could not create full module: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
         return EXIT_FAILURE;
     }
 
