@@ -32,10 +32,11 @@ int main()
     nr::ScreenDimension screenDim = { 640, 480 };
     const nr_uint dim = 3;
     nr::__internal::BinQueueConfig config = { 32, 32, 5 };
-    nr::CommandQueue q = nr::CommandQueue::getDefault();
     std::unique_ptr<nr::RawColorRGB> bitmap(new nr::RawColorRGB[screenDim.width * screenDim.height]);
 
     if (!init("Nraster Demo 3d", screenDim, wnd)) return EXIT_FAILURE;
+
+    nr::CommandQueue q = nr::CommandQueue::getDefault();
 
     // Prepare to write to framebuffer
     glViewport(0, 0, screenDim.width, screenDim.height);
