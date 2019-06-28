@@ -7,3 +7,7 @@ build/
 
 # Visual Studio
 .vs/
+
+
+# Scripts (which are mostly platform dependent)
+scripts/
