@@ -103,7 +103,7 @@ public:
         const std::vector<Event>& wait, 
         const nr_uint& offset = 0, Event* notify = nullptr)
     {
-        return clEnqueueFillBuffer(object, buffer, value, sizeof(T), sizeof(value) * offset, sizeof(value) * count, wait.size(), &wait.front(), (cl_event*) notify);
+        return clEnqueueFillBuffer(object, buffer, &value, sizeof(T), sizeof(value) * offset, sizeof(value) * count, wait.size(), &wait.front(), (cl_event*) notify);
     }
 
     template<typename T>
@@ -112,7 +112,14 @@ public:
         const T& value, const nr_ulong& count, 
         const nr_uint& offset = 0, Event* notify = nullptr)
     {
-        return clEnqueueFillBuffer(object, buffer, value, sizeof(T), sizeof(value) * offset, sizeof(value) * count, 0, nullptr, (cl_event*) notify);
+        return clEnqueueFillBuffer(object, buffer, &value, sizeof(T), sizeof(value) * offset, sizeof(value) * count, 0, nullptr, (cl_event*) notify);
+    }
+
+    template<typename T>
+    cl_status enqueueBufferFillCommand(
+        const Buffer<T>& buffer, const T& value, const nr_ulong offset = 0, Event* notify = nullptr)
+    {
+        return clEnqueueFillBuffer(object, buffer, &value, sizeof(T), offset * sizeof(T), buffer.getSize(), 0, nullptr, (cl_event*) notify);
     }
 
 // Fields

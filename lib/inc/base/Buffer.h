@@ -78,6 +78,13 @@ public:
     {
         return object;
     }
+
+    nr_size getSize() const
+    {
+        nr_size ret;
+        clGetMemObjectInfo(object, CL_MEM_SIZE, sizeof(nr_size), &ret, nullptr);
+        return ret;
+    }
 };
 
 }

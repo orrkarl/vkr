@@ -1,12 +1,13 @@
+#include <utils/converters.h>
+
 #include <utils.h>
 #include <linalg.h>
 
-#include <stdio.h>
-#include <iostream>
 #include <chrono>
-#include <thread>
-
 #include <cmath>
+#include <iostream>
+#include <stdio.h>
+#include <thread>
 
 Vector h_cube[]
 {
@@ -85,17 +86,18 @@ void profilePipeline(
 int main(const int argc, const char* argv[])
 {
     GLFWwindow* wnd;
-    cl_int cl_err = CL_SUCCESS;
+    cl_status cl_err = CL_SUCCESS;
 
     nr::ScreenDimension screenDim = { 640, 480 };
     const nr_uint dim = 4;
+    const nr_uint triangleCount = 48 * 4;
     nr::__internal::BinQueueConfig config = { 32, 32, 256 };
     
-    cl::CommandQueue q = cl::CommandQueue::getDefault();
+    nr::CommandQueue q = nr::CommandQueue::getDefault();
 
-    std::unique_ptr<GLubyte> bitmap(new GLubyte[3 * screenDim.width * screenDim.height]);
+    std::unique_ptr<nr::RawColorRGB> bitmap(new nr::RawColorRGB[screenDim.width * screenDim.height]);
     
-    Triangle4d h_triangles[48 * 4]; 
+    Triangle4d h_triangles[triangleCount]; 
 
     if (!init("Nraster Demo 4d", screenDim, wnd)) return EXIT_FAILURE;
 
@@ -103,7 +105,7 @@ int main(const int argc, const char* argv[])
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);    
 
-    nr::__internal::Module nr_code = mkFullModule(dim, &cl_err);
+    nr::Module nr_code = mkFullModule(dim, &cl_err);
     if (cl_err != CL_SUCCESS)
     {
         std::cout << "Could not create nr_code: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
@@ -124,7 +126,7 @@ int main(const int argc, const char* argv[])
         return EXIT_FAILURE;
     }
 
-    if (nr::error::isFailure(cl_err = pipeline.setup(dim, 48 * 4, (nr_float*) h_triangles, h_near, h_far, screenDim, config, 1, frame)))
+    if (nr::error::isFailure(cl_err = pipeline.setup(dim, triangleCount, (nr_float*) h_triangles, h_near, h_far, screenDim, config, 1, frame)))
     {
         std::cout << "Failed to setup pipeline: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
         return EXIT_FAILURE;
@@ -136,25 +138,23 @@ int main(const int argc, const char* argv[])
         auto t0 = std::chrono::system_clock::now();
         transform(h_triangles, tick++);
         auto t_transform = std::chrono::system_clock::now();
-        q.enqueueWriteBuffer(pipeline.vertexShader.params.points.getBuffer(), CL_FALSE, 0, sizeof(h_triangles), h_triangles);
-        q.enqueueFillBuffer(pipeline.binRasterizer.params.binQueues.getBuffer(), 0.0f, 0, pipeline.binRasterizer.params.binQueues.getBuffer().getInfo<CL_MEM_SIZE>());
-        q.enqueueFillBuffer(pipeline.fineRasterizer.params.frameBuffer.color.getBuffer(), (uint8_t) 0, 0, pipeline.fineRasterizer.params.frameBuffer.color.getBuffer().getInfo<CL_MEM_SIZE>());
-        q.enqueueFillBuffer(pipeline.fineRasterizer.params.frameBuffer.depth.getBuffer(), 0.0f, 0, pipeline.fineRasterizer.params.frameBuffer.depth.getBuffer().getInfo<CL_MEM_SIZE>());
-        q.finish();
+        q.enqueueBufferWriteCommand(pipeline.vertexShader.points, false, triangleCount, (nr_float*) h_triangles);
+        q.enqueueBufferFillCommand(pipeline.binRasterizer.binQueues, 0u);
+        q.enqueueBufferFillCommand(pipeline.fineRasterizer.frameBuffer.color, { 0, 0, 0 });
+        q.enqueueBufferFillCommand(pipeline.fineRasterizer.frameBuffer.depth, 0.0f);
+        q.await();
         auto t_buffers = std::chrono::system_clock::now();
         pipeline(q);
-        q.finish();
+        q.await();
         auto t_pipeline = std::chrono::system_clock::now();
-        q.enqueueReadBuffer(frame.color.getBuffer(), CL_TRUE, 0, 3 * screenDim.width * screenDim.height * sizeof(GLubyte), bitmap.get());
-        q.finish();
+        q.enqueueBufferReadCommand(frame.color, true, screenDim.width * screenDim.height, bitmap.get());
+        q.await();
         auto t_framebufferRead = std::chrono::system_clock::now();
         glDrawPixels(640, 480, GL_RGB, GL_UNSIGNED_BYTE, bitmap.get());
         auto t_framebufferWrite = std::chrono::system_clock::now();
         glfwSwapBuffers(wnd);
         auto t_bufferSwap = std::chrono::system_clock::now();
     
-        // profilePipeline(t0, t_transform, t_buffers, t_pipeline, t_framebufferRead, t_framebufferWrite, t_bufferSwap);
-
         auto end = std::chrono::system_clock::now();
         std::chrono::milliseconds diff(400 - (end - t0).count() * 1000000);
         std::this_thread::sleep_for(diff);

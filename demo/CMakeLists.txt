@@ -11,7 +11,7 @@ ADD_LIBRARY(NrasterDemoUtils src/utils.cpp src/linalg.cpp)
 
 TARGET_LINK_LIBRARIES(NrasterDemoUtils 
 	PUBLIC Nraster
-	PUBLIC opengl32
+	PUBLIC OpenGL
 	PUBLIC glfw
 	PUBLIC glew)
 

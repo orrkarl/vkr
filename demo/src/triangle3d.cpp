@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <memory>
 #include <stdio.h>
 
 #include <utils/converters.h>

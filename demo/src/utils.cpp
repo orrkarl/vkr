@@ -139,19 +139,19 @@ cl_status FullPipeline::operator()(nr::CommandQueue q)
     
     printf("Enqueuing vertex shader\n");
 	if ((cl_err = vertexShader.load()) != CL_SUCCESS) return cl_err;
-	if ((cl_err = q.enqueueKernelCommand(vertexShader, vertexShaderGlobalSize, vertexShaderLocalSize)) != CL_SUCCESS) return cl_err;
+	if ((cl_err = q.enqueueKernelCommand<1>(vertexShader, vertexShaderGlobalSize, vertexShaderLocalSize)) != CL_SUCCESS) return cl_err;
     if ((cl_err = q.await()) != CL_SUCCESS) return cl_err;
     printf("Vertecies transformed!\n");
 
     printf("Enqueuing bin rasterizer\n");   
 	if ((cl_err = binRasterizer.load()) != CL_SUCCESS) return cl_err;
-	if ((cl_err = q.enqueueKernelCommand(binRasterizer, binRasterizerGlobalSize, binRasterizerLocalSize)) != CL_SUCCESS) return cl_err;
+	if ((cl_err = q.enqueueKernelCommand<2>(binRasterizer, binRasterizerGlobalSize, binRasterizerLocalSize)) != CL_SUCCESS) return cl_err;
 	if ((cl_err = q.await()) != CL_SUCCESS) return cl_err;
     printf("Bins filled!\n");
 
     printf("Enqueuing fine rasterizer\n");
 	if ((cl_err = fineRasterizer.load()) != CL_SUCCESS) return cl_err;
-	if ((cl_err = q.enqueueKernelCommand(fineRasterizer, fineRasterizerGlobalSize, fineRasterizerLocalSize)) != CL_SUCCESS) return cl_err;
+	if ((cl_err = q.enqueueKernelCommand<2>(fineRasterizer, fineRasterizerGlobalSize, fineRasterizerLocalSize)) != CL_SUCCESS) return cl_err;
 	if ((cl_err = q.await()) != CL_SUCCESS) return cl_err;
     printf("Framebuffer filled - pipeline completed!\n");
     
