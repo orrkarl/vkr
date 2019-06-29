@@ -4,7 +4,11 @@
 #include <linalg.h>
 
 #include <chrono>
+
+// Some compilers (msvc...) don't include the math constants (e.g. PI) unless this macro is defined
+#define _USE_MATH_DEFINES
 #include <cmath>
+
 #include <iostream>
 #include <stdio.h>
 #include <thread>
