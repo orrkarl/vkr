@@ -208,7 +208,11 @@ cl_status FullPipeline::setup(
     return CL_SUCCESS;
 }
 
-cl_status FullPipeline::operator()(nr::CommandQueue q)
+cl_status FullPipeline::operator()(
+	nr::CommandQueue q, 
+	std::chrono::system_clock::time_point& vertexShading, 
+	std::chrono::system_clock::time_point& binRasterizing, 
+	std::chrono::system_clock::time_point& fineRasterizing)
 {
     const nr_uint totalScreenDim = fineRasterizer.dim.width * fineRasterizer.dim.height;
     cl_status cl_err = CL_SUCCESS;
@@ -217,21 +221,30 @@ cl_status FullPipeline::operator()(nr::CommandQueue q)
 	if ((cl_err = vertexShader.load()) != CL_SUCCESS) return cl_err;
 	if ((cl_err = q.enqueueKernelCommand<1>(vertexShader, vertexShaderGlobalSize, vertexShaderLocalSize)) != CL_SUCCESS) return cl_err;
     if ((cl_err = q.await()) != CL_SUCCESS) return cl_err;
+	vertexShading = std::chrono::system_clock::now();
     printf("Vertecies transformed!\n");
 
     printf("Enqueuing bin rasterizer\n");   
 	if ((cl_err = binRasterizer.load()) != CL_SUCCESS) return cl_err;
 	if ((cl_err = q.enqueueKernelCommand<2>(binRasterizer, binRasterizerGlobalSize, binRasterizerLocalSize)) != CL_SUCCESS) return cl_err;
 	if ((cl_err = q.await()) != CL_SUCCESS) return cl_err;
+	binRasterizing = std::chrono::system_clock::now();
     printf("Bins filled!\n");
 
     printf("Enqueuing fine rasterizer\n");
 	if ((cl_err = fineRasterizer.load()) != CL_SUCCESS) return cl_err;
 	if ((cl_err = q.enqueueKernelCommand<2>(fineRasterizer, fineRasterizerGlobalSize, fineRasterizerLocalSize)) != CL_SUCCESS) return cl_err;
 	if ((cl_err = q.await()) != CL_SUCCESS) return cl_err;
-    printf("Framebuffer filled - pipeline completed!\n");
+	fineRasterizing = std::chrono::system_clock::now();
+	printf("Framebuffer filled - pipeline completed!\n");
     
     return CL_SUCCESS;
+}
+
+cl_status FullPipeline::operator()(nr::CommandQueue q)
+{
+	std::chrono::system_clock::time_point t0, t1, t2;
+	return operator()(q, t0, t1, t2);
 }
 
 void error_callback(int error, const char* description)

@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <chrono>
 #include <iostream>
 
 #include <general/predefs.h>
@@ -48,7 +49,11 @@ struct FullPipeline
         nr::ScreenDimension screenDim, nr::__internal::BinQueueConfig config,            // Bin rasterizer
         const nr_uint binRasterWorkGroupCount, nr::FrameBuffer frameBuffer);             // Fine rasterizer
 
-    cl_status operator()(nr::CommandQueue q);
+    cl_status operator()(
+		nr::CommandQueue q, 
+		std::chrono::system_clock::time_point& vertexShading, std::chrono::system_clock::time_point& binRasterizing, std::chrono::system_clock::time_point& fineRasterizing);
+
+	cl_status operator()(nr::CommandQueue q);
 
 private:
 	std::array<nr_size, 1> vertexShaderGlobalSize, vertexShaderLocalSize{};
