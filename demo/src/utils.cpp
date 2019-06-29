@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <cstring>
+#include <iostream>
 
 #include <base/Platform.h>
 
@@ -14,7 +15,6 @@ bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWwindow*& wn
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-    // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
     wnd = glfwCreateWindow(dim.width, dim.height, name.c_str(), NULL, NULL);
     if (!wnd)
@@ -192,6 +192,7 @@ cl_status FullPipeline::setup(
 
 	binRasterizerGlobalSize = { binRasterWorkGroupCount * binCountX, binCountY };
 	binRasterizerLocalSize  = { binCountX, binCountY };
+	std::cout << "Bin rasterizer local size: (" << binCountX << ", " << binCountY << ")" << std::endl;
 
     // Fine rasterizer
     fineRasterizer.triangleData   = vertexShader.result;

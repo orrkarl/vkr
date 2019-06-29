@@ -31,8 +31,9 @@ int main()
 
     nr::ScreenDimension screenDim = { 640, 480 };
     const nr_uint dim = 3;
-    nr::__internal::BinQueueConfig config = { 32, 32, 5 };
+    nr::__internal::BinQueueConfig config = { 48, 48, 5 };
     std::unique_ptr<nr::RawColorRGB> bitmap(new nr::RawColorRGB[screenDim.width * screenDim.height]);
+	const nr_uint binWorkGroupCount = 8;
 
     if (!init("Nraster Demo 3d", screenDim, wnd)) return EXIT_FAILURE;
 
@@ -62,7 +63,7 @@ int main()
         std::cout << "Could not create frame buffer: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
         return EXIT_FAILURE;
     }
-
+		
     auto pipeline = FullPipeline(nr_code, &cl_err);
     if (cl_err != CL_SUCCESS)
     {
@@ -70,7 +71,7 @@ int main()
         return EXIT_FAILURE;
     }
 
-    if (nr::error::isFailure(cl_err = pipeline.setup(dim, 1, h_triangle, h_near, h_far, screenDim, config, 1, frame)))
+    if (nr::error::isFailure(cl_err = pipeline.setup(dim, 1, h_triangle, h_near, h_far, screenDim, config, binWorkGroupCount, frame)))
     {
         std::cout << "Failed to setup pipeline: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
         return EXIT_FAILURE;
