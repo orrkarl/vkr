@@ -1,3 +1,13 @@
+/**
+ * @file Buffer.h
+ * @author Orr Karl (karlor041@gmail.com)
+ * @brief Wrapping the most basic OpenCL device memory access scheme - buffers
+ * @version 0.5.9
+ * @date 2019-06-30
+ * 
+ * @copyright Copyright (c) 2019
+ * 
+ */
 #pragma once
 
 #include "../general/predefs.h"
@@ -8,9 +18,9 @@ namespace nr
 {
 
 /**
- * Simple wrapper for opencl buffers, may be removed in the next refactor as it isn't really neccessary
- * Also, this class isn't "NRAPI" as it is templated, hence everything is on the header
- **/
+ * @brief Wrapper around an OpenCL buffer. Templated to allow type-safe read and write to and from the buffer.
+ * @tparam T The buffer's element type (only has meaning on the host side, as device side type can be different)
+ */
 template<typename T>
 class Buffer : public Wrapper<cl_mem>
 {
@@ -79,10 +89,14 @@ public:
         return object;
     }
 
-    nr_size getSize() const
+    /**
+     * @brief Aquire the size (in bytes) of the buffer in device memory
+     * @param[out] err internal OpenCL call error status
+     */
+    nr_size getSize(cl_status* err = nullptr) const
     {
         nr_size ret;
-        clGetMemObjectInfo(object, CL_MEM_SIZE, sizeof(nr_size), &ret, nullptr);
+        if(err) *err = clGetMemObjectInfo(object, CL_MEM_SIZE, sizeof(nr_size), &ret, nullptr);
         return ret;
     }
 };

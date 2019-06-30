@@ -1,9 +1,17 @@
+/**
+ * @file predefs.h
+ * @author Orr Karl (karlor041@gmail.com)
+ * @brief Typedefs and macros used throwout the code
+ * @version 0.5.9
+ * @date 2019-06-30
+ * 
+ * @copyright Copyright (c) 2019
+ * 
+ */
+
 #pragma once
 
-#include <cstdint>
 #include <string>
-#include <cmath>
-#include <stdio.h>
 
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <CL/cl.h>

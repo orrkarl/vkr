@@ -1,3 +1,13 @@
+/**
+ * @file Module.h
+ * @author Orr Karl (karlor041@gmail.com)
+ * @brief Wrapping cl_program
+ * @version 0.5.9
+ * @date 2019-06-30
+ * 
+ * @copyright Copyright (c) 2019
+ * 
+ */
 #pragma once
 
 #include "../general/predefs.h"
@@ -13,12 +23,20 @@ namespace nr
 {
 
 /**
- * Utility wrapper around cl_program
- **/
+ * @brief Wrapper class for cl_program, provides a more interface for compiler options
+ * 
+ */
 class NRAPI Module : public Wrapper<cl_program>
 {
-// Types
 public:
+	/**
+	 * @brief An OpenCL compiler option. 
+	 * @par
+	 * This class represents the entire option. 
+	 * It doesn't know if the option is a macro or an optimization level, and as such the entire option has to be specified. For example: passing "FOO=1" 
+	 * will result in an error; pass "-D FOO=1" instead.
+	 * 
+	 */
 	struct NRAPI Option
 	{
 		public:
@@ -62,13 +80,13 @@ public:
 	explicit Module(const Sources& codes, cl_status* err = nullptr);
 
 	template<nr_uint N>
-	explicit Module(const std::array<nr_char*, N>& codes, const std::array<nr_uint, N>& sizes, cl_status* err = nullptr)
+	explicit Module(const std::array<string, N>& codes, const std::array<nr_uint, N>& sizes, cl_status* err = nullptr)
 		: Module(Context::getDefault(), codes, sizes, err)
 	{
 	}
 
 	template<nr_uint N>
-	explicit Module(Context& context, const std::array<nr_char*, N>& codes, const std::array<nr_uint, N>& sizes, cl_status* err = nullptr)
+	explicit Module(Context& context, const std::array<string, N>& codes, const std::array<nr_uint, N>& sizes, cl_status* err = nullptr)
 		: Wrapped(clCreateProgramWithSource(context, N, codes.data(), sizes.data(), err))
 	{
 	}
@@ -136,6 +154,13 @@ public:
 	string getBuildLog(Device device, cl_status* err = nullptr);
 
 private:
+	/**
+	 * @brief finalizes a list of options into a single string which OpenCL can handle
+	 * 
+	 * @param 	options 	the compiler options
+	 * @return 	the string representation of passed options
+	 * 
+	 */
 	static string finalizeOptions(const Options& options);
 
 // Fields

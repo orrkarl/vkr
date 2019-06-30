@@ -1,3 +1,13 @@
+/**
+ * @file Device.h
+ * @author Orr Karl (karlor041@gmail.com)
+ * @brief Wrapping OpenCL cl_device_id 
+ * @version 0.5.9
+ * @date 2019-06-30
+ * 
+ * @copyright Copyright (c) 2019
+ * 
+ */
 #pragma once
 
 #include "../general/predefs.h"
@@ -7,9 +17,12 @@
 namespace nr
 {
 
+/**
+ * @brief Represents an OpenCL physical device, such as a specific GPU exsiting in the computer.
+ * 
+ */
 class NRAPI Device : public Wrapper<cl_device_id>
 {
-// Functions and Constructors
 public:
     static void makeDefault(const Device& provided);
 

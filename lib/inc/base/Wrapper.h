@@ -1,3 +1,15 @@
+/**
+ * @file Wrapper.h
+ * @author Orr Karl (karlor041@gmail.com)
+ * @brief Wrapping OpenCL built in reference handling, implementing copy and move constructors and operators accordingly
+ * @see ReferenceHandler.h
+ * @version 0.5.9
+ * @date 2019-06-30
+ * 
+ * @copyright Copyright (c) 2019
+ * 
+ */
+
 #pragma once
 
 #include "../general/predefs.h"
@@ -6,10 +18,13 @@
 namespace nr
 {
 
+/**
+ * @brief Wrapping class for basic OpenCL types, allowing to copy and move them while updating their referene count correctly 
+ * 
+ */
 template<typename cl_type>
 class Wrapper
 {
-// Methods and Constructors
 public:
     Wrapper() 
         : object(nullptr)
@@ -76,13 +91,10 @@ protected:
         return object != nullptr ? ReferenceHandler<cl_type>::retain(object) : CL_SUCCESS; 
     }
 
-// Fields
-protected:
-    cl_type object;
-
-// Types
 protected:
     typedef Wrapper<cl_type> Wrapped;
+
+    cl_type object;
 };
 
 }

@@ -1,3 +1,13 @@
+/**
+ * @file Event.h
+ * @author Orr Karl (karlor041@gmail.com)
+ * @brief Wrapping cl_event
+ * @version 0.5.9
+ * @date 2019-06-30
+ * 
+ * @copyright Copyright (c) 2019
+ * 
+ */
 #pragma once
 
 #include "../general/predefs.h"
@@ -11,9 +21,12 @@
 namespace nr
 {
 
+/**
+ * @brief Wrapper class for OpenCL cl_event - used to notify the host and device for commands status
+ * 
+ */
 class NRAPI Event : public Wrapper<cl_event>
 {
-// Functions and Constructors
 public:
     Event();
 

@@ -1,10 +1,29 @@
 #include <pipeline/BinRasterizer.h>
 
+#include <cmath>
+
 namespace nr
 {
 
 namespace __internal
 {
+
+nr_uint BinRasterizer::getTotalBinQueueCount(const nr_uint workGroupCount, const ScreenDimension& dim, const BinQueueConfig config)
+{
+    return workGroupCount * getBinCount(dim, config.binWidth, config.binHeight) * (config.queueSize + 1) * sizeof(nr_uint);
+}
+
+nr_uint BinRasterizer::getBinCount(const ScreenDimension& dim, const nr_uint& binWidth, const nr_uint& binHeight)
+{
+    nr_uint xCount = (nr_uint) ceil(((nr_float) dim.width) / binWidth);
+    nr_uint yCount = (nr_uint) ceil(((nr_float) dim.height) / binHeight);
+    return xCount * yCount;
+}
+
+BinRasterizer::BinRasterizer(Module module, cl_status* err)
+    : Kernel(module, "bin_rasterize", err)
+{
+}
 
 cl_status BinRasterizer::load()
 {
