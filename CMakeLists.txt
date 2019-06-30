@@ -6,12 +6,20 @@ IF(NOT CMAKE_BUILD_TYPE)
 	SET(CMAKE_BUILD_TYPE Debug)
 ENDIF()
 
+# Default options:
 OPTION(BUILD_TESTS "builds the test directory and gtest" ON)
 OPTION(BUILD_DEMOS "builds the demo directory" ON)
+OPTION(BUILD_DOCS  "builds the Nraster documentation (requires Doxygen)" ON)
 
+# General settings
 SET(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+SET(VERSION_MAJOR 0 CACHE STRING "Nraster major version")
+SET(VERSION_MINOR 5 CACHE STRING "Nraster minor version")
+SET(VERSION_PATCH 9 CACHE STRING "Nraster patch version")
 
+
+# Platform specific settings:
 IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	ADD_COMPILE_OPTIONS(-Wno-ignored-attributes)
 ENDIF()
@@ -20,11 +28,17 @@ IF(WIN32)
 	SET(gtest_force_shared_crt ON)
 ENDIF(WIN32)
 
+
+# Must-have packeges
 FIND_PACKAGE(OpenCL REQUIRED)
 
+
+# Adding Nraster itself
 ADD_SUBDIRECTORY(lib)
 SET(NRASTER_ALL_INCLUDES ${PROJECT_SOURCE_DIR}/lib/inc)
 
+
+# Conditional packeges and targets
 IF(BUILD_DEMOS)
 	ADD_SUBDIRECTORY(dependencies/glew EXCLUDE_FROM_ALL)
 	SET(glew_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/glew/include")
@@ -46,6 +60,11 @@ IF(BUILD_TESTS)
 	ADD_SUBDIRECTORY(test)
 	ENABLE_TESTING()
 	ADD_TEST(NAME AllTests COMMAND NrasterTest) # run the executable itself for a better log as it uses GTest
+ENDIF()
+
+IF(BUILD_DOCS)
+	FIND_PACKAGE(Doxygen REQUIRED)
+	ADD_SUBDIRECTORY(docs)
 ENDIF()
 
 UNSET(NRASTER_ALL_INCLUDES)
