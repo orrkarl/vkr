@@ -95,7 +95,7 @@ public:
      */
     nr_size getSize(cl_status* err = nullptr) const
     {
-        nr_size ret;
+        nr_size ret = 0;
         if(err) *err = clGetMemObjectInfo(object, CL_MEM_SIZE, sizeof(nr_size), &ret, nullptr);
         return ret;
     }
