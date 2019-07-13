@@ -199,6 +199,11 @@ kernel void fine_rasterize(
 
                 barycentric2d(p0, p1, p2, current_position_ndc, &barycentric);
 
+				if (!all(isfinite(barycentric)))
+				{
+					//DEBUG_MESSAGE2("Invalid Triangle found - (%d, %d)\n", frag_x, frag_y);
+				}
+
                 if (is_point_in_triangle(p0, p1, p2, barycentric))
                 {
                     current_frag.depth = depth_at_point(triangle_data[current_queue_element], barycentric);

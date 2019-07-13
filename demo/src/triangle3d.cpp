@@ -96,7 +96,7 @@ int main()
     
     // Write directly to back-buffer
     printf("Drawing pixels...\n");
-    glDrawPixels(640, 480, GL_RGB, GL_UNSIGNED_BYTE, bitmap.get());
+    glDrawPixels(640, 480, GL_RGBA, GL_UNSIGNED_BYTE, bitmap.get());
     
     printf("Swapping buffers...\n");
     glfwSwapBuffers(wnd);

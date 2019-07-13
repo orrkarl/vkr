@@ -160,7 +160,9 @@ void staticCube(
 		transform(h_triangles, tick++);
 		t_transform = std::chrono::system_clock::now();
 
-		cl_err = q.enqueueBufferWriteCommand(pipeline.vertexShader.points, false, triangleCount, (nr_float*)h_triangles);
+		const nr_uint dim = 4;
+
+		cl_err = q.enqueueBufferWriteCommand(pipeline.vertexShader.points, false, triangleCount * dim * 3, (nr_float*)h_triangles);
 		if (nr::error::isFailure(cl_err)) return;
 		cl_err = q.enqueueBufferFillCommand(pipeline.binRasterizer.binQueues, 0u);
 		if (nr::error::isFailure(cl_err)) return;
@@ -202,7 +204,7 @@ int main(const int argc, const char* argv[])
 
     nr::ScreenDimension screenDim = { 640, 480 };
     const nr_uint dim = 4;
-    const nr_uint triangleCount = 48 * 4;
+    const nr_uint triangleCount = 8 * 6 * 4; // In one 4d cube: 8 3d cubes, each devided to 6 3d-simplexes (in 4d space), each has 4 triangles
     nr::__internal::BinQueueConfig config = { 48, 48, 256 };
     
     std::unique_ptr<nr::RawColorRGBA> bitmap(new nr::RawColorRGBA[screenDim.width * screenDim.height]);

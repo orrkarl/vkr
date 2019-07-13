@@ -31,8 +31,7 @@ void normalize_step(
 
 // Applies the perspective projection (without normalization) to a vector
 void perspective_step(const uint d, global Point result)
-{
-    
+{ 
     for (uint coord = 0; coord < d; ++coord)
     {
         result[coord] /= result[d];
@@ -59,22 +58,19 @@ void perspective_bounded(
     perspective_bounded_axis(result[1], result[2], bottom, top, p_floats + 1);
 }
 
+
 // vertex shader "main" function. Applies all of the perspective steps to a vector.
 kernel void shade_vertex(
     const global Point* points, 
     const global float near[RENDER_DIMENSION], const global float far[RENDER_DIMENSION],
     global Point* result)
 {
-    // DEBUG_ONCE("Starting vertex shader\n");
-
     const uint index = get_global_id(0);
         
-    
     for (uint d = 0; d < RENDER_DIMENSION; ++d)
     {
         result[index][d] = points[index][d];
     }
-
     
     for (uint d = RENDER_DIMENSION - 1; d > 2; --d)
     {
