@@ -69,10 +69,15 @@ struct Point
     nr_float operator[](const nr_uint index) const { return values[index]; }
 };
 
+// represents a dim-1 dimensional simplex, embedded in 'dim' dimensional space
 template<nr_uint dim>
 struct Simplex
 {
     Point<dim> points[dim];
+
+	Point<dim> operator[](const nr_uint index) const { return points[index]; }
+
+	Point<dim>& operator[](const nr_uint index) { return points[index]; }
 };
 
 template<nr_uint dim>
@@ -80,10 +85,21 @@ struct Triangle
 {
     Point<dim> points[3];
 
-    friend std::ostream& operator<<(std::ostream& os, const Triangle& tri)
-    {
-        return os << "Triangle{" << tri.points[0] << ", " << tri.points[1] << ", " << tri.points[2] << "}";
-    }
+	bool operator==(const Triangle<dim>& other) const
+	{
+		for (auto i = 0; i < 3; ++i)
+			if (points[i] != other[i])
+				return false;
+
+		return true;
+	}
+
+	friend std::ostream& operator<<(std::ostream& os, const Triangle& tri)
+	{
+		return os << "Triangle{" << tri.points[0] << ", " << tri.points[1] << ", " << tri.points[2] << "}";
+	}
+
+	Point<dim> operator[](const nr_uint index) const { return points[index]; }
 };
 
 #pragma pack(pop)

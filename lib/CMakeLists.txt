@@ -13,6 +13,7 @@ ADD_LIBRARY(Nraster SHARED
 	
 	src/pipeline/BinRasterizer.cpp
 	src/pipeline/FineRasterizer.cpp
+	src/pipeline/SimplexReducer.cpp
 	src/pipeline/VertexShader.cpp
 
 	src/utils/converters.cpp)

@@ -20,7 +20,7 @@ cl_status SimplexReducer::load()
 {
 	cl_status err = CL_SUCCESS;
 	if ((err = setArg(0, simplexes)) != CL_SUCCESS) return err;
-	return setArg(1, triangles);
+	return setArg(1, result);
 }
 
 }

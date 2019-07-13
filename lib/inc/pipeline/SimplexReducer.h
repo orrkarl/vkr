@@ -24,7 +24,7 @@ struct NRAPI SimplexReducer : Kernel
 	cl_status load();
 
 	Buffer<nr_float> simplexes;
-	Buffer<nr_float> triangles;
+	Buffer<nr_float> result;
 };
 
 }

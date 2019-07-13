@@ -39,7 +39,7 @@ kernel void reduce_simplex(
 	
 	for (uint i = 0; i < RENDER_DIMENSION - 2; ++i)
 	{
-		for (uint j = i + 1; j < REMDER_DIMENSION - 1; ++j)
+		for (uint j = i + 1; j < RENDER_DIMENSION - 1; ++j)
 		{
 			for (uint k = j + 1; k < RENDER_DIMENSION; ++k)
 			{
