@@ -5,14 +5,14 @@
 namespace nr
 {
 
-namespace __internal
-{
+	namespace __internal
+	{
 
-namespace clcode
-{
+		namespace clcode
+		{
 
-// All of the cross-file utilities and types used in my cl code are here
-const string vertex_reducing = R"__CODE__(
+			// All of the cross-file utilities and types used in my cl code are here
+			const string simplex_reducing = R"__CODE__(
 #define TRIANGLES_PER_SIMPLEX (RENDER_DIMENSION * (RENDER_DIMENSION - 1) * (RENDER_DIMENSION - 2) / 6) // There are nC3 triangles in an n-1 simplex
 
 void copy_point(const global Point p, global Point res)
@@ -50,3 +50,9 @@ kernel void reduce_simplex(
 }
 
 )__CODE__";
+
+}
+
+}
+
+}
