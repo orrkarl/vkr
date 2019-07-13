@@ -15,7 +15,7 @@ using namespace nr;
 using namespace nr::__internal;
 using namespace testing;
 
-void validateFragment(const Fragment& fragment, const ScreenDimension& screenDim, const RawColorRGB* color, const nr_float* depth)
+void validateFragment(const Fragment& fragment, const ScreenDimension& screenDim, const RawColorRGBA* color, const nr_float* depth)
 {
     const nr_uint idx = index_from_screen(fragment.position, screenDim);
 
@@ -64,7 +64,7 @@ TEST(Fine, Rasterizer)
     std::unique_ptr<Triangle<dim>[]> h_triangles(new Triangle<dim>[triangleCount]);
     std::unique_ptr<nr_uint[]> h_binQueues(new nr_uint[totalBinQueuesSize]);
 
-    std::unique_ptr<RawColorRGB[]> h_colorBuffer(new RawColorRGB[totalScreenSize]);
+    std::unique_ptr<RawColorRGBA[]> h_colorBuffer(new RawColorRGBA[totalScreenSize]);
     std::unique_ptr<nr_float[]> h_depthBuffer(new nr_float[totalScreenSize]);
 
     Fragment expected;
@@ -87,7 +87,7 @@ TEST(Fine, Rasterizer)
     auto q = CommandQueue::getDefault();
 
     FrameBuffer frame;
-    frame.color = Buffer<nr::RawColorRGB>(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_colorBuffer.get(), &err);
+    frame.color = Buffer<nr::RawColorRGBA>(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_colorBuffer.get(), &err);
     ASSERT_SUCCESS(err);
     frame.depth = Buffer<nr_float>(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_depthBuffer.get(), &err);
     ASSERT_SUCCESS(err);

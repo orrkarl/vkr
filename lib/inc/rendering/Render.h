@@ -21,24 +21,24 @@ struct ScreenDimension
     }
 };
 
-struct RawColorRGB
+struct RawColorRGBA
 {
-    nr_ubyte r, g, b;
+    nr_ubyte r, g, b, a;
 
-    bool operator==(const RawColorRGB& other) const
+    bool operator==(const RawColorRGBA& other) const
     {
-        return r == other.r && g == other.g && b == other.b;
+        return r == other.r && g == other.g && b == other.b && a == other.a;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const RawColorRGB& color)
+    friend std::ostream& operator<<(std::ostream& os, const RawColorRGBA& color)
     {
-        return os << "(" << (nr_uint) color.r << "," << (nr_uint) color.g << "," << (nr_uint) color.b << ')';
+        return os << "(" << (nr_uint) color.r << "," << (nr_uint) color.g << "," << (nr_uint) color.b << "," << (nr_uint) color.a << ')';
     }
 };
 
 struct FrameBuffer
 {
-    Buffer<RawColorRGB> color;
+    Buffer<RawColorRGBA> color;
     Buffer<nr_float> depth;
 };
 

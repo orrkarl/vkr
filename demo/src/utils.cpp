@@ -110,7 +110,7 @@ nr::FrameBuffer mkFrameBuffer(const nr::ScreenDimension& dim, cl_status* err)
     const nr_uint totalScreenSize = dim.width * dim.height;
 
     nr::FrameBuffer ret;
-    ret.color = nr::Buffer<nr::RawColorRGB>(CL_MEM_READ_WRITE, totalScreenSize, err);  
+    ret.color = nr::Buffer<nr::RawColorRGBA>(CL_MEM_READ_WRITE, totalScreenSize, err);  
     if (nr::error::isFailure(*err)) return ret;
     ret.depth = nr::Buffer<nr_float>(CL_MEM_READ_WRITE, totalScreenSize, err);
     return ret;
@@ -192,7 +192,6 @@ cl_status FullPipeline::setup(
 
 	binRasterizerGlobalSize = { binRasterWorkGroupCount * binCountX, binCountY };
 	binRasterizerLocalSize  = { binCountX, binCountY };
-	std::cout << "Bin rasterizer local size: (" << binCountX << ", " << binCountY << ")" << std::endl;
 
     // Fine rasterizer
     fineRasterizer.triangleData   = vertexShader.result;

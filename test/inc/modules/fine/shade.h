@@ -44,7 +44,7 @@ TEST(Fine, ShadeTest)
     constexpr ScreenDimension screenDim = { 5, 2 };
     constexpr nr_uint totalScreenSize = screenDim.width * screenDim.height;
 
-    RawColorRGB h_color[totalScreenSize];
+    RawColorRGBA h_color[totalScreenSize];
     Depth       h_depth[totalScreenSize];
 
     for (nr_uint i = 0; i < totalScreenSize; ++i)
@@ -66,7 +66,7 @@ TEST(Fine, ShadeTest)
     const nr_uint idx = index_from_screen(firstFrag.position, screenDim);
 
     FrameBuffer frame;
-    frame.color = Buffer<RawColorRGB>(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_color, &err);
+    frame.color = Buffer<RawColorRGBA>(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_color, &err);
     ASSERT_SUCCESS(err);
     frame.depth = Buffer<nr_float>(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_depth, &err);
     ASSERT_SUCCESS(err);

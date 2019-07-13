@@ -32,7 +32,7 @@ int main()
     nr::ScreenDimension screenDim = { 640, 480 };
     const nr_uint dim = 3;
     nr::__internal::BinQueueConfig config = { 48, 48, 5 };
-    std::unique_ptr<nr::RawColorRGB> bitmap(new nr::RawColorRGB[screenDim.width * screenDim.height]);
+    std::unique_ptr<nr::RawColorRGBA> bitmap(new nr::RawColorRGBA[screenDim.width * screenDim.height]);
 	const nr_uint binWorkGroupCount = 8;
 
     if (!init("Nraster Demo 3d", screenDim, wnd)) return EXIT_FAILURE;

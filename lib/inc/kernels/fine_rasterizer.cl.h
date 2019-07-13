@@ -17,7 +17,7 @@ const string fine_rasterizer = R"__CODE__(
 void shade(
     Fragment fragment,
     const ScreenDimension dim,
-    global RawColorRGB* color, global Depth* depth)
+    global RawColorRGBA* color, global Depth* depth)
 {
     uint buffer_index;
     buffer_index = index_from_screen(fragment.position, dim);
@@ -123,7 +123,7 @@ kernel void fine_rasterize(
     const ScreenDimension screen_dim,
     const BinQueueConfig config,
     const uint work_group_count,
-    global RawColorRGB* color,
+    global RawColorRGBA* color,
     global Depth* depth)
 {
     Fragment current_frag;
@@ -218,7 +218,7 @@ kernel void fine_rasterize(
 kernel void shade_test(
     const Fragment fragment,
     const ScreenDimension dim,
-    global RawColorRGB* color, global Depth* depth)
+    global RawColorRGBA* color, global Depth* depth)
 {
     shade(fragment, dim, color, depth);
 }

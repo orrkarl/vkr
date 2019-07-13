@@ -62,21 +62,21 @@ typedef struct _ColorRGBA
 typedef uint  Index;
 typedef float Depth;
 
-typedef struct _RawColorRGB
+typedef struct _RawColorRGBA
 {
-    uchar r, g, b;
-} RawColorRGB;
+    uchar r, g, b, a;
+} RawColorRGBA;
 
 typedef struct _FrameBuffer
 {
-    RawColorRGB*    color;
+    RawColorRGBA*    color;
     Depth*          depth;
 } FrameBuffer;
 
 typedef struct _Fragment
 {
     ScreenPosition position;
-    RawColorRGB color;
+    RawColorRGBA color;
     Depth depth;
 } Fragment;
 
@@ -103,7 +103,7 @@ typedef struct _BinQueueConfig
 
 // -------------------------------------- Globals -------------------------------------- 
 
-#define RAW_RED ((RawColorRGB) {255, 0, 0})
+#define RAW_RED ((RawColorRGBA) {255, 0, 0})
 
 #define r(vec) (vec.x)
 #define g(vec) (vec.y)

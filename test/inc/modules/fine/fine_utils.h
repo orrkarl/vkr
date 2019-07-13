@@ -5,7 +5,7 @@
 #include <rendering/Render.h>
 #include <pipeline/BinRasterizer.h>
 
-const RawColorRGB RED = { 255, 0, 0 };
+const RawColorRGBA RED = { 255, 0, 0 };
 const nr::Module::Macro TEST_FINE("_TEST_FINE");
 
 template<nr_uint dim>

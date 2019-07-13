@@ -1,5 +1,3 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
-
 INCLUDE_DIRECTORIES(
 	PUBLIC inc
 	PUBLIC ${NRASTER_ALL_INCLUDES}
@@ -21,7 +19,7 @@ TARGET_LINK_LIBRARIES(Triangle3d NrasterDemoUtils)
 ADD_EXECUTABLE(Cube4d src/cube4d.cpp)
 TARGET_LINK_LIBRARIES(Cube4d NrasterDemoUtils)
 
-if(WIN32)
+IF(WIN32)
     # Copy DLL files to output directory. Yes, this is digusting, but nothing else worked :(
 	
 	ADD_CUSTOM_COMMAND(TARGET Triangle3d POST_BUILD
@@ -59,4 +57,4 @@ if(WIN32)
 				$<TARGET_FILE_DIR:Cube4d>
 		)
 	ENDIF()
-endif()
+ENDIF()

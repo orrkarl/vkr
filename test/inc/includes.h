@@ -58,7 +58,7 @@ typedef nr_float Depth;
 struct Fragment
 {
     ScreenPosition position;
-    nr::RawColorRGB color;
+    nr::RawColorRGBA color;
     Depth depth;
 };
 

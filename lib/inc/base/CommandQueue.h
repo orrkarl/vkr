@@ -19,6 +19,7 @@
 #include "Wrapper.h"
 
 #include <array>
+#include <typeinfo>
 
 namespace nr
 {
@@ -251,10 +252,20 @@ public:
      * @return      internal OpenCL error status
      */
     template<typename T>
-    cl_status enqueueBufferFillCommand(
+	cl_status enqueueBufferFillCommand(
         const Buffer<T>& buffer, const T& value, Event* notify = nullptr)
     {
-        return clEnqueueFillBuffer(object, buffer, &value, sizeof(T), 0, buffer.getSize(), 0, nullptr, (cl_event*) notify);
+		static_assert(
+			sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8 || sizeof(T) == 16 || sizeof(T) == 32 || sizeof(T) == 64 || sizeof(T) == 128,
+			"enqueueBufferFilleCommand: value size has to be one of {1, 2, 4, 8, 16, 32, 64, 128}");
+
+		cl_status err = CL_SUCCESS;
+		auto s = buffer.getSize(&err);
+		if (nr::error::isFailure(err))
+		{
+			return err;
+		}
+        return clEnqueueFillBuffer(object, buffer, &value, sizeof(T), size_t(0), s, size_t(0), nullptr, (cl_event*) notify);
     }
 
 private:

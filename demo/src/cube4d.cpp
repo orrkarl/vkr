@@ -101,7 +101,7 @@ void profilePipeline(
 void dynamicCube(
 	FullPipeline pipeline, 
 	nr::CommandQueue q, 
-	nr::RawColorRGB* bitmap, 
+	nr::RawColorRGBA* bitmap, 
 	Triangle4d* h_triangles, nr_uint triangleCount, 
 	GLFWwindow* wnd,
 	nr::FrameBuffer frame,
@@ -130,7 +130,7 @@ void dynamicCube(
 	q.enqueueBufferReadCommand(frame.color, true, screenDim.width * screenDim.height, bitmap);
 	q.await();
 	auto t_framebufferRead = std::chrono::system_clock::now();
-	glDrawPixels(640, 480, GL_RGB, GL_UNSIGNED_BYTE, bitmap);
+	glDrawPixels(640, 480, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
 	auto t_framebufferWrite = std::chrono::system_clock::now();
 	glfwSwapBuffers(wnd);
 	auto t_bufferSwap = std::chrono::system_clock::now();
@@ -143,7 +143,7 @@ void dynamicCube(
 void staticCube(
 	FullPipeline pipeline,
 	nr::CommandQueue q,
-	nr::RawColorRGB* bitmap,
+	nr::RawColorRGBA* bitmap,
 	Triangle4d* h_triangles, nr_uint triangleCount,
 	GLFWwindow* wnd,
 	nr::FrameBuffer frame,
@@ -160,11 +160,16 @@ void staticCube(
 		transform(h_triangles, tick++);
 		t_transform = std::chrono::system_clock::now();
 
-		q.enqueueBufferWriteCommand(pipeline.vertexShader.points, false, triangleCount, (nr_float*)h_triangles);
-		q.enqueueBufferFillCommand(pipeline.binRasterizer.binQueues, 0u);
-		q.enqueueBufferFillCommand(pipeline.fineRasterizer.frameBuffer.color, { 0, 0, 0 });
-		q.enqueueBufferFillCommand(pipeline.fineRasterizer.frameBuffer.depth, 0.0f);
-		q.await();
+		cl_err = q.enqueueBufferWriteCommand(pipeline.vertexShader.points, false, triangleCount, (nr_float*)h_triangles);
+		if (nr::error::isFailure(cl_err)) return;
+		cl_err = q.enqueueBufferFillCommand(pipeline.binRasterizer.binQueues, 0u);
+		if (nr::error::isFailure(cl_err)) return;
+		cl_err = q.enqueueBufferFillCommand(pipeline.fineRasterizer.frameBuffer.color, { 0, 0, 0 });
+		if (nr::error::isFailure(cl_err)) return;
+		cl_err = q.enqueueBufferFillCommand(pipeline.fineRasterizer.frameBuffer.depth, 0.0f);
+		if (nr::error::isFailure(cl_err)) return;
+		cl_err = q.await();
+		if (nr::error::isFailure(cl_err)) return;
 		t_buffers = std::chrono::system_clock::now();
 
 		if (nr::error::isFailure(cl_err = pipeline(q, t_vertexShading, t_binRasterizing, t_fineRasterizing)))
@@ -180,7 +185,7 @@ void staticCube(
 		q.await();
 		t_framebufferRead = std::chrono::system_clock::now();
 
-		glDrawPixels(640, 480, GL_RGB, GL_UNSIGNED_BYTE, bitmap);
+		glDrawPixels(640, 480, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
 		t_framebufferWrite = std::chrono::system_clock::now();
 
 		glfwSwapBuffers(wnd);
@@ -200,14 +205,13 @@ int main(const int argc, const char* argv[])
     const nr_uint triangleCount = 48 * 4;
     nr::__internal::BinQueueConfig config = { 48, 48, 256 };
     
-    std::unique_ptr<nr::RawColorRGB> bitmap(new nr::RawColorRGB[screenDim.width * screenDim.height]);
+    std::unique_ptr<nr::RawColorRGBA> bitmap(new nr::RawColorRGBA[screenDim.width * screenDim.height]);
     
     Triangle4d h_triangles[triangleCount]; 
 
     if (!init("Nraster Demo 4d", screenDim, wnd)) return EXIT_FAILURE;
 
     nr::CommandQueue q = nr::CommandQueue::getDefault();
-    std::cout << (cl_command_queue) q << std::endl;
 
     glViewport(0, 0, screenDim.width, screenDim.height);
     glClearColor(0, 0, 0, 1);

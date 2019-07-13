@@ -1,5 +1,3 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
-
 # main Nraster library
 
 ADD_LIBRARY(Nraster SHARED
