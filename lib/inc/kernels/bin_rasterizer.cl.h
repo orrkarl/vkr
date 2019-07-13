@@ -99,8 +99,8 @@ event_t reduce_triangle_buffer(
 	{
 		for (uint i = 0; i < raw_copy_count; ++i)
 		{
-			result_x[i] = src_base[i * RENDER_DIMENSION];
-			result_y[i] = src_base[i * RENDER_DIMENSION + 1];
+			result_x[i] = src_base[i * ELEMENTS_PER_POINT];
+			result_y[i] = src_base[i * ELEMENTS_PER_POINT + 1];
 		}
 	}
 
@@ -122,7 +122,7 @@ kernel void bin_rasterize(
     local float reduced_triangles_y[BATCH_COUNT * RENDER_DIMENSION];
     local uint current_batch_index;
 
-    // Workaround for that wierd compiler bug
+    // Workaround for that weird compiler bug
     private const ScreenDimension screen_dim = dim;
     
     private uint index_x = get_local_id(0);

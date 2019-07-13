@@ -46,6 +46,7 @@ TEST(Fine, Rasterizer)
     cl_status err = CL_SUCCESS;
 
     const nr_uint dim = 5;
+	const nr_uint point_count = dim + 1;
 
     const ScreenDimension screenDim = { 1366, 768 };
     const nr_uint totalScreenSize = screenDim.width * screenDim.height;

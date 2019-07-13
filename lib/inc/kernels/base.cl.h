@@ -28,6 +28,8 @@ const string base = R"__CODE__(
     #define MAX_WORK_GROUP_COUNT (16)
 #endif
 
+#define ELEMENTS_PER_POINT (RENDER_DIMENSION + 1)
+
 typedef struct _ScreenDimension
 {
     uint width;
@@ -88,7 +90,7 @@ typedef struct _Bin
     uint y;
 } Bin;
 
-typedef float Point[RENDER_DIMENSION];   // point in n-dimensional space 
+typedef float Point[ELEMENTS_PER_POINT;   // point in n-dimensional space 
 typedef Point Triangle[3];               // Nth dimensional triangle
 typedef Point Simplex[RENDER_DIMENSION]; // N-1 simplex (rendering is done on an object's surface)
 

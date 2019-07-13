@@ -91,6 +91,7 @@ TEST(SimplexReducer, reducing)
 	cl_status err = CL_SUCCESS;
 
 	const nr_uint dim = 4;
+	const nr_uint point_count = dim + 1;
 	const nr_uint simplexCount = 3;
 
 	Simplex<dim> orig[simplexCount];
@@ -116,7 +117,7 @@ TEST(SimplexReducer, reducing)
 	auto q = CommandQueue::getDefault();
 	ASSERT_SUCCESS(err);
 
-	Buffer<nr_float> d_orig(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim * dim * simplexCount, (nr_float*)orig, &err);
+	Buffer<nr_float> d_orig(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, point_count * dim * simplexCount, (nr_float*)orig, &err);
 	ASSERT_SUCCESS(err); 
 	Buffer<nr_float> d_res(CL_MEM_WRITE_ONLY, dim * 3 * (dim * (dim - 1) * (dim - 2) / 6) * simplexCount, &err);
 	ASSERT_SUCCESS(err);
@@ -129,7 +130,7 @@ TEST(SimplexReducer, reducing)
 
 	ASSERT_SUCCESS(testee.load());
 	ASSERT_SUCCESS(q.enqueueKernelCommand<1>(testee, global, local));
-	ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_res, false, dim * 3 * (dim * (dim - 1) * (dim - 2) / 6) * simplexCount, (nr_float*) result));
+	ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_res, false, point_count * 3 * (dim * (dim - 1) * (dim - 2) / 6) * simplexCount, (nr_float*) result));
 	ASSERT_SUCCESS(q.await());
 
 	for (auto i = 0u; i < simplexCount; ++i)

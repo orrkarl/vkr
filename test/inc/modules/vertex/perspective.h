@@ -17,6 +17,7 @@ TEST(VertexShader, Perspective)
     cl_status err = CL_SUCCESS;
 
     const nr_uint dim = 3;
+	const nr_uint point_count = dim + 1;
 
     Point<dim> p;
     p.values[0] = 1;
@@ -49,13 +50,13 @@ TEST(VertexShader, Perspective)
     auto q = CommandQueue::getDefault();
     ASSERT_SUCCESS(err);
 
-    Buffer<nr_float> d_point(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, p.values, &err);
+    Buffer<nr_float> d_point(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, point_count, p.values, &err);
     ASSERT_SUCCESS(err);
     Buffer<nr_float> d_near(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, near, &err);
     ASSERT_SUCCESS(err);
     Buffer<nr_float> d_far(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, far, &err);
     ASSERT_SUCCESS(err);
-    Buffer<nr_float> d_result(CL_MEM_READ_WRITE, dim, &err);
+    Buffer<nr_float> d_result(CL_MEM_READ_WRITE, point_count, &err);
     ASSERT_SUCCESS(err);
 
     testee.points = d_point;
@@ -68,7 +69,7 @@ TEST(VertexShader, Perspective)
 
     ASSERT_SUCCESS(testee.load());
     ASSERT_SUCCESS(q.enqueueKernelCommand<1>(testee, global, local));
-    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, dim, result.values));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, point_count, result.values));
     ASSERT_SUCCESS(q.await());
 
     ASSERT_EQ(expected, result);

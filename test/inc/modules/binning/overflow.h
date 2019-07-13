@@ -9,6 +9,7 @@
 #include <base/Buffer.h>
 
 #include <chrono>
+#include <memory>
 
 using namespace nr;
 using namespace nr::__internal;
@@ -29,7 +30,8 @@ TEST(Binning, RasterizerOverflow)
 
     auto q = CommandQueue::getDefault();
 
-    Triangle<dim> h_triangles[triangleCount];
+	std::unique_ptr<Triangle<dim>[]> h_triangles_(new Triangle<dim>[triangleCount]);
+	auto h_triangles = h_triangles_.get();
     for (nr_uint i = 0; i < triangleCount; ++i)
     {
         mkTriangleInCoords(0, 0, screenDim, h_triangles + i);

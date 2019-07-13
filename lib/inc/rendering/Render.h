@@ -45,11 +45,11 @@ struct FrameBuffer
 template<nr_uint dim>
 struct Point
 {
-    nr_float values[dim];
+    nr_float values[dim + 1];
 
     bool operator==(const Point& other) const
     {
-        for (auto i = 0; i < dim; ++i) 
+        for (auto i = 0; i < dim + 1; ++i) 
             if (std::abs(values[i] - other[i]) > 10e-6)
                 return false;
 
@@ -59,11 +59,11 @@ struct Point
     friend std::ostream& operator<<(std::ostream& os, const Point<dim>& self)
     {
         os << "Point<" << dim << ">{ ";
-        for (auto i = 0; i < dim - 1; ++i)
+        for (auto i = 0; i < dim; ++i)
         {
             os << self[i] << ", ";
         }
-        return os << self[dim - 1] << " }";
+        return os << self[dim] << " }";
     }
 
     nr_float operator[](const nr_uint index) const { return values[index]; }

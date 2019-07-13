@@ -72,6 +72,7 @@ TEST(Binning, ReduceTriangleBuffer)
     const nr_uint dim = 5;
     const nr_uint triangleCount = 3;
     const nr_uint offset = 2;
+	const nr_uint point_count = dim + 1;
 	const nr_uint floatsPerTriangle = sizeof(Triangle<dim>) / sizeof(nr_float);
     
     cl_status err = CL_SUCCESS; 
@@ -95,7 +96,7 @@ TEST(Binning, ReduceTriangleBuffer)
 
     Buffer<nr_float> d_triangle(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, floatsPerTriangle * (offset + triangleCount), (nr_float*) h_triangles_raw, &err);
     ASSERT_SUCCESS(err);
-    Buffer<nr_float> d_result(CL_MEM_WRITE_ONLY, 2 * triangleFloatCount / dim, &err);
+    Buffer<nr_float> d_result(CL_MEM_WRITE_ONLY, 2 * point_count * triangleCount, &err);
     ASSERT_SUCCESS(err);
     
     auto test = ReduceTriangleBuffer(code, &err);
