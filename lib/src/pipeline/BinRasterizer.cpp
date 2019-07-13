@@ -21,7 +21,7 @@ nr_uint BinRasterizer::getBinCount(const ScreenDimension& dim, const nr_uint& bi
 }
 
 BinRasterizer::BinRasterizer(Module module, cl_status* err)
-    : Kernel(module, "bin_rasterize", err)
+	: Kernel(module, "bin_rasterize", err), dimension{ 0 }, binQueueConfig{ 0, 0, 0 }, triangleCount{ 0 }
 {
 }
 
