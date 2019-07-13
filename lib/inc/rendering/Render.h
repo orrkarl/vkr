@@ -100,6 +100,8 @@ struct Triangle
 	}
 
 	Point<dim> operator[](const nr_uint index) const { return points[index]; }
+
+	Point<dim>& operator[](const nr_uint index) { return points[index]; }
 };
 
 #pragma pack(pop)

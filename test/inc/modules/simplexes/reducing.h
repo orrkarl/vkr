@@ -118,7 +118,7 @@ TEST(SimplexReducer, reducing)
 
 	Buffer<nr_float> d_orig(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim * dim * simplexCount, (nr_float*)orig, &err);
 	ASSERT_SUCCESS(err); 
-	Buffer<nr_float> d_res(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, dim * 3 * (dim * (dim - 1) * (dim - 2) / 6) * simplexCount, (nr_float*)expected, &err);
+	Buffer<nr_float> d_res(CL_MEM_WRITE_ONLY, dim * 3 * (dim * (dim - 1) * (dim - 2) / 6) * simplexCount, &err);
 	ASSERT_SUCCESS(err);
 
 	testee.simplexes = d_orig;
@@ -134,6 +134,6 @@ TEST(SimplexReducer, reducing)
 
 	for (auto i = 0u; i < simplexCount; ++i)
 	{
-		ASSERT_EQ(expected[i], result[i]);
+		ASSERT_EQ(expected[i], result[i]) << i;
 	}
 }
