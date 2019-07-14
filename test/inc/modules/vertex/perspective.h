@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 #include <inc/includes.h>
 
 #include <base/Module.h>
@@ -23,6 +25,7 @@ TEST(VertexShader, Perspective)
     p.values[0] = 1;
     p.values[1] = 1;
     p.values[2] = 2;
+	p.values[3] = nanf("");
     nr_float near[dim] = { 0, 0, 0 };
     nr_float far[dim]  = { 2, 2, 3 };
     Point<dim> result;
@@ -31,6 +34,7 @@ TEST(VertexShader, Perspective)
     expected.values[0] = -0.5;
     expected.values[1] = -0.5;
     expected.values[2] = 2.0f / 3;
+	expected.values[3] = nanf("");
     
     Module::Options options = 
     {

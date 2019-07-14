@@ -48,25 +48,14 @@ void setupSimplexes(const nr_uint count, Simplex<4>* original, ReducedSimplex<4>
 
 	for (auto i = 0; i < count; ++i)
 	{
-		original[i][0].values[0] = curr;
-		original[i][0].values[1] = curr;
-		original[i][0].values[2] = curr;
-		original[i][0].values[3] = curr++;
-
-		original[i][1].values[0] = curr;
-		original[i][1].values[1] = curr;
-		original[i][1].values[2] = curr;
-		original[i][1].values[3] = curr++;
-
-		original[i][2].values[0] = curr;
-		original[i][2].values[1] = curr;
-		original[i][2].values[2] = curr;
-		original[i][2].values[3] = curr++;
-
-		original[i][3].values[0] = curr;
-		original[i][3].values[1] = curr;
-		original[i][3].values[2] = curr;
-		original[i][3].values[3] = curr++;
+		for (auto j = 0u; j < 4; ++j)
+		{
+			original[i][j][0] = curr;
+			original[i][j][1] = curr;
+			original[i][j][2] = curr;
+			original[i][j][3] = curr++;
+			original[i][j][4] = nanf("");
+		}
 
 		result[i][0][0] = original[i][0];
 		result[i][0][1] = original[i][1];
@@ -93,6 +82,7 @@ TEST(SimplexReducer, reducing)
 	const nr_uint dim = 4;
 	const nr_uint point_count = dim + 1;
 	const nr_uint simplexCount = 3;
+	const nr_uint totalElementCount = point_count * 3 * (dim * (dim - 1) * (dim - 2) / 6) * simplexCount;
 
 	Simplex<dim> orig[simplexCount];
 	ReducedSimplex<dim> expected[simplexCount];
@@ -119,7 +109,7 @@ TEST(SimplexReducer, reducing)
 
 	Buffer<nr_float> d_orig(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, point_count * dim * simplexCount, (nr_float*)orig, &err);
 	ASSERT_SUCCESS(err); 
-	Buffer<nr_float> d_res(CL_MEM_WRITE_ONLY, dim * 3 * (dim * (dim - 1) * (dim - 2) / 6) * simplexCount, &err);
+	Buffer<nr_float> d_res(CL_MEM_WRITE_ONLY, totalElementCount, &err);
 	ASSERT_SUCCESS(err);
 
 	testee.simplexes = d_orig;

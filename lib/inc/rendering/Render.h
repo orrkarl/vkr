@@ -67,6 +67,8 @@ struct Point
     }
 
     nr_float operator[](const nr_uint index) const { return values[index]; }
+
+	nr_float& operator[](const nr_uint index) { return values[index]; }
 };
 
 // represents a dim-1 dimensional simplex, embedded in 'dim' dimensional space

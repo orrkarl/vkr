@@ -7,11 +7,11 @@
 
 #include <utils/converters.h>
 
-nr_float h_triangle[9]
+nr_float h_triangle[]
 {
-    -5, -2.5, 3,
-    0, 5, 2.5,
-    5, -2.5, 2
+    -5, -2.5,   3, 1,
+     0,    5, 2.5, 1,
+     5, -2.5,   2, 1
 };
 
 nr_float h_near[3]
