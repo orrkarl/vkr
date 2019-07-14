@@ -13,6 +13,8 @@
 #include <stdio.h>
 #include <thread>
 
+const nr_uint dim = 4;
+
 Vector h_cube[]
 {
     Vector(-1, -1, -1, -1, 1),
@@ -52,11 +54,10 @@ void transform(Triangle4d triangles[48 * 4], const nr_uint tick)
     
     Matrix op = t * r;
 
-    Vector4d cube[16];
+    Vector cube[16];
     for (auto i = 0; i < 16; ++i)
     {
-        Vector tmp = op * h_cube[i];
-        tmp.toVector4d(cube + i);
+		cube[i] = op * h_cube[i];
     }
 
     reduce4Cube(cube, triangles);
@@ -112,7 +113,7 @@ void dynamicCube(
 	auto t0 = std::chrono::system_clock::now();
 	transform(h_triangles, tick++);
 	auto t_transform = std::chrono::system_clock::now();
-	q.enqueueBufferWriteCommand(pipeline.vertexShader.points, false, triangleCount, (nr_float*)h_triangles);
+	q.enqueueBufferWriteCommand(pipeline.vertexShader.points, false, 3 * (dim + 1) * triangleCount, (nr_float*)h_triangles);
 	q.enqueueBufferFillCommand(pipeline.binRasterizer.binQueues, 0u);
 	q.enqueueBufferFillCommand(pipeline.fineRasterizer.frameBuffer.color, { 0, 0, 0 });
 	q.enqueueBufferFillCommand(pipeline.fineRasterizer.frameBuffer.depth, 0.0f);
@@ -160,9 +161,7 @@ void staticCube(
 		transform(h_triangles, tick++);
 		t_transform = std::chrono::system_clock::now();
 
-		const nr_uint dim = 4;
-
-		cl_err = q.enqueueBufferWriteCommand(pipeline.vertexShader.points, false, triangleCount * dim * 3, (nr_float*)h_triangles);
+		cl_err = q.enqueueBufferWriteCommand(pipeline.vertexShader.points, false, triangleCount * (dim + 1) * 3, (nr_float*)h_triangles);
 		if (nr::error::isFailure(cl_err)) return;
 		cl_err = q.enqueueBufferFillCommand(pipeline.binRasterizer.binQueues, 0u);
 		if (nr::error::isFailure(cl_err)) return;
@@ -203,7 +202,6 @@ int main(const int argc, const char* argv[])
     cl_status cl_err = CL_SUCCESS;
 
     nr::ScreenDimension screenDim = { 640, 480 };
-    const nr_uint dim = 4;
     const nr_uint triangleCount = 8 * 6 * 4; // In one 4d cube: 8 3d cubes, each devided to 6 3d-simplexes (in 4d space), each has 4 triangles
     nr::__internal::BinQueueConfig config = { 48, 48, 256 };
     

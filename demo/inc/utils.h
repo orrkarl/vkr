@@ -22,6 +22,8 @@
 #include <pipeline/FineRasterizer.h>
 #include <pipeline/VertexShader.h>
 
+#include "linalg.h"
+
 bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWwindow*& wnd);
 
 // Nraster utilities
@@ -61,35 +63,16 @@ private:
 	std::array<nr_size, 2> fineRasterizerGlobalSize, fineRasterizerLocalSize{};
 };
 
-struct Vector4d
-{
-    nr_float x, y, z, w;
-
-    Vector4d();
-
-    Vector4d(const nr_float x, const nr_float y, const nr_float z, const nr_float w);
-
-    nr_float dot(const Vector4d& other) const;
-
-    Vector4d operator-(const Vector4d& other) const;
-
-    bool operator==(const Vector4d& other) const;
-
-    nr_float distanceSquared(const Vector4d& other) const;
-
-    friend std::ostream& operator<<(std::ostream& os, const Vector4d& self);
-};
-
 struct Triangle4d
 {
-    Vector4d points[3];
+    Vector points[3];
 
     friend std::ostream& operator<<(std::ostream& os, const Triangle4d& self);
 };
 
 struct Tetrahedron
 {
-    Vector4d points[4];
+    Vector points[4];
 
     friend std::ostream& operator<<(std::ostream& os, const Tetrahedron& self);
 };
@@ -108,4 +91,4 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void reduce4Simplex(const Tetrahedron& tetrahedron, Triangle4d result[4]);
 
 // Reduce a 4-cbue to Triangles
-void reduce4Cube(const Vector4d cube[16], Triangle4d result[6 * 8 * 4]); 
+void reduce4Cube(const Vector cube[16], Triangle4d result[6 * 8 * 4]); 

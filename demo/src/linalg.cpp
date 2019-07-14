@@ -149,34 +149,6 @@ Vector::Vector()
 {
 }
 
-Vector::Vector(const Vector4d& other)
-    : Vector(other.x, other.y, other.z, other.w, 1)
-{
-}
-
-Vector4d Vector::toVector4d() const
-{
-    Vector4d ret;
-    toVector4d(ret);
-    return ret;
-}
-
-void Vector::toVector4d(Vector4d& vec) const
-{
-    vec.x = data[X];
-    vec.y = data[Y];
-    vec.z = data[Z];
-    vec.w = data[W];
-}
-
-void Vector::toVector4d(Vector4d* vec) const
-{
-    vec->x = data[X];
-    vec->y = data[Y];
-    vec->z = data[Z];
-    vec->w = data[W];
-}
-
 nr_float& Vector::operator[](const Axis idx)
 {
     return data[idx];
@@ -185,6 +157,66 @@ nr_float& Vector::operator[](const Axis idx)
 const nr_float& Vector::operator[](const Axis idx) const
 {
     return data[idx];
+}
+
+nr_float Vector::dot(const Vector& other) const
+{
+	return data[0] * other.data[0] + data[1] * other.data[1] + data[2] * other.data[2] + data[3] * other.data[3] + data[4] * other.data[4];
+}
+
+nr_float Vector::distanceSquared(const Vector& other) const
+{
+	auto tmp = *this - other;
+	return tmp.dot(tmp);
+}
+
+Vector Vector::operator-(const Vector& other) const
+{
+	Vector ret;
+	ret.data[0] = data[0] - other.data[0];
+	ret.data[1] = data[1] - other.data[1];
+	ret.data[2] = data[2] - other.data[2];
+	ret.data[3] = data[3] - other.data[3];
+	ret.data[4] = data[4] - other.data[4];
+	return ret;
+}
+
+Vector Vector::operator+(const Vector& other) const
+{
+	Vector ret;
+	ret.data[0] = data[0] + other.data[0];
+	ret.data[1] = data[1] + other.data[1];
+	ret.data[2] = data[2] + other.data[2];
+	ret.data[3] = data[3] + other.data[3];
+	ret.data[4] = data[4] + other.data[4];
+	return ret;
+}
+
+Vector Vector::operator*(const nr_float s) const
+{
+	Vector ret;
+	ret.data[0] = data[0] * s;
+	ret.data[1] = data[1] * s;
+	ret.data[2] = data[2] * s;
+	ret.data[3] = data[3] * s;
+	ret.data[4] = data[4] * s;
+	return ret;
+}
+
+Vector Vector::operator/(const nr_float s) const
+{
+	Vector ret;
+	ret.data[0] = data[0] / s;
+	ret.data[1] = data[1] / s;
+	ret.data[2] = data[2] / s;
+	ret.data[3] = data[3] / s;
+	ret.data[4] = data[4] / s;
+	return ret;
+}
+
+bool Vector::operator==(const Vector& other) const
+{
+	return data[0] == other.data[0] && data[1] == other.data[1] && data[2] == other.data[2] && data[3] == other.data[3] && data[4] == other.data[4];
 }
 
 std::ostream& operator<<(std::ostream& os, const Vector& self)

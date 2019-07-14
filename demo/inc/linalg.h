@@ -2,7 +2,7 @@
 
 #include <ostream>
 
-#include "utils.h"
+#include <general/predefs.h>
 
 typedef enum _Axis
 {
@@ -15,14 +15,19 @@ struct Vector
     
     explicit Vector(nr_float x, nr_float y, nr_float z, nr_float w, nr_float q);
     explicit Vector();
-    explicit Vector(const Vector4d& other);
-
-    Vector4d toVector4d() const;
-    void toVector4d(Vector4d& vec) const;
-    void toVector4d(Vector4d* vec) const;
 
     nr_float& operator[](const Axis axis);
     const nr_float& operator[](const Axis axis) const;
+
+	nr_float dot(const Vector& other) const;
+	nr_float distanceSquared(const Vector& other) const;
+
+	Vector operator-(const Vector& other) const;
+	Vector operator+(const Vector& other) const;
+	Vector operator*(const nr_float s) const;
+	Vector operator/(const nr_float s) const;
+
+	bool operator==(const Vector& other) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Vector& vec);
 };

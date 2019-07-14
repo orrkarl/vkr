@@ -91,6 +91,8 @@ cl_status init()
 
 cl_status destroy()
 {
+	cl_status ret = CL_SUCCESS;
+	if (nr::error::isFailure(ret = CommandQueue::getDefault().flush())) return ret;
 	return CommandQueue::getDefault().finish();
 }
 

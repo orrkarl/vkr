@@ -277,42 +277,6 @@ void reduce4Simplex(const Tetrahedron& tetrahedron, Triangle4d result[4])
     result[3].points[2] = tetrahedron.points[3];
 }
 
-Vector4d::Vector4d(const nr_float x, const nr_float y, const nr_float z, const nr_float w)
-    : x(x), y(y), z(z), w(w)
-{
-}
-
-Vector4d::Vector4d()
-    : x(0), y(0), z(0), w(0)
-{
-}
-
-nr_float Vector4d::dot(const Vector4d& other) const
-{
-    return x * other.x + y * other.y + z * other.z + w * other.w;
-}
-
-Vector4d Vector4d::operator-(const Vector4d& other) const
-{
-    return Vector4d(x - other.x, y - other.y, z - other.z, w - other.w);
-}
-
-nr_float Vector4d::distanceSquared(const Vector4d& other) const
-{
-    auto diff = *this - other;
-    return diff.dot(diff);
-}
-
-bool Vector4d::operator==(const Vector4d& other) const
-{
-    return (x == other.x) && (y == other.y) && (z == other.z) && (w == other.w);
-}
-
-std::ostream& operator<<(std::ostream& os, const Vector4d& self)
-{
-    return os << "Vector4d{" << self.x << ", " << self.y << ", " << self.z << ", " << self.w << "}";
-}
-
 std::ostream& operator<<(std::ostream& os, const Triangle4d& self)
 {
     return os << "Triangle4d{" << self.points[0] << ", " << self.points[1] << ", " << self.points[2] << "}";
@@ -323,7 +287,7 @@ std::ostream& operator<<(std::ostream& os, const Tetrahedron& self)
     return os << "Tetrahedron{" << self.points[0] << ", " << self.points[1] << ", " << self.points[2] << ", " << self.points[3] << "}";
 }
 
-bool isCubeFace(const Vector4d& p0, const Vector4d& p1, const Vector4d& p2, const Vector4d& p3)
+bool isCubeFace(const Vector& p0, const Vector& p1, const Vector& p2, const Vector& p3)
 {
     auto d01 = p0.distanceSquared(p1);
     auto d02 = p0.distanceSquared(p2);
@@ -349,7 +313,7 @@ bool isCubeFace(const Vector4d& p0, const Vector4d& p1, const Vector4d& p2, cons
     return countMax == 2 && countMin == 4; 
 }
 
-void reduceToFaces(const Vector4d cube[8], Vector4d result[6 * 4])
+void reduceToFaces(const Vector cube[8], Vector result[6 * 4])
 {    
     auto result_idx = 0;
     for (auto i = 0; i < 8 && result_idx < 24; ++i)
@@ -373,7 +337,7 @@ void reduceToFaces(const Vector4d cube[8], Vector4d result[6 * 4])
     }
 }
 
-bool isVertexInFace(const Vector4d& initial, const Vector4d faces[4])
+bool isVertexInFace(const Vector& initial, const Vector faces[4])
 {
     for (auto vec = 0; vec < 4; ++vec)
         if (initial == faces[vec])
@@ -382,7 +346,7 @@ bool isVertexInFace(const Vector4d& initial, const Vector4d faces[4])
     return false;
 }
 
-void getNextFace(const Vector4d& initial, const Vector4d faces[24], const nr_uint lastFaceIndex, nr_uint& result)
+void getNextFace(const Vector& initial, const Vector faces[24], const nr_uint lastFaceIndex, nr_uint& result)
 {
     for (auto face = lastFaceIndex + 1; face < 6; ++face)
     {
@@ -394,9 +358,9 @@ void getNextFace(const Vector4d& initial, const Vector4d faces[24], const nr_uin
     }
 }
 
-void tetrahadrlize3Cube(const Vector4d cube[8], Tetrahedron result[6])
+void tetrahadrlize3Cube(const Vector cube[8], Tetrahedron result[6])
 {
-    Vector4d faces[24];
+    Vector faces[24];
     reduceToFaces(cube, faces);
 
     nr_uint i0, i1, i2;
@@ -435,7 +399,7 @@ void tetrahadrlize3Cube(const Vector4d cube[8], Tetrahedron result[6])
     result[5].points[3] = faces[i2 * 4];
 }
 
-void generate3cube(const Vector4d cube[16], const nr_uint diff, const nr_uint offset, Vector4d cube3d[8])
+void generate3cube(const Vector cube[16], const nr_uint diff, const nr_uint offset, Vector cube3d[8])
 {
     auto cube3_idx = 0;
     for (nr_uint i = offset * diff; i < 16; i += 2 * diff)
@@ -447,9 +411,9 @@ void generate3cube(const Vector4d cube[16], const nr_uint diff, const nr_uint of
     }
 }
 
-void cube4dToSimplices(const Vector4d cube[16], Tetrahedron simplices[6 * 8])
+void cube4dToSimplices(const Vector cube[16], Tetrahedron simplices[6 * 8])
 {
-    Vector4d cube3d[8];
+    Vector cube3d[8];
 
     auto result_idx = 0;
     for (auto diff = 1; diff <= 8; diff *= 2)
@@ -465,7 +429,7 @@ void cube4dToSimplices(const Vector4d cube[16], Tetrahedron simplices[6 * 8])
     }
 }
 
-void reduce4Cube(const Vector4d cube[16], Triangle4d result[6 * 8 * 4])
+void reduce4Cube(const Vector cube[16], Triangle4d result[6 * 8 * 4])
 {
     Tetrahedron simplices[6 * 8];
     cube4dToSimplices(cube, simplices);

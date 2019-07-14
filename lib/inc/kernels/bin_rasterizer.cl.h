@@ -268,14 +268,14 @@ kernel void reduce_triangle_buffer_test(
 {
     local float res_x[TOTAL_TRIANGLE_COUNT * 3];
     local float res_y[TOTAL_TRIANGLE_COUNT * 3];
-	const uint copiedTriangleCount = TOTAL_TRIANGLE_COUNT - offset / (RENDER_DIMENSION * 3);
+	const uint copiedTriangleCount = TOTAL_TRIANGLE_COUNT - offset;
 
     event_t wait = reduce_triangle_buffer(triangle_data, copiedTriangleCount, offset, 0, res_x, res_y);
     wait_group_events(1, &wait);
 
     if (get_global_id(0) == 0)
     {
-        for (uint i = 0; i < 3 * TOTAL_TRIANGLE_COUNT - offset / RENDER_DIMENSION; ++i)
+        for (uint i = 0; i < 3 * (TOTAL_TRIANGLE_COUNT - offset); ++i)
         {
             result[i].x = res_x[i];
             result[i].y = res_y[i];
