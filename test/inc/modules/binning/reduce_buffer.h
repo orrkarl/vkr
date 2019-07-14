@@ -103,7 +103,7 @@ TEST(Binning, ReduceTriangleBuffer)
     ASSERT_SUCCESS(err);
 
     test.triangles = d_triangle;
-    test.offset    = offset * floatsPerTriangle;
+    test.offset    = offset;
     test.result    = d_result;
     
     std::array<size_t, 1> local  = { 30 };

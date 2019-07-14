@@ -91,7 +91,7 @@ event_t reduce_triangle_buffer(
     local float* result_x, 
     local float* result_y)
 {
-    const global float* src_base = ((const global float*) triangles) + offset; 
+    const global float* src_base = ((const global float*) (triangles + offset)); 
 
     const uint raw_copy_count = triangle_count * 3; // one for each point in the triangle buffer
 	
