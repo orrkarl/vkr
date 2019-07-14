@@ -161,9 +161,10 @@ cl_status FullPipeline::setup(
     const nr_uint binCountY = ceil(((nr_float) screenDim.height) / config.binHeight);
     const nr_uint totalBinCount = binCountX * binCountY;
     const nr_uint totalScreenDim = screenDim.width * screenDim.height;
+	const nr_uint totalFloatCount = (dim + 1) * 3 * triangleCount;
     
     // Vertex Shader
-    vertexShader.points = nr::Buffer<nr_float>(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim * 3 * triangleCount, vertecies, &ret);
+    vertexShader.points = nr::Buffer<nr_float>(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, totalFloatCount, vertecies, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
     vertexShader.near = nr::Buffer<nr_float>(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim, near, &ret);
@@ -172,7 +173,7 @@ cl_status FullPipeline::setup(
     vertexShader.far = nr::Buffer<nr_float>(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim, far, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
-    vertexShader.result = nr::Buffer<nr_float>(CL_MEM_READ_WRITE, dim * 3 * triangleCount, &ret);
+    vertexShader.result = nr::Buffer<nr_float>(CL_MEM_READ_WRITE, totalFloatCount, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
 	vertexShaderGlobalSize = { triangleCount * 3 };
@@ -185,7 +186,7 @@ cl_status FullPipeline::setup(
     binRasterizer.binQueueConfig = config;
     binRasterizer.hasOverflow    = nr::Buffer<nr_bool>(CL_MEM_WRITE_ONLY, 1, &ret);
     if (nr::error::isFailure(ret)) return ret;
-    binRasterizer.binQueues = nr::Buffer<nr_uint>(CL_MEM_READ_WRITE, 3 * dim * binRasterWorkGroupCount * totalBinCount * (config.queueSize + 1), &ret);
+    binRasterizer.binQueues = nr::Buffer<nr_uint>(CL_MEM_READ_WRITE, binRasterWorkGroupCount * totalBinCount * (config.queueSize + 1), &ret);
     if (nr::error::isFailure(ret)) return ret;
     binRasterizer.batchIndex = nr::Buffer<nr_uint>(CL_MEM_READ_WRITE, 1, &ret);
     if (nr::error::isFailure(ret)) return ret;

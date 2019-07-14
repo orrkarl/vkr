@@ -80,8 +80,6 @@ kernel void shade_vertex(
 
     perspective_bounded(near[0], far[0], near[1], far[1], result[index]);
     normalize_step(points[index], near, far, 2, result[index]);
-
-	DEBUG_ONCE5("[ %f %f %f %f %f ]\n", result[index][0], result[index][1], result[index][2], result[index][3], result[index][4]);
 }
 
 )__CODE__";
