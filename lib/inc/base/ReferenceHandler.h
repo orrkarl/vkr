@@ -82,7 +82,7 @@ public:
      * @brief Decrements the commandQueue's refernece count                   
      * @param obj The OpenCL object                                                
      */                                                                 
-    static cl_status release(cl_command_queue obj) { return clReleaseCommandQueue(obj); }    
+    static cl_status release(cl_command_queue obj) {return clReleaseCommandQueue(obj); }    
 };
 
 /**                                                                     

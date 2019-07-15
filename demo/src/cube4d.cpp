@@ -45,7 +45,7 @@ nr_float h_far[]
     5, 5, 10, 10
 };
 
-void transform(Triangle4d triangles[48 * 4], const nr_uint tick)
+void transform(Tetrahedron simplexes[48], const nr_uint tick)
 {
     auto angle = tick * M_PI / 20;
 
@@ -60,13 +60,14 @@ void transform(Triangle4d triangles[48 * 4], const nr_uint tick)
 		cube[i] = op * h_cube[i];
     }
 
-    reduce4Cube(cube, triangles);
+    reduce4Cube(cube, simplexes);
 }
 
 void profilePipeline(
     const std::chrono::system_clock::time_point& t0,
     const std::chrono::system_clock::time_point& transform,
     const std::chrono::system_clock::time_point& buffers,
+	const std::chrono::system_clock::time_point& simplexReducing,
 	const std::chrono::system_clock::time_point& vertexShading,
 	const std::chrono::system_clock::time_point& binRasterizing,
 	const std::chrono::system_clock::time_point& fineRasterizing,
@@ -77,7 +78,8 @@ void profilePipeline(
 {
     std::chrono::duration<nr_double> dt_transform = transform - t0;
     std::chrono::duration<nr_double> dt_buffers = buffers - transform;
-	std::chrono::duration<nr_double> dt_vertexShading = vertexShading - buffers;
+	std::chrono::duration<nr_double> dt_simplexReducing = simplexReducing - buffers;
+	std::chrono::duration<nr_double> dt_vertexShading = vertexShading - simplexReducing;
 	std::chrono::duration<nr_double> dt_binRasterizing = binRasterizing - vertexShading;
 	std::chrono::duration<nr_double> dt_fineRasterizing = fineRasterizing - binRasterizing;
     std::chrono::duration<nr_double> dt_pipeline = pipeline - buffers;
@@ -90,6 +92,7 @@ void profilePipeline(
     std::printf("\ttotal transform - %fms\n",			dt_transform.count()        * 1000);
     std::printf("\ttotal buffers setup - %fms\n",		dt_buffers.count()          * 1000);
     std::printf("\ttotal pipeline - %fms\n",			dt_pipeline.count()         * 1000);
+	std::printf("\t\tsimplex reducing- %fms\n",			dt_simplexReducing.count()  * 1000);
 	std::printf("\t\tvertex shading - %fms\n",			dt_vertexShading.count()	* 1000);
 	std::printf("\t\tbin rasterizing - %fms\n",			dt_binRasterizing.count()	* 1000);
 	std::printf("\t\tfine rasterizing - %fms\n",		dt_fineRasterizing.count()	* 1000);
@@ -103,7 +106,7 @@ void dynamicCube(
 	FullPipeline pipeline, 
 	nr::CommandQueue q, 
 	nr::RawColorRGBA* bitmap, 
-	Triangle4d* h_triangles, nr_uint triangleCount, 
+	Tetrahedron* h_simplexes, nr_uint simplexCount,
 	GLFWwindow* wnd,
 	nr::FrameBuffer frame,
 	nr::ScreenDimension screenDim,
@@ -111,9 +114,9 @@ void dynamicCube(
 	cl_status& cl_err)
 {
 	auto t0 = std::chrono::system_clock::now();
-	transform(h_triangles, tick++);
+	transform(h_simplexes, tick++);
 	auto t_transform = std::chrono::system_clock::now();
-	q.enqueueBufferWriteCommand(pipeline.vertexShader.points, false, 3 * (dim + 1) * triangleCount, (nr_float*)h_triangles);
+	q.enqueueBufferWriteCommand(pipeline.vertexShader.points, false, simplexCount, (nr_float*)h_simplexes);
 	q.enqueueBufferFillCommand(pipeline.binRasterizer.binQueues, 0u);
 	q.enqueueBufferFillCommand(pipeline.fineRasterizer.frameBuffer.color, { 0, 0, 0 });
 	q.enqueueBufferFillCommand(pipeline.fineRasterizer.frameBuffer.depth, 0.0f);
@@ -145,23 +148,31 @@ void staticCube(
 	FullPipeline pipeline,
 	nr::CommandQueue q,
 	nr::RawColorRGBA* bitmap,
-	Triangle4d* h_triangles, nr_uint triangleCount,
+	Tetrahedron* h_simplexes, nr_uint simplexCount,
 	GLFWwindow* wnd,
 	nr::FrameBuffer frame,
 	nr::ScreenDimension screenDim,
 	nr_uint& tick,
 	cl_status& cl_err)
 {
-	std::chrono::time_point<std::chrono::system_clock> t0, t_transform, t_buffers, t_vertexShading, t_binRasterizing, t_fineRasterizing, t_pipeline, t_framebufferRead, t_framebufferWrite, t_bufferSwap;
+	std::chrono::time_point<std::chrono::system_clock> 
+		t0, 
+		t_transform, t_buffers, 
+		t_simplexReducing, t_vertexShading, t_binRasterizing, t_fineRasterizing, t_pipeline, 
+		t_framebufferRead, t_framebufferWrite, t_bufferSwap;
 
 	if (!tick)
 	{
 		t0 = std::chrono::system_clock::now();
 
-		transform(h_triangles, tick++);
+		transform(h_simplexes, tick++);
 		t_transform = std::chrono::system_clock::now();
 
-		cl_err = q.enqueueBufferWriteCommand(pipeline.vertexShader.points, false, triangleCount * (dim + 1) * 3, (nr_float*)h_triangles);
+		cl_err = q.enqueueBufferWriteCommand(
+			pipeline.simplexReducer.simplexes, 
+			false, 
+			(dim + 1) * dim * simplexCount, // floats per vertex * vertecies per simplex * simplex count = floats count
+			(nr_float*)h_simplexes);
 		if (nr::error::isFailure(cl_err)) return;
 		cl_err = q.enqueueBufferFillCommand(pipeline.binRasterizer.binQueues, 0u);
 		if (nr::error::isFailure(cl_err)) return;
@@ -173,7 +184,7 @@ void staticCube(
 		if (nr::error::isFailure(cl_err)) return;
 		t_buffers = std::chrono::system_clock::now();
 
-		if (nr::error::isFailure(cl_err = pipeline(q, t_vertexShading, t_binRasterizing, t_fineRasterizing)))
+		if (nr::error::isFailure(cl_err = pipeline(q, t_simplexReducing, t_vertexShading, t_binRasterizing, t_fineRasterizing)))
 		{
 			std::cerr << "Pipeline enqueue failed: " << nr::utils::stringFromCLError(cl_err) << std::endl;
 			return;
@@ -192,7 +203,7 @@ void staticCube(
 		glfwSwapBuffers(wnd);
 		t_bufferSwap = std::chrono::system_clock::now();
 
-		profilePipeline(t0, t_transform, t_buffers, t_vertexShading, t_binRasterizing, t_fineRasterizing, t_pipeline, t_framebufferRead, t_framebufferWrite, t_bufferSwap);
+		profilePipeline(t0, t_transform, t_buffers, t_simplexReducing, t_vertexShading, t_binRasterizing, t_fineRasterizing, t_pipeline, t_framebufferRead, t_framebufferWrite, t_bufferSwap);
 	}
 }
 
@@ -202,12 +213,12 @@ int main(const int argc, const char* argv[])
     cl_status cl_err = CL_SUCCESS;
 
     nr::ScreenDimension screenDim = { 640, 480 };
-    const nr_uint triangleCount = 8 * 6 * 4; // In one 4d cube: 8 3d cubes, each devided to 6 3d-simplexes (in 4d space), each has 4 triangles
+    const nr_uint triangleCount = 8 * 6; // In one 4d cube: 8 3d cubes, each devided to 6 3d-simplexes (in 4d space), each has 4 triangles
     nr::__internal::BinQueueConfig config = { 48, 48, 256 };
     
     std::unique_ptr<nr::RawColorRGBA> bitmap(new nr::RawColorRGBA[screenDim.width * screenDim.height]);
     
-    Triangle4d h_triangles[triangleCount]; 
+    Tetrahedron h_simplexes[triangleCount]; 
 
     if (!init("Nraster Demo 4d", screenDim, wnd)) return EXIT_FAILURE;
 
@@ -244,7 +255,7 @@ int main(const int argc, const char* argv[])
         return EXIT_FAILURE;
     }
 
-    if (nr::error::isFailure(cl_err = pipeline.setup(dim, triangleCount, (nr_float*) h_triangles, h_near, h_far, screenDim, config, 1, frame)))
+    if (nr::error::isFailure(cl_err = pipeline.setup(dim, triangleCount, (nr_float*) h_simplexes, h_near, h_far, screenDim, config, 1, frame)))
     {
         std::cout << "Failed to setup pipeline: " << nr::utils::stringFromCLError(cl_err) << "(" << cl_err << ")\n";
         return EXIT_FAILURE;
@@ -253,8 +264,12 @@ int main(const int argc, const char* argv[])
     nr_uint tick = 0;
     while (!glfwWindowShouldClose(wnd))
     {
-		staticCube(pipeline, q, bitmap.get(), h_triangles, triangleCount, wnd, frame, screenDim, tick, cl_err);
-		if (nr::error::isFailure(cl_err)) return EXIT_FAILURE;
+		staticCube(pipeline, q, bitmap.get(), h_simplexes, triangleCount, wnd, frame, screenDim, tick, cl_err);
+		if (nr::error::isFailure(cl_err))
+		{
+			std::cerr << "Pipeline error: " << nr::utils::stringFromCLError(cl_err) << std::endl;
+			return EXIT_FAILURE;
+		}
         glfwPollEvents();
     }
 
