@@ -194,7 +194,7 @@ cl_status FullPipeline::setup(
     vertexShader.result = nr::Buffer<nr_float>(CL_MEM_READ_WRITE, totalFloatCount, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
-	vertexShaderGlobalSize = { verteciesPerTriangle * trianglesPerSimplex };
+	vertexShaderGlobalSize = { verteciesPerTriangle * triangleCount };
 	vertexShaderLocalSize  = { 1 };
 
     // Bin rasterizer
@@ -242,28 +242,6 @@ cl_status FullPipeline::operator()(
 	if ((cl_err = q.await()) != CL_SUCCESS) return cl_err;
 	simplexReducing = std::chrono::system_clock::now();
 	printf("Simplexes reduced!\n");
-
-	auto count = simplexReducer.result.getElementCount(&cl_err);
-	std::cout << "Buffer element count: " << count << std::endl;
-	std::cout << "error: " << cl_err << std::endl;
-	std::unique_ptr<nr_float[]> reducedSimplices(new nr_float[count]);
-	q.enqueueBufferReadCommand(simplexReducer.result, true, count, reducedSimplices.get());
-
-	printf("Triangles:\n");
-	for (auto tri = 48 * 3; tri < 48 * 6; ++tri)
-	{
-		printf("\tTriangle %d:\n", tri);
-		for (auto v = 0; v < 3; ++v)
-		{
-			printf("\t\t[ ");
-			for (auto i = 0; i < 5; ++i)
-			{
-				printf(" %f", reducedSimplices.get()[5 * 3 * tri + 5 * v + i]);
-			}
-			printf(" ]\n");
-		}
-	}
-	
     
     printf("Enqueuing vertex shader\n");
 	if ((cl_err = vertexShader.load()) != CL_SUCCESS) return cl_err;

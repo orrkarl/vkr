@@ -116,7 +116,11 @@ void dynamicCube(
 	auto t0 = std::chrono::system_clock::now();
 	transform(h_simplexes, tick++);
 	auto t_transform = std::chrono::system_clock::now();
-	q.enqueueBufferWriteCommand(pipeline.vertexShader.points, false, simplexCount, (nr_float*)h_simplexes);
+	cl_err = q.enqueueBufferWriteCommand(
+		pipeline.simplexReducer.simplexes,
+		false,
+		(dim + 1) * dim * simplexCount, // floats per vertex * vertecies per simplex * simplex count = floats count
+		(nr_float*)h_simplexes);
 	q.enqueueBufferFillCommand(pipeline.binRasterizer.binQueues, 0u);
 	q.enqueueBufferFillCommand(pipeline.fineRasterizer.frameBuffer.color, { 0, 0, 0 });
 	q.enqueueBufferFillCommand(pipeline.fineRasterizer.frameBuffer.depth, 0.0f);
@@ -140,7 +144,7 @@ void dynamicCube(
 	auto t_bufferSwap = std::chrono::system_clock::now();
 
 	auto end = std::chrono::system_clock::now();
-	std::chrono::milliseconds diff(400 - (end - t0).count() * 1000000);
+	std::chrono::milliseconds diff(600 - (end - t0).count() * 1000000);
 	std::this_thread::sleep_for(diff);
 }
 
@@ -264,7 +268,7 @@ int main(const int argc, const char* argv[])
     nr_uint tick = 0;
     while (!glfwWindowShouldClose(wnd))
     {
-		staticCube(pipeline, q, bitmap.get(), h_simplexes, triangleCount, wnd, frame, screenDim, tick, cl_err);
+		dynamicCube(pipeline, q, bitmap.get(), h_simplexes, triangleCount, wnd, frame, screenDim, tick, cl_err);
 		if (nr::error::isFailure(cl_err))
 		{
 			std::cerr << "Pipeline error: " << nr::utils::stringFromCLError(cl_err) << std::endl;
