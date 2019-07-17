@@ -18,7 +18,7 @@ const string simplex_reducing = R"__CODE__(
 
 void copy_point(const global Point p, global Point res)
 {
-	for (uint i = 0; i < RENDER_DIMENSION; ++i)
+	for (uint i = 0; i < ELEMENTS_PER_POINT; ++i)
 	{
 		res[i] = p[i];
 	}

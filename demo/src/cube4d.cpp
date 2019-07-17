@@ -9,6 +9,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+#include <fstream>
 #include <iostream>
 #include <stdio.h>
 #include <thread>
@@ -163,7 +164,7 @@ void staticCube(
 
 		transform(h_simplexes, tick++);
 		t_transform = std::chrono::system_clock::now();
-
+		
 		cl_err = q.enqueueBufferWriteCommand(pipeline.vertexShader.points, false, simplexCount * (dim + 1) * dim, (nr_float*)h_simplexes);
 		if (nr::error::isFailure(cl_err)) return;
 		cl_err = q.enqueueBufferFillCommand(pipeline.binRasterizer.binQueues, 0u);
@@ -196,6 +197,28 @@ void staticCube(
 		t_bufferSwap = std::chrono::system_clock::now();
 
 		profilePipeline(t0, t_transform, t_buffers, t_vertexShading, t_simplexReducing, t_binRasterizing, t_fineRasterizing, t_pipeline, t_framebufferRead, t_framebufferWrite, t_bufferSwap);
+		
+		const auto count = (dim + 1) * 3 * 4 * simplexCount;
+		std::unique_ptr<nr_float[]> buf(new nr_float[count]);
+		q.enqueueBufferReadCommand(pipeline.binRasterizer.triangleData, true, count, buf.get());
+
+		std::ofstream log;
+		log.open("C:/git/Nraster/pre-binning-buffer post update.log");
+
+		for (auto tri = 0u; tri < simplexCount * dim; ++tri)
+		{
+			log << tri << std::endl;
+			for (auto v = 0; v < 3; ++v)
+			{
+				for (auto i = 0; i < 5; ++i)
+				{
+					log << buf.get()[tri * 3 * 5 + v * 5 + i] << " ";
+				}
+				log << std::endl;
+			}
+		}
+
+		log.close();
 	}
 }
 
