@@ -13,18 +13,16 @@
 #include <base/Kernel.h>
 #include <base/Module.h>
 
-#include <kernels/base.cl.h>
-#include <kernels/bin_rasterizer.cl.h>
-#include <kernels/fine_rasterizer.cl.h>
-#include <kernels/vertex_shading.cl.h>
-
 #include <pipeline/BinRasterizer.h>
 #include <pipeline/FineRasterizer.h>
+#include <pipeline/SimplexReducer.h>
 #include <pipeline/VertexShader.h>
 
 #include "linalg.h"
 
 bool init(const nr::string name, const nr::ScreenDimension& dim, GLFWwindow*& wnd);
+
+typedef std::chrono::system_clock::time_point timestamp_t;
 
 // Nraster utilities
 
@@ -39,9 +37,10 @@ struct FullModule : nr::Module
 
 struct FullPipeline
 {
-    nr::__internal::VertexShader   vertexShader;
 	nr::__internal::BinRasterizer  binRasterizer;
 	nr::__internal::FineRasterizer fineRasterizer;
+	nr::__internal::SimplexReducer simplexReducer;
+	nr::__internal::VertexShader   vertexShader;
 
     FullPipeline(FullModule module, cl_status* err);
 
@@ -53,14 +52,15 @@ struct FullPipeline
 
     cl_status operator()(
 		nr::CommandQueue q, 
-		std::chrono::system_clock::time_point& vertexShading, std::chrono::system_clock::time_point& binRasterizing, std::chrono::system_clock::time_point& fineRasterizing);
+		timestamp_t& vertexShading, timestamp_t& simplexReducing, timestamp_t& binRasterizing, timestamp_t& fineRasterizing);
 
 	cl_status operator()(nr::CommandQueue q);
 
 private:
-	std::array<nr_size, 1> vertexShaderGlobalSize, vertexShaderLocalSize{};
-	std::array<nr_size, 2> binRasterizerGlobalSize, binRasterizerLocalSize{};
-	std::array<nr_size, 2> fineRasterizerGlobalSize, fineRasterizerLocalSize{};
+	std::array<nr_size, 1> simplexReducerGlobalSize, simplexReducerLocalSize;
+	std::array<nr_size, 1> vertexShaderGlobalSize, vertexShaderLocalSize;
+	std::array<nr_size, 2> binRasterizerGlobalSize, binRasterizerLocalSize;
+	std::array<nr_size, 2> fineRasterizerGlobalSize, fineRasterizerLocalSize;
 };
 
 struct Triangle4d
@@ -89,6 +89,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 // Reduce a 4-Simplex to Triangles
 void reduce4Simplex(const Tetrahedron& tetrahedron, Triangle4d result[4]);
+
+void cube4dToSimplices(const Vector cube[16], Tetrahedron simplices[6 * 8]);
 
 // Reduce a 4-cbue to Triangles
 void reduce4Cube(const Vector cube[16], Triangle4d result[6 * 8 * 4]); 

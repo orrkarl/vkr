@@ -4,7 +4,14 @@
 #include <cstring>
 #include <iostream>
 
+
 #include <base/Platform.h>
+
+#include <kernels/base.cl.h>
+#include <kernels/bin_rasterizer.cl.h>
+#include <kernels/fine_rasterizer.cl.h>
+#include <kernels/simplex_reducing.cl.h>
+#include <kernels/vertex_shading.cl.h>
 
 #include <utils/converters.h>
 
@@ -119,12 +126,6 @@ nr::FrameBuffer mkFrameBuffer(const nr::ScreenDimension& dim, cl_status* err)
 FullModule::FullModule(cl_status* err)
     : nr::Module(STANDARD_MODULE_KERNELS, err)
 {
-    auto allCodes = {
-        nr::__internal::clcode::base,
-        nr::__internal::clcode::bin_rasterizer,
-        nr::__internal::clcode::fine_rasterizer,
-        nr::__internal::clcode::vertex_shading
-    };
 }
 
 cl_status FullModule::build(const nr_uint dim)
@@ -141,17 +142,18 @@ const nr::Module::Sources FullModule::STANDARD_MODULE_KERNELS = {
     nr::__internal::clcode::base,
     nr::__internal::clcode::bin_rasterizer,
     nr::__internal::clcode::fine_rasterizer,
+	nr::__internal::clcode::simplex_reducing,
     nr::__internal::clcode::vertex_shading
 };
 
 FullPipeline::FullPipeline(FullModule module, cl_status* err)
-	: vertexShader(module, err), binRasterizer(module, err), fineRasterizer(module, err)
+	: vertexShader(module, err), binRasterizer(module, err), fineRasterizer(module, err), simplexReducer(module, err)
 {
 }
 
 cl_status FullPipeline::setup(
     const nr_uint dim,
-    const nr_uint triangleCount, nr_float* vertecies, nr_float* near, nr_float* far,
+    const nr_uint simplexCount, nr_float* vertecies, nr_float* near, nr_float* far,
     nr::ScreenDimension screenDim, nr::__internal::BinQueueConfig config,                  
     const nr_uint binRasterWorkGroupCount, nr::FrameBuffer frameBuffer)
 {
@@ -161,10 +163,12 @@ cl_status FullPipeline::setup(
     const nr_uint binCountY = ceil(((nr_float) screenDim.height) / config.binHeight);
     const nr_uint totalBinCount = binCountX * binCountY;
     const nr_uint totalScreenDim = screenDim.width * screenDim.height;
+	const nr_uint trianglesPerSimplex = dim * (dim - 1) * (dim - 2) / 6;
+	const nr_uint triangleCount = trianglesPerSimplex * simplexCount;
 	const nr_uint totalFloatCount = (dim + 1) * 3 * triangleCount;
     
     // Vertex Shader
-    vertexShader.points = nr::Buffer<nr_float>(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, totalFloatCount, vertecies, &ret);
+    vertexShader.points = nr::Buffer<nr_float>(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, (dim + 1) * dim * simplexCount, vertecies, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
     vertexShader.near = nr::Buffer<nr_float>(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim, near, &ret);
@@ -173,14 +177,21 @@ cl_status FullPipeline::setup(
     vertexShader.far = nr::Buffer<nr_float>(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, dim, far, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
-    vertexShader.result = nr::Buffer<nr_float>(CL_MEM_READ_WRITE, totalFloatCount, &ret);
+    vertexShader.result = nr::Buffer<nr_float>(CL_MEM_READ_WRITE, (dim + 1) * dim * simplexCount, &ret);
     if (nr::error::isFailure(ret)) return ret;
 
-	vertexShaderGlobalSize = { triangleCount * 3 };
+	vertexShaderGlobalSize = { dim * simplexCount };
 	vertexShaderLocalSize  = { 1 };
 
+	// Simplex Reducer
+	simplexReducer.simplexes = vertexShader.result;
+	simplexReducer.result = nr::Buffer<nr_float>(CL_MEM_READ_WRITE, totalFloatCount, &ret);
+	
+	simplexReducerGlobalSize = { simplexCount };
+	simplexReducerLocalSize = { 1 };
+
     // Bin rasterizer
-    binRasterizer.triangleData   = vertexShader.result;
+    binRasterizer.triangleData   = simplexReducer.result;
     binRasterizer.triangleCount  = triangleCount;
     binRasterizer.dimension      = screenDim;
     binRasterizer.binQueueConfig = config;
@@ -209,20 +220,28 @@ cl_status FullPipeline::setup(
 }
 
 cl_status FullPipeline::operator()(
-	nr::CommandQueue q, 
-	std::chrono::system_clock::time_point& vertexShading, 
-	std::chrono::system_clock::time_point& binRasterizing, 
-	std::chrono::system_clock::time_point& fineRasterizing)
+	nr::CommandQueue q,
+	timestamp_t& vertexShading,
+	timestamp_t& simplexReducing,
+	timestamp_t& binRasterizing, 
+	timestamp_t& fineRasterizing)
 {
     const nr_uint totalScreenDim = fineRasterizer.dim.width * fineRasterizer.dim.height;
     cl_status cl_err = CL_SUCCESS;
     
-    printf("Enqueuing vertex shader\n");
+	printf("Enqueuing vertex shader\n");
 	if ((cl_err = vertexShader.load()) != CL_SUCCESS) return cl_err;
 	if ((cl_err = q.enqueueKernelCommand<1>(vertexShader, vertexShaderGlobalSize, vertexShaderLocalSize)) != CL_SUCCESS) return cl_err;
-    if ((cl_err = q.await()) != CL_SUCCESS) return cl_err;
+	if ((cl_err = q.await()) != CL_SUCCESS) return cl_err;
 	vertexShading = std::chrono::system_clock::now();
-    printf("Vertecies transformed!\n");
+	printf("Vertecies transformed!\n");
+
+	printf("Enqueuing simplex reducer\n");
+	if ((cl_err = simplexReducer.load()) != CL_SUCCESS) return cl_err;
+	if ((cl_err = q.enqueueKernelCommand<1>(simplexReducer, simplexReducerGlobalSize, simplexReducerLocalSize)) != CL_SUCCESS) return cl_err;
+	if ((cl_err = q.await()) != CL_SUCCESS) return cl_err;
+	simplexReducing = std::chrono::system_clock::now();
+	printf("Simplex reduced!\n");
 
     printf("Enqueuing bin rasterizer\n");   
 	if ((cl_err = binRasterizer.load()) != CL_SUCCESS) return cl_err;
@@ -243,8 +262,8 @@ cl_status FullPipeline::operator()(
 
 cl_status FullPipeline::operator()(nr::CommandQueue q)
 {
-	std::chrono::system_clock::time_point t0, t1, t2;
-	return operator()(q, t0, t1, t2);
+	timestamp_t t0, t1, t2, t3;
+	return operator()(q, t0, t1, t2, t3);
 }
 
 void error_callback(int error, const char* description)
@@ -418,12 +437,11 @@ void cube4dToSimplices(const Vector cube[16], Tetrahedron simplices[6 * 8])
     auto result_idx = 0;
     for (auto diff = 1; diff <= 8; diff *= 2)
     {
-        // printf("Working on cube %d\n", result_idx / 6);
-        generate3cube(cube, diff, 0, cube3d);
+		generate3cube(cube, diff, 0, cube3d);
         tetrahadrlize3Cube(cube3d, simplices + result_idx);
         result_idx += 6;
-        // printf("Working on cube %d\n", result_idx / 6);
-        generate3cube(cube, diff, 1, cube3d);
+
+		generate3cube(cube, diff, 1, cube3d);
         tetrahadrlize3Cube(cube3d, simplices + result_idx);
         result_idx += 6;
     }
