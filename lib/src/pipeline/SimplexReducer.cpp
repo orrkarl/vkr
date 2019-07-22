@@ -16,6 +16,11 @@ SimplexReducer::SimplexReducer(Module module, cl_status* err)
 {
 }
 
+SimplexReducer::SimplexReducer()
+	: Kernel()
+{
+}
+
 cl_status SimplexReducer::load()
 {
 	cl_status err = CL_SUCCESS;

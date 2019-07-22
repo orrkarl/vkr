@@ -5,7 +5,7 @@ INCLUDE_DIRECTORIES(
 	PUBLIC ${glew_INCLUDE_DIRS}
 	PUBLIC ${glfw_INCLUDE_DIRS})
 
-ADD_LIBRARY(NrasterDemoUtils src/utils.cpp src/linalg.cpp)
+ADD_LIBRARY(NrasterDemoUtils src/utils.cpp src/linalg.cpp src/app.cpp)
 
 TARGET_LINK_LIBRARIES(NrasterDemoUtils 
 	PUBLIC Nraster

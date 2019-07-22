@@ -18,6 +18,8 @@ namespace __internal
 struct NRAPI VertexShader : Kernel
 {
 	VertexShader(Module module, cl_status* err = nullptr);
+
+	VertexShader();
     
 	cl_status load();
 

@@ -202,8 +202,7 @@ void staticCube(
 		std::unique_ptr<nr_float[]> buf(new nr_float[count]);
 		q.enqueueBufferReadCommand(pipeline.binRasterizer.triangleData, true, count, buf.get());
 
-		std::ofstream log;
-		log.open("C:/git/Nraster/pre-binning-buffer post update.log");
+		std::ofstream log; 
 
 		for (auto tri = 0u; tri < simplexCount * dim; ++tri)
 		{

@@ -11,6 +11,11 @@ VertexShader::VertexShader(Module module, cl_status* err)
 {
 }
 
+VertexShader::VertexShader()
+	: Kernel()
+{
+}
+
 cl_status VertexShader::load()
 {
 	cl_status err = CL_SUCCESS;

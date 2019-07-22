@@ -4,7 +4,6 @@
 #include <cstring>
 #include <iostream>
 
-
 #include <base/Platform.h>
 
 #include <kernels/base.cl.h>

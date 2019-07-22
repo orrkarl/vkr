@@ -30,6 +30,8 @@ struct NRAPI BinRasterizer : Kernel
     
     BinRasterizer(Module module, cl_status* err = nullptr);
 
+	BinRasterizer();
+
     cl_status load();
 
     // Screen Dimensions
