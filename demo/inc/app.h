@@ -22,6 +22,8 @@ class App
 public:
 	static bool init();
 
+	static void deinit();
+
 	App(const nr::string& name, const nr::ScreenDimension& dim, const nr_uint renderDimension, const nr_uint simplexCount);
 
 	void run();
@@ -71,6 +73,7 @@ private:
 	std::unique_ptr<nr::RawColorRGBA[]>	m_bitmap; 
 	nr::CommandQueue					m_commandQueue;
 	nr::Context							m_context;
+	nr::Device							m_device;
 	std::unique_ptr<nr_float[]>			m_far;
 	const nr::string					m_name;
 	std::unique_ptr<nr_float[]>			m_near;
