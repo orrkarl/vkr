@@ -1,16 +1,6 @@
-#include <utils/converters.h>
-
-
-#include <chrono>
-
 // Some compilers (msvc...) don't include the math constants (e.g. PI) unless this macro is defined
 #define _USE_MATH_DEFINES
 #include <cmath>
-
-#include <fstream>
-#include <iostream>
-#include <stdio.h>
-#include <thread>
 
 #include <app.h>
 #include <linalg.h>
@@ -86,7 +76,9 @@ int main(const int argc, const char* argv[])
 	if (!App::init()) return EXIT_FAILURE;
 
 	auto app = Cube4dApp();
-	app.run();
+	auto ret = app.run();
 
 	App::deinit();
+
+	return ret;
 }

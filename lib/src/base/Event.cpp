@@ -18,11 +18,6 @@ Event::Event(Context context, cl_status* err)
 {
 }
 
-Event::Event(cl_status* err)
-    : Event(Context::getDefault(), err)
-{
-}
-
 Event::Event(const Event& other)
     : Wrapped(other)
 {

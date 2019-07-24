@@ -75,16 +75,6 @@ public:
 public:
     Module();
 
-	explicit Module(const string& code, cl_status* err = nullptr);
-
-	explicit Module(const Sources& codes, cl_status* err = nullptr);
-
-	template<nr_uint N>
-	explicit Module(const std::array<string, N>& codes, const std::array<nr_uint, N>& sizes, cl_status* err = nullptr)
-		: Module(Context::getDefault(), codes, sizes, err)
-	{
-	}
-
 	template<nr_uint N>
 	explicit Module(Context& context, const std::array<string, N>& codes, const std::array<nr_uint, N>& sizes, cl_status* err = nullptr)
 		: Wrapped(clCreateProgramWithSource(context, N, codes.data(), sizes.data(), err))
@@ -106,8 +96,6 @@ public:
     Module& operator=(Module&& other);
 
 	operator cl_program() const;
-
-	cl_status build(const Options& options);
 
 	cl_status build(const Device& device, const Options& options);
 
@@ -148,8 +136,6 @@ public:
 	}
 
 	Kernel createKernel(const string& name, cl_status* err = nullptr);
-
-	string getBuildLog(cl_status* err = nullptr);
 
 	string getBuildLog(Device device, cl_status* err = nullptr);
 

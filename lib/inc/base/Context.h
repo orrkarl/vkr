@@ -31,10 +31,6 @@ namespace nr
 class NRAPI Context : public Wrapper<cl_context>
 {
 public:
-    static void makeDefault(const Context& provided);
-
-    static Context getDefault();
-
     Context();
 
     explicit Context(const cl_context& context, const nr_bool retain = false);
@@ -101,10 +97,6 @@ public:
     Context& operator=(Context&& other);
 
     operator cl_context() const;
-
-// Fields
-private:
-    static Context defaultContext;
 };
 
 }

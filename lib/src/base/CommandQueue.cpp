@@ -4,17 +4,6 @@
 
 namespace nr
 {
-
-void CommandQueue::makeDefault(const CommandQueue& provided)
-{
-    defaultQueue = provided;
-}
-
-CommandQueue CommandQueue::getDefault()
-{
-    return defaultQueue;
-}
-
 CommandQueue::CommandQueue()
     : Wrapped()
 {
@@ -37,16 +26,6 @@ CommandQueue::CommandQueue(CommandQueue&& other)
 
 CommandQueue::CommandQueue(Context context, Device device, cl_command_queue_properties properties, cl_status* err)
     : Wrapped(clCreateCommandQueue(context, device, properties, err))
-{
-}
-
-CommandQueue::CommandQueue(Device device, cl_command_queue_properties properties, cl_status* err)
-    : Wrapped(clCreateCommandQueue(Context::getDefault(), device, properties, err))
-{
-}
-
-CommandQueue::CommandQueue(cl_command_queue_properties properties, cl_status* err)
-    : Wrapped(clCreateCommandQueue(Context::getDefault(), Device::getDefault(), properties, err))
 {
 }
 
@@ -81,7 +60,5 @@ cl_status CommandQueue::finish()
 {
     return clFinish(object);
 }
-
-CommandQueue CommandQueue::defaultQueue = CommandQueue();
 
 }

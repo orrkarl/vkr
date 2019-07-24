@@ -34,10 +34,6 @@ namespace nr
 class NRAPI CommandQueue : public Wrapper<cl_command_queue>
 {
 public:
-    static CommandQueue getDefault();
-    
-    static void makeDefault(const CommandQueue& queue);
-
     CommandQueue();
 
     explicit CommandQueue(const cl_command_queue& commandQueue, const nr_bool retain = false);
@@ -47,10 +43,6 @@ public:
     CommandQueue(CommandQueue&& other);
 
     CommandQueue(Context context, Device device, cl_command_queue_properties properties, cl_status* err = nullptr);
-
-    CommandQueue(Device device, cl_command_queue_properties properties, cl_status* err = nullptr);
-
-    CommandQueue(cl_command_queue_properties properties, cl_status* err = nullptr);
 
     CommandQueue& operator=(const CommandQueue& other);
 
@@ -267,9 +259,6 @@ public:
 		}
         return clEnqueueFillBuffer(object, buffer, &value, sizeof(T), size_t(0), s, size_t(0), nullptr, (cl_event*) notify);
     }
-
-private:
-    static CommandQueue defaultQueue;
 };
 
 }

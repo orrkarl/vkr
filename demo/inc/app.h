@@ -20,13 +20,13 @@
 class App
 {
 public:
-	static bool init();
-
 	static void deinit();
+
+	static bool init();
 
 	App(const nr::string& name, const nr::ScreenDimension& dim, const nr_uint renderDimension, const nr_uint simplexCount);
 
-	void run();
+	nr_int run();
 
 protected:
 	virtual void update() = 0;

@@ -23,6 +23,11 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		glfwSetWindowShouldClose(window, GLFW_TRUE); 
 }
 
+void App::deinit()
+{
+	glfwTerminate();
+}
+
 bool App::init()
 {
 	if (!glfwInit()) return false;
@@ -31,21 +36,16 @@ bool App::init()
 	return true;
 }
 
-void App::deinit()
-{
-	glfwTerminate();
-}
-
 App::App(const nr::string& name, const nr::ScreenDimension& m_renderDimension, const nr_uint renderDimension, const nr_uint simplexCount)
 	: m_bitmap(new nr::RawColorRGBA[m_renderDimension.width * m_renderDimension.height]), m_far(new nr_float[renderDimension]), m_name(name), m_near(new nr_float[renderDimension]), m_renderDimension(renderDimension), m_screenDim(m_renderDimension), m_h_simplexes(new nr_float[renderDimension * (renderDimension + 1) * simplexCount]), m_simplexCount(simplexCount)
 {
 }
 
-void App::run()
+nr_int App::run()
 {
 	cl_status status = CL_SUCCESS;
 
-	if (!initialize()) return;
+	if (!initialize()) return status;
 	
 	glViewport(0, 0, m_screenDim.width, m_screenDim.height);
 	glClearColor(0, 0, 0, 1);
@@ -58,6 +58,7 @@ void App::run()
 	}
 
 	destroy();
+	return status;
 }
 
 nr_uint App::getSimplexCount()
@@ -290,7 +291,27 @@ bool App::initRenderingPipeline()
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not initialize pipeline module: " << nr::utils::stringFromCLError(ret) << '\n';
+		auto buildLog = fullModule.getBuildLog(m_device, &ret);
+		if (nr::error::isFailure(ret))
+		{
+			std::cerr << "Could not aquire pipeline module build log: " << nr::utils::stringFromCLError(ret) << '\n';
+		}
+		else if (buildLog.size() > 0)
+		{
+			std::cerr << "Errors while building pipeline module:\n" << buildLog << '\n';
+		}
 		return false;
+	}
+
+	auto buildLog = fullModule.getBuildLog(m_device, &ret);
+	if (nr::error::isFailure(ret))
+	{
+		std::cerr << "Could not aquire pipeline module build log: " << nr::utils::stringFromCLError(ret) << '\n';
+		return false;
+	}
+	if (buildLog.size() > 0)
+	{
+		std::cerr << "Warnings while building pipeline module:\n" << buildLog << '\n';
 	}
 
 	m_binRasterizer = nr::__internal::BinRasterizer(fullModule, &ret);

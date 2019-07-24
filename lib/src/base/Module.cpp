@@ -41,16 +41,6 @@ Module::Module()
 {
 }
 
-Module::Module(const string& code, cl_status* err)
-    : Module(Context::getDefault(), code, err)
-{
-}
-
-Module::Module(const Sources& codes, cl_status* err)
-    : Module(Context::getDefault(), codes, err)
-{
-}
-
 Module::Module(Context context, const string& code, cl_status* err)
     : Wrapped()
 {
@@ -99,17 +89,6 @@ Module::operator cl_program() const
     return object;
 }
 
-cl_status Module::build(const Options& options)
-{
-    auto dev = static_cast<cl_device_id>(Device::getDefault());
-    return clBuildProgram(
-        object, 
-        1, &dev,
-        Module::finalizeOptions(options).c_str(), 
-        nullptr, 
-        nullptr);
-}
-
 cl_status Module::build(const Device& device, const Options& options)
 {
     return clBuildProgram(
@@ -144,11 +123,6 @@ string Module::finalizeOptions(const Options& options)
     }
 
     return ret;    
-}
-
-string Module::getBuildLog(cl_status* err)
-{
-    return getBuildLog(Device::getDefault(), err);
 }
 
 string Module::getBuildLog(Device device, cl_status* err)

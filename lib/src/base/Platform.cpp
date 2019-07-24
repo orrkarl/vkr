@@ -5,16 +5,6 @@
 namespace nr
 {
 
-void Platform::makeDefault(const Platform& provided)
-{
-    defaultPlatform = provided;
-}
-
-Platform Platform::getDefault()
-{
-    return defaultPlatform;
-}
-
 std::vector<Platform> Platform::getAvailablePlatforms(cl_status* err)
 {
     cl_uint platformCount;
@@ -79,7 +69,5 @@ std::vector<Device> Platform::getDevicesByType(cl_device_type type, cl_status* e
 
     return ret;
 }
-
-Platform Platform::defaultPlatform = Platform();
 
 }

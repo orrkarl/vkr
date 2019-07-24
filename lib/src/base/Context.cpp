@@ -2,17 +2,6 @@
 
 namespace nr
 {
-
-void Context::makeDefault(const Context& provided)
-{
-    defaultContext = provided;
-}
-
-Context Context::getDefault()
-{
-    return defaultContext;
-}
-
 Context::Context()
     : Wrapped()
 {
@@ -75,7 +64,5 @@ Context::operator cl_context() const
 {
     return object;
 }
-
-Context Context::defaultContext = Context();
 
 }
