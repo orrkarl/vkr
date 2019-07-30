@@ -29,7 +29,7 @@ Context::Context(
     : Wrapped(
         clCreateContext(
             properties, 
-            devices.size(), &devices.front().get(), 
+            cl_uint(devices.size()), &devices.front().get(), 
             nullptr, nullptr, 
             err))
 {

@@ -3,7 +3,7 @@ PROJECT_NUMBER         	= @VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@
 
 
 STRIP_FROM_PATH        	= @PROJECT_SOURCE_DIR@/lib
-INPUT                  	= Markdown.md @PROJECT_SOURCE_DIR@/lib
+INPUT                  	= @PROJECT_SOURCE_DIR@/README.md @PROJECT_SOURCE_DIR@/lib
 
 FILE_PATTERNS          	= *.h \
                           *.cpp
@@ -15,4 +15,4 @@ WARN_LOGFILE	       	= @CMAKE_CURRENT_BINARY_DIR@/doxygen.log
 QUIET				   	= YES
 
 
-USE_MDFILE_AS_MAINPAGE	= Markdown.md
+USE_MDFILE_AS_MAINPAGE	= @PROJECT_SOURCE_DIR@/README.md

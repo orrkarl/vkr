@@ -52,7 +52,7 @@ cl_status Event::await() const
 
 cl_status Event::await(const std::vector<Event>& events)
 {
-    return clWaitForEvents(events.size(), (const cl_event*) &events.front());
+    return clWaitForEvents(cl_uint(events.size()), (const cl_event*) &events.front());
 }
 
 }

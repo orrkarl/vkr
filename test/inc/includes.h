@@ -24,6 +24,53 @@ extern nr::Context defaultContext;
 extern nr::Device defaultDevice;
 extern nr::CommandQueue defaultCommandQueue;
 
+template <typename T>
+testing::AssertionResult validateBuffer(const nr::string& name, const nr_uint countX, const nr_uint countY, const T* expected, const T* actual, const nr_uint maxDiffs = 5)
+{
+	std::vector<std::pair<nr_uint, nr_uint>> diffIndices;
+
+	bool diffOverflow = false;
+
+	for (auto i = 0u; i < dimensions.height; ++i)
+	{
+		for (auto j = 0u; j < dimensions.width; ++j)
+		{
+			auto idx = i * dimensions.width + j;
+			if (expected[idx] != actual[idx])
+			{
+				if (diffIndices.size() < maxDiffs)
+				{
+					diffIndices.push_back({ i, j });
+				}
+				else
+				{
+					diffOverflow = true;
+				}
+			}
+		}
+	}
+
+	if (diffIndices.empty()) return testing::AssertionSuccess();
+
+	auto ret = testing::AssertionFailure();
+
+	ret << "Unexpected " << name << " buffer elements:\n";
+	for (auto i = 0u; i < maxDiffs; ++i)
+	{
+		nr_uint x = diffIndices[i].first;
+		nr_uint y = diffIndices[i].second;
+		nr_uint idx = y * countX + x;
+		ret << "\tAt (" << x << ", " << y << "): " << "expected - " << expected[idx] << ", actual - " << actual[idx] << "\n";
+	}
+	if (diffOverflow)
+	{
+		ret << "\t...\n";
+	}
+
+	return ret;
+}
+
+
 struct ScreenPosition
 {
     nr_uint x;

@@ -115,6 +115,86 @@ void fillTriangles(
     }
 }
 
+template <nr_uint dim>
+void tesselateBin(
+	const ScreenDimension& screenDim,
+	const Bin bin,
+	const nr_uint queueSize,
+	const nr_uint workGroup,
+	const nr_float expectedDepth,
+	const bool halfBin,
+	const nr_uint index,
+	Triangle<dim>* triangles,
+	nr_uint* binQueues,
+	nr::RawColorRGBA* expectedColorBuffer,
+	nr_float* expectedDepthBuffer)
+{
+	const nr_uint binCountY = nr_uint(ceil(nr_float(screenDim.height) / config.binHeight));
+	const nr_uint binCountX = nr_uint(ceil(nr_float(screenDim.width) / config.binWidth));
+	const nr_uint indexX = bin.x / bin.width;
+	const nr_uint indexY = bin.y / bin.height;
+	const nr_uint totalBinCount = binCountX * binCountY;
+	const nr_uint binOffset = binCountX * indexY + indexX;
+
+	Triangle<dim>* currentTriangle = triangles + index;
+	nr_uint* currentQueue = binQueues + (totalBinCount * workGroup + binOffset) * (queueSize + 1);
+	nr::RawColorRGBA* currentFragmentColor = expectedColorBuffer + binOffset * (bin.width * bin.height);
+	nr_float* currentFragmentDepth = expectedDepthBuffer + binOffset * (bin.width * bin.height);
+}
+
+template<nr_uint dim>
+void tesselateScreen(
+	const ScreenDimension& screenDim,
+	const BinQueueConfig config,
+	const nr_uint totalWorkGroupCount,
+	const nr_float expectedDepth,
+	const nr_uint triangleCount,
+	Triangle<dim>* triangles,
+	nr_uint* binQueues,
+	nr::RawColorRGBA* expectedColorBuffer,
+	nr_float* expectedDepthBuffer)
+{
+	assert(triangleCount != 0);
+	assert(triangles != nullptr);
+	assert(binQueues != nullptr);
+	assert(expectedColorBuffer != nullptr);
+	assert(expectedDepthBuffer != nullptr);
+
+	const nr_uint totalBinCount = nr_uint(ceil(nr_float(screenDim.width) / config.binWidth)) * nr_uint(ceil(nr_float(screenDim.height) / config.binHeight));
+	assert(triangleCount < 2 * totalBinCount);
+
+	auto currentWorkGroup = 0u;
+	Bin currentBin{ config.binWidth, config.binHeight, 0, 0 };
+	
+	for (auto currentTriangleCount = 0; currentTriangleCount < triangleCount; currentTriangleCount += 2)
+	{
+		if (currentTriangleCount == 1)
+		{
+			tesselateBin(screenDim, currentBin, config.queueSize, currentWorkGroup, expectedDepth, true, currentTriangleCount, triangles, binQueues, expectedColorBuffer, expectedDepthBuffer);
+		}
+		else if (currentTriangleCount == 2)
+		{
+			tesselateBin(screenDim, currentBin, config.queueSize, currentWorkGroup, expectedDepth, false, currentTriangleCount, triangles, binQueues, expectedColorBuffer, expectedDepthBuffer);
+		}
+		else
+		{
+			tesselateBin(screenDim, currentBin, config.queueSize, currentWorkGroup, expectedDepth, false, currentTriangleCount, triangles, binQueues, expectedColorBuffer, expectedDepthBuffer);
+
+			if (currentBin.x + currentBin.width < screenDim.width)
+			{
+				currentBin.x += currentBin.width;
+			}
+			else
+			{
+				currentBin.x = 0;
+				currentBin.y += currentBin.height;
+			}
+
+			currentWorkGroup = (currentWorkGroup + 1) % totalWorkGroupCount;
+		}
+	}
+}
+
 nr::Module mkFineModule(const nr_uint dim, cl_status* err)
 {
     auto opts = mkStandardOptions(dim);
@@ -122,4 +202,22 @@ nr::Module mkFineModule(const nr_uint dim, cl_status* err)
     auto ret = nr::Module(defaultContext, {nr::__internal::clcode::base, nr::__internal::clcode::fine_rasterizer}, err);
     *err = ret.build(defaultDevice, opts);
     return ret;
+}
+
+testing::AssertionResult validateDepth(const nr_float* depthBuffer, const ScreenDimension& screenDim, const nr_float defaultDepth, const nr_float expectedDepth)
+{
+	for (nr_uint y = 0; y < screenDim.height; ++y)
+	{
+		for (nr_uint x = 0; x < screenDim.width; ++x)
+		{
+			nr_float actualDepth = depthBuffer[y * screenDim.width + x];
+			nr_float expected = 1 / expectedDepth;
+			if (std::abs(actualDepth - defaultDepth) > 10e-5 && std::abs(actualDepth - expected) > 10e-5)
+			{
+				return testing::AssertionFailure() << "At: (" << x << ", " << y << "). default = " << defaultDepth << ", expected = " << expected << ", actual = " << actualDepth;
+			}
+		}
+	}
+
+	return testing::AssertionSuccess();
 }

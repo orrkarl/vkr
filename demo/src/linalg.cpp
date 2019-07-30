@@ -3,32 +3,22 @@
 #include <cmath>
 
 Matrix::Matrix()
+	: data{}
 {
-    for (auto i = 0; i < 5; ++i)
-    {
-        for (auto j = 0; j < 5; ++j)
-        {
-            data[i][j] = 0;
-        }
-    }
 }
 
 Matrix::Matrix(const nr_float data[5][5])
+	: data{}
 {
     std::memcpy(this->data, data, 5 * 5 * sizeof(nr_float));
 }
 
 Matrix::Matrix(const nr_float diagonal)
+	: data{}
 {
     for (auto i = 0; i < 5; ++i)
     {
-        for (auto j = 0; j < 5; ++j)
-        {
-            if (i == j)
-                data[i][j] = diagonal;
-            else
-                data[i][j] = 0;
-        }
+		data[i][i] = diagonal;
     }
 }
 
