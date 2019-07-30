@@ -63,7 +63,7 @@ TEST(Fine, ShadeTest)
     secondFrag.color = { 255, 0, 0 };
     secondFrag.depth = firstFrag.depth / 1.1f;
 
-    const nr_uint idx = index_from_screen(firstFrag.position, screenDim);
+    const nr_uint idx = indexFromScreen(firstFrag.position, screenDim);
 
     FrameBuffer frame;
     frame.color = Buffer<RawColorRGBA>(defaultContext, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_color, &err);

@@ -24,7 +24,7 @@ void testCompilation(const nr::Module::Options options, string configurationName
 	ASSERT_SUCCESS(buildErr) << "Compiling " << configurationName << " failed:" << "\n" << log;
 }
 
-nr_uint index_from_screen(const ScreenPosition& position, const nr::ScreenDimension& dim)
+nr_uint indexFromScreen(const ScreenPosition& position, const nr::ScreenDimension& dim)
 {
     return position.y * dim.width + position.x;
 }
@@ -32,9 +32,17 @@ nr_uint index_from_screen(const ScreenPosition& position, const nr::ScreenDimens
 NDCPosition ndcFromScreen(const ScreenPosition screen, const nr::ScreenDimension& screenDim)
 {
     NDCPosition ndc;
-    ndc.x = ((nr_float) screen.x) * 2.0f / (screenDim.width - 1) - 1;
-    ndc.y = ((nr_float) screen.y) * 2.0f / (screenDim.height - 1) - 1;
+    ndc.x = screen.x * 2.0f / screenDim.width - 1;
+    ndc.y = screen.y * 2.0f / screenDim.height - 1;
     return ndc;
+}
+
+NDCPosition ndcFromPixelMid(const ScreenPosition& screen, const nr::ScreenDimension& dim)
+{
+	NDCPosition ndc;
+	ndc.x = (screen.x + 0.5f) * 2.0f / dim.width - 1;
+	ndc.y = (screen.y + 0.5f) * 2.0f / dim.height - 1;
+	return ndc;
 }
 
 testing::AssertionResult isSuccess(const cl_status& err)

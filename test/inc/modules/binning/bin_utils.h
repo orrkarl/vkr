@@ -11,8 +11,8 @@ using namespace nr::__internal;
 
 struct Bin
 {
-    const nr_uint width;
-    const nr_uint height;
+	nr_uint width;
+	nr_uint height;
     nr_uint x;
     nr_uint y;
 };

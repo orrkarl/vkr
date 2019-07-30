@@ -10,8 +10,8 @@
 
 #include <utils/converters.h>
 
-
 #include <array>
+#include <fstream>
 
 #pragma once
 
@@ -30,12 +30,13 @@ testing::AssertionResult validateBuffer(const nr::string& name, const nr_uint co
 	std::vector<std::pair<nr_uint, nr_uint>> diffIndices;
 
 	bool diffOverflow = false;
+	nr_ulong totalDiffs = 0;
 
-	for (auto i = 0u; i < dimensions.height; ++i)
+	for (auto i = 0u; i < countY; ++i)
 	{
-		for (auto j = 0u; j < dimensions.width; ++j)
+		for (auto j = 0u; j < countX; ++j)
 		{
-			auto idx = i * dimensions.width + j;
+			auto idx = i * countX + j;
 			if (expected[idx] != actual[idx])
 			{
 				if (diffIndices.size() < maxDiffs)
@@ -46,6 +47,8 @@ testing::AssertionResult validateBuffer(const nr::string& name, const nr_uint co
 				{
 					diffOverflow = true;
 				}
+
+				totalDiffs += 1;
 			}
 		}
 	}
@@ -54,17 +57,17 @@ testing::AssertionResult validateBuffer(const nr::string& name, const nr_uint co
 
 	auto ret = testing::AssertionFailure();
 
-	ret << "Unexpected " << name << " buffer elements:\n";
+	ret << "Unexpected " << name << " buffer elements:";
 	for (auto i = 0u; i < maxDiffs; ++i)
 	{
 		nr_uint x = diffIndices[i].first;
 		nr_uint y = diffIndices[i].second;
 		nr_uint idx = y * countX + x;
-		ret << "\tAt (" << x << ", " << y << "): " << "expected - " << expected[idx] << ", actual - " << actual[idx] << "\n";
+		ret << "\n\tAt (" << x << ", " << y << "): " << "expected - " << expected[idx] << ", actual - " << actual[idx];
 	}
 	if (diffOverflow)
 	{
-		ret << "\t...\n";
+		ret << "\n\t... [ " << totalDiffs << " total differences ] ";
 	}
 
 	return ret;
@@ -114,13 +117,15 @@ struct Fragment
 };
 
 // convert 2d index from 2d array to 1d flat array index
-nr_uint index_from_screen(const ScreenPosition& position, const nr::ScreenDimension& dim);
+nr_uint indexFromScreen(const ScreenPosition& position, const nr::ScreenDimension& dim);
 
 // Test a module's compilation status
 void testCompilation(const nr::Module::Options options, nr::string configurationName, std::initializer_list<nr::string> codes);
 
 // Convert Screen Coordinates to NDC
 NDCPosition ndcFromScreen(const ScreenPosition screen, const nr::ScreenDimension& screenDim);
+
+NDCPosition ndcFromPixelMid(const ScreenPosition& screen, const nr::ScreenDimension& dim);
 
 // Check if a status value indicates success, return well formatted message O.W
 testing::AssertionResult isSuccess(const cl_status& err);

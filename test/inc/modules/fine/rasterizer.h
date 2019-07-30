@@ -33,7 +33,7 @@ TEST(Fine, Rasterizer)
 	const nr_uint totalBinQueuesSize = totalWorkGroupCount * totalBinCount * (config.queueSize + 1);
 
 	const nr_float defaultDepth = 1;
-	const nr_float expectedDepth = 1 / 0.5f;
+	const nr_float expectedDepth = 0.5f;
 
 	const nr_uint triangleCount = 3;
 	std::unique_ptr<Triangle<dim>[]> h_triangles(new Triangle<dim>[triangleCount]);
@@ -45,7 +45,7 @@ TEST(Fine, Rasterizer)
 	std::unique_ptr<RawColorRGBA[]> expectedColorBuffer(new RawColorRGBA[totalScreenSize]);
 	std::unique_ptr<nr_float[]> expectedDepthBuffer(new nr_float[totalScreenSize]);
 	
-	fillTriangles<dim>(screenDim, config, totalWorkGroupCount, expectedDepth, 256, h_triangles.get(), h_binQueues.get());
+	tesselateScreen<dim>(screenDim, config, totalWorkGroupCount, expectedDepth, triangleCount, h_triangles.get(), h_binQueues.get(), expectedColorBuffer.get(), expectedDepthBuffer.get());
 
 	for (nr_uint i = 0; i < totalScreenSize; ++i)
 	{
