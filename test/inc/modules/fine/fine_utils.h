@@ -177,7 +177,7 @@ void tesselateBin(
 				{
 					auto idx = y * screenDim.width + x;
 					expectedColorBuffer[idx] = RED;
-					expectedDepthBuffer[idx] = expectedDepth;
+					expectedDepthBuffer[idx] = 1 / expectedDepth;
 				}
 			}
 		}
@@ -185,8 +185,8 @@ void tesselateBin(
 	}
 	else
 	{
-		mkTriangleInExactCoordinates(ndcBottomLeft, ndcTopLeft, ndcTopRight, 1 / expectedDepth, currentTriangle);
-		mkTriangleInExactCoordinates(ndcTopRight, ndcBottomRight, ndcBottomLeft, 1 / expectedDepth, currentTriangle + 1);
+		mkTriangleInExactCoordinates(ndcBottomLeft, ndcTopLeft, ndcTopRight, expectedDepth, currentTriangle);
+		mkTriangleInExactCoordinates(ndcTopRight, ndcBottomRight, ndcBottomLeft, expectedDepth, currentTriangle + 1);
 
 		currentQueue[0] = 0;
 		currentQueue[1] = index;
@@ -199,7 +199,7 @@ void tesselateBin(
 			{
 				auto idx = y * screenDim.width + x;
 				expectedColorBuffer[idx] = RED;
-				expectedDepthBuffer[idx] = expectedDepth;
+				expectedDepthBuffer[idx] = 1 / expectedDepth;
 			}
 		}
 	}

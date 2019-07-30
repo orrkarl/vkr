@@ -22,34 +22,34 @@ TEST(Fine, Rasterizer)
 	const nr_uint dim = 5;
 	const nr_uint point_count = dim + 1;
 
-	const ScreenDimension screenDim = { 1366, 768 };
+	const ScreenDimension screenDim = { 16, 16 };
 	const nr_uint totalScreenSize = screenDim.width * screenDim.height;
 
-	const BinQueueConfig config = { 32, 32, 256 };
+	const BinQueueConfig config = { 8, 8, 10 };
 	const nr_uint binCountX = ceil(((nr_float)screenDim.width) / config.binWidth);
 	const nr_uint binCountY = ceil(((nr_float)screenDim.height) / config.binHeight);
 	const nr_uint totalBinCount = binCountX * binCountY;
-	const nr_uint totalWorkGroupCount = 6;
+	const nr_uint totalWorkGroupCount = 1;
 	const nr_uint totalBinQueuesSize = totalWorkGroupCount * totalBinCount * (config.queueSize + 1);
 
 	const nr_float defaultDepth = 1;
 	const nr_float expectedDepth = 0.5f;
 
-	const nr_uint triangleCount = 3;
+	const nr_uint triangleCount = 2;
 	std::unique_ptr<Triangle<dim>[]> h_triangles(new Triangle<dim>[triangleCount]);
 	std::unique_ptr<nr_uint[]> h_binQueues(new nr_uint[totalBinQueuesSize]);
 
 	std::unique_ptr<RawColorRGBA[]> h_colorBuffer(new RawColorRGBA[totalScreenSize]);
 	std::unique_ptr<nr_float[]> h_depthBuffer(new nr_float[totalScreenSize]);
 
-	std::unique_ptr<RawColorRGBA[]> expectedColorBuffer(new RawColorRGBA[totalScreenSize]);
-	std::unique_ptr<nr_float[]> expectedDepthBuffer(new nr_float[totalScreenSize]);
+	std::unique_ptr<RawColorRGBA[]> expectedColorBuffer(new RawColorRGBA[totalScreenSize]{});
+	std::unique_ptr<nr_float[]> expectedDepthBuffer(new nr_float[totalScreenSize]{});
 	
 	tesselateScreen<dim>(screenDim, config, totalWorkGroupCount, expectedDepth, triangleCount, h_triangles.get(), h_binQueues.get(), expectedColorBuffer.get(), expectedDepthBuffer.get());
 
 	for (nr_uint i = 0; i < totalScreenSize; ++i)
 	{
-		h_colorBuffer[i] = { 0, 0, 0 };
+		h_colorBuffer[i] = { 0, 0, 0, 0 };
 		h_depthBuffer[i] = defaultDepth;
 	}
 

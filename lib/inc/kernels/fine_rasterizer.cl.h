@@ -58,7 +58,22 @@ Depth depth_at_point(const global Triangle triangle, float3 barycentric)
 // Check if point fits the top\left rule for a certain edge
 bool is_contained_top_left(const NDCPosition vec, float weight)
 {
-    return weight > 0 || (weight == 0 && (vec.y > 0 || (vec.y == 0 && vec.x > 0)));
+ //   return weight > 0 || (weight == 0 && (vec.y > 0 || (vec.y == 0 && vec.x > 0)));
+	if (weight > 0) return true;
+
+	if (weight < 0)
+	{
+		DEBUG_ONCE3("Rejected - out of the triangle! [ %f %f ] - %f\n", vec.x, vec.y, weight);
+		return false;
+	}
+	
+	if (!(vec.y > 0 || (vec.y == 0 && vec.x > 0)))
+	{
+		DEBUG_ONCE2("Rejected by the top\\left edge rule! [ %f %f ]\n", vec.x, vec.y);
+		return false;
+	}
+
+	return true;
 }
 
 // Check if a point is "in" a triangle, according to the top\left rule
@@ -178,7 +193,7 @@ kernel void fine_rasterize(
         }
         
         current_queue_element = current_queue_bases[current_queue][current_queue_elements[current_queue]];
-
+		DEBUG_ONCE1("Triangle %d:\n", current_queue_element);
         for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, x * config.bin_width + config.bin_width); ++frag_x)
         {
             for (uint frag_y = y * config.bin_height; frag_y < min(screen_dim.height, y * config.bin_height + config.bin_height); ++frag_y)
@@ -196,13 +211,8 @@ kernel void fine_rasterize(
 
 				p2.x = triangle_data[current_queue_element][2][0];
 				p2.y = triangle_data[current_queue_element][2][1];
-
+				DEBUG_ONCE2("Point: (%d, %d)\n", frag_x, frag_y)
                 barycentric2d(p0, p1, p2, current_position_ndc, &barycentric);
-
-				//if (!all(isfinite(barycentric)))
-				//{
-					//DEBUG_ITEM_SPECIFIC6(2, 6, 0, "Invalid Triangle found - [ (%f, %f) (%f, %f) (%f, %f) ]\n", p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
-				//}
 
                 if (is_point_in_triangle(p0, p1, p2, barycentric))
                 {

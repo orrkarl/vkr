@@ -15,7 +15,7 @@
 
 #pragma once
 
-#define ASSERT_SUCCESS(expr) ASSERT_PRED1(isSuccess, (expr))
+#define ASSERT_SUCCESS(expr) ASSERT_TRUE(isSuccess(expr))
 
 const float TOLERANCE = 0.00001f;
 const double DOUBLE_TOLERANCE = 0.000000001;
@@ -58,7 +58,7 @@ testing::AssertionResult validateBuffer(const nr::string& name, const nr_uint co
 	auto ret = testing::AssertionFailure();
 
 	ret << "Unexpected " << name << " buffer elements:";
-	for (auto i = 0u; i < maxDiffs; ++i)
+	for (auto i = 0u; i < diffIndices.size(); ++i)
 	{
 		nr_uint x = diffIndices[i].first;
 		nr_uint y = diffIndices[i].second;
@@ -69,6 +69,27 @@ testing::AssertionResult validateBuffer(const nr::string& name, const nr_uint co
 	{
 		ret << "\n\t... [ " << totalDiffs << " total differences ] ";
 	}
+
+	std::ofstream expectedLog;
+	expectedLog.open(name + "-expected.log");
+
+	std::ofstream actualLog;
+	actualLog.open(name + "-actual.log");
+
+	for (nr_int y = countY - 1; y >= 0; --y)
+	{
+		for (auto x = 0u; x < countX; ++x)
+		{
+			auto idx = y * countX + x;
+			expectedLog << expected[idx] << " ";
+			actualLog << actual[idx] << " ";
+		}
+		expectedLog << '\n';
+		actualLog << '\n';
+	}
+
+	expectedLog.close();
+	actualLog.close();
 
 	return ret;
 }
