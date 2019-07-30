@@ -17,7 +17,7 @@ void ndcFromScreenTestTemplate(NDCFromScreen kernel, CommandQueue q, const Scree
     
     kernel.position  = screen;
     kernel.dimension = dim;
-    kernel.result    = Buffer<NDCPosition>(CL_MEM_READ_WRITE, 1, &err);
+    kernel.result    = Buffer<NDCPosition>(defaultContext, CL_MEM_READ_WRITE, 1, &err);
     ASSERT_SUCCESS(err);
 
     ASSERT_SUCCESS(kernel.load());
@@ -38,7 +38,7 @@ void checkConversionBounded(NDCFromScreen kernel, CommandQueue q, const ScreenPo
     
     kernel.position  = screen;
     kernel.dimension = dim;
-    kernel.result    = Buffer<NDCPosition>(CL_MEM_READ_WRITE, 1, &err);
+    kernel.result    = Buffer<NDCPosition>(defaultContext, CL_MEM_READ_WRITE, 1, &err);
 
     ASSERT_SUCCESS(kernel.load());
     ASSERT_SUCCESS(q.enqueueKernelCommand<1>(kernel, global, local));
@@ -55,12 +55,12 @@ TEST(Base, NDCFromScreen)
 {
     cl_status err = CL_SUCCESS; 
  
-    CommandQueue q = CommandQueue::getDefault();
+    auto q = defaultCommandQueue;
 
-    Module base(clcode::base, &err);
+    Module base(defaultContext, clcode::base, &err);
     ASSERT_SUCCESS(err);
 
-    ASSERT_SUCCESS(base.build(Module::Options{Module::_3D}));
+    ASSERT_SUCCESS(base.build(defaultDevice, Module::Options{Module::_3D}));
 
     auto ndc_from_screen = NDCFromScreen(base, &err);
     ASSERT_SUCCESS(err);

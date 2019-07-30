@@ -18,11 +18,7 @@ int main(int argc, char **argv)
 
 	auto ret = RUN_ALL_TESTS();
 
-	if ((initStatus = destroy()) != CL_SUCCESS)
-	{
-		std::cerr << "Destroy failed: " << utils::stringFromCLError(initStatus) << std::endl;
-	}
-
+	destroy();
     return ret;
 }
 

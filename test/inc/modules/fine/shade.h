@@ -66,9 +66,9 @@ TEST(Fine, ShadeTest)
     const nr_uint idx = index_from_screen(firstFrag.position, screenDim);
 
     FrameBuffer frame;
-    frame.color = Buffer<RawColorRGBA>(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_color, &err);
+    frame.color = Buffer<RawColorRGBA>(defaultContext, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_color, &err);
     ASSERT_SUCCESS(err);
-    frame.depth = Buffer<nr_float>(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_depth, &err);
+    frame.depth = Buffer<nr_float>(defaultContext, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_depth, &err);
     ASSERT_SUCCESS(err);
     
     auto code = mkFineModule(dim, &err);
@@ -77,7 +77,7 @@ TEST(Fine, ShadeTest)
     auto testee = ShadeTest(code, &err);
     ASSERT_SUCCESS(err);
 
-    auto q = CommandQueue::getDefault();
+    auto q = defaultCommandQueue;
     ASSERT_SUCCESS(err);
 
     testee.fragment = firstFrag;

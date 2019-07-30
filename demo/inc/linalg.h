@@ -54,6 +54,9 @@ struct Matrix
 
     static Matrix rotation(const Axis source, const Axis dest, const nr_float radians);
     static Matrix scale(const nr_float s);
+	static Matrix scale(const nr_float x, const nr_float y, const nr_float z, const nr_float w);
     static Matrix translation(const nr_float x, const nr_float y, const nr_float z, const nr_float w);
     static Matrix identity();
+
+	friend std::ostream& operator<<(std::ostream& os, const Matrix& mat);
 };

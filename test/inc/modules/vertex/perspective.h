@@ -43,24 +43,24 @@ TEST(VertexShader, Perspective)
         Module::DEBUG
     };
 
-    Module code({clcode::base, clcode::vertex_shading}, &err);
+    Module code(defaultContext, {clcode::base, clcode::vertex_shading}, &err);
     ASSERT_SUCCESS(err);
 
-    ASSERT_SUCCESS(code.build(options));
+    ASSERT_SUCCESS(code.build(defaultDevice, options));
 
     auto testee = VertexShader(code, &err);
     ASSERT_SUCCESS(err);
 
-    auto q = CommandQueue::getDefault();
+    auto q = defaultCommandQueue;
     ASSERT_SUCCESS(err);
 
-    Buffer<nr_float> d_point(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, point_count, p.values, &err);
+    Buffer<nr_float> d_point(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, point_count, p.values, &err);
     ASSERT_SUCCESS(err);
-    Buffer<nr_float> d_near(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, near, &err);
+    Buffer<nr_float> d_near(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, near, &err);
     ASSERT_SUCCESS(err);
-    Buffer<nr_float> d_far(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, far, &err);
+    Buffer<nr_float> d_far(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, far, &err);
     ASSERT_SUCCESS(err);
-    Buffer<nr_float> d_result(CL_MEM_READ_WRITE, point_count, &err);
+    Buffer<nr_float> d_result(defaultContext, CL_MEM_READ_WRITE, point_count, &err);
     ASSERT_SUCCESS(err);
 
     testee.points = d_point;

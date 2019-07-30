@@ -27,13 +27,14 @@ public:
 	{
 		setNearPlane(h_near);
 		setFarPlane(h_far);
+
+		auto simplex = getHostSimplexes<dim>();
+		*simplex = h_triangle;
 	}
 
 protected:
 	void update() override
-	{
-		auto simplex = getHostSimplexes<dim>();
-		*simplex = h_triangle;
+	{	
 	}
 };
 

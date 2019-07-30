@@ -62,12 +62,13 @@ public:
 	{
 		setNearPlane(h_near);
 		setFarPlane(h_far);
+
+		transform(reinterpret_cast<Tetrahedron*>(getHostSimplexes<dim>()), M_PI / 20);
 	}
 
 protected:
 	void update() override
 	{
-		transform(reinterpret_cast<Tetrahedron*>(getHostSimplexes<dim>()), M_PI / 20);
 	}
 };
 

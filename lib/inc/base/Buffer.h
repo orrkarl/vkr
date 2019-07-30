@@ -25,24 +25,18 @@ template<typename T>
 class Buffer : public Wrapper<cl_mem>
 {
 public:    
-    Buffer(const cl_mem_flags& flags, const nr_ulong& count, cl_int* err = nullptr)
+    Buffer(const cl_mem_flags& flags, const nr_ulong& count, cl_status* err = nullptr)
         : Buffer(flags, count, nullptr, err)
     {
     }
 
-    
-    Buffer(const cl_mem_flags& flags, const nr_ulong& count, T* data = nullptr, cl_int* error = nullptr)
-        : Wrapped(clCreateBuffer(Context::getDefault(), flags, count * sizeof(T), data, error))
-    {
-    }
-
-    Buffer(const Context& context, const cl_mem_flags& flags, const nr_ulong& count, cl_int* err = nullptr)
+    Buffer(const Context& context, const cl_mem_flags& flags, const nr_ulong& count, cl_status* err = nullptr)
         : Buffer(context, flags, count, nullptr, err)
     {
     }
 
     
-    Buffer(const Context& context, const cl_mem_flags& flags, const nr_ulong& count, T* data = nullptr, cl_int* error = nullptr)
+    Buffer(const Context& context, const cl_mem_flags& flags, const nr_ulong& count, T* data = nullptr, cl_status* error = nullptr)
         : Wrapped(clCreateBuffer(context, flags, count * sizeof(T), data, error))
     {
     }

@@ -5,16 +5,20 @@
 
 using namespace nr;
 
+nr::Device defaultDevice = nr::Device();
+nr::Context defaultContext = nr::Context();
+nr::CommandQueue defaultCommandQueue = nr::CommandQueue();
+
 void testCompilation(const nr::Module::Options options, string configurationName, std::initializer_list<string> codes)
 {
     cl_status err = CL_SUCCESS;
 
-    Module code(codes, &err);
+    Module code(defaultContext, codes, &err);
     ASSERT_SUCCESS(err);
 
-    cl_status buildErr = code.build(options);
+    cl_status buildErr = code.build(defaultDevice, options);
 
-    auto log = code.getBuildLog(&err);
+    auto log = code.getBuildLog(defaultDevice, &err);
     ASSERT_SUCCESS(err);
 	
 	ASSERT_SUCCESS(buildErr) << "Compiling " << configurationName << " failed:" << "\n" << log;
@@ -62,9 +66,9 @@ cl_status init()
         return 10000;
     }
 
-    Platform::makeDefault(platforms[0]);
+    auto defaultPlatform = platforms[0];
     
-    auto devices = platforms[0].getDevicesByType(CL_DEVICE_TYPE_GPU, pret);
+    auto devices = defaultPlatform.getDevicesByType(CL_DEVICE_TYPE_GPU, pret);
     if (error::isFailure(ret)) return ret;
 
     if (!devices.size())
@@ -73,26 +77,30 @@ cl_status init()
         return 10000;
     }
 
-    Device::makeDefault(devices[0]);
+    defaultDevice = devices[0];
 
-    const cl_context_properties props[3] = { CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>((cl_platform_id) Platform::getDefault()), 0};
+    const cl_context_properties props[3] = { CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>((cl_platform_id) defaultPlatform), 0};
     auto context = Context(props, CL_DEVICE_TYPE_GPU, pret);
     if (error::isFailure(ret)) return ret;
 
-    Context::makeDefault(context);
+    defaultContext = context;
 
 	auto q = CommandQueue(context, devices[0], (cl_command_queue_properties) CL_QUEUE_PROFILING_ENABLE, pret);
 	if (error::isFailure(ret)) return ret;
 
-	CommandQueue::makeDefault(q);
+	defaultCommandQueue = q;
 
     return CL_SUCCESS;
 }
 
-cl_status destroy()
+void destroy()
 {
-	cl_status ret = CL_SUCCESS;
-	if (nr::error::isFailure(ret = CommandQueue::getDefault().flush())) return ret;
-	return CommandQueue::getDefault().finish();
+	defaultCommandQueue.flush();
+	defaultCommandQueue.finish();
+	defaultCommandQueue.release();
+
+	defaultDevice.release();
+
+	defaultContext.release();
 }
 

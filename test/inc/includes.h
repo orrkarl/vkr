@@ -20,6 +20,10 @@
 const float TOLERANCE = 0.00001f;
 const double DOUBLE_TOLERANCE = 0.000000001;
 
+extern nr::Context defaultContext;
+extern nr::Device defaultDevice;
+extern nr::CommandQueue defaultCommandQueue;
+
 struct ScreenPosition
 {
     nr_uint x;
@@ -71,11 +75,11 @@ void testCompilation(const nr::Module::Options options, nr::string configuration
 // Convert Screen Coordinates to NDC
 NDCPosition ndcFromScreen(const ScreenPosition screen, const nr::ScreenDimension& screenDim);
 
-// Check if a cl_int value indicates success, return well formatted message O.W
-testing::AssertionResult isSuccess(const cl_int& err);
+// Check if a status value indicates success, return well formatted message O.W
+testing::AssertionResult isSuccess(const cl_status& err);
 
 nr::Module::Options mkStandardOptions(const nr_uint dim);
 
 cl_status init();
 
-cl_status destroy();
+void destroy();

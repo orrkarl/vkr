@@ -119,7 +119,7 @@ nr::Module mkFineModule(const nr_uint dim, cl_status* err)
 {
     auto opts = mkStandardOptions(dim);
     opts.push_back(TEST_FINE);
-    auto ret = nr::Module({nr::__internal::clcode::base, nr::__internal::clcode::fine_rasterizer}, err);
-    *err = ret.build(opts);
+    auto ret = nr::Module(defaultContext, {nr::__internal::clcode::base, nr::__internal::clcode::fine_rasterizer}, err);
+    *err = ret.build(defaultDevice, opts);
     return ret;
 }

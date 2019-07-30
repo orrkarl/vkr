@@ -19,8 +19,8 @@ TARGET_LINK_LIBRARIES(Triangle3d NrasterDemoUtils)
 ADD_EXECUTABLE(Cube4d src/cube4d.cpp)
 TARGET_LINK_LIBRARIES(Cube4d NrasterDemoUtils)
 
-ADD_EXECUTABLE(Triangles src/triangles.cpp)
-TARGET_LINK_LIBRARIES(Triangles NrasterDemoUtils)
+ADD_EXECUTABLE(Simpelxes src/simplexes.cpp)
+TARGET_LINK_LIBRARIES(Simpelxes NrasterDemoUtils)
 
 IF(WIN32)
     # Copy DLL files to output directory. Yes, this is digusting, but nothing else worked :(
