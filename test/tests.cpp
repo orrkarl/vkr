@@ -1,9 +1,7 @@
 #include "inc/includes.h"
 
-//#include "inc/base/all.h"
-//#include "inc/modules/all_module_tests.h"
-#include "inc/modules/fine/rasterizer.h"
-#include "inc/modules/fine/compilation.h"
+#include "inc/base/all.h"
+#include "inc/modules/all_module_tests.h"
 
 #include <iostream>
 
