@@ -35,23 +35,17 @@ TEST(Fine, Rasterizer)
 	const nr_float defaultDepth = 1;
 	const nr_float expectedDepth = 0.5f;
 
-	const nr_uint triangleCount = 2;
+	const nr_uint triangleCount = 3;
 	std::unique_ptr<Triangle<dim>[]> h_triangles(new Triangle<dim>[triangleCount]);
 	std::unique_ptr<nr_uint[]> h_binQueues(new nr_uint[totalBinQueuesSize]);
 
-	std::unique_ptr<RawColorRGBA[]> h_colorBuffer(new RawColorRGBA[totalScreenSize]);
-	std::unique_ptr<nr_float[]> h_depthBuffer(new nr_float[totalScreenSize]);
+	std::unique_ptr<RawColorRGBA[]> h_colorBuffer(new RawColorRGBA[totalScreenSize]{});
+	std::unique_ptr<nr_float[]> h_depthBuffer(new nr_float[totalScreenSize]{ defaultDepth });
 
 	std::unique_ptr<RawColorRGBA[]> expectedColorBuffer(new RawColorRGBA[totalScreenSize]{});
-	std::unique_ptr<nr_float[]> expectedDepthBuffer(new nr_float[totalScreenSize]{});
+	std::unique_ptr<nr_float[]> expectedDepthBuffer(new nr_float[totalScreenSize]{ defaultDepth });
 	
 	tesselateScreen<dim>(screenDim, config, totalWorkGroupCount, expectedDepth, triangleCount, h_triangles.get(), h_binQueues.get(), expectedColorBuffer.get(), expectedDepthBuffer.get());
-
-	for (nr_uint i = 0; i < totalScreenSize; ++i)
-	{
-		h_colorBuffer[i] = { 0, 0, 0, 0 };
-		h_depthBuffer[i] = defaultDepth;
-	}
 
 	auto code = mkFineModule(dim, &err);
 	ASSERT_SUCCESS(err);

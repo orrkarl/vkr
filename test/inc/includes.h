@@ -25,7 +25,7 @@ extern nr::Device defaultDevice;
 extern nr::CommandQueue defaultCommandQueue;
 
 template <typename T>
-testing::AssertionResult validateBuffer(const nr::string& name, const nr_uint countX, const nr_uint countY, const T* expected, const T* actual, const nr_uint maxDiffs = 5)
+testing::AssertionResult validateBuffer(const nr::string& name, const nr_uint countX, const nr_uint countY, const T* expected, const T* actual, const nr_uint maxDiffs = 10)
 {
 	std::vector<std::pair<nr_uint, nr_uint>> diffIndices;
 

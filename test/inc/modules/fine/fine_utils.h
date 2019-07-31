@@ -147,19 +147,19 @@ void tesselateBin(
 	const auto rightEdge = std::min(bin.x + bin.width, screenDim.width);
 	const auto topEdge = std::min(bin.y + bin.height, screenDim.height);
 
-	auto screenTopLeft		= ScreenPosition{ bin.x, topEdge - 1 };
-	auto screenTopRight		= ScreenPosition{ rightEdge - 1, topEdge - 1 };
-	auto screenBottomRight	= ScreenPosition{ rightEdge - 1, bin.y };
+	auto screenTopLeft		= ScreenPosition{ bin.x, topEdge };
+	auto screenTopRight		= ScreenPosition{ rightEdge, topEdge };
+	auto screenBottomRight	= ScreenPosition{ rightEdge, bin.y };
 	auto screenBottomLeft	= ScreenPosition{ bin.x, bin.y };
 
 	auto ndcTopLeft		= ndcFromScreen(screenTopLeft, screenDim);
-	auto ndcTopRight	= ndcFromPixelMid(screenTopRight, screenDim);
-	auto ndcBottomRight = ndcFromPixelMid(screenBottomRight, screenDim);
+	auto ndcTopRight	= ndcFromScreen(screenTopRight, screenDim);
+	auto ndcBottomRight = ndcFromScreen(screenBottomRight, screenDim);
 	auto ndcBottomLeft	= ndcFromScreen(screenBottomLeft, screenDim);
 
 	if (halfBin)
 	{
-		mkTriangleInExactCoordinates(ndcBottomLeft, ndcTopLeft, ndcTopRight, 1 / expectedDepth, currentTriangle);
+		mkTriangleInExactCoordinates(ndcBottomLeft, ndcTopLeft, ndcTopRight, expectedDepth, currentTriangle);
 
 		currentQueue[0] = 0;
 		currentQueue[1] = index;
@@ -173,7 +173,7 @@ void tesselateBin(
 			{
 				auto midpoint = ndcFromPixelMid({ x, y }, screenDim);
 				auto tmpSlope = slope(midpoint, ndcBottomLeft);
-				if (tmpSlope >= binSlope)
+				if (tmpSlope > binSlope)
 				{
 					auto idx = y * screenDim.width + x;
 					expectedColorBuffer[idx] = RED;

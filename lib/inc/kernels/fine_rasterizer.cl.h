@@ -63,13 +63,13 @@ bool is_contained_top_left(const float2 vec, float weight)
 
 	if (weight < 0)
 	{
-		DEBUG_ONCE3("Rejected - out of the triangle! [ %f %f ] - %f\n", vec.x, vec.y, weight);
+		DEBUG_ONCE1("Rejected - out of the triangle! w=%f\n", weight);
 		return false;
 	}
 	
 	if (!(vec.y > 0 || (vec.y == 0 && vec.x > 0)))
 	{
-		DEBUG_ONCE2("Rejected by the top\\left edge rule! [ %f %f ]\n", vec.x, vec.y);
+		//DEBUG_ONCE2("Rejected by the top\\left edge rule! [ %f %f ]\n", vec.x, vec.y);
 		return false;
 	}
 
@@ -78,7 +78,7 @@ bool is_contained_top_left(const float2 vec, float weight)
 
 // Check if a point is "in" a triangle, according to the top\left rule
 bool is_point_in_triangle(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, float3 barycentric)
-{		//0 -> 1 -> 2 -> 0
+{		
 	float2 v0 = (float2)(p2.x - p1.x, p2.y - p1.y);
     float2 v1 = (float2)(p0.x - p2.x, p0.y - p2.y);
     float2 v2 = (float2)(p1.x - p0.x, p1.y - p0.y);
@@ -197,7 +197,18 @@ kernel void fine_rasterize(
         }
         
         current_queue_element = current_queue_bases[current_queue][current_queue_elements[current_queue]];
-		DEBUG_ONCE1("Triangle %d:\n", current_queue_element);
+		
+		p0.x = triangle_data[current_queue_element][0][0];
+		p0.y = triangle_data[current_queue_element][0][1];
+
+		p1.x = triangle_data[current_queue_element][1][0];
+		p1.y = triangle_data[current_queue_element][1][1];
+
+		p2.x = triangle_data[current_queue_element][2][0];
+		p2.y = triangle_data[current_queue_element][2][1];
+
+		DEBUG_ONCE7("Triangle %d: [ (%f, %f), (%f, %f), (%f, %f) ]\n", current_queue_element, p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+
         for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, x * config.bin_width + config.bin_width); ++frag_x)
         {
             for (uint frag_y = y * config.bin_height; frag_y < min(screen_dim.height, y * config.bin_height + config.bin_height); ++frag_y)
@@ -206,16 +217,8 @@ kernel void fine_rasterize(
                 current_frag.position.y = frag_y;
                 
                 pixel_mid_point_from_screen(current_frag.position, screen_dim, &current_position_ndc); 
-                
-				p0.x = triangle_data[current_queue_element][0][0];
-				p0.y = triangle_data[current_queue_element][0][1];
-
-				p1.x = triangle_data[current_queue_element][1][0];
-				p1.y = triangle_data[current_queue_element][1][1];
-
-				p2.x = triangle_data[current_queue_element][2][0];
-				p2.y = triangle_data[current_queue_element][2][1];
-				DEBUG_ONCE2("Point: (%d, %d)\n", frag_x, frag_y)
+				
+				DEBUG_ONCE4("Point: (%d, %d)\\(%f, %f)\n", frag_x, frag_y, current_position_ndc.x, current_position_ndc.y);
                 barycentric2d(p0, p1, p2, current_position_ndc, &barycentric);
 
                 if (is_point_in_triangle(p0, p1, p2, barycentric))
