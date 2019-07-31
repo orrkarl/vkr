@@ -56,7 +56,7 @@ Depth depth_at_point(const global Triangle triangle, float3 barycentric)
 
 
 // Check if point fits the top\left rule for a certain edge
-bool is_contained_top_left(const NDCPosition vec, float weight)
+bool is_contained_top_left(const float2 vec, float weight)
 {
  //   return weight > 0 || (weight == 0 && (vec.y > 0 || (vec.y == 0 && vec.x > 0)));
 	if (weight > 0) return true;
@@ -78,8 +78,12 @@ bool is_contained_top_left(const NDCPosition vec, float weight)
 
 // Check if a point is "in" a triangle, according to the top\left rule
 bool is_point_in_triangle(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, float3 barycentric)
-{
-    return is_contained_top_left(p0, barycentric.x) && is_contained_top_left(p1, barycentric.y) && is_contained_top_left(p2, barycentric.z);
+{		//0 -> 1 -> 2 -> 0
+	float2 v0 = (float2)(p2.x - p1.x, p2.y - p1.y);
+    float2 v1 = (float2)(p0.x - p2.x, p0.y - p2.y);
+    float2 v2 = (float2)(p1.x - p0.x, p1.y - p0.y);
+
+    return is_contained_top_left(v0, barycentric.x) && is_contained_top_left(v1, barycentric.y) && is_contained_top_left(v2, barycentric.z);
 }
 
 bool is_queue_ended(global const Index** queues, uint* indices, uint index)
