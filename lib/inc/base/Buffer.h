@@ -86,13 +86,23 @@ public:
     /**
      * @brief Aquire the size (in bytes) of the buffer in device memory
      * @param[out] err internal OpenCL call error status
+	 * @return the buffer size (in bytes)
      */
-    nr_size getSize(cl_status* err = nullptr) const
+    nr_size getDeviceByteSize(cl_status* err = nullptr) const
     {
         nr_size ret = 0;
-        if(err) *err = clGetMemObjectInfo(object, CL_MEM_SIZE, sizeof(nr_size), &ret, nullptr);
+		auto status = clGetMemObjectInfo(object, CL_MEM_SIZE, sizeof(nr_size), &ret, nullptr);
+        if (err) *err = status;
         return ret;
     }
+
+	nr_ulong getElementCount(cl_status* err = nullptr) const
+	{
+		nr_ulong ret = 0;
+		auto status = clGetMemObjectInfo(object, CL_MEM_SIZE, sizeof(nr_size), &ret, nullptr);
+		if (err)* err = status;
+		return ret / sizeof(T);
+	}
 };
 
 }

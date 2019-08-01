@@ -120,7 +120,7 @@ TEST(SimplexReducer, reducing)
 
 	ASSERT_SUCCESS(testee.load());
 	ASSERT_SUCCESS(q.enqueueKernelCommand<1>(testee, global, local));
-	ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_res, false, point_count * 3 * (dim * (dim - 1) * (dim - 2) / 6) * simplexCount, (nr_float*) result));
+	ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_res, false, (nr_float*) result));
 	ASSERT_SUCCESS(q.await());
 
 	for (auto i = 0u; i < simplexCount; ++i)

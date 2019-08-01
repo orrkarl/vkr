@@ -71,7 +71,7 @@ cl_status init()
     if (!platforms.size())
     {
         std::cerr << "No OpenCL platforms found!" << std::endl;
-        return 10000;
+        return CL_INVALID_PLATFORM;
     }
 
     auto defaultPlatform = platforms[0];
@@ -82,7 +82,7 @@ cl_status init()
     if (!devices.size())
     {
         std::cerr << "No OpenCL devices found!" << std::endl;
-        return 10000;
+        return CL_INVALID_DEVICE;
     }
 
     defaultDevice = devices[0];

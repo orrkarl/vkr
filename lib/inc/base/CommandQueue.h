@@ -110,6 +110,24 @@ public:
                 0, nullptr, (cl_event*) notify);
     }
 
+	/**
+	 * @brief enqueues a buffer read command - reading the entire buffer to host memory
+	 *
+	 * @tparam      T       underlying buffer's element type
+	 * @param       buffer  device buffer object
+	 * @param       block   should the function block (wait until the data read is completed)
+	 * @param[out]  data    destination for the memory copy operation
+	 * @param[out]  notify  event which will be notified when this command changes status; will be ignored if nullptr
+	 * @return      internal OpenCL error status
+	 */
+	template<typename T>
+	cl_status enqueueBufferReadCommand(const Buffer<T>& buffer, nr_bool block, T* data, Event * notify = nullptr)
+	{
+		return clEnqueueReadBuffer(
+			object, buffer, block, 0, buffer.getDeviceByteSize(), data,
+			0, nullptr, (cl_event*)notify);
+	}
+
     /**
      * @brief enqueues a buffer write command - moving data from host memory to a device buffer
      * 
@@ -252,7 +270,7 @@ public:
 			"enqueueBufferFilleCommand: value size has to be one of {1, 2, 4, 8, 16, 32, 64, 128}");
 
 		cl_status err = CL_SUCCESS;
-		auto s = buffer.getSize(&err);
+		auto s = buffer.getDeviceByteSize(&err);
 		if (nr::error::isFailure(err))
 		{
 			return err;

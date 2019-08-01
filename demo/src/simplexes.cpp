@@ -25,7 +25,7 @@ class SimplexesApp : public App
 {
 public:
 	SimplexesApp()
-		: App("Simplexes", nr::ScreenDimension{ 640, 480 }, dim, SimplexesApp::COUNT)
+		: App("Simplexes", nr::ScreenDimension{ 64, 64 }, dim, SimplexesApp::COUNT)
 	{
 		setNearPlane(h_near);
 		setFarPlane(h_far);
@@ -51,10 +51,9 @@ public:
 		}
 		t[0] = Matrix::translation(6.0f, 3.0f, 1.0f, 1.0f);
 		t[1] = Matrix::translation(-6.0f, -3.0f, 1.0f, 1.0f);
-		t[2] = Matrix::translation(-6.0f, 3.0f, 1.0f, 1.0f);
-		t[3] = Matrix::translation(6.0f, -3.0f, 1.0f, 1.0f);
-		t[4] = Matrix::translation(0.0f, 0.0f, 1.0f, 1.0f);
-
+		//t[2] = Matrix::translation(-6.0f, 3.0f, 1.0f, 1.0f);
+		//t[3] = Matrix::translation(6.0f, -3.0f, 1.0f, 1.0f);
+		//t[4] = Matrix::translation(0.0f, 0.0f, 1.0f, 1.0f);
 
 		Matrix op;
 		
@@ -62,10 +61,10 @@ public:
 		{
 			op = globalPosition * t[i];
 
-			result[i].points[0] = op * base.points[0];
-			result[i].points[1] = op * base.points[1];
-			result[i].points[2] = op * base.points[2];
-			result[i].points[3] = op * base.points[3];
+			for (auto j = 0u; j < dim; ++j)
+			{
+				result[i].points[j] = op * base.points[j];
+			}
 		}
 	}
 
@@ -75,7 +74,7 @@ protected:
 	}
 
 private:
-	static const nr_uint COUNT = 5;
+	static const nr_uint COUNT = 2;
 };
 
 int main(const int argc, const char* argv[])

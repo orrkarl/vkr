@@ -172,6 +172,20 @@ kernel void fine_rasterize(
         current_queue_bases[i] += 1;
     }
 
+	if (IS_GLOBAL_HEAD)
+	{
+		ptrdiff_t consecutive_coords_distance = &triangle_data[0][0][1] - &triangle_data[0][0][0];
+		ptrdiff_t consecutive_points_distance = &triangle_data[0][1][0] - &triangle_data[0][0][0];
+		ptrdiff_t consecutive_triangles_distance = &triangle_data[1][0][0] - &triangle_data[0][0][0];
+
+		DEBUG_MESSAGE3("coords - %d, points - %d, triangles - %d\n", consecutive_coords_distance, consecutive_points_distance, consecutive_triangles_distance);
+		global float* triangles_flatten = (global float*) triangle_data;
+		for (uint i = 0; i < 8 * sizeof(Triangle) / sizeof(float); ++i)
+		{
+			DEBUG_MESSAGE1("%f ", triangles_flatten[i]);
+		}
+		DEBUG_MESSAGE("\n");
+	}
     while (true)
     {
         current_queue = pick_queue(current_queue_bases, current_queue_elements, work_group_count, config.queue_size);
@@ -192,6 +206,10 @@ kernel void fine_rasterize(
 		p2.x = triangle_data[current_queue_element][2][0];
 		p2.y = triangle_data[current_queue_element][2][1];
 
+		//DEBUG_ITEM_SPECIFIC7(1, 1, 0, "Triangle %d - [ (%f, %f), (%f, %f), (%f, %f) ]\n", current_queue_element, p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+	
+		//DEBUG_MESSAGE9("{%d %d} -> Triangle %d - [ (%f, %f), (%f, %f), (%f, %f) ]\n", x, y, current_queue_element, p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+
         for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, x * config.bin_width + config.bin_width); ++frag_x)
         {
             for (uint frag_y = y * config.bin_height; frag_y < min(screen_dim.height, y * config.bin_height + config.bin_height); ++frag_y)
@@ -202,7 +220,7 @@ kernel void fine_rasterize(
                 pixel_mid_point_from_screen(current_frag.position, screen_dim, &current_position_ndc); 
 				
                 barycentric2d(p0, p1, p2, current_position_ndc, &barycentric);
-
+	
                 if (is_point_in_triangle(p0, p1, p2, barycentric))
                 {
                     current_frag.depth = depth_at_point(triangle_data[current_queue_element], barycentric);

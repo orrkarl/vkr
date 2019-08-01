@@ -151,7 +151,44 @@ void App::draw(cl_status* err)
 		return;
 	}
 
-	glDrawPixels(640, 480, GL_RGBA, GL_UNSIGNED_BYTE, m_bitmap.get());
+	nr::__internal::BinQueueConfig config{ 32, 32, 120 };
+
+	const nr_uint binRasterWorkGroupCount = 1;
+	const nr_uint binCountX = ceil(((nr_float)m_screenDim.width) / config.binWidth);
+	const nr_uint binCountY = ceil(((nr_float)m_screenDim.height) / config.binHeight);
+	const nr_uint totalBinCount = binCountX * binCountY;
+
+	const nr_uint trianglesPerSimplex = m_renderDimension * (m_renderDimension - 1) * (m_renderDimension - 2) / 6;
+	const nr_uint triangleCount = trianglesPerSimplex * m_simplexCount;
+	const nr_uint totalFloatCount = (m_renderDimension + 1) * 3 * triangleCount;
+
+	std::unique_ptr<nr_uint[]> binQueues(new nr_uint[totalBinCount * binRasterWorkGroupCount * (config.queueSize + 1)]);
+	m_commandQueue.enqueueBufferReadCommand(m_fineRasterizer.binQueues, true, binQueues.get());
+	for (auto g = 0u; g < binRasterWorkGroupCount; ++g)
+	{
+		for (nr_int y = binCountY - 1; y >= 0; --y)
+		{
+			for (auto x = 0u; x < binCountX; ++x)
+			{
+				std::cout << "Bin queue [ " << x << ", " << y << " ]:\t";
+				for (auto i = 0u; i < config.queueSize + 1; ++i)
+				{
+					std::cout << binQueues[(g * totalBinCount + y * binCountX + x) * (config.queueSize + 1) + i] << " ";
+				}
+				std::cout << std::endl;
+			}
+		}
+	}
+
+	std::unique_ptr<nr::Triangle<4>[]> triangles(new nr::Triangle<4>[triangleCount]);
+	
+	m_commandQueue.enqueueBufferReadCommand(m_binRasterizer.triangleData, true, reinterpret_cast<nr_float*>(triangles.get()));
+	for (auto tri = 0u; tri < triangleCount; ++tri)
+	{
+		std::cout << "Triangle " << tri << ":\t" << triangles[tri] << std::endl;
+	}
+
+	glDrawPixels(m_screenDim.width, m_screenDim.height, GL_RGBA, GL_UNSIGNED_BYTE, m_bitmap.get());
 }
 
 bool App::initCL()
@@ -232,6 +269,7 @@ bool App::initGL()
 {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+	glfwWindowHint(GLFW_RESIZABLE, 0);
 
 	m_window = glfwCreateWindow(m_screenDim.width, m_screenDim.height, m_name.c_str(), NULL, NULL);
 	if (!m_window)
@@ -261,7 +299,7 @@ bool App::initRenderingPipeline()
 {
 	cl_status ret = CL_SUCCESS;
 
-	nr::__internal::BinQueueConfig config{48, 48, 120};
+	nr::__internal::BinQueueConfig config{32, 32, 120};
 
 	const nr_uint binRasterWorkGroupCount = 1;
 	const nr_uint binCountX = ceil(((nr_float)m_screenDim.width) / config.binWidth);
@@ -464,5 +502,6 @@ void App::loop(cl_status* err)
 		
 		glfwSwapBuffers(m_window);
 		glfwPollEvents();
+		return;
 	}
 }
