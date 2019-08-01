@@ -54,29 +54,78 @@ void transform(Tetrahedron simplexes[48], const nr_float angle)
 	cube4dToSimplices(cube, simplexes);
 }
 
-class Cube4dApp : public App
+class DynamicCube4dApp : public App
 {
 public:
-	Cube4dApp()
-		: App("Cube4d", nr::ScreenDimension{ 640, 480 }, dim, 48)
+	DynamicCube4dApp()
+		: App("Dynamic Cube4d", nr::ScreenDimension{ 640, 480 }, dim, 48)
 	{
 		setNearPlane(h_near);
 		setFarPlane(h_far);
-
-		transform(reinterpret_cast<Tetrahedron*>(getHostSimplexes<dim>()), M_PI / 20);
 	}
 
 protected:
 	void update() override
 	{
+		if (glfwGetKey(getWindow(), GLFW_KEY_SPACE) == GLFW_PRESS)
+		{
+			tick = (tick + 1) % divisions;
+		}
+		const nr_float angle = tick * (2 * M_PI) / divisions;
+
+		if (glfwGetKey(getWindow(), GLFW_KEY_S) == GLFW_PRESS)
+		{
+			std::cout << "Tick: " << tick << '\n';
+			std::cout << "Angle: " << angle << std::endl;
+		}
+
+		transform(reinterpret_cast<Tetrahedron*>(getHostSimplexes<dim>()), angle);
 	}
+
+private:
+	nr_uint tick = 0;
+	const nr_uint divisions = 40;
+};
+
+class StaticCube4dApp : public App
+{
+public:
+	StaticCube4dApp(const nr_float angle)
+		: App("Static Cube4d", nr::ScreenDimension{ 640, 480 }, dim, 48), angle(angle)
+	{
+		setNearPlane(h_near);
+		setFarPlane(h_far);
+	}
+
+	StaticCube4dApp(const nr_uint divisions, const nr_uint tick)
+		: StaticCube4dApp(tick * 2 * M_PI / divisions)
+	{
+	}
+
+protected:
+	void update() override
+	{
+		if (glfwGetKey(getWindow(), GLFW_KEY_R) == GLFW_PRESS)
+		{
+			std::cout << "Angle: " << angle << " (rad)" << std::endl;
+		}
+		if (glfwGetKey(getWindow(), GLFW_KEY_D) == GLFW_PRESS)
+		{
+			std::cout << "Angle: " << 180 * angle / M_PI << " (deg)" << std::endl;
+		}
+
+		transform(reinterpret_cast<Tetrahedron*>(getHostSimplexes<dim>()), angle);
+	}
+
+private:
+	const nr_float angle;
 };
 
 int main(const int argc, const char* argv[])
 {
 	if (!App::init()) return EXIT_FAILURE;
 
-	auto app = Cube4dApp();
+	auto app = StaticCube4dApp(40, 22);
 	auto ret = app.run();
 
 	App::deinit();

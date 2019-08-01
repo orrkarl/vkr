@@ -43,6 +43,8 @@ protected:
 
 	void setFarPlane(const nr_float* far);
 
+	GLFWwindow* getWindow();
+
 private:
 	void clearBuffers(cl_status* err);
 	void destroy();

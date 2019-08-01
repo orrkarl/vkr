@@ -130,6 +130,7 @@ kernel void fine_rasterize(
     global RawColorRGBA* color,
     global Depth* depth)
 {
+	//DEBUG_ONCE("Fine Rasterizer!\n");
     Fragment current_frag;
     float3 barycentric;
     uint current_queue_elements[MAX_WORK_GROUP_COUNT];
@@ -172,20 +173,21 @@ kernel void fine_rasterize(
         current_queue_bases[i] += 1;
     }
 
-	if (IS_GLOBAL_HEAD)
-	{
-		ptrdiff_t consecutive_coords_distance = &triangle_data[0][0][1] - &triangle_data[0][0][0];
-		ptrdiff_t consecutive_points_distance = &triangle_data[0][1][0] - &triangle_data[0][0][0];
-		ptrdiff_t consecutive_triangles_distance = &triangle_data[1][0][0] - &triangle_data[0][0][0];
+	//if (IS_GLOBAL_HEAD)
+	//{
+	//	ptrdiff_t consecutive_coords_distance = &triangle_data[0][0][1] - &triangle_data[0][0][0];
+	//	ptrdiff_t consecutive_points_distance = &triangle_data[0][1][0] - &triangle_data[0][0][0];
+	//	ptrdiff_t consecutive_triangles_distance = &triangle_data[1][0][0] - &triangle_data[0][0][0];
+	//
+	//	DEBUG_MESSAGE3("coords - %d, points - %d, triangles - %d\n", consecutive_coords_distance, consecutive_points_distance, consecutive_triangles_distance);
+	//	global float* triangles_flatten = (global float*) triangle_data;
+	//	for (uint i = 0; i < 8 * sizeof(Triangle) / sizeof(float); ++i)
+	//	{
+	//		DEBUG_MESSAGE1("%f ", triangles_flatten[i]);
+	//	}
+	//	DEBUG_MESSAGE("\n");
+	//}
 
-		DEBUG_MESSAGE3("coords - %d, points - %d, triangles - %d\n", consecutive_coords_distance, consecutive_points_distance, consecutive_triangles_distance);
-		global float* triangles_flatten = (global float*) triangle_data;
-		for (uint i = 0; i < 8 * sizeof(Triangle) / sizeof(float); ++i)
-		{
-			DEBUG_MESSAGE1("%f ", triangles_flatten[i]);
-		}
-		DEBUG_MESSAGE("\n");
-	}
     while (true)
     {
         current_queue = pick_queue(current_queue_bases, current_queue_elements, work_group_count, config.queue_size);

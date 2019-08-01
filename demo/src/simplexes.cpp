@@ -25,7 +25,7 @@ class SimplexesApp : public App
 {
 public:
 	SimplexesApp()
-		: App("Simplexes", nr::ScreenDimension{ 64, 64 }, dim, SimplexesApp::COUNT)
+		: App("Simplexes", nr::ScreenDimension{ 640, 480 }, dim, SimplexesApp::COUNT)
 	{
 		setNearPlane(h_near);
 		setFarPlane(h_far);
@@ -51,9 +51,9 @@ public:
 		}
 		t[0] = Matrix::translation(6.0f, 3.0f, 1.0f, 1.0f);
 		t[1] = Matrix::translation(-6.0f, -3.0f, 1.0f, 1.0f);
-		//t[2] = Matrix::translation(-6.0f, 3.0f, 1.0f, 1.0f);
-		//t[3] = Matrix::translation(6.0f, -3.0f, 1.0f, 1.0f);
-		//t[4] = Matrix::translation(0.0f, 0.0f, 1.0f, 1.0f);
+		t[2] = Matrix::translation(-6.0f, 3.0f, 1.0f, 1.0f);
+		t[3] = Matrix::translation(6.0f, -3.0f, 1.0f, 1.0f);
+		t[4] = Matrix::translation(0.0f, 0.0f, 1.0f, 1.0f);
 
 		Matrix op;
 		
@@ -74,7 +74,7 @@ protected:
 	}
 
 private:
-	static const nr_uint COUNT = 2;
+	static const nr_uint COUNT = 5;
 };
 
 int main(const int argc, const char* argv[])
