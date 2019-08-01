@@ -41,7 +41,7 @@ nr_float h_far[]
 void transform(Tetrahedron simplexes[48], const nr_float angle)
 {
     Matrix r = Matrix::rotation(Y, Z, angle);
-    Matrix t = Matrix::translation(1.5, 1.5, 2, 2);
+    Matrix t = Matrix::translation(1.5, 1.5, 3, 2);
     
     Matrix op = t * r;
 
@@ -51,14 +51,20 @@ void transform(Tetrahedron simplexes[48], const nr_float angle)
 		cube[i] = op * h_cube[i];
     }
 
+	//std::cout << "Cube:\n";
+	//for (auto v = 0u; v < 16; ++v)
+	//{
+	//	std::cout << "\tvertex " << v << " - " << cube[v] << std::endl;
+	//}
+
 	cube4dToSimplices(cube, simplexes);
 }
 
 class DynamicCube4dApp : public App
 {
 public:
-	DynamicCube4dApp()
-		: App("Dynamic Cube4d", nr::ScreenDimension{ 640, 480 }, dim, 48)
+	DynamicCube4dApp(const nr_uint divisions)
+		: App("Dynamic Cube4d", nr::ScreenDimension{ 640, 480 }, dim, 48), divisions(divisions)
 	{
 		setNearPlane(h_near);
 		setFarPlane(h_far);
@@ -67,16 +73,13 @@ public:
 protected:
 	void update() override
 	{
-		if (glfwGetKey(getWindow(), GLFW_KEY_SPACE) == GLFW_PRESS)
-		{
-			tick = (tick + 1) % divisions;
-		}
-		const nr_float angle = tick * (2 * M_PI) / divisions;
+		const nr_float angle = (tick++) * (2 * M_PI) / divisions;
 
 		if (glfwGetKey(getWindow(), GLFW_KEY_S) == GLFW_PRESS)
 		{
 			std::cout << "Tick: " << tick << '\n';
-			std::cout << "Angle: " << angle << std::endl;
+			std::cout << "Angle: " << angle << " (rad)" << std::endl;
+			std::cout << "Angle: " << 180 * angle / nr_float(M_PI) << " (deg)" << std::endl;
 		}
 
 		transform(reinterpret_cast<Tetrahedron*>(getHostSimplexes<dim>()), angle);
@@ -84,7 +87,7 @@ protected:
 
 private:
 	nr_uint tick = 0;
-	const nr_uint divisions = 40;
+	const nr_uint divisions;
 };
 
 class StaticCube4dApp : public App
@@ -97,7 +100,7 @@ public:
 		setFarPlane(h_far);
 	}
 
-	StaticCube4dApp(const nr_uint divisions, const nr_uint tick)
+	StaticCube4dApp(const nr_uint tick, const nr_uint divisions)
 		: StaticCube4dApp(tick * 2 * M_PI / divisions)
 	{
 	}
@@ -111,7 +114,7 @@ protected:
 		}
 		if (glfwGetKey(getWindow(), GLFW_KEY_D) == GLFW_PRESS)
 		{
-			std::cout << "Angle: " << 180 * angle / M_PI << " (deg)" << std::endl;
+			std::cout << "Angle: " << 180 * angle / nr_float(M_PI) << " (deg)" << std::endl;
 		}
 
 		transform(reinterpret_cast<Tetrahedron*>(getHostSimplexes<dim>()), angle);
@@ -125,7 +128,7 @@ int main(const int argc, const char* argv[])
 {
 	if (!App::init()) return EXIT_FAILURE;
 
-	auto app = StaticCube4dApp(40, 22);
+	auto app = DynamicCube4dApp(40);
 	auto ret = app.run();
 
 	App::deinit();
