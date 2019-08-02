@@ -25,24 +25,18 @@ template<typename T>
 class Buffer : public Wrapper<cl_mem>
 {
 public:    
-    Buffer(const cl_mem_flags& flags, const nr_ulong& count, cl_int* err = nullptr)
+    Buffer(const cl_mem_flags& flags, const nr_ulong& count, cl_status* err = nullptr)
         : Buffer(flags, count, nullptr, err)
     {
     }
 
-    
-    Buffer(const cl_mem_flags& flags, const nr_ulong& count, T* data = nullptr, cl_int* error = nullptr)
-        : Wrapped(clCreateBuffer(Context::getDefault(), flags, count * sizeof(T), data, error))
-    {
-    }
-
-    Buffer(const Context& context, const cl_mem_flags& flags, const nr_ulong& count, cl_int* err = nullptr)
+    Buffer(const Context& context, const cl_mem_flags& flags, const nr_ulong& count, cl_status* err = nullptr)
         : Buffer(context, flags, count, nullptr, err)
     {
     }
 
     
-    Buffer(const Context& context, const cl_mem_flags& flags, const nr_ulong& count, T* data = nullptr, cl_int* error = nullptr)
+    Buffer(const Context& context, const cl_mem_flags& flags, const nr_ulong& count, T* data = nullptr, cl_status* error = nullptr)
         : Wrapped(clCreateBuffer(context, flags, count * sizeof(T), data, error))
     {
     }
@@ -92,23 +86,22 @@ public:
     /**
      * @brief Aquire the size (in bytes) of the buffer in device memory
      * @param[out] err internal OpenCL call error status
-	 * @return buffer byte size in device memory
+	 * @return the buffer size (in bytes)
      */
-    nr_size getSize(cl_status* err = nullptr) const
+    nr_size getDeviceByteSize(cl_status* err = nullptr) const
     {
         nr_size ret = 0;
-        if(err) *err = clGetMemObjectInfo(object, CL_MEM_SIZE, sizeof(nr_size), &ret, nullptr);
+		auto status = clGetMemObjectInfo(object, CL_MEM_SIZE, sizeof(nr_size), &ret, nullptr);
+        if (err) *err = status;
         return ret;
     }
 
-	/**
-	 * @brief Queries how many elements are in the buffer
-	 * @param[out] err internal OpenCL call error status
-	 * @return buffer element count
-	 */
 	nr_size getElementCount(cl_status* err = nullptr) const
 	{
-		return getSize(err) / sizeof(T);
+		nr_size ret = 0;
+		auto status = clGetMemObjectInfo(object, CL_MEM_SIZE, sizeof(nr_size), &ret, nullptr);
+		if (err) *err = status;
+		return ret / sizeof(T);
 	}
 };
 

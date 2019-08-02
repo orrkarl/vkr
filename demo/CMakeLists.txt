@@ -5,7 +5,7 @@ INCLUDE_DIRECTORIES(
 	PUBLIC ${glew_INCLUDE_DIRS}
 	PUBLIC ${glfw_INCLUDE_DIRS})
 
-ADD_LIBRARY(NrasterDemoUtils src/utils.cpp src/linalg.cpp)
+ADD_LIBRARY(NrasterDemoUtils src/utils.cpp src/linalg.cpp src/app.cpp)
 
 TARGET_LINK_LIBRARIES(NrasterDemoUtils 
 	PUBLIC Nraster
@@ -19,39 +19,42 @@ TARGET_LINK_LIBRARIES(Triangle3d NrasterDemoUtils)
 ADD_EXECUTABLE(Cube4d src/cube4d.cpp)
 TARGET_LINK_LIBRARIES(Cube4d NrasterDemoUtils)
 
+ADD_EXECUTABLE(Simpelxes src/simplexes.cpp)
+TARGET_LINK_LIBRARIES(Simpelxes NrasterDemoUtils)
+
 IF(WIN32)
     # Copy DLL files to output directory. Yes, this is digusting, but nothing else worked :(
 	
-	ADD_CUSTOM_COMMAND(TARGET Triangle3d POST_BUILD
+	ADD_CUSTOM_COMMAND(TARGET Triangle3d PRE_LINK
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		"${PROJECT_BINARY_DIR}/lib/Nraster.dll"         
 		$<TARGET_FILE_DIR:Triangle3d>
 	)
 		
-	ADD_CUSTOM_COMMAND(TARGET Cube4d POST_BUILD
+	ADD_CUSTOM_COMMAND(TARGET Cube4d PRE_LINK
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		"${PROJECT_BINARY_DIR}/lib/Nraster.dll"         
 		$<TARGET_FILE_DIR:Cube4d>
 	)
 
 	IF(CMAKE_BUILD_TYPE STREQUAL Debug)
-		ADD_CUSTOM_COMMAND(TARGET Triangle3d POST_BUILD
+		ADD_CUSTOM_COMMAND(TARGET Triangle3d PRE_LINK
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			"${PROJECT_BINARY_DIR}/bin/glewd.dll"         
 			$<TARGET_FILE_DIR:Triangle3d>
 		)
-		ADD_CUSTOM_COMMAND(TARGET Cube4d POST_BUILD
+		ADD_CUSTOM_COMMAND(TARGET Cube4d PRE_LINK
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			"${PROJECT_BINARY_DIR}/bin/glewd.dll"         
 			$<TARGET_FILE_DIR:Cube4d>
 		)	
 	ELSE()
-		ADD_CUSTOM_COMMAND(TARGET Triangle3d POST_BUILD
+		ADD_CUSTOM_COMMAND(TARGET Triangle3d PRE_LINK
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 				"${PROJECT_BINARY_DIR}/bin/glew.dll"         
 				$<TARGET_FILE_DIR:Triangle3d>
 		)
-		ADD_CUSTOM_COMMAND(TARGET Cube4d POST_BUILD
+		ADD_CUSTOM_COMMAND(TARGET Cube4d PRE_LINK
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 				"${PROJECT_BINARY_DIR}/bin/glew.dll"         
 				$<TARGET_FILE_DIR:Cube4d>

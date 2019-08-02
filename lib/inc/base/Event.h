@@ -34,8 +34,6 @@ public:
 
     explicit Event(Context context, cl_status* err = nullptr);
 
-    explicit Event(cl_status* err);
-
     Event(const Event& other);
 
     Event(Event&& other);

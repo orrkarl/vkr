@@ -2,17 +2,6 @@
 
 namespace nr
 {
-
-void Device::makeDefault(const Device& provided)
-{
-    defaultDevice = provided;
-}
-
-Device Device::getDefault()
-{
-    return defaultDevice;
-}
-
 Device::Device()
     : Wrapped()
 {
@@ -54,7 +43,5 @@ const cl_device_id& Device::get() const
 {
     return object;
 }
-
-Device Device::defaultDevice = Device();
 
 }

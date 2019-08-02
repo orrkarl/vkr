@@ -21,6 +21,8 @@ struct NRAPI SimplexReducer : Kernel
 
 	SimplexReducer(Module module, cl_status* err = nullptr);
 
+	SimplexReducer();
+
 	cl_status load();
 
 	Buffer<nr_float> simplexes;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "compilation.h"
+#include "depth.h"
 #include "point_in_triangle.h"
-#include "shade.h"
 #include "rasterizer.h"
+#include "shade.h"

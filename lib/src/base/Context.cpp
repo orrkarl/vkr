@@ -2,17 +2,6 @@
 
 namespace nr
 {
-
-void Context::makeDefault(const Context& provided)
-{
-    defaultContext = provided;
-}
-
-Context Context::getDefault()
-{
-    return defaultContext;
-}
-
 Context::Context()
     : Wrapped()
 {
@@ -40,7 +29,7 @@ Context::Context(
     : Wrapped(
         clCreateContext(
             properties, 
-            devices.size(), &devices.front().get(), 
+            cl_uint(devices.size()), &devices.front().get(), 
             nullptr, nullptr, 
             err))
 {
@@ -75,7 +64,5 @@ Context::operator cl_context() const
 {
     return object;
 }
-
-Context Context::defaultContext = Context();
 
 }

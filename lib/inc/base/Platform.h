@@ -27,10 +27,6 @@ namespace nr
 class NRAPI Platform : public Wrapper<cl_platform_id>
 {
 public:
-    static void makeDefault(const Platform& provided);
-
-    static Platform getDefault();
-
     static std::vector<Platform> getAvailablePlatforms(cl_status* err);
 
     Platform();
@@ -48,9 +44,6 @@ public:
     operator cl_platform_id() const;
 
     std::vector<Device> getDevicesByType(cl_device_type type, cl_status* err);
-
-private:
-    static Platform defaultPlatform;
 };
 
 }

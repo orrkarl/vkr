@@ -13,16 +13,12 @@ int main(int argc, char **argv)
         std::cerr << "init failed: " << utils::stringFromCLError(initStatus) << std::endl;
         return initStatus;
     }
-
+	
     ::testing::InitGoogleTest(&argc, argv);
-
+	
 	auto ret = RUN_ALL_TESTS();
-
-	if ((initStatus = destroy()) != CL_SUCCESS)
-	{
-		std::cerr << "Destroy failed: " << utils::stringFromCLError(initStatus) << std::endl;
-	}
-
+	
+	destroy();
     return ret;
 }
 

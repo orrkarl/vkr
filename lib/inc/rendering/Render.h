@@ -3,6 +3,7 @@
 #include "../general/predefs.h"
 #include "../base/Buffer.h"
 
+#include <iomanip>
 #include <iostream>
 
 namespace nr
@@ -30,9 +31,14 @@ struct RawColorRGBA
         return r == other.r && g == other.g && b == other.b && a == other.a;
     }
 
+	bool operator!=(const RawColorRGBA& other) const
+	{
+		return !(operator==(other));
+	}
+
     friend std::ostream& operator<<(std::ostream& os, const RawColorRGBA& color)
     {
-        return os << "(" << (nr_uint) color.r << "," << (nr_uint) color.g << "," << (nr_uint) color.b << "," << (nr_uint) color.a << ')';
+        return os << "(" << std::setw(3) << (nr_uint) color.r << "," << std::setw(3) << (nr_uint) color.g << "," << std::setw(3) << (nr_uint) color.b << "," << std::setw(3) << (nr_uint) color.a << ')';
     }
 };
 

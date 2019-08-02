@@ -15,7 +15,7 @@ TARGET_INCLUDE_DIRECTORIES(NrasterTest
 
 if(WIN32)
     # Copy DLL files to output directory
-    add_custom_command(TARGET NrasterTest PRE_LINK
+    ADD_CUSTOM_COMMAND(TARGET NrasterTest PRE_LINK
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "${PROJECT_BINARY_DIR}/lib/Nraster.dll"             
     $<TARGET_FILE_DIR:NrasterTest>)

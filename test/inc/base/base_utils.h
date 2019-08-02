@@ -50,7 +50,7 @@ public:
 
     cl_status getResult(ScreenPosition* res) 
     {
-        return CommandQueue::getDefault().enqueueBufferReadCommand(result, true, 1, res);
+        return defaultCommandQueue.enqueueBufferReadCommand(result, true, 1, res);
     } 
 
     NDCPosition ndcPosition;

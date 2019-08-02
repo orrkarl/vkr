@@ -16,7 +16,7 @@ void screenFromNDCTestTemplate(ScreenFromNDC kernel, CommandQueue q, const NDCPo
     
     kernel.ndcPosition = ndc;
     kernel.dimension   = dim;
-	kernel.result = Buffer<ScreenPosition>(CL_MEM_WRITE_ONLY, 1, &err);
+	kernel.result = Buffer<ScreenPosition>(defaultContext, CL_MEM_WRITE_ONLY, 1, &err);
 
     ASSERT_SUCCESS(kernel.load());
     ASSERT_SUCCESS(q.enqueueKernelCommand<1>(kernel, global, local));
@@ -31,22 +31,20 @@ void screenFromNDCTestTemplate(ScreenFromNDC kernel, CommandQueue q, const NDCPo
 TEST(Base, ScreenFromNDC)   
 {
     cl_status err = CL_SUCCESS; 
- 
-    CommandQueue queue = CommandQueue::getDefault();
 
-    Module base(clcode::base, &err);
+    Module base(defaultContext, clcode::base, &err);
     ASSERT_SUCCESS(err);
 
-    ASSERT_SUCCESS(base.build(Module::Options{Module::CL_VERSION_12, Module::_3D}));
+    ASSERT_SUCCESS(base.build(defaultDevice, Module::Options{Module::CL_VERSION_12, Module::_3D}));
 
     auto screen_from_ndc = ScreenFromNDC(base, &err);
     ASSERT_SUCCESS(err);
 
-    screenFromNDCTestTemplate(screen_from_ndc, queue, NDCPosition{-1.0f, -1.0f}, ScreenDimension{100, 100}, ScreenPosition{0, 0});
-    screenFromNDCTestTemplate(screen_from_ndc, queue, NDCPosition{0.0f, 0.0f}, ScreenDimension{100, 100}, ScreenPosition{50, 50});
-    screenFromNDCTestTemplate(screen_from_ndc, queue, NDCPosition{0.99f, 0.99f}, ScreenDimension{100, 100}, ScreenPosition{99, 99});
-
-    screenFromNDCTestTemplate(screen_from_ndc, queue, NDCPosition{-1.0f, -1.0f}, ScreenDimension{99, 99}, ScreenPosition{0, 0});
-    screenFromNDCTestTemplate(screen_from_ndc, queue, NDCPosition{0.0f, 0.0f}, ScreenDimension{99, 99}, ScreenPosition{49, 49});
-    screenFromNDCTestTemplate(screen_from_ndc, queue, NDCPosition{0.99f, 0.99f}, ScreenDimension{99, 99}, ScreenPosition{98, 98});
+    screenFromNDCTestTemplate(screen_from_ndc, defaultCommandQueue, NDCPosition{-1.0f, -1.0f}, ScreenDimension{100, 100}, ScreenPosition{0, 0});
+    screenFromNDCTestTemplate(screen_from_ndc, defaultCommandQueue, NDCPosition{0.0f, 0.0f}, ScreenDimension{100, 100}, ScreenPosition{50, 50});
+    screenFromNDCTestTemplate(screen_from_ndc, defaultCommandQueue, NDCPosition{0.99f, 0.99f}, ScreenDimension{100, 100}, ScreenPosition{99, 99});
+											   
+    screenFromNDCTestTemplate(screen_from_ndc, defaultCommandQueue, NDCPosition{-1.0f, -1.0f}, ScreenDimension{99, 99}, ScreenPosition{0, 0});
+    screenFromNDCTestTemplate(screen_from_ndc, defaultCommandQueue, NDCPosition{0.0f, 0.0f}, ScreenDimension{99, 99}, ScreenPosition{49, 49});
+    screenFromNDCTestTemplate(screen_from_ndc, defaultCommandQueue, NDCPosition{0.99f, 0.99f}, ScreenDimension{99, 99}, ScreenPosition{98, 98});
 }

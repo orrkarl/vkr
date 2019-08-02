@@ -42,16 +42,16 @@ void testBin(TriangleInBin testee, CommandQueue q, const nr_uint dimension, cons
     cl_status err = CL_SUCCESS;
 
     cl_bool h_result = CL_FALSE;
-    Buffer<cl_bool> d_result(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, 1, &h_result, &err);
+    Buffer<cl_bool> d_result(defaultContext, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, 1, &h_result, &err);
     ASSERT_SUCCESS(err);
 
     nr_float defaultValue = -2.0;
     nr_int defaultValueAsInt = * (nr_int*) &defaultValue; 
     memset(triangle_x, defaultValueAsInt, 3 * sizeof(nr_float));
     memset(triangle_y, defaultValueAsInt, 3 * sizeof(nr_float));
-    Buffer<nr_float> d_triangle_x(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3, triangle_x, &err);
+    Buffer<nr_float> d_triangle_x(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3, triangle_x, &err);
     ASSERT_SUCCESS(err);
-    Buffer<nr_float> d_triangle_y(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3, triangle_x, &err);
+    Buffer<nr_float> d_triangle_y(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3, triangle_x, &err);
     ASSERT_SUCCESS(err);
 
     testee.bin = bin;
@@ -108,6 +108,6 @@ TEST(Binning, IsSimplexInBin)
     const ScreenDimension screenDim{1920, 1080};
     const Bin bin{32, 32, 800, 800};
 
-    testBin(test, CommandQueue::getDefault(), dim, bin, screenDim, triangle_x, triangle_y);
+    testBin(test, defaultCommandQueue, dim, bin, screenDim, triangle_x, triangle_y);
 }
 

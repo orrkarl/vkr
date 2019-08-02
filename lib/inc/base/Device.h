@@ -24,10 +24,6 @@ namespace nr
 class NRAPI Device : public Wrapper<cl_device_id>
 {
 public:
-    static void makeDefault(const Device& provided);
-
-    static Device getDefault();
-
     Device();
 
     explicit Device(const cl_device_id& device, const nr_bool retain = false);
@@ -43,10 +39,6 @@ public:
     operator cl_device_id() const;
 
     const cl_device_id& get() const;
-
-// Fields
-private:
-    static Device defaultDevice;
 };
 
 }

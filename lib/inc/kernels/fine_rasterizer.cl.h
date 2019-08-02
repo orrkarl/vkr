@@ -56,15 +56,19 @@ Depth depth_at_point(const global Triangle triangle, float3 barycentric)
 
 
 // Check if point fits the top\left rule for a certain edge
-bool is_contained_top_left(const NDCPosition vec, float weight)
+bool is_contained_top_left(const float2 vec, float weight)
 {
-    return weight > 0 || (weight == 0 && (vec.y > 0 || (vec.y == 0 && vec.x > 0)));
+	return weight > 0 || (weight == 0 && (vec.y > 0 || (vec.y == 0 && vec.x > 0)));
 }
 
 // Check if a point is "in" a triangle, according to the top\left rule
 bool is_point_in_triangle(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, float3 barycentric)
-{
-    return is_contained_top_left(p0, barycentric.x) && is_contained_top_left(p1, barycentric.y) && is_contained_top_left(p2, barycentric.z);
+{		
+	float2 v0 = (float2)(p2.x - p1.x, p2.y - p1.y);
+    float2 v1 = (float2)(p0.x - p2.x, p0.y - p2.y);
+    float2 v2 = (float2)(p1.x - p0.x, p1.y - p0.y);
+
+    return is_contained_top_left(v0, barycentric.x) && is_contained_top_left(v1, barycentric.y) && is_contained_top_left(v2, barycentric.z);
 }
 
 bool is_queue_ended(global const Index** queues, uint* indices, uint index)
@@ -178,6 +182,19 @@ kernel void fine_rasterize(
         }
         
         current_queue_element = current_queue_bases[current_queue][current_queue_elements[current_queue]];
+		
+		p0.x = triangle_data[current_queue_element][0][0];
+		p0.y = triangle_data[current_queue_element][0][1];
+
+		p1.x = triangle_data[current_queue_element][1][0];
+		p1.y = triangle_data[current_queue_element][1][1];
+
+		p2.x = triangle_data[current_queue_element][2][0];
+		p2.y = triangle_data[current_queue_element][2][1];
+
+		//DEBUG_ITEM_SPECIFIC7(1, 1, 0, "Triangle %d - [ (%f, %f), (%f, %f), (%f, %f) ]\n", current_queue_element, p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+	
+		//DEBUG_MESSAGE9("{%d %d} -> Triangle %d - [ (%f, %f), (%f, %f), (%f, %f) ]\n", x, y, current_queue_element, p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
 
         for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, x * config.bin_width + config.bin_width); ++frag_x)
         {
@@ -187,16 +204,7 @@ kernel void fine_rasterize(
                 current_frag.position.y = frag_y;
                 
                 pixel_mid_point_from_screen(current_frag.position, screen_dim, &current_position_ndc); 
-                
-				p0.x = triangle_data[current_queue_element][0][0];
-				p0.y = triangle_data[current_queue_element][0][1];
-
-				p1.x = triangle_data[current_queue_element][1][0];
-				p1.y = triangle_data[current_queue_element][1][1];
-
-				p2.x = triangle_data[current_queue_element][2][0];
-				p2.y = triangle_data[current_queue_element][2][1];
-
+				
                 barycentric2d(p0, p1, p2, current_position_ndc, &barycentric);
 
                 if (is_point_in_triangle(p0, p1, p2, barycentric))

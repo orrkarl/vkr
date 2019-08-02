@@ -25,6 +25,11 @@ public:
     {
     }
 
+	FineRasterizer()
+		: Kernel()
+	{
+	}
+
     cl_status load();
 
     // Simplex buffer

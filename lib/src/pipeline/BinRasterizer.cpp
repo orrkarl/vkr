@@ -25,6 +25,11 @@ BinRasterizer::BinRasterizer(Module module, cl_status* err)
 {
 }
 
+BinRasterizer::BinRasterizer()
+	: Kernel(), dimension{ 0 }, binQueueConfig{ 0, 0, 0 }, triangleCount{ 0 }
+{
+}
+
 cl_status BinRasterizer::load()
 {
     cl_status err = CL_SUCCESS;

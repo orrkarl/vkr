@@ -96,20 +96,20 @@ TEST(SimplexReducer, reducing)
 		Module::DEBUG
 	};
 
-	Module code({ clcode::base, clcode::simplex_reducing }, &err);
+	Module code(defaultContext, { clcode::base, clcode::simplex_reducing }, &err);
 	ASSERT_SUCCESS(err);
 
-	ASSERT_SUCCESS(code.build(options));
+	ASSERT_SUCCESS(code.build(defaultDevice, options));
 
 	auto testee = SimplexReducer(code, &err);
 	ASSERT_SUCCESS(err);
 
-	auto q = CommandQueue::getDefault();
+	auto q = defaultCommandQueue;
 	ASSERT_SUCCESS(err);
 
-	Buffer<nr_float> d_orig(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, point_count * dim * simplexCount, (nr_float*)orig, &err);
+	Buffer<nr_float> d_orig(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, point_count * dim * simplexCount, (nr_float*)orig, &err);
 	ASSERT_SUCCESS(err); 
-	Buffer<nr_float> d_res(CL_MEM_WRITE_ONLY, totalElementCount, &err);
+	Buffer<nr_float> d_res(defaultContext, CL_MEM_WRITE_ONLY, totalElementCount, &err);
 	ASSERT_SUCCESS(err);
 
 	testee.simplexes = d_orig;
@@ -120,7 +120,7 @@ TEST(SimplexReducer, reducing)
 
 	ASSERT_SUCCESS(testee.load());
 	ASSERT_SUCCESS(q.enqueueKernelCommand<1>(testee, global, local));
-	ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_res, false, point_count * 3 * (dim * (dim - 1) * (dim - 2) / 6) * simplexCount, (nr_float*) result));
+	ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_res, false, (nr_float*) result));
 	ASSERT_SUCCESS(q.await());
 
 	for (auto i = 0u; i < simplexCount; ++i)

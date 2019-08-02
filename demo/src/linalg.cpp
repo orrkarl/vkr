@@ -3,32 +3,22 @@
 #include <cmath>
 
 Matrix::Matrix()
+	: data{}
 {
-    for (auto i = 0; i < 5; ++i)
-    {
-        for (auto j = 0; j < 5; ++j)
-        {
-            data[i][j] = 0;
-        }
-    }
 }
 
 Matrix::Matrix(const nr_float data[5][5])
+	: data{}
 {
     std::memcpy(this->data, data, 5 * 5 * sizeof(nr_float));
 }
 
 Matrix::Matrix(const nr_float diagonal)
+	: data{}
 {
     for (auto i = 0; i < 5; ++i)
     {
-        for (auto j = 0; j < 5; ++j)
-        {
-            if (i == j)
-                data[i][j] = diagonal;
-            else
-                data[i][j] = 0;
-        }
+		data[i][i] = diagonal;
     }
 }
 
@@ -119,9 +109,17 @@ Matrix Matrix::rotation(const Axis source, const Axis dest, const nr_float radia
 
 Matrix Matrix::scale(const nr_float s)
 {
-    Matrix ret(s);
-    ret.data[4][4] = 1;
-    return ret;
+	return Matrix::scale(s, s, s, s);
+}
+
+Matrix Matrix::scale(const nr_float x, const nr_float y, const nr_float z, const nr_float w)
+{
+	Matrix ret(1.0f);
+	ret.data[0][0] = x;
+	ret.data[1][1] = y;
+	ret.data[2][2] = z;
+	ret.data[3][3] = w;
+	return ret;
 }
 
 Matrix Matrix::translation(const nr_float x, const nr_float y, const nr_float z, const nr_float w)
@@ -137,6 +135,21 @@ Matrix Matrix::translation(const nr_float x, const nr_float y, const nr_float z,
 Matrix Matrix::identity()
 {
    return Matrix(1);
+}
+
+std::ostream& operator<<(std::ostream& os, const Matrix& mat)
+{
+	for (auto i = 0u; i < 5; ++i)
+	{
+		os << "[ ";
+		for (auto j = 0u; j < 5; ++j)
+		{
+			os << mat.data[i][j] << " ";
+		}
+		os << "]\n";
+	}
+
+	return os;
 }
 
 Vector::Vector(nr_float x, nr_float y, nr_float z, nr_float w, nr_float q)

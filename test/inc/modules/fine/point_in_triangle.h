@@ -59,7 +59,7 @@ TEST(Fine, PointInTriangle)
 
     nr_bool h_result = false;
 
-    auto q = CommandQueue::getDefault();
+    auto q = defaultCommandQueue;
 
     auto code = mkFineModule(dim, &err);
     ASSERT_SUCCESS(err);
@@ -67,10 +67,10 @@ TEST(Fine, PointInTriangle)
     auto testee = PointInTriangle(code, &err);
     ASSERT_SUCCESS(err);
 
-    Buffer<nr_float> d_triangle(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(triangle) / sizeof(nr_float), (nr_float*) &triangle, &err);
+    Buffer<nr_float> d_triangle(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(triangle) / sizeof(nr_float), (nr_float*) &triangle, &err);
     ASSERT_SUCCESS(err);
 
-    Buffer<nr_bool> d_result(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, &h_result, &err);
+    Buffer<nr_bool> d_result(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, &h_result, &err);
     ASSERT_SUCCESS(err);
 
     testee.triangle = d_triangle;

@@ -78,7 +78,6 @@ public:
         return *this;
     }
 
-protected:
     cl_status release() 
     { 
         cl_status ret = object != nullptr ? ReferenceHandler<cl_type>::release(object) : CL_SUCCESS; 
