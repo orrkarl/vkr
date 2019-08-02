@@ -41,7 +41,7 @@ nr_float h_far[]
 void transform(Tetrahedron simplexes[48], const nr_float angle)
 {
     Matrix r = Matrix::rotation(Y, Z, angle);
-    Matrix t = Matrix::translation(1.5, 1.5, 3, 2);
+    Matrix t = Matrix::translation(1.5, 1.5, 3, 3);
     
     Matrix op = t * r;
 
@@ -50,12 +50,6 @@ void transform(Tetrahedron simplexes[48], const nr_float angle)
     {
 		cube[i] = op * h_cube[i];
     }
-
-	//std::cout << "Cube:\n";
-	//for (auto v = 0u; v < 16; ++v)
-	//{
-	//	std::cout << "\tvertex " << v << " - " << cube[v] << std::endl;
-	//}
 
 	cube4dToSimplices(cube, simplexes);
 }
@@ -73,7 +67,8 @@ public:
 protected:
 	void update() override
 	{
-		const nr_float angle = (tick++) * (2 * M_PI) / divisions;
+		const nr_float angle = tick * (2 * M_PI) / divisions;
+		tick = (tick + 1) % divisions;
 
 		if (glfwGetKey(getWindow(), GLFW_KEY_S) == GLFW_PRESS)
 		{
@@ -81,6 +76,9 @@ protected:
 			std::cout << "Angle: " << angle << " (rad)" << std::endl;
 			std::cout << "Angle: " << 180 * angle / nr_float(M_PI) << " (deg)" << std::endl;
 		}
+
+		transform(reinterpret_cast<Tetrahedron*>(getHostSimplexes<4>()), angle);
+	}
 
 private:
 	nr_uint tick = 0;
@@ -125,7 +123,7 @@ int main(const int argc, const char* argv[])
 {
 	if (!App::init()) return EXIT_FAILURE;
 
-	auto app = DynamicCube4dApp(40);
+	auto app = StaticCube4dApp(25, 40);
 	auto ret = app.run();
 
 	App::deinit();
