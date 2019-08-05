@@ -34,10 +34,10 @@ struct PointInTriangle : Kernel
         return setArg(argc, result);
     }
 
-    Buffer<nr_float> triangle;
+    Buffer triangle;
     ScreenPosition position;
     ScreenDimension screenDim;
-    Buffer<nr_bool> result; 
+    Buffer result; 
 };
 
 TEST(Fine, PointInTriangle)
@@ -67,10 +67,10 @@ TEST(Fine, PointInTriangle)
     auto testee = PointInTriangle(code, &err);
     ASSERT_SUCCESS(err);
 
-    Buffer<nr_float> d_triangle(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(triangle) / sizeof(nr_float), (nr_float*) &triangle, &err);
+    auto d_triangle = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(triangle) / sizeof(nr_float), (nr_float*) &triangle, &err);
     ASSERT_SUCCESS(err);
 
-    Buffer<nr_bool> d_result(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, &h_result, &err);
+    auto d_result = Buffer::make<nr_bool>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, &h_result, &err);
     ASSERT_SUCCESS(err);
 
     testee.triangle = d_triangle;

@@ -62,14 +62,14 @@ TEST(Fine, Depth)
     auto q = defaultCommandQueue;
 
     FrameBuffer frame;
-    frame.color = Buffer<nr::RawColorRGBA>(defaultContext, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_colorBuffer.get(), &err);
+    frame.color = Buffer::make<nr::RawColorRGBA>(defaultContext, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_colorBuffer.get(), &err);
     ASSERT_SUCCESS(err);
-    frame.depth = Buffer<nr_float>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_depthBuffer.get(), &err);
+    frame.depth = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, totalScreenSize, h_depthBuffer.get(), &err);
     ASSERT_SUCCESS(err);
 
-    Buffer<nr_float> d_triangles(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount * sizeof(Triangle<dim>) / sizeof(nr_float), (nr_float*) h_triangles.get(), &err);
+    auto d_triangles = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount * sizeof(Triangle<dim>) / sizeof(nr_float), (nr_float*) h_triangles.get(), &err);
     ASSERT_SUCCESS(err);
-    Buffer<nr_uint> d_binQueues(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, totalBinQueuesSize, h_binQueues.get(), &err);
+    auto d_binQueues = Buffer::make<nr_uint>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, totalBinQueuesSize, h_binQueues.get(), &err);
     ASSERT_SUCCESS(err);
 
     testee.triangleData = d_triangles;

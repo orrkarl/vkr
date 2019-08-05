@@ -28,7 +28,7 @@ public:
 
     ScreenPosition position;
     ScreenDimension dimension;
-    Buffer<NDCPosition> result;
+    Buffer result;
 };
 
 struct ScreenFromNDC : Kernel
@@ -55,7 +55,7 @@ public:
 
     NDCPosition ndcPosition;
     ScreenDimension dimension;
-    Buffer<ScreenPosition> result;
+    Buffer result;
 };
 
 

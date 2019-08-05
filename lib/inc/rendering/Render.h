@@ -44,8 +44,8 @@ struct RawColorRGBA
 
 struct FrameBuffer
 {
-    Buffer<RawColorRGBA> color;
-    Buffer<nr_float> depth;
+    Buffer color;
+    Buffer depth;
 };
 
 template<nr_uint dim>
@@ -110,6 +110,11 @@ struct Triangle
 	Point<dim> operator[](const nr_uint index) const { return points[index]; }
 
 	Point<dim>& operator[](const nr_uint index) { return points[index]; }
+};
+
+enum class NRPrimitive : nr_uint
+{
+	SIMPLEX
 };
 
 #pragma pack(pop)

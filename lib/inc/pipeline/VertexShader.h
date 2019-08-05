@@ -23,10 +23,10 @@ struct NRAPI VertexShader : Kernel
     
 	cl_status load();
 
-    Buffer<nr_float> points;
-    Buffer<nr_float> near;
-    Buffer<nr_float> far;
-    Buffer<nr_float> result;
+    Buffer points;
+    Buffer near;
+    Buffer far;
+    Buffer result;
 };
 
 }

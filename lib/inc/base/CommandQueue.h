@@ -83,7 +83,7 @@ public:
      * @return      internal OpenCL error status
      */
     template<typename T>
-    cl_status enqueueBufferReadCommand(const Buffer<T>& buffer, nr_bool block, nr_ulong count, T* data, const std::vector<Event>& wait, nr_ulong offset = 0, Event* notify = nullptr)
+    cl_status enqueueBufferReadCommand(const Buffer& buffer, nr_bool block, nr_uint count, T* data, const std::vector<Event>& wait, nr_uint offset = 0, Event* notify = nullptr)
     {
         return clEnqueueReadBuffer(
             object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
@@ -103,7 +103,7 @@ public:
      * @return      internal OpenCL error status
      */
     template<typename T>
-    cl_status enqueueBufferReadCommand(const Buffer<T>& buffer, nr_bool block, nr_ulong count, T* data, nr_ulong offset = 0, Event* notify = nullptr)
+    cl_status enqueueBufferReadCommand(const Buffer& buffer, nr_bool block, nr_uint count, T* data, nr_uint offset = 0, Event* notify = nullptr)
     {
         return clEnqueueReadBuffer(
                 object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
@@ -121,10 +121,10 @@ public:
 	 * @return      internal OpenCL error status
 	 */
 	template<typename T>
-	cl_status enqueueBufferReadCommand(const Buffer<T>& buffer, nr_bool block, T* data, Event * notify = nullptr)
+	cl_status enqueueBufferReadCommand(const Buffer& buffer, nr_bool block, T* data, Event* notify = nullptr)
 	{
 		return clEnqueueReadBuffer(
-			object, buffer, block, 0, buffer.getDeviceByteSize(), data,
+			object, buffer, block, 0, buffer.getBufferSize(), data,
 			0, nullptr, (cl_event*)notify);
 	}
 
@@ -142,7 +142,7 @@ public:
      * @return      internal OpenCL error status
      */
     template<typename T>
-    cl_status enqueueBufferWriteCommand(const Buffer<T>& buffer, nr_bool block, nr_ulong count, T* data, const std::vector<Event>& wait, nr_ulong offset = 0, Event* notify = nullptr)
+    cl_status enqueueBufferWriteCommand(const Buffer& buffer, nr_bool block, nr_uint count, T* data, const std::vector<Event>& wait, nr_uint offset = 0, Event* notify = nullptr)
     {
         return clEnqueueWriteBuffer(
             object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
@@ -162,7 +162,7 @@ public:
      * @return      internal OpenCL error status
      */
     template<typename T>
-    cl_status enqueueBufferWriteCommand(const Buffer<T>& buffer, nr_bool block, nr_ulong count, T* data, nr_ulong offset = 0, Event* notify = nullptr)
+    cl_status enqueueBufferWriteCommand(const Buffer& buffer, nr_bool block, nr_uint count, T* data, nr_uint offset = 0, Event* notify = nullptr)
     {
         return clEnqueueWriteBuffer(
                 object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
@@ -224,8 +224,8 @@ public:
      */
     template<typename T>
     cl_status enqueueBufferFillCommand(
-        const Buffer<T>& buffer, 
-        const T& value, const nr_ulong& count, 
+        const Buffer& buffer, 
+        const T& value, const nr_uint& count, 
         const std::vector<Event>& wait, 
         const nr_uint& offset = 0, Event* notify = nullptr)
     {
@@ -245,8 +245,8 @@ public:
      */
     template<typename T>
     cl_status enqueueBufferFillCommand(
-        const Buffer<T>& buffer, 
-        const T& value, const nr_ulong& count, 
+        const Buffer& buffer, 
+        const T& value, const nr_uint& count, 
         const nr_uint& offset = 0, Event* notify = nullptr)
     {
         return clEnqueueFillBuffer(object, buffer, &value, sizeof(T), sizeof(value) * offset, sizeof(value) * count, 0, nullptr, (cl_event*) notify);
@@ -263,14 +263,14 @@ public:
      */
     template<typename T>
 	cl_status enqueueBufferFillCommand(
-        const Buffer<T>& buffer, const T& value, Event* notify = nullptr)
+        const Buffer& buffer, const T& value, Event* notify = nullptr)
     {
 		static_assert(
 			sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8 || sizeof(T) == 16 || sizeof(T) == 32 || sizeof(T) == 64 || sizeof(T) == 128,
-			"enqueueBufferFilleCommand: value size has to be one of {1, 2, 4, 8, 16, 32, 64, 128}");
+			"enqueueBufferFillCommand: value size has to be one of {1, 2, 4, 8, 16, 32, 64, 128}");
 
 		cl_status err = CL_SUCCESS;
-		auto s = buffer.getDeviceByteSize(&err);
+		auto s = buffer.getBufferSize(&err);
 		if (nr::error::isFailure(err))
 		{
 			return err;

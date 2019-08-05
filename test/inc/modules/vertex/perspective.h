@@ -54,13 +54,13 @@ TEST(VertexShader, Perspective)
     auto q = defaultCommandQueue;
     ASSERT_SUCCESS(err);
 
-    Buffer<nr_float> d_point(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, point_count, p.values, &err);
+    auto d_point = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, point_count, p.values, &err);
     ASSERT_SUCCESS(err);
-    Buffer<nr_float> d_near(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, near, &err);
+    auto d_near = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, near, &err);
     ASSERT_SUCCESS(err);
-    Buffer<nr_float> d_far(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, far, &err);
+    auto d_far = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, far, &err);
     ASSERT_SUCCESS(err);
-    Buffer<nr_float> d_result(defaultContext, CL_MEM_READ_WRITE, point_count, &err);
+    auto d_result = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_WRITE, point_count, &err);
     ASSERT_SUCCESS(err);
 
     testee.points = d_point;

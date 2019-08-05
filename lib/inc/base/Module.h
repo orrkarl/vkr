@@ -34,7 +34,7 @@ public:
 	 * @par
 	 * This class represents the entire option. 
 	 * It doesn't know if the option is a macro or an optimization level, and as such the entire option has to be specified. For example: passing "FOO=1" 
-	 * will result in an error; pass "-D FOO=1" instead.
+	 * will result in an CL_UNKNOWN_COMPILER_ARGS error; pass "-D FOO=1" instead.
 	 * 
 	 */
 	struct NRAPI Option
@@ -42,7 +42,7 @@ public:
 		public:
 			Option(const string& value);
 		
-			string getOption() const;
+			const string& getOption() const;
 
 		protected:
 			const string value;

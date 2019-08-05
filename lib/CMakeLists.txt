@@ -1,6 +1,7 @@
 # main Nraster library
 
 ADD_LIBRARY(Nraster SHARED
+	src/base/Buffer.cpp
 	src/base/CommandQueue.cpp
 	src/base/Context.cpp
 	src/base/Device.cpp

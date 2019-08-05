@@ -21,87 +21,58 @@ namespace nr
  * @brief Wrapper around an OpenCL buffer. Templated to allow type-safe read and write to and from the buffer.
  * @tparam T The buffer's element type (only has meaning on the host side, as device side type can be different)
  */
-template<typename T>
-class Buffer : public Wrapper<cl_mem>
+class NRAPI Buffer : public Wrapper<cl_mem>
 {
-public:    
-    Buffer(const cl_mem_flags& flags, const nr_ulong& count, cl_status* err = nullptr)
-        : Buffer(flags, count, nullptr, err)
-    {
-    }
+public:
+	template <typename T>
+	static Buffer make(const Context& context, const cl_mem_flags& flags, const nr_uint& count, T* data, cl_status* status = nullptr)
+	{
+		return Buffer(context, flags, static_cast<nr_size>(count * sizeof(T)), data, status);
+	}
 
-    Buffer(const Context& context, const cl_mem_flags& flags, const nr_ulong& count, cl_status* err = nullptr)
-        : Buffer(context, flags, count, nullptr, err)
-    {
-    }
+	template <typename T>
+	static Buffer make(const Context& context, const cl_mem_flags& flags, const nr_uint& count, cl_status* status = nullptr)
+	{
+		return make<T>(context, flags, count, nullptr, status);
+	}
 
-    
-    Buffer(const Context& context, const cl_mem_flags& flags, const nr_ulong& count, T* data = nullptr, cl_status* error = nullptr)
-        : Wrapped(clCreateBuffer(context, flags, count * sizeof(T), data, error))
-    {
-    }
+	Buffer();
 
-    Buffer()
-        : Wrapped()
-    {
-    }
+	Buffer(const Context& context, const cl_mem_flags& flags, const nr_size& size, cl_status* err = nullptr);
 
-    explicit Buffer(const cl_mem& buffer, const nr_bool retain = false)
-        : Wrapped(buffer, retain)
-    {
-    }
+	Buffer(const Context& context, const cl_mem_flags& flags, const nr_size& size, void* data = nullptr, cl_status* error = nullptr);
 
-    Buffer(const Buffer& other)
-        : Wrapped(other)
-    {
-    }
+	explicit Buffer(const cl_mem& buffer, const nr_bool retain = false);
 
-    Buffer(Buffer&& other)
-        : Wrapped(other)
-    {
-    }
+	Buffer(const Buffer& other);
 
-    Buffer& operator=(const Buffer& other)
-    {
-        Wrapped::operator=(other);
-        return *this;
-    }
+	Buffer(Buffer&& other);
 
-    Buffer& operator=(Buffer&& other)
-    {
-        Wrapped::operator=(other);
-        return *this;
-    }
+	Buffer& operator=(const Buffer& other);
 
-    operator cl_mem() const 
-    {
-        return object;
-    }
+	Buffer& operator=(Buffer&& other);
 
-    const cl_mem& get() const
-    {
-        return object;
-    }
+	operator cl_mem() const;
+
+	const cl_mem& get() const;
 
     /**
      * @brief Aquire the size (in bytes) of the buffer in device memory
      * @param[out] err internal OpenCL call error status
 	 * @return the buffer size (in bytes)
      */
-    nr_size getDeviceByteSize(cl_status* err = nullptr) const
-    {
-        nr_size ret = 0;
-		auto status = clGetMemObjectInfo(object, CL_MEM_SIZE, sizeof(nr_size), &ret, nullptr);
-        if (err) *err = status;
-        return ret;
-    }
+	nr_size getBufferSize(cl_status* err = nullptr) const;
 
-	nr_size getElementCount(cl_status* err = nullptr) const
+	/**
+	 * @brief Get the amount of elements of type T which the buffer can hold
+	 * @tparam T element type
+	 * @param[out] err internal OpenCL call error status
+	 * @return buffer capacity for elements of type T
+	 */
+	template <typename T>
+	nr_size getBufferCount(cl_status* err = nullptr) const
 	{
-		nr_size ret = 0;
-		auto status = clGetMemObjectInfo(object, CL_MEM_SIZE, sizeof(nr_size), &ret, nullptr);
-		if (err) *err = status;
-		return ret / sizeof(T);
+		return getBufferSize(err) / sizeof(T);
 	}
 };
 

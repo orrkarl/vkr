@@ -16,7 +16,7 @@ void screenFromNDCTestTemplate(ScreenFromNDC kernel, CommandQueue q, const NDCPo
     
     kernel.ndcPosition = ndc;
     kernel.dimension   = dim;
-	kernel.result = Buffer<ScreenPosition>(defaultContext, CL_MEM_WRITE_ONLY, 1, &err);
+	kernel.result = Buffer::make<ScreenPosition>(defaultContext, CL_MEM_WRITE_ONLY, 1, &err);
 
     ASSERT_SUCCESS(kernel.load());
     ASSERT_SUCCESS(q.enqueueKernelCommand<1>(kernel, global, local));

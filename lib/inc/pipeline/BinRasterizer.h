@@ -39,16 +39,16 @@ struct NRAPI BinRasterizer : Kernel
 
     // Bin Queues Data
 	BinQueueConfig binQueueConfig;
-    Buffer<nr_uint> binQueues;
+    Buffer binQueues;
 
     // Simplex data
-    Buffer<nr_float> triangleData;
+    Buffer triangleData;
 	nr_uint triangleCount;
 
     // Overflow handling
-	Buffer<nr_bool> hasOverflow;
+	Buffer hasOverflow;
 
-    Buffer<nr_uint> batchIndex;
+    Buffer batchIndex;
 };
 
 }

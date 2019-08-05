@@ -30,11 +30,11 @@ struct TriangleInBin : Kernel
         return setArg(argc++, result);
     }
 
-    Buffer<nr_float> triangle_x;
-    Buffer<nr_float> triangle_y;
+    Buffer triangle_x;
+    Buffer triangle_y;
     Bin bin;
     ScreenDimension dim;
-    Buffer<cl_bool> result;
+    Buffer result;
 };
 
 void testBin(TriangleInBin testee, CommandQueue q, const nr_uint dimension, const Bin& bin, const ScreenDimension& dim, nr_float* triangle_x, nr_float* triangle_y)
@@ -42,16 +42,16 @@ void testBin(TriangleInBin testee, CommandQueue q, const nr_uint dimension, cons
     cl_status err = CL_SUCCESS;
 
     cl_bool h_result = CL_FALSE;
-    Buffer<cl_bool> d_result(defaultContext, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, 1, &h_result, &err);
+    auto d_result = Buffer::make(defaultContext, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, 1, &h_result, &err);
     ASSERT_SUCCESS(err);
 
     nr_float defaultValue = -2.0;
     nr_int defaultValueAsInt = * (nr_int*) &defaultValue; 
     memset(triangle_x, defaultValueAsInt, 3 * sizeof(nr_float));
     memset(triangle_y, defaultValueAsInt, 3 * sizeof(nr_float));
-    Buffer<nr_float> d_triangle_x(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3, triangle_x, &err);
+    auto d_triangle_x = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3, triangle_x, &err);
     ASSERT_SUCCESS(err);
-    Buffer<nr_float> d_triangle_y(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3, triangle_x, &err);
+    auto d_triangle_y = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3, triangle_x, &err);
     ASSERT_SUCCESS(err);
 
     testee.bin = bin;

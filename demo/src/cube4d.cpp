@@ -50,7 +50,7 @@ void transform(Tetrahedron simplexes[48], const nr_float angle)
     {
 		cube[i] = op * h_cube[i];
     }
-
+  
 	cube4dToSimplices(cube, simplexes);
 }
 

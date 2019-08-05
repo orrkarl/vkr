@@ -30,9 +30,9 @@ public:
         return setArg(2, result);
     }
 
-    Buffer<nr_float> triangles;
+    Buffer triangles;
     nr_uint offset;
-    Buffer<nr_float> result;
+    Buffer result;
 };
 
 template<nr_uint dim>
@@ -94,9 +94,9 @@ TEST(Binning, ReduceTriangleBuffer)
 
     std::vector<nr_float> h_actual(expectedFloatCount);
 
-    Buffer<nr_float> d_triangle(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, floatsPerTriangle * (offset + triangleCount), (nr_float*) h_triangles_raw, &err);
+    auto d_triangle = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, floatsPerTriangle * (offset + triangleCount), (nr_float*) h_triangles_raw, &err);
     ASSERT_SUCCESS(err);
-    Buffer<nr_float> d_result(defaultContext, CL_MEM_WRITE_ONLY, 2 * point_count * triangleCount, &err);
+    auto d_result = Buffer::make<nr_float>(defaultContext, CL_MEM_WRITE_ONLY, 2 * point_count * triangleCount, &err);
     ASSERT_SUCCESS(err);
     
     auto test = ReduceTriangleBuffer(code, &err);

@@ -43,16 +43,16 @@ TEST(Binning, RasterizerOverflow)
     auto testee = BinRasterizer(code, &err);
     ASSERT_SUCCESS(err);
     
-    Buffer<nr_float> d_triangles(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount * sizeof(Triangle<dim>) / sizeof(nr_float), (nr_float*) h_triangles, &err);
+    auto d_triangles = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount * sizeof(Triangle<dim>) / sizeof(nr_float), (nr_float*) h_triangles, &err);
     ASSERT_SUCCESS(err);
 
-    Buffer<nr_bool> d_overflow(defaultContext, CL_MEM_READ_WRITE, 1, &err);
+    auto d_overflow = Buffer::make<nr_uint>(defaultContext, CL_MEM_READ_WRITE, 1, &err);
     ASSERT_SUCCESS(err);
 
-    Buffer<nr_uint> d_binQueues(defaultContext, CL_MEM_READ_WRITE, BinRasterizer::getTotalBinQueueCount(workGroupCount, screenDim, config), &err);
+    auto d_binQueues = Buffer::make<nr_uint>(defaultContext, CL_MEM_READ_WRITE, BinRasterizer::getTotalBinQueueCount(workGroupCount, screenDim, config), &err);
     ASSERT_SUCCESS(err);
 
-    Buffer<nr_uint> d_batchIndex(defaultContext, CL_MEM_READ_WRITE, 1, &err);
+    auto d_batchIndex = Buffer::make<nr_uint>(defaultContext, CL_MEM_READ_WRITE, 1, &err);
     ASSERT_SUCCESS(err);
 
     testee.binQueueConfig = config;

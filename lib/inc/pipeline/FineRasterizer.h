@@ -33,15 +33,15 @@ public:
     cl_status load();
 
     // Simplex buffer
-    Buffer<nr_float> triangleData;
+    Buffer triangleData;
 
     // Screen Dimensions [size in pixels]
-	ScreenDimension dim{};
+	ScreenDimension dim;
 
     // Bin Queues
-	BinQueueConfig binQueueConfig{};
-    Buffer<nr_uint> binQueues;
-	nr_uint workGroupCount{};
+	BinQueueConfig binQueueConfig;
+    Buffer binQueues;
+	nr_uint workGroupCount;
 
     // Frame buffer
     FrameBuffer frameBuffer;

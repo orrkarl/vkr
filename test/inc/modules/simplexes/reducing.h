@@ -107,9 +107,9 @@ TEST(SimplexReducer, reducing)
 	auto q = defaultCommandQueue;
 	ASSERT_SUCCESS(err);
 
-	Buffer<nr_float> d_orig(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, point_count * dim * simplexCount, (nr_float*)orig, &err);
+	auto d_orig = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, point_count * dim * simplexCount, (nr_float*)orig, &err);
 	ASSERT_SUCCESS(err); 
-	Buffer<nr_float> d_res(defaultContext, CL_MEM_WRITE_ONLY, totalElementCount, &err);
+	auto d_res = Buffer::make<nr_float>(defaultContext, CL_MEM_WRITE_ONLY, totalElementCount, &err);
 	ASSERT_SUCCESS(err);
 
 	testee.simplexes = d_orig;

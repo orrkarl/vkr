@@ -1,6 +1,7 @@
 #include <base/Module.h>
 
 #include <algorithm>
+#include <functional>
 #include <memory>
 
 namespace nr
@@ -11,7 +12,7 @@ Module::Option::Option(const string& value)
 {
 }
 
-string Module::Option::getOption() const 
+const string& Module::Option::getOption() const 
 { 
     return value; 
 }
@@ -53,8 +54,8 @@ Module::Module(Context context, const Sources& codes, cl_status* err)
     : Wrapped() 
 {
     std::vector<const nr_char*> codesRaw(codes.size());
-    std::transform(codes.cbegin(), codes.cend(), codesRaw.begin(), [](const string& code){ return code.c_str(); });
-    object = clCreateProgramWithSource(context, codes.size(), &codesRaw[0], nullptr, err);
+    std::transform(codes.cbegin(), codes.cend(), codesRaw.begin(), std::mem_fn(&string::c_str));
+    object = clCreateProgramWithSource(context, static_cast<nr_uint>(codes.size()), &codesRaw[0], nullptr, err);
 }
 
 Module::Module(const cl_program& module, const nr_bool retain)
@@ -103,7 +104,7 @@ cl_status Module::build(const Devices& devices, const Options& options)
 {
     return clBuildProgram(
         object, 
-        devices.size(), (const cl_device_id*) &devices[0], 
+		static_cast<nr_uint>(devices.size()), (const cl_device_id*) &devices[0],
         Module::finalizeOptions(options).c_str(), 
         nullptr, 
         nullptr);

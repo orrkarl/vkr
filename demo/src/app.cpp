@@ -89,13 +89,13 @@ GLFWwindow* App::getWindow()
 
 void App::clearBuffers(cl_status* err)
 {
-	*err = m_commandQueue.enqueueBufferFillCommand(m_binRasterizer.binQueues, 0u);
+	*err = m_commandQueue.enqueueBufferFillCommand<nr_uint>(m_binRasterizer.binQueues, 0u);
 	if (nr::error::isFailure(*err)) return;
 
-	*err = m_commandQueue.enqueueBufferFillCommand(m_fineRasterizer.frameBuffer.color, { 0, 0, 0 });
+	*err = m_commandQueue.enqueueBufferFillCommand<nr::RawColorRGBA>(m_fineRasterizer.frameBuffer.color, { 0, 0, 0, 0 });
 	if (nr::error::isFailure(*err)) return;
 
-	*err = m_commandQueue.enqueueBufferFillCommand(m_fineRasterizer.frameBuffer.depth, 0.0f);
+	*err = m_commandQueue.enqueueBufferFillCommand<nr_float>(m_fineRasterizer.frameBuffer.depth, 0.0f);
 }
 
 void App::destroy()
@@ -386,28 +386,28 @@ bool App::initRenderingPipeline()
 	}
 
 	// Vertex Shader
-	m_vertexShader.points = nr::Buffer<nr_float>(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, (m_renderDimension + 1) * m_renderDimension * m_simplexCount, m_h_simplexes.get(), &ret);
+	m_vertexShader.points = nr::Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, (m_renderDimension + 1) * m_renderDimension * m_simplexCount, m_h_simplexes.get(), &ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not initialize vertex shader point buffer: " << nr::utils::stringFromCLError(ret) << '\n';
 		return false;
 	}
 
-	m_vertexShader.near = nr::Buffer<nr_float>(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, m_renderDimension, m_near.get(), &ret);
+	m_vertexShader.near = nr::Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, m_renderDimension, m_near.get(), &ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not initialize vertex shader near buffer: " << nr::utils::stringFromCLError(ret) << '\n';
 		return false;
 	}
 
-	m_vertexShader.far = nr::Buffer<nr_float>(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, m_renderDimension, m_far.get(), &ret);
+	m_vertexShader.far = nr::Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, m_renderDimension, m_far.get(), &ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not initialize vertex shader far buffer: " << nr::utils::stringFromCLError(ret) << '\n';
 		return false;
 	}
 
-	m_vertexShader.result = nr::Buffer<nr_float>(m_context, CL_MEM_READ_WRITE, (m_renderDimension + 1) * m_renderDimension * m_simplexCount, &ret);
+	m_vertexShader.result = nr::Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE, (m_renderDimension + 1) * m_renderDimension * m_simplexCount, &ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not initialize vertex shader result buffer: " << nr::utils::stringFromCLError(ret) << '\n';
@@ -419,7 +419,7 @@ bool App::initRenderingPipeline()
 
 	// Simplex Reducer
 	m_simplexReducer.simplexes = m_vertexShader.result;
-	m_simplexReducer.result = nr::Buffer<nr_float>(m_context, CL_MEM_READ_WRITE, totalFloatCount, &ret);
+	m_simplexReducer.result = nr::Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE, totalFloatCount, &ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not initialize simplex reducer result buffer: " << nr::utils::stringFromCLError(ret) << '\n';
@@ -435,21 +435,21 @@ bool App::initRenderingPipeline()
 	m_binRasterizer.dimension = m_screenDim;
 	m_binRasterizer.binQueueConfig = config;
 	
-	m_binRasterizer.hasOverflow = nr::Buffer<nr_bool>(m_context, CL_MEM_WRITE_ONLY, 1, &ret);
+	m_binRasterizer.hasOverflow = nr::Buffer::make<nr_uint>(m_context, CL_MEM_WRITE_ONLY, 1, &ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not initialize bin rasterizer overflow buffer: " << nr::utils::stringFromCLError(ret) << '\n';
 		return false;
 	}
 
-	m_binRasterizer.binQueues = nr::Buffer<nr_uint>(m_context, CL_MEM_READ_WRITE, binRasterWorkGroupCount * totalBinCount * (config.queueSize + 1), &ret);
+	m_binRasterizer.binQueues = nr::Buffer::make<nr_uint>(m_context, CL_MEM_READ_WRITE, binRasterWorkGroupCount * totalBinCount * (config.queueSize + 1), &ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not initialize bin rasterizer queues: " << nr::utils::stringFromCLError(ret) << '\n';
 		return false;
 	}
 
-	m_binRasterizer.batchIndex = nr::Buffer<nr_uint>(m_context, CL_MEM_READ_WRITE, 1, &ret);
+	m_binRasterizer.batchIndex = nr::Buffer::make<nr_uint>(m_context, CL_MEM_READ_WRITE, 1, &ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not initialize bin rasterizer batch inde  buffer: " << nr::utils::stringFromCLError(ret) << '\n';
@@ -467,13 +467,13 @@ bool App::initRenderingPipeline()
 	m_fineRasterizer.binQueues = m_binRasterizer.binQueues;
 	
 	m_fineRasterizer.frameBuffer = nr::FrameBuffer();
-	m_fineRasterizer.frameBuffer.color = nr::Buffer<nr::RawColorRGBA>(m_context, CL_MEM_READ_WRITE, m_screenDim.width * m_screenDim.height, &ret);
+	m_fineRasterizer.frameBuffer.color = nr::Buffer::make<nr::RawColorRGBA>(m_context, CL_MEM_READ_WRITE, m_screenDim.width * m_screenDim.height, &ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not initialize color buffer: " << nr::utils::stringFromCLError(ret) << '\n';
 		return false;
 	}
-	m_fineRasterizer.frameBuffer.depth = nr::Buffer<nr_float>(m_context, CL_MEM_READ_WRITE, m_screenDim.width * m_screenDim.height, &ret);
+	m_fineRasterizer.frameBuffer.depth = nr::Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE, m_screenDim.width * m_screenDim.height, &ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not initialize depth buffer: " << nr::utils::stringFromCLError(ret) << '\n';
