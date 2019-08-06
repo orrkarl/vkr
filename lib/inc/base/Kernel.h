@@ -12,6 +12,8 @@
 
 #include "../general/predefs.h"
 
+#include <array>
+
 #include "Wrapper.h"
 
 namespace nr

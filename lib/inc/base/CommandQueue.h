@@ -24,6 +24,27 @@
 namespace nr
 {
 
+class CommandQueue;
+
+template <typename Consumer>
+class Dispatch
+{
+public:
+	cl_status operator()(nr::CommandQueue* q)
+	{
+		return static_cast<Consumer*>(this)->consume(q);
+	}
+};
+
+template <nr_uint dim>
+using NDRange = std::array<nr_size, dim>;
+
+template <nr_uint dim>
+struct NDExecutionRange
+{
+	NDRange global, local;
+};
+
 /**
  * @brief Wrapper class for OpenCl command queue, allowing for a more type safe and 'cpp-esque' interface.
  * 
@@ -87,7 +108,7 @@ public:
     {
         return clEnqueueReadBuffer(
             object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
-            wait.size(), (const cl_event*) &wait.front(), (cl_event*) notify);
+            wait.size(), (const cl_event*) wait.data(), (cl_event*) notify);
     }
 
     /**
@@ -146,7 +167,7 @@ public:
     {
         return clEnqueueWriteBuffer(
             object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
-            wait.size(), (const cl_event*) &wait.front(), (cl_event*) notify);
+            wait.size(), (const cl_event*) wait.data(), (cl_event*) notify);
     }
 
     /**
@@ -184,10 +205,10 @@ public:
     template<nr_uint dim>
     typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
         const Kernel& kernel, 
-        const std::array<size_t, dim>& global, const std::array<size_t, dim>& local,
-        const std::array<size_t, dim>& offset, const std::vector<Event>& wait, Event* notify = nullptr)
+        const NDRange<dim>& global, const NDRange<dim>& local,
+        const NDRange<dim>& offset, const std::vector<Event>& wait, Event* notify = nullptr)
     {
-        return clEnqueueNDRangeKernel(object, kernel, dim, &offset.front(), &global.front(), &local.front(), wait.size(), &wait.front(), (cl_event*) notify);
+        return clEnqueueNDRangeKernel(object, kernel, dim, offset.data(), global.data(), local.data(), wait.size(), wait.data(), (cl_event*) notify);
     }
 
     /**
@@ -204,11 +225,63 @@ public:
     template<nr_uint dim>
     typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
         const Kernel& kernel, 
-        const std::array<size_t, dim>& global, const std::array<size_t, dim>& local,
-        const std::array<size_t, dim>& offset = std::array<size_t, dim>{}, Event* notify = nullptr)
+        const NDRange<dim>& global, const NDRange<dim>& local,
+        const NDRange<dim>& offset = NDRange<dim>{}, Event* notify = nullptr)
     {
-        return clEnqueueNDRangeKernel(object, kernel, dim, &offset.front(), &global.front(), &local.front(), 0, nullptr, (cl_event*) notify);
+        return clEnqueueNDRangeKernel(object, kernel, dim, offset.data(), global.data(), local.data(), 0, nullptr, (cl_event*) notify);
     }
+
+	/**
+	 * @brief enqueues a kernel command - submits a kernel to the device
+	 *
+	 * @tparam      dim     execution dimension - has to be between 1, 2 or 3
+	 * @param       kernel  kernel to be submitted
+	 * @param       range	spcification of the kernel execution range
+	 * @param       offset  local execution offset
+	 * @param       wait    list of events that have to complete before this command will begin execution
+	 * @param[out]  notify  event which will be notified when this command changes status; will be ignored if nullptr
+	 * @return      internal OpenCL error status
+	 */
+	template<nr_uint dim>
+	typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
+		const Kernel & kernel,
+		const NDExecutionRange<dim>& range,
+		const NDRange<dim> & offset, const std::vector<Event> & wait, Event * notify = nullptr)
+	{
+		return clEnqueueNDRangeKernel(object, kernel, dim, offset.data(), range.global.data(), range.local.data(), wait.size(), wait.data(), (cl_event*)notify);
+	}
+
+	/**
+	 * @brief enqueues a kernel command - submits a kernel to the device
+	 *
+	 * @tparam      dim     execution dimension - has to be between 1, 2 or 3
+	 * @param       kernel  kernel to be submitted
+	 * @param       range	spcification of the kernel execution range
+	 * @param       offset  local execution offset
+	 * @param[out]  notify  event which will be notified when this command changes status; will be ignored if nullptr
+	 * @return      internal OpenCL error status
+	 */
+	template<nr_uint dim>
+	typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
+		const Kernel & kernel,
+		const NDExecutionRange<dim>& range,
+		const NDRange<dim> & offset = NDRange<dim>{}, Event * notify = nullptr)
+	{
+		return clEnqueueNDRangeKernel(object, kernel, dim, offset.data(), range.global.data(), range.local.data(), 0, nullptr, (cl_event*)notify);
+	}
+
+	/**
+	 * @brief enqueues a kernel command to the device
+	 *
+	 * @tparam      T			CRTP dispatch type
+	 * @param       dispatch	dispatch to execute
+	 * @return      internal	OpenCL error status
+	 */
+	template <typename T>
+	cl_status enqueueDispatchCommand(const Dispatch<T>& dispatch)
+	{
+		return dispatch(this);
+	}
 
     /**
      * @brief enqueues a buffer fill command - fills a device buffer with a single value
@@ -229,7 +302,7 @@ public:
         const std::vector<Event>& wait, 
         const nr_uint& offset = 0, Event* notify = nullptr)
     {
-        return clEnqueueFillBuffer(object, buffer, &value, sizeof(T), sizeof(value) * offset, sizeof(value) * count, wait.size(), &wait.front(), (cl_event*) notify);
+        return clEnqueueFillBuffer(object, buffer, &value, sizeof(T), sizeof(value) * offset, sizeof(value) * count, wait.size(), wait.data(), (cl_event*) notify);
     }
 
     /**

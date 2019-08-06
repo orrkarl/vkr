@@ -22,7 +22,7 @@ public:
 
 	cl_status setRenderDimension();
 
-	void setInputBuffer();
+	void setInputBuffer(Buffer in);
 protected:
 	cl_status render();
 

@@ -135,9 +135,9 @@ public:
 			userData);
 	}
 
-	Kernel createKernel(const string& name, cl_status* err = nullptr);
+	Kernel createKernel(const string& name, cl_status* err = nullptr) const;
 
-	string getBuildLog(Device device, cl_status* err = nullptr);
+	string getBuildLog(Device device, cl_status* err = nullptr) const;
 
 private:
 	/**

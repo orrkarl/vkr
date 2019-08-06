@@ -110,7 +110,7 @@ cl_status Module::build(const Devices& devices, const Options& options)
         nullptr);
 }
 
-Kernel Module::createKernel(const string& name, cl_status* err)
+Kernel Module::createKernel(const string& name, cl_status* err) const
 {
     return Kernel(clCreateKernel(object, name.c_str(), err));
 }
@@ -126,7 +126,7 @@ string Module::finalizeOptions(const Options& options)
     return ret;    
 }
 
-string Module::getBuildLog(Device device, cl_status* err)
+string Module::getBuildLog(Device device, cl_status* err) const
 {
 	nr_size len = 0;
 	*err = clGetProgramBuildInfo(object, device, CL_PROGRAM_BUILD_LOG, len, nullptr, &len);
