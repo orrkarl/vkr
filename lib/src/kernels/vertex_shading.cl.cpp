@@ -8,52 +8,6 @@ namespace detail
 
 extern const char* VERTEX_REDUCE_KERNEL_NAME = "shade_vertex";
 
-VertexReduceKernel::VertexReduceKernel(const Module& module, cl_status* err)
-	: TypesafeKernel<Buffer, Buffer, Buffer, Buffer>(module, VERTEX_REDUCE_KERNEL_NAME, err)
-{
-}
-
-VertexReduceKernel::VertexReduceKernel()
-	: TypesafeKernel()
-{
-}
-
-cl_status VertexReduceKernel::setSimplexInputBuffer(const Buffer& in)
-{
-	return setArg<INPUT_BUFFER>(in);
-}
-
-cl_status VertexReduceKernel::setNearPlaneBuffer(const Buffer& near)
-{
-	return setArg<NEAR_PLANE_BUFFER>(near);
-}
-
-cl_status VertexReduceKernel::setFarPlaneBuffer(const Buffer& far)
-{
-	return setArg<FAR_PLANE_BUFFER>(far);
-}
-
-cl_status VertexReduceKernel::setSimplexOutputBuffer(const Buffer& out)
-{
-	return setArg<OUTPUT_BUFFER>(out);
-}
-
-cl_status VertexReduceKernel::consume(const CommandQueue& q) const
-{
-	return q.enqueueKernelCommand(*this, m_range);
-}
-
-void VertexReduceKernel::setExecutionRange(const nr_uint primitiveCount)
-{
-	m_range.global.x = primitiveCount;
-	m_range.local.x = 1;
-}
-
-NDExecutionRange<1> VertexReduceKernel::getExecutionRange() const
-{
-	return m_range;
-}
-
 namespace clcode
 {
 

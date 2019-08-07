@@ -4,9 +4,9 @@ constexpr const nr_uint dim = 3;
 
 nr::Simplex<dim> h_triangle
 {
-	nr::Point<dim>{ -5, -2.5,   3, 1 },
-	nr::Point<dim>{  0,	   5, 2.5, 1 },
-	nr::Point<dim>{  5, -2.5,   2, 1 }
+	nr::Vertex<dim>{ -5, -2.5,   3, 1 },
+	nr::Vertex<dim>{  0,	   5, 2.5, 1 },
+	nr::Vertex<dim>{  5, -2.5,   2, 1 }
 };
 
 nr_float h_near[3]

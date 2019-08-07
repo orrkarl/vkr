@@ -61,8 +61,8 @@ void extractNDCPosition(const nr_uint triangleCount, const Triangle<dim>* buffer
 {
     for (nr_uint i = 0; i < triangleCount * 3; ++i)
     {
-        result[2 * i] = ((const Point<dim>*) buffer)[i].values[0];
-        result[2 * i + 1] = ((const Point<dim>*) buffer)[i].values[1];
+        result[2 * i] = ((const Vertex<dim>*) buffer)[i].values[0];
+        result[2 * i + 1] = ((const Vertex<dim>*) buffer)[i].values[1];
     }
 }
 

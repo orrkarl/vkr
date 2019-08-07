@@ -49,11 +49,11 @@ struct FrameBuffer
 };
 
 template<nr_uint dim>
-struct Point
+struct Vertex
 {
     nr_float values[dim + 1];
 
-    bool operator==(const Point& other) const
+    bool operator==(const Vertex& other) const
     {
         for (auto i = 0; i < dim + 1; ++i) 
             if (std::abs(values[i] - other[i]) > 10e-6)
@@ -62,7 +62,7 @@ struct Point
         return true;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const Point<dim>& self)
+    friend std::ostream& operator<<(std::ostream& os, const Vertex<dim>& self)
     {
         os << "Point<" << dim << ">{ ";
         for (auto i = 0; i < dim; ++i)
@@ -81,17 +81,17 @@ struct Point
 template<nr_uint dim>
 struct Simplex
 {
-    Point<dim> points[dim];
+    Vertex<dim> points[dim];
 
-	Point<dim> operator[](const nr_uint index) const { return points[index]; }
+	Vertex<dim> operator[](const nr_uint index) const { return points[index]; }
 
-	Point<dim>& operator[](const nr_uint index) { return points[index]; }
+	Vertex<dim>& operator[](const nr_uint index) { return points[index]; }
 };
 
 template<nr_uint dim>
 struct Triangle
 {
-    Point<dim> points[3];
+    Vertex<dim> points[3];
 
 	bool operator==(const Triangle<dim>& other) const
 	{
@@ -107,9 +107,9 @@ struct Triangle
 		return os << "Triangle{" << tri.points[0] << ", " << tri.points[1] << ", " << tri.points[2] << "}";
 	}
 
-	Point<dim> operator[](const nr_uint index) const { return points[index]; }
+	Vertex<dim> operator[](const nr_uint index) const { return points[index]; }
 
-	Point<dim>& operator[](const nr_uint index) { return points[index]; }
+	Vertex<dim>& operator[](const nr_uint index) { return points[index]; }
 };
 
 enum class NRPrimitive : nr_uint
