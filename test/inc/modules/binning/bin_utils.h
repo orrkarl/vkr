@@ -17,6 +17,16 @@ struct Bin
     nr_uint y;
 };
 
+template <nr_uint QueueSize>
+struct BinQueue
+{
+	nr_uint isEmpty;
+	nr_uint queue[QueueSize];
+};
+
+template <nr_uint BinCountX, nr_uint BinCountY, nr_uint QueueSize>
+using BinQueues = BinQueue<QueueSize>[BinCountX][BinCountY];
+
 const Module::Macro TEST_BINNING("_TEST_BINNING");
 
 template<nr_uint dim>

@@ -16,13 +16,6 @@ using namespace nr;
 using namespace nr::detail;
 using namespace testing;
 
-// Because MSVC doesn't evaluate constexpr as well as GCC...
-constexpr nr_uint compileTimeCeil(const nr_float f)
-{
-	const nr_uint as_uint = static_cast<nr_uint>(f);
-	return as_uint == f ? as_uint : as_uint + 1;
-}
-
 TEST(Binning, Rasterizer)
 {
     cl_status err = CL_SUCCESS; 
@@ -40,6 +33,8 @@ TEST(Binning, Rasterizer)
 
 	constexpr nr_uint binCountX = compileTimeCeil(((nr_float) screenDim.width) / config.binWidth);
 	constexpr nr_uint binCountY = compileTimeCeil(((nr_float) screenDim.height) / config.binHeight);
+
+	BinQueues<binCountX, binCountY, config.queueSize> h_result[workGroupCount];
 
 	nr_uint h_result[workGroupCount * (config.queueSize + 1) * binCountX * binCountY];
 
@@ -64,7 +59,7 @@ TEST(Binning, Rasterizer)
     auto testee = BinRasterizer(code, &err);
     ASSERT_SUCCESS(err);
 
-    auto d_triangles = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(h_triangles) / sizeof(nr_float), (nr_float*) h_triangles, &err);
+    auto d_triangles = Buffer::make<Triangle<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles, &err);
     ASSERT_SUCCESS(err);
 
     auto d_overflow = Buffer::make<nr_uint>(defaultContext, CL_MEM_READ_WRITE, 1, &err);

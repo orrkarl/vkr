@@ -66,7 +66,7 @@ public:
 		return m_range;
 	}
 
-	using TypesafeKernel<Buffer, Buffer, Buffer, Buffer>::operator cl_kernel;
+	using TypesafeKernel::operator cl_kernel;
 
 private:
 	NDExecutionRange<1> m_range;

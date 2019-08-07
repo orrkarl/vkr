@@ -156,3 +156,11 @@ nr::Module::Options mkStandardOptions(const nr_uint dim);
 cl_status init();
 
 void destroy();
+
+// Because MSVC doesn't evaluate constexpr as well as GCC...
+constexpr nr_uint compileTimeCeil(const nr_float f)
+{
+	const nr_uint as_uint = static_cast<nr_uint>(f);
+	return as_uint == f ? as_uint : as_uint + 1;
+}
+
