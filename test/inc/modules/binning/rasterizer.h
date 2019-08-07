@@ -40,8 +40,6 @@ TEST(Binning, Rasterizer)
 
 	Queues h_result[workGroupCount];
 
-	//nr_uint h_result[workGroupCount * (config.queueSize + 1) * binCountX * binCountY];
-
     nr_bool isOverflowing = false;
 
     const nr_uint destinationBinX = 1;
@@ -59,7 +57,7 @@ TEST(Binning, Rasterizer)
     auto code = mkBinningModule(dim, triangleCount, &err);
     ASSERT_SUCCESS(err);
 
-    auto testee = BinRasterizer(code, &err);
+    auto testee = BinRasterizerKernel(code, &err);
     ASSERT_SUCCESS(err);
 
     auto d_triangles = Buffer::make<Triangle<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles, &err);
@@ -68,25 +66,22 @@ TEST(Binning, Rasterizer)
     auto d_overflow = Buffer::make<nr_uint>(defaultContext, CL_MEM_READ_WRITE, 1, &err);
     ASSERT_SUCCESS(err);
 
-    auto d_binQueues = Buffer::make<nr_uint>(defaultContext, CL_MEM_READ_WRITE, BinRasterizer::getTotalBinQueueCount(workGroupCount, screenDim, config), &err);
+    auto d_binQueues = Buffer::make<Queues>(defaultContext, CL_MEM_READ_WRITE, workGroupCount, &err);
     ASSERT_SUCCESS(err);
 
     auto d_batchIndex = Buffer::make<nr_uint>(defaultContext, CL_MEM_READ_WRITE, 1, &err);
     ASSERT_SUCCESS(err);
 
-    testee.binQueueConfig = config;
-    testee.dimension      = screenDim;
-    testee.triangleData   = d_triangles;
-    testee.triangleCount  = triangleCount;
-    testee.hasOverflow    = d_overflow;
-    testee.binQueues      = d_binQueues;
-    testee.batchIndex     = d_batchIndex;
+	testee.setExecutionRange(binCountX, binCountY, workGroupCount);
 
-    NDRange<2> global = { workGroupCount * binCountX, binCountY };
-    NDRange<2> local  = { binCountX, binCountY };
-
-    ASSERT_SUCCESS(testee.load());
-    ASSERT_SUCCESS(q.enqueueKernelCommand<2>(testee, global, local));
+	ASSERT_SUCCESS(testee.setBinQueueConfig(config));
+	ASSERT_SUCCESS(testee.setScreenDimension(screenDim));
+	ASSERT_SUCCESS(testee.setTriangleInputBuffer(d_triangles));
+	ASSERT_SUCCESS(testee.setTriangleCount(triangleCount));
+	ASSERT_SUCCESS(testee.setOvereflowNotifier(d_overflow));
+	ASSERT_SUCCESS(testee.setBinQueuesBuffer(d_binQueues));
+	ASSERT_SUCCESS(testee.setGlobalBatchIndex(d_batchIndex));
+    ASSERT_SUCCESS(q.enqueueDispatchCommand(testee));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_binQueues, false, workGroupCount, h_result));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_overflow, false, 1, &isOverflowing));
     ASSERT_SUCCESS(q.await());
