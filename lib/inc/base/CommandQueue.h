@@ -312,7 +312,7 @@ public:
 	template <typename T>
 	cl_status enqueueDispatchCommand(const Dispatch<T>& dispatch)
 	{
-		return dispatch(this);
+		return dispatch(*this);
 	}
 
     /**

@@ -31,7 +31,7 @@ public:
 
 	cl_status setSimplexOutputBuffer(const Buffer& out);
 
-	cl_status consume(const CommandQueue& q);
+	cl_status consume(const CommandQueue& q) const;
 
 	void setExecutionRange(const nr_uint primitiveCount);
 

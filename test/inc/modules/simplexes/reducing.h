@@ -6,7 +6,6 @@
 #include <base/Buffer.h>
 #include <kernels/base.cl.h>
 #include <kernels/simplex_reducing.cl.h>
-#include <pipeline/SimplexReducer.h>
 
 #include <utility>
 
@@ -79,10 +78,8 @@ TEST(SimplexReducer, reducing)
 {
 	cl_status err = CL_SUCCESS;
 
-	const nr_uint dim = 4;
-	const nr_uint point_count = dim + 1;
+	constexpr const nr_uint dim = 4;
 	const nr_uint simplexCount = 3;
-	const nr_uint totalElementCount = point_count * 3 * (dim * (dim - 1) * (dim - 2) / 6) * simplexCount;
 
 	Simplex<dim> orig[simplexCount];
 	ReducedSimplex<dim> expected[simplexCount];
@@ -101,25 +98,22 @@ TEST(SimplexReducer, reducing)
 
 	ASSERT_SUCCESS(code.build(defaultDevice, options));
 
-	auto testee = SimplexReducer(code, &err);
+	auto testee = SimplexReduceKernel(code, &err);
 	ASSERT_SUCCESS(err);
 
 	auto q = defaultCommandQueue;
 	ASSERT_SUCCESS(err);
 
-	auto d_orig = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, point_count * dim * simplexCount, (nr_float*)orig, &err);
+	auto d_orig = Buffer::make<Simplex<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, simplexCount, orig, &err);
 	ASSERT_SUCCESS(err); 
-	auto d_res = Buffer::make<nr_float>(defaultContext, CL_MEM_WRITE_ONLY, totalElementCount, &err);
+	auto d_res = Buffer::make<ReducedSimplex<dim>>(defaultContext, CL_MEM_WRITE_ONLY, simplexCount, &err);
 	ASSERT_SUCCESS(err);
 
-	testee.simplexes = d_orig;
-	testee.result = d_res;
-
-	NDRange<1> global{ simplexCount };
-	NDRange<1> local{ 1 };
-
-	ASSERT_SUCCESS(testee.load());
-	ASSERT_SUCCESS(q.enqueueKernelCommand<1>(testee, global, local));
+	testee.setExecutionRange(simplexCount);
+	
+	ASSERT_SUCCESS(testee.setSimplexInputBuffer(d_orig));
+	ASSERT_SUCCESS(testee.setTriangleOutputBuffer(d_res));
+	ASSERT_SUCCESS(q.enqueueDispatchCommand(testee));
 	ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_res, false, (nr_float*) result));
 	ASSERT_SUCCESS(q.await());
 

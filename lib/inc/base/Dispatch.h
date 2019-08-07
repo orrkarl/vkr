@@ -11,9 +11,9 @@ template <typename Consumer>
 class Dispatch
 {
 public:
-	cl_status operator()(const nr::CommandQueue& q)
+	cl_status operator()(const nr::CommandQueue& q) const
 	{
-		return static_cast<Consumer*>(this)->consume(q);
+		return static_cast<const Consumer*>(this)->consume(q);
 	}
 };
 

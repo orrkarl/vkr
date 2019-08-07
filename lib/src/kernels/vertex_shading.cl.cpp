@@ -38,7 +38,7 @@ cl_status VertexReduceKernel::setSimplexOutputBuffer(const Buffer& out)
 	return setArg<OUTPUT_BUFFER>(out);
 }
 
-cl_status VertexReduceKernel::consume(const CommandQueue& q)
+cl_status VertexReduceKernel::consume(const CommandQueue& q) const
 {
 	return q.enqueueKernelCommand(*this, m_range);
 }
