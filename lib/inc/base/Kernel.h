@@ -119,9 +119,9 @@ public:
 		return Kernel::setArg(Index, arg);
 	}
 
-	operator cl_kernel() const { return get(); }
+	using Kernel::get;
 
-	cl_kernel get() const { return Kernel::get(); }
+	using Kernel::operator cl_kernel;
 };
 
 }

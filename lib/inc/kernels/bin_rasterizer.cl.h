@@ -3,9 +3,8 @@
 #include "../general/predefs.h"
 
 #include "../base/Buffer.h"
-#include "../base/CommandQueue.h"
-#include "../base/Dispatch.h"
-#include "../base/Kernel.h"
+
+#include "../utils/StandardDispatch.h"
 
 #include "../rendering/Render.h"
 
@@ -19,16 +18,16 @@ namespace detail
 
 NRAPI extern const char* BIN_RASTER_KERNEL_NAME;
 
-class BinRasterizerKernel : private TypesafeKernel<Buffer, nr_uint, ScreenDimension, BinQueueConfig, Buffer, Buffer, Buffer>, public Dispatch<BinRasterizerKernel>
+class BinRasterizerKernel : public StandardDispatch<2, Buffer, nr_uint, ScreenDimension, BinQueueConfig, Buffer, Buffer, Buffer>
 {
 public:
 	BinRasterizerKernel::BinRasterizerKernel(const Module& module, cl_status* err = nullptr)
-		: TypesafeKernel(module, BIN_RASTER_KERNEL_NAME, err)
+		: StandardDispatch(module, BIN_RASTER_KERNEL_NAME, err)
 	{
 	}
 
 	BinRasterizerKernel::BinRasterizerKernel()
-		: TypesafeKernel()
+		: StandardDispatch()
 	{
 	}
 
@@ -67,11 +66,6 @@ public:
 		return setArg<BATCH_INDEX>(batchIndex);
 	}
 
-	cl_status consume(const CommandQueue& q) const
-	{
-		return q.enqueueKernelCommand(*this, m_range);
-	}
-
 	void setExecutionRange(const ScreenDimension& screenDim, const BinQueueConfig& config, const nr_uint workGroupCount)
 	{
 		nr_uint binCountX = static_cast<nr_uint>(std::ceil(static_cast<nr_float>(screenDim.width) / config.binWidth));
@@ -81,23 +75,16 @@ public:
 
 	void setExecutionRange(const nr_uint binCountX, const nr_uint binCountY, const nr_uint workGroupCount)
 	{
-		m_range.global.x = workGroupCount * binCountX;
-		m_range.global.y = binCountY;
+		range.global.x = workGroupCount * binCountX;
+		range.global.y = binCountY;
 
-		m_range.local.x = binCountX;
-		m_range.local.y = binCountY;
-	}
-
-	NDExecutionRange<2> getExecutionRange() const
-	{
-		return m_range;
+		range.local.x = binCountX;
+		range.local.y = binCountY;
 	}
 
 	using TypesafeKernel::operator cl_kernel;
 
 private:
-	NDExecutionRange<2> m_range;
-
 	static constexpr const nr_uint TRIANGLE_BUFFER = 0;
 	static constexpr const nr_uint TRIANGLE_COUNT = 1;
 	static constexpr const nr_uint SCREEN_DIMENSION = 2;
