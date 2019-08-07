@@ -12,7 +12,7 @@
 #include <memory>
 
 using namespace nr;
-using namespace nr::__internal;
+using namespace nr::detail;
 using namespace testing;
 
 TEST(Binning, RasterizerOverflow)
@@ -62,8 +62,8 @@ TEST(Binning, RasterizerOverflow)
     testee.hasOverflow = d_overflow;
     testee.batchIndex = d_batchIndex;
 
-    std::array<size_t, 2> global = { workGroupCount * screenDim.width, screenDim.height };
-    std::array<size_t, 2> local  = { screenDim.width, screenDim.height };
+    NDRange<2> global = { workGroupCount * screenDim.width, screenDim.height };
+    NDRange<2> local  = { screenDim.width, screenDim.height };
 
     ASSERT_SUCCESS(testee.load());
     ASSERT_SUCCESS(q.enqueueKernelCommand<2>(testee, global, local));

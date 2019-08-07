@@ -12,10 +12,10 @@
 namespace nr
 {
 
-namespace __internal
+namespace detail
 {
 
-class Pipeline
+class NRAPI Pipeline
 {
 public:
 	Pipeline();

@@ -5,7 +5,7 @@
 namespace nr
 {
 
-namespace __internal
+namespace detail
 {
 
 nr_uint BinRasterizer::getTotalBinQueueCount(const nr_uint workGroupCount, const ScreenDimension& dim, const BinQueueConfig config)

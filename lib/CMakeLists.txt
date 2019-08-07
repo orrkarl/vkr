@@ -9,13 +9,14 @@ ADD_LIBRARY(Nraster SHARED
 	src/base/Kernel.cpp
 	src/base/Module.cpp
 	src/base/Platform.cpp
-
-	src/general/predefs.cpp
 	
+	src/kernels/Source.cpp
+
 	src/pipeline/BinRasterizer.cpp
 	src/pipeline/FineRasterizer.cpp
 	src/pipeline/SimplexReducer.cpp
 	src/pipeline/VertexShader.cpp
+	src/pipeline/VertexProcessor.cpp
 
 	src/utils/converters.cpp)
 

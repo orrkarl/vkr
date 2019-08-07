@@ -11,7 +11,7 @@
 #include <utility>
 
 using namespace nr;
-using namespace nr::__internal;
+using namespace nr::detail;
 using namespace testing;
 using namespace std::rel_ops;
 
@@ -115,8 +115,8 @@ TEST(SimplexReducer, reducing)
 	testee.simplexes = d_orig;
 	testee.result = d_res;
 
-	std::array<size_t, 1> global{ simplexCount };
-	std::array<size_t, 1> local{ 1 };
+	NDRange<1> global{ simplexCount };
+	NDRange<1> local{ 1 };
 
 	ASSERT_SUCCESS(testee.load());
 	ASSERT_SUCCESS(q.enqueueKernelCommand<1>(testee, global, local));

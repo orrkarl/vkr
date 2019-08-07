@@ -7,7 +7,7 @@
 
 using namespace nr;
 using namespace testing;
-using namespace nr::__internal;
+using namespace nr::detail;
 
 struct Bin
 {

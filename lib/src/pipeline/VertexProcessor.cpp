@@ -1,35 +1,75 @@
-#include "..\..\inc\pipeline\VertexProcessor.h"
+#include <pipeline/VertexProcessor.h>
 
 namespace nr
 {
 
-namespace __internal
+namespace detail
 {
 
-const string VertexProcessor::SIMPLEX_REDUCE_NAME = "reduce_simplex";
-const string VertexProcessor::VERTEX_REDUCE_NAME = "shade_vertex";
-
-VertexProcessor::VertexProcessor(const Module& code, const nr_uint dim)
-	: m_simplexReduce(code, SIMPLEX_REDUCE_NAME, nullptr), m_vertexReduce(code, VERTEX_REDUCE_NAME, nullptr)
+cl_status VertexProcessor::setRenderDimension(const Source& source)
 {
+	if (source.getRenderDimension() == m_currentRenderDimension) return CL_SUCCESS;
+	cl_status ret = CL_SUCCESS;
+	auto pret = &ret;
+
+	m_simplexReduce = source.simplexReduce(pret);
+	if (nr::error::isFailure(ret)) return ret;
+	m_vertexReduce = source.vertexReduce(pret);
+	if (nr::error::isFailure(ret)) return ret;
+	m_currentRenderDimension = source.getRenderDimension();
+
+	auto ctx = source.getRenderContext();
+
+	parameters.far = Buffer::make<nr_float>(ctx, CL_MEM_READ_WRITE, m_currentRenderDimension);
+	parameters.near = Buffer::make<nr_float>(ctx, CL_MEM_READ_WRITE, m_currentRenderDimension);
+
+	return CL_SUCCESS;
 }
 
-void VertexProcessor::setRenderDimension(const Module& code, const nr_uint dim)
+cl_status VertexProcessor::setNearPlane(const CommandQueue& q, const nr_float* near)
 {
-	m_simplexReduce = Kernel(code, SIMPLEX_REDUCE_NAME, nullptr);
-	m_vertexReduce = Kernel(code, VERTEX_REDUCE_NAME, nullptr);
+	return q.enqueueBufferWriteCommand(parameters.near, false, m_currentRenderDimension, near);
 }
 
-void VertexProcessor::setNearPlane(nr::CommandQueue* q, const nr_float* near)
+cl_status VertexProcessor::setFarPlane(const CommandQueue& q, const nr_float* far)
 {
-
+	return q.enqueueBufferWriteCommand(parameters.far, false, m_currentRenderDimension, far);
 }
 
-void VertexProcessor::setFarPlane(nr::CommandQueue* q, const nr_float* far)
-{
+cl_status VertexProcessor::consume(const CommandQueue& q)
+{	
+	cl_status ret;
+
+	ret = setup();
+	if (nr::error::isFailure(ret)) return ret;
+
+	ret = q.enqueueKernelCommand<1>(m_vertexReduce, m_vertexReduceRange);
+	if (nr::error::isFailure(ret)) return ret;
+
+	ret = q.enqueueKernelCommand<1>(m_simplexReduce, m_simplexReduceRange);
+	if (nr::error::isFailure(ret)) return ret;
+
+	return ret;
 }
 
-cl_status VertexProcessor::consume(nr::CommandQueue* q)
+cl_status VertexProcessor::setup()
+{
+	cl_status err;
+	if (nr::error::isFailure(err = setupVertexReduce())) return err;
+	return setupSimplexReduce();
+}
+
+cl_status VertexProcessor::setupSimplexReduce()
+{
+	cl_status ret = CL_SUCCESS;
+
+	ret = m_simplexReduce.setArg(0, inputs.simplexes);
+	if (nr::error::isFailure(ret)) return ret;
+
+	return m_simplexReduce.setArg(1, outputs.result);
+}
+
+cl_status VertexProcessor::setupVertexReduce()
 {
 	return cl_status();
 }

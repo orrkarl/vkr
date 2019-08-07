@@ -5,11 +5,13 @@
 namespace nr
 {
 
-namespace __internal
+namespace detail
 {
 
 namespace clcode
 {
+
+const string SIMPLEX_REDUCE_KERNEL_NAME = "reduce_simplex";
 
 // Reducing simplexes to their triangles
 const string simplex_reducing = R"__CODE__(

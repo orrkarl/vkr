@@ -13,7 +13,7 @@
 #include "fine_utils.h"
 
 using namespace nr;
-using namespace nr::__internal;
+using namespace nr::detail;
 using namespace testing;
 
 struct PointInTriangle : Kernel
@@ -77,8 +77,8 @@ TEST(Fine, PointInTriangle)
     testee.screenDim = screenDim;
     testee.result = d_result;
 
-    std::array<size_t, 1> global = {1};
-    std::array<size_t, 1> local  = {1};
+    NDRange<1> global = {1};
+    NDRange<1> local  = {1};
 
     testee.position = origin;
     ASSERT_SUCCESS(testee.load());

@@ -42,7 +42,7 @@ Module::Module()
 {
 }
 
-Module::Module(Context context, const string& code, cl_status* err)
+Module::Module(const Context& context, const string& code, cl_status* err)
     : Wrapped()
 {
     size_t s = code.size();
@@ -50,7 +50,7 @@ Module::Module(Context context, const string& code, cl_status* err)
     object = clCreateProgramWithSource(context, 1, &code_ptr, &s, err);
 }
 
-Module::Module(Context context, const Sources& codes, cl_status* err)
+Module::Module(const Context& context, const Sources& codes, cl_status* err)
     : Wrapped() 
 {
     std::vector<const nr_char*> codesRaw(codes.size());
@@ -87,7 +87,12 @@ Module& Module::operator=(Module&& other)
 
 Module::operator cl_program() const
 {
-    return object;
+    return get();
+}
+
+cl_program Module::get() const
+{
+	return object;
 }
 
 cl_status Module::build(const Device& device, const Options& options)
@@ -133,6 +138,21 @@ string Module::getBuildLog(Device device, cl_status* err) const
 	std::unique_ptr<nr_char[]> str = std::make_unique<nr_char[]>(len);
 	*err = clGetProgramBuildInfo(object, device, CL_PROGRAM_BUILD_LOG, len, str.get(), nullptr);
 	return string(str.get());
+}
+
+Context Module::getContext(cl_status* err) const
+{
+	cl_context ret;
+	if (err)
+	{
+		*err = clGetProgramInfo(object, CL_PROGRAM_CONTEXT, sizeof(ret), &ret, nullptr);
+	}
+	else
+	{
+		clGetProgramInfo(object, CL_PROGRAM_CONTEXT, sizeof(ret), &ret, nullptr);
+	}
+
+	return Context(ret, true);
 }
 
 const Module::Macro           Module::DEBUG               = Module::Macro("_DEBUG");

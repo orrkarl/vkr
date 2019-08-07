@@ -12,7 +12,7 @@
 #include "fine_utils.h"
 
 using namespace nr;
-using namespace nr::__internal;
+using namespace nr::detail;
 using namespace testing;
 
 TEST(Fine, Rasterizer)
@@ -73,8 +73,8 @@ TEST(Fine, Rasterizer)
 	testee.workGroupCount = totalWorkGroupCount;
 	testee.frameBuffer = frame;
 
-	std::array<size_t, 2> global = { binCountX, binCountY };
-	std::array<size_t, 2> local = { binCountX, binCountY / totalWorkGroupCount };
+	NDRange<2> global = { binCountX, binCountY };
+	NDRange<2> local = { binCountX, binCountY / totalWorkGroupCount };
 
 	ASSERT_SUCCESS(testee.load());
 	ASSERT_SUCCESS(q.enqueueKernelCommand<2>(testee, global, local));

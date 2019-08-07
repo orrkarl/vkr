@@ -13,7 +13,7 @@
 #include <chrono>
 
 using namespace nr;
-using namespace nr::__internal;
+using namespace nr::detail;
 using namespace testing;
 
 // Because MSVC doesn't evaluate constexpr as well as GCC...
@@ -84,8 +84,8 @@ TEST(Binning, Rasterizer)
     testee.binQueues      = d_binQueues;
     testee.batchIndex     = d_batchIndex;
 
-    std::array<size_t, 2> global = { workGroupCount * binCountX, binCountY };
-    std::array<size_t, 2> local  = { binCountX, binCountY };
+    NDRange<2> global = { workGroupCount * binCountX, binCountY };
+    NDRange<2> local  = { binCountX, binCountY };
 
     ASSERT_SUCCESS(testee.load());
     ASSERT_SUCCESS(q.enqueueKernelCommand<2>(testee, global, local));

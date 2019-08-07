@@ -156,7 +156,7 @@ void App::draw(cl_status* err)
 		return;
 	}
 
-	//nr::__internal::BinQueueConfig config{ 32, 32, 120 };
+	//nr::detail::BinQueueConfig config{ 32, 32, 120 };
 	//
 	//const nr_uint binRasterWorkGroupCount = 1;
 	//const nr_uint binCountX = ceil(((nr_float)m_screenDim.width) / config.binWidth);
@@ -304,7 +304,7 @@ bool App::initRenderingPipeline()
 {
 	cl_status ret = CL_SUCCESS;
 
-	nr::__internal::BinQueueConfig config{48, 48, 120};
+	nr::detail::BinQueueConfig config{48, 48, 120};
 
 	const nr_uint binRasterWorkGroupCount = 1;
 	const nr_uint binCountX = ceil(((nr_float)m_screenDim.width) / config.binWidth);
@@ -317,11 +317,11 @@ bool App::initRenderingPipeline()
 	
 	nr::Module::Options opts = { nr::Module::RenderDimension(m_renderDimension), nr::Module::DEBUG, nr::Module::CL_VERSION_12 };
 	nr::Module::Sources srcs = {
-		nr::__internal::clcode::base,
-		nr::__internal::clcode::bin_rasterizer,
-		nr::__internal::clcode::fine_rasterizer,
-		nr::__internal::clcode::simplex_reducing,
-		nr::__internal::clcode::vertex_shading
+		nr::detail::clcode::base,
+		nr::detail::clcode::bin_rasterizer,
+		nr::detail::clcode::fine_rasterizer,
+		nr::detail::clcode::simplex_reducing,
+		nr::detail::clcode::vertex_shading
 	};
 	
 	auto fullModule = nr::Module(m_context, srcs, &ret);
@@ -357,28 +357,28 @@ bool App::initRenderingPipeline()
 		std::cerr << "Warnings while building pipeline module:\n" << buildLog << '\n';
 	}
 
-	m_binRasterizer = nr::__internal::BinRasterizer(fullModule, &ret);
+	m_binRasterizer = nr::detail::BinRasterizer(fullModule, &ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not initialize bin rasterizer kernel: " << nr::utils::stringFromCLError(ret) << '\n';
 		return false;
 	}
 
-	m_fineRasterizer = nr::__internal::FineRasterizer(fullModule, &ret);
+	m_fineRasterizer = nr::detail::FineRasterizer(fullModule, &ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not initialize fine rasterizer kernel: " << nr::utils::stringFromCLError(ret) << '\n';
 		return false;
 	}
 
-	m_simplexReducer = nr::__internal::SimplexReducer(fullModule, &ret);
+	m_simplexReducer = nr::detail::SimplexReducer(fullModule, &ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not initialize simplex reducer kernel: " << nr::utils::stringFromCLError(ret) << '\n';
 		return false;
 	}
 
-	m_vertexShader = nr::__internal::VertexShader(fullModule, &ret);
+	m_vertexShader = nr::detail::VertexShader(fullModule, &ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not initialize vertex shader kernel: " << nr::utils::stringFromCLError(ret) << '\n';

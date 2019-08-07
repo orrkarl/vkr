@@ -9,7 +9,7 @@
 #include <rendering/Render.h>
 
 using namespace nr;
-using namespace nr::__internal;
+using namespace nr::detail;
 using namespace testing;
 
 struct TriangleInBin : Kernel
@@ -60,8 +60,8 @@ void testBin(TriangleInBin testee, CommandQueue q, const nr_uint dimension, cons
     testee.triangle_y = d_triangle_y;
     testee.result     = d_result;
 
-    std::array<size_t, 1> global{1};
-    std::array<size_t, 1> local{1};
+    NDRange<1> global{1};
+    NDRange<1> local{1};
     
     // Shouldn't be in any bin
     ASSERT_SUCCESS(testee.load());

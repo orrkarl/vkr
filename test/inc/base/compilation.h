@@ -8,7 +8,7 @@
 #include <kernels/base.cl.h>
 
 using namespace nr;
-using namespace nr::__internal;
+using namespace nr::detail;
 using namespace testing;
 
 TEST(Base, Compilation)

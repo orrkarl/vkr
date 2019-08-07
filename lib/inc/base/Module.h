@@ -33,8 +33,8 @@ public:
 	 * @brief An OpenCL compiler option. 
 	 * @par
 	 * This class represents the entire option. 
-	 * It doesn't know if the option is a macro or an optimization level, and as such the entire option has to be specified. For example: passing "FOO=1" 
-	 * will result in an CL_UNKNOWN_COMPILER_ARGS error; pass "-D FOO=1" instead.
+	 * It doesn't know if the option is a macro, optimization level, etc. and as such the entire option has to be specified. For example: passing "FOO=1" 
+	 * will result in an CL_UNKNOWN_COMPILER_ARGS error; pass "-D FOO=1" (or use @ref Macro) instead.
 	 * 
 	 */
 	struct NRAPI Option
@@ -75,15 +75,9 @@ public:
 public:
     Module();
 
-	template<nr_uint N>
-	explicit Module(Context& context, const std::array<string, N>& codes, const std::array<nr_uint, N>& sizes, cl_status* err = nullptr)
-		: Wrapped(clCreateProgramWithSource(context, N, codes.data(), sizes.data(), err))
-	{
-	}
+	Module(const Context& context, const string& code, cl_status* err = nullptr);
 
-	Module(Context context, const string& code, cl_status* err = nullptr);
-
-	Module(Context context, const Sources& codes, cl_status* err = nullptr);
+	Module(const Context& context, const Sources& codes, cl_status* err = nullptr);
 
     explicit Module(const cl_program& module, const nr_bool retain = false);
 
@@ -97,6 +91,8 @@ public:
 
 	operator cl_program() const;
 
+	cl_program get() const;
+
 	cl_status build(const Device& device, const Options& options);
 
 	cl_status build(const Devices& devices, const Options& options);
@@ -108,7 +104,7 @@ public:
 			object, 
 			1, &device, 
 			Module::finalizeOptions(options).c_str(), 
-			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog, true), (T*) data);}), 
+			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog, true), reinterpret_cast<T*>(data));}), 
 			userData);
 	}
 	
@@ -120,7 +116,7 @@ public:
 			object, 
 			1, &dev, 
 			Module::finalizeOptions(options).c_str(), 
-			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog, true), (T*) data);}), 
+			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog, true), reinterpret_cast<T*>(data));}), 
 			userData);
 	}
 
@@ -131,7 +127,7 @@ public:
 			object, 
 			devices.size(), &devices[0], 
 			Module::finalizeOptions(options).c_str(), 
-			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog, true), (T*) data);}), 
+			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog, true), reinterpret_cast<T*>(data));}), 
 			userData);
 	}
 
@@ -139,12 +135,14 @@ public:
 
 	string getBuildLog(Device device, cl_status* err = nullptr) const;
 
+	Context getContext(cl_status* err = nullptr) const;
+
 private:
 	/**
 	 * @brief finalizes a list of options into a single string which OpenCL can handle
 	 * 
 	 * @param 	options 	the compiler options
-	 * @return 	the string representation of passed options
+	 * @return 	the string	representation of passed options
 	 * 
 	 */
 	static string finalizeOptions(const Options& options);

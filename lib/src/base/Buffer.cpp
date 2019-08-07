@@ -55,7 +55,7 @@ const cl_mem& Buffer::get() const
 	return object;
 }
 
-nr_size Buffer::getBufferSize(cl_status* err) const
+nr_size Buffer::size(cl_status* err) const
 {
 	nr_size ret = 0;
 	auto status = clGetMemObjectInfo(object, CL_MEM_SIZE, sizeof(nr_size), &ret, nullptr);

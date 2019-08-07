@@ -37,12 +37,55 @@ public:
 };
 
 template <nr_uint dim>
-using NDRange = std::array<nr_size, dim>;
+struct NDRange {};
+
+#pragma pack(push, 1)
+
+template <>
+struct NDRange<1>
+{
+	union
+	{
+		nr_size x;
+		nr_size data[1];
+	};
+};
+
+template <>
+struct NDRange<2>
+{
+	union
+	{
+		struct
+		{
+			nr_size x;
+			nr_size y;
+		};
+		nr_size data[2];
+	};
+};
+
+template <>
+struct NDRange<3>
+{
+	union
+	{
+		struct
+		{
+			nr_size x;
+			nr_size y;
+			nr_size z;
+		};
+		nr_size data[3];
+	};
+};
+
+#pragma pack(pop)
 
 template <nr_uint dim>
 struct NDExecutionRange
 {
-	NDRange global, local;
+	NDRange<dim> global, local;
 };
 
 /**
@@ -104,7 +147,7 @@ public:
      * @return      internal OpenCL error status
      */
     template<typename T>
-    cl_status enqueueBufferReadCommand(const Buffer& buffer, nr_bool block, nr_uint count, T* data, const std::vector<Event>& wait, nr_uint offset = 0, Event* notify = nullptr)
+    cl_status enqueueBufferReadCommand(const Buffer& buffer, nr_bool block, nr_uint count, T* data, const std::vector<Event>& wait, nr_uint offset = 0, Event* notify = nullptr) const
     {
         return clEnqueueReadBuffer(
             object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
@@ -124,7 +167,7 @@ public:
      * @return      internal OpenCL error status
      */
     template<typename T>
-    cl_status enqueueBufferReadCommand(const Buffer& buffer, nr_bool block, nr_uint count, T* data, nr_uint offset = 0, Event* notify = nullptr)
+    cl_status enqueueBufferReadCommand(const Buffer& buffer, nr_bool block, nr_uint count, T* data, nr_uint offset = 0, Event* notify = nullptr) const
     {
         return clEnqueueReadBuffer(
                 object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
@@ -142,55 +185,55 @@ public:
 	 * @return      internal OpenCL error status
 	 */
 	template<typename T>
-	cl_status enqueueBufferReadCommand(const Buffer& buffer, nr_bool block, T* data, Event* notify = nullptr)
+	cl_status enqueueBufferReadCommand(const Buffer& buffer, nr_bool block, T* data, Event* notify = nullptr) const
 	{
 		return clEnqueueReadBuffer(
-			object, buffer, block, 0, buffer.getBufferSize(), data,
+			object, buffer, block, 0, buffer.size(), data,
+			0, nullptr, (cl_event*)notify);
+	}
+
+	/**
+	 * @brief enqueues a buffer write command - moving data from host memory to a device buffer
+	 *
+	 * @tparam      T       underlying buffer's element type
+	 * @param       buffer  device buffer object
+	 * @param       block   should the function block (wait until the data read is completed)
+	 * @param       count   counting how many elements of T will be copied from the buffer
+	 * @param       data    source for memory copy operation
+	 * @param       wait    list of events that have to complete before this command will begin execution
+	 * @param       offset  offset (in elements, not bytes) in buffer from which the copy will begin
+	 * @param[out]  notify  event which will be notified when this command changes status; will be ignored if nullptr
+	 * @return      internal OpenCL error status
+	 */
+	template<typename T>
+	cl_status enqueueBufferWriteCommand(const Buffer& buffer, nr_bool block, nr_uint count, T* data, const std::vector<Event>& wait, nr_uint offset = 0, Event * notify = nullptr) const
+	{
+		return clEnqueueWriteBuffer(
+			object, buffer, block, offset * sizeof(T), count * sizeof(T), data,
+			wait.size(), (const cl_event*)wait.data(), (cl_event*)notify);
+	}
+
+	/**
+	 * @brief enqueues a buffer write command - moving data from host memory to a device buffer
+	 *
+	 * @tparam      T       underlying buffer's element type
+	 * @param       buffer  device buffer object
+	 * @param       block   should the function block (wait until the data read is completed)
+	 * @param       count   counting how many elements of T will be copied from the buffer
+	 * @param       data    source for memory copy operation
+	 * @param       offset  offset (in elements, not bytes) in buffer from which the copy will begin
+	 * @param[out]  notify  event which will be notified when this command changes status; will be ignored if nullptr
+	 * @return      internal OpenCL error status
+	 */
+	template<typename T>
+	cl_status enqueueBufferWriteCommand(const Buffer& buffer, nr_bool block, nr_uint count, T* data, nr_uint offset = 0, Event * notify = nullptr) const
+	{
+		return clEnqueueWriteBuffer(
+			object, buffer, block, offset * sizeof(T), count * sizeof(T), data,
 			0, nullptr, (cl_event*)notify);
 	}
 
     /**
-     * @brief enqueues a buffer write command - moving data from host memory to a device buffer
-     * 
-     * @tparam      T       underlying buffer's element type
-     * @param       buffer  device buffer object
-     * @param       block   should the function block (wait until the data read is completed)
-     * @param       count   counting how many elements of T will be copied from the buffer
-     * @param       data    source for memory copy operation
-     * @param       wait    list of events that have to complete before this command will begin execution
-     * @param       offset  offset (in elements, not bytes) in buffer from which the copy will begin 
-     * @param[out]  notify  event which will be notified when this command changes status; will be ignored if nullptr
-     * @return      internal OpenCL error status
-     */
-    template<typename T>
-    cl_status enqueueBufferWriteCommand(const Buffer& buffer, nr_bool block, nr_uint count, T* data, const std::vector<Event>& wait, nr_uint offset = 0, Event* notify = nullptr)
-    {
-        return clEnqueueWriteBuffer(
-            object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
-            wait.size(), (const cl_event*) wait.data(), (cl_event*) notify);
-    }
-
-    /**
-     * @brief enqueues a buffer write command - moving data from host memory to a device buffer
-     * 
-     * @tparam      T       underlying buffer's element type
-     * @param       buffer  device buffer object
-     * @param       block   should the function block (wait until the data read is completed)
-     * @param       count   counting how many elements of T will be copied from the buffer
-     * @param       data    source for memory copy operation
-     * @param       offset  offset (in elements, not bytes) in buffer from which the copy will begin 
-     * @param[out]  notify  event which will be notified when this command changes status; will be ignored if nullptr
-     * @return      internal OpenCL error status
-     */
-    template<typename T>
-    cl_status enqueueBufferWriteCommand(const Buffer& buffer, nr_bool block, nr_uint count, T* data, nr_uint offset = 0, Event* notify = nullptr)
-    {
-        return clEnqueueWriteBuffer(
-                object, buffer, block, offset * sizeof(T), count * sizeof(T), data, 
-                0, nullptr, (cl_event*) notify);
-    }
-
-    /**
      * @brief enqueues a kernel command - submits a kernel to the device
      * 
      * @tparam      dim     execution dimension - has to be between 1, 2 or 3
@@ -206,9 +249,9 @@ public:
     typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
         const Kernel& kernel, 
         const NDRange<dim>& global, const NDRange<dim>& local,
-        const NDRange<dim>& offset, const std::vector<Event>& wait, Event* notify = nullptr)
+        const NDRange<dim>& offset, const std::vector<Event>& wait, Event* notify = nullptr) const
     {
-        return clEnqueueNDRangeKernel(object, kernel, dim, offset.data(), global.data(), local.data(), wait.size(), wait.data(), (cl_event*) notify);
+        return clEnqueueNDRangeKernel(object, kernel, dim, offset.data, global.data, local.data, wait.size(), wait.data(), (cl_event*) notify);
     }
 
     /**
@@ -226,9 +269,9 @@ public:
     typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
         const Kernel& kernel, 
         const NDRange<dim>& global, const NDRange<dim>& local,
-        const NDRange<dim>& offset = NDRange<dim>{}, Event* notify = nullptr)
+        const NDRange<dim>& offset = NDRange<dim>{}, Event* notify = nullptr) const
     {
-        return clEnqueueNDRangeKernel(object, kernel, dim, offset.data(), global.data(), local.data(), 0, nullptr, (cl_event*) notify);
+        return clEnqueueNDRangeKernel(object, kernel, dim, offset.data, global.data, local.data, 0, nullptr, (cl_event*) notify);
     }
 
 	/**
@@ -246,9 +289,9 @@ public:
 	typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
 		const Kernel & kernel,
 		const NDExecutionRange<dim>& range,
-		const NDRange<dim> & offset, const std::vector<Event> & wait, Event * notify = nullptr)
+		const NDRange<dim> & offset, const std::vector<Event> & wait, Event * notify = nullptr) const
 	{
-		return clEnqueueNDRangeKernel(object, kernel, dim, offset.data(), range.global.data(), range.local.data(), wait.size(), wait.data(), (cl_event*)notify);
+		return clEnqueueNDRangeKernel(object, kernel, dim, offset.data, range.global.data, range.local.data, wait.size(), wait.data(), (cl_event*)notify);
 	}
 
 	/**
@@ -265,9 +308,9 @@ public:
 	typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
 		const Kernel & kernel,
 		const NDExecutionRange<dim>& range,
-		const NDRange<dim> & offset = NDRange<dim>{}, Event * notify = nullptr)
+		const NDRange<dim> & offset = NDRange<dim>{}, Event * notify = nullptr) const
 	{
-		return clEnqueueNDRangeKernel(object, kernel, dim, offset.data(), range.global.data(), range.local.data(), 0, nullptr, (cl_event*)notify);
+		return clEnqueueNDRangeKernel(object, kernel, dim, offset.data, range.global.data, range.local.data, 0, nullptr, (cl_event*)notify);
 	}
 
 	/**
@@ -300,7 +343,7 @@ public:
         const Buffer& buffer, 
         const T& value, const nr_uint& count, 
         const std::vector<Event>& wait, 
-        const nr_uint& offset = 0, Event* notify = nullptr)
+        const nr_uint& offset = 0, Event* notify = nullptr) const
     {
         return clEnqueueFillBuffer(object, buffer, &value, sizeof(T), sizeof(value) * offset, sizeof(value) * count, wait.size(), wait.data(), (cl_event*) notify);
     }
@@ -320,7 +363,7 @@ public:
     cl_status enqueueBufferFillCommand(
         const Buffer& buffer, 
         const T& value, const nr_uint& count, 
-        const nr_uint& offset = 0, Event* notify = nullptr)
+        const nr_uint& offset = 0, Event* notify = nullptr) const
     {
         return clEnqueueFillBuffer(object, buffer, &value, sizeof(T), sizeof(value) * offset, sizeof(value) * count, 0, nullptr, (cl_event*) notify);
     }
@@ -336,14 +379,14 @@ public:
      */
     template<typename T>
 	cl_status enqueueBufferFillCommand(
-        const Buffer& buffer, const T& value, Event* notify = nullptr)
+        const Buffer& buffer, const T& value, Event* notify = nullptr) const
     {
 		static_assert(
 			sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8 || sizeof(T) == 16 || sizeof(T) == 32 || sizeof(T) == 64 || sizeof(T) == 128,
 			"enqueueBufferFillCommand: value size has to be one of {1, 2, 4, 8, 16, 32, 64, 128}");
 
 		cl_status err = CL_SUCCESS;
-		auto s = buffer.getBufferSize(&err);
+		auto s = buffer.size(&err);
 		if (nr::error::isFailure(err))
 		{
 			return err;

@@ -5,14 +5,14 @@
 #include <kernels/base.cl.h>
 
 using namespace nr;
-using namespace nr::__internal;
+using namespace nr::detail;
 
 void screenFromNDCTestTemplate(ScreenFromNDC kernel, CommandQueue q, const NDCPosition& ndc, const ScreenDimension& dim, const ScreenPosition& expected)
 {
 	cl_status err = CL_SUCCESS;
 
-    std::array<size_t, 1> global{1};
-    std::array<size_t, 1> local{1};
+    NDRange<1> global{1};
+    NDRange<1> local{1};
     
     kernel.ndcPosition = ndc;
     kernel.dimension   = dim;

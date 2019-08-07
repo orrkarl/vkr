@@ -5,14 +5,15 @@
 #include "../base/Buffer.h"
 #include "../base/CommandQueue.h"
 #include "../base/Kernel.h"
-#include "../base/Module.h"
+
+#include "../kernels/Source.h"
 
 #include "Stage.h"
 
 namespace nr
 {
 
-namespace __internal
+namespace detail
 {
 
 namespace vertex_processor
@@ -37,28 +38,29 @@ struct Outputs
 
 }
 
-class VertexProcessor : public Dispatch<VertexProcessor>, public Stage<vertex_processor::Params, vertex_processor::Inputs, vertex_processor::Outputs>
+class NRAPI VertexProcessor : public Dispatch<VertexProcessor>, public Stage<vertex_processor::Params, vertex_processor::Inputs, vertex_processor::Outputs>
 {
 public:
-	VertexProcessor(const Module& code, const nr_uint dim);
+	cl_status setRenderDimension(const Source& source);
 
-	void setRenderDimension(const Module& code, const nr_uint dim);
+	cl_status setNearPlane(const CommandQueue& q, const nr_float* near);
 
-	void setNearPlane(nr::CommandQueue* q, const nr_float* near);
+	cl_status setFarPlane(const CommandQueue& q, const nr_float* far);
 
-	void setFarPlane(nr::CommandQueue* q, const nr_float* far);
-
-	cl_status consume(nr::CommandQueue* q);
+	cl_status consume(const CommandQueue& q);
 
 private:
-	static const string SIMPLEX_REDUCE_NAME;
-	static const string VERTEX_REDUCE_NAME;
+	cl_status setup();
+	cl_status setupSimplexReduce();
+	cl_status setupVertexReduce();
 
 	Kernel m_simplexReduce;
-	NDExecutionRange<2> m_simplexReduceRange{ 0, 0 };
+	NDExecutionRange<1> m_simplexReduceRange{ 0, 0 };
 
 	Kernel m_vertexReduce;
-	NDExecutionRange<2> m_vertexReduceRange{ 0, 0 };
+	NDExecutionRange<1> m_vertexReduceRange{ 0, 0 };
+
+	nr_uint m_currentRenderDimension = 0;
 };
 
 }

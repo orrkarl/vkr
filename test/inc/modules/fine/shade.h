@@ -10,7 +10,7 @@
 #include "fine_utils.h"
 
 using namespace nr;
-using namespace nr::__internal;
+using namespace nr::detail;
 using namespace testing;
 
 struct ShadeTest : Kernel
@@ -84,8 +84,8 @@ TEST(Fine, ShadeTest)
     testee.screenDim = screenDim;
     testee.frame = frame;
 
-    std::array<size_t, 1> global = { 1 };
-    std::array<size_t, 1> local  = { 1 };
+    NDRange<1> global = { 1 };
+    NDRange<1> local  = { 1 };
 
     ASSERT_SUCCESS(testee.load());
     ASSERT_SUCCESS(q.enqueueKernelCommand<1>(testee, global, local));

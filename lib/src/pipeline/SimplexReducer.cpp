@@ -3,7 +3,7 @@
 namespace nr
 {
 
-namespace __internal
+namespace detail
 {
 
 nr_uint SimplexReducer::getTriangleCount(const nr_uint simplexCount)

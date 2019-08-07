@@ -5,11 +5,13 @@
 namespace nr
 {
 
-namespace __internal
+namespace detail
 {
 
 namespace clcode
 {
+
+const string FINE_RASTER_KERNEL_NAME = "fine_rasterize";
 
 const string fine_rasterizer = R"__CODE__(
 

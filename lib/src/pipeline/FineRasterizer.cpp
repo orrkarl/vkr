@@ -3,7 +3,7 @@
 namespace nr
 {
 
-namespace __internal
+namespace detail
 {
 
 cl_status FineRasterizer::load()

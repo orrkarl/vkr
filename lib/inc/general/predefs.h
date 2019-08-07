@@ -62,10 +62,12 @@ namespace nr
 
 typedef std::basic_string<nr_char> string;
 
+#define NR_OK(status) ((status) == CL_SUCCESS)
+
 namespace error
 {
-	NRAPI nr_bool isSuccess(const cl_status& err);
-	NRAPI nr_bool isFailure(const cl_status& err);
+	inline nr_bool isSuccess(const cl_status& err) { return NR_OK(err); }
+	inline nr_bool isFailure(const cl_status& err) { return !NR_OK(err); }
 }
 
 }

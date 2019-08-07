@@ -14,7 +14,7 @@
 namespace nr
 {
 
-namespace __internal
+namespace detail
 {
 
 struct NRAPI FineRasterizer : Kernel

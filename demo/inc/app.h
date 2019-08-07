@@ -56,21 +56,21 @@ private:
 	void loadData(cl_status* err);
 	void loop(cl_status* err);
 
-	nr::__internal::BinRasterizer m_binRasterizer;
-	std::array<nr_size, 2>		  m_binRasterizerGlobalSize;
-	std::array<nr_size, 2>		  m_binRasterizerLocalSize;
+	nr::detail::BinRasterizer m_binRasterizer;
+	nr::NDRange<2>		  m_binRasterizerGlobalSize;
+	nr::NDRange<2>		  m_binRasterizerLocalSize;
 
-	nr::__internal::FineRasterizer m_fineRasterizer;
-	std::array<nr_size, 2>		   m_fineRasterizerGlobalSize;
-	std::array<nr_size, 2>		   m_fineRasterizerLocalSize;
+	nr::detail::FineRasterizer m_fineRasterizer;
+	nr::NDRange<2>		   m_fineRasterizerGlobalSize;
+	nr::NDRange<2>		   m_fineRasterizerLocalSize;
 
-	nr::__internal::SimplexReducer m_simplexReducer;
-	std::array<nr_size, 1>		   m_simplexReducerGlobalSize;
-	std::array<nr_size, 1>		   m_simplexReducerLocalSize;
+	nr::detail::SimplexReducer m_simplexReducer;
+	nr::NDRange<1>		   m_simplexReducerGlobalSize;
+	nr::NDRange<1>		   m_simplexReducerLocalSize;
 
-	nr::__internal::VertexShader m_vertexShader;
-	std::array<nr_size, 1>		 m_vertexShaderGlobalSize;
-	std::array<nr_size, 1>		 m_vertexShaderLocalSize;
+	nr::detail::VertexShader m_vertexShader;
+	nr::NDRange<1>		 m_vertexShaderGlobalSize;
+	nr::NDRange<1>		 m_vertexShaderLocalSize;
 
 	std::unique_ptr<nr::RawColorRGBA[]>	m_bitmap; 
 	nr::CommandQueue					m_commandQueue;

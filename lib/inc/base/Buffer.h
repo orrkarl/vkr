@@ -61,7 +61,7 @@ public:
      * @param[out] err internal OpenCL call error status
 	 * @return the buffer size (in bytes)
      */
-	nr_size getBufferSize(cl_status* err = nullptr) const;
+	nr_size size(cl_status* err = nullptr) const;
 
 	/**
 	 * @brief Get the amount of elements of type T which the buffer can hold
@@ -70,9 +70,9 @@ public:
 	 * @return buffer capacity for elements of type T
 	 */
 	template <typename T>
-	nr_size getBufferCount(cl_status* err = nullptr) const
+	nr_size count(cl_status* err = nullptr) const
 	{
-		return getBufferSize(err) / sizeof(T);
+		return size(err) / sizeof(T);
 	}
 };
 

@@ -8,7 +8,7 @@
 #include "fine_utils.h"
 
 using namespace nr;
-using namespace nr::__internal;
+using namespace nr::detail;
 using namespace testing;
 
 TEST(Fine, Compilation)

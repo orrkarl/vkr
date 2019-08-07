@@ -12,7 +12,7 @@
 namespace nr
 {
 
-namespace __internal
+namespace detail
 {
 
 struct NRAPI VertexShader : Kernel

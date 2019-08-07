@@ -5,11 +5,13 @@
 namespace nr
 {
 
-namespace __internal
+namespace detail
 {
 
 namespace clcode
 {
+
+const string VERTEX_SHADE_KERNEL_NAME = "shade_vertex";
 
 const string vertex_shading = R"__CODE__(
 

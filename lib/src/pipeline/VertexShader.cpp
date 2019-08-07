@@ -3,7 +3,7 @@
 namespace nr
 {
 
-namespace __internal
+namespace detail
 {
 
 VertexShader::VertexShader(Module module, cl_status* err)

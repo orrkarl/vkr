@@ -4,7 +4,7 @@
 #include <array>
 
 using namespace nr;
-using namespace nr::__internal;
+using namespace nr::detail;
 using namespace testing;
 
 void ndcFromScreenTestTemplate(NDCFromScreen kernel, CommandQueue q, const ScreenPosition& screen, const ScreenDimension& dim, const NDCPosition& expected)
@@ -12,8 +12,8 @@ void ndcFromScreenTestTemplate(NDCFromScreen kernel, CommandQueue q, const Scree
     NDCPosition result;
     cl_status err = CL_SUCCESS;
 
-    std::array<size_t, 1> global{1};
-    std::array<size_t, 1> local{1};
+    NDRange<1> global{1};
+    NDRange<1> local{1};
     
     kernel.position  = screen;
     kernel.dimension = dim;
@@ -33,8 +33,8 @@ void checkConversionBounded(NDCFromScreen kernel, CommandQueue q, const ScreenPo
     NDCPosition result;
     cl_status err = CL_SUCCESS;
 
-    std::array<size_t, 1> global{1};
-    std::array<size_t, 1> local{1};
+    NDRange<1> global{1};
+    NDRange<1> local{1};
     
     kernel.position  = screen;
     kernel.dimension = dim;

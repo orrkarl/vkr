@@ -5,7 +5,7 @@
 namespace nr
 {
 
-namespace __internal
+namespace detail
 {
 
 namespace clcode
