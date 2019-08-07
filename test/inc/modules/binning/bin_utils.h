@@ -22,6 +22,14 @@ struct BinQueue
 {
 	nr_uint isEmpty;
 	nr_uint queue[QueueSize];
+
+	nr_uint& get(const nr_uint index) { return queue[index]; }
+
+	const nr_uint& get(const nr_uint index) const { return queue[index]; }
+
+	nr_uint& operator[](const nr_uint index) { return get(index); }
+
+	const nr_uint& operator[](const nr_uint index) const { return get(index); }
 };
 
 template <nr_uint BinCountX, nr_uint BinCountY, nr_uint QueueSize>

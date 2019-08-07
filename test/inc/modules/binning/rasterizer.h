@@ -34,16 +34,19 @@ TEST(Binning, Rasterizer)
 	constexpr nr_uint binCountX = compileTimeCeil(((nr_float) screenDim.width) / config.binWidth);
 	constexpr nr_uint binCountY = compileTimeCeil(((nr_float) screenDim.height) / config.binHeight);
 
-	BinQueues<binCountX, binCountY, config.queueSize> h_result[workGroupCount];
+	using Queues = BinQueues<binCountX, binCountY, config.queueSize>;
 
-	nr_uint h_result[workGroupCount * (config.queueSize + 1) * binCountX * binCountY];
+	constexpr const nr_uint totalBinCount = binCountX * binCountY;
+
+	Queues h_result[workGroupCount];
+
+	//nr_uint h_result[workGroupCount * (config.queueSize + 1) * binCountX * binCountY];
 
     nr_bool isOverflowing = false;
 
     const nr_uint destinationBinX = 1;
     const nr_uint destinationBinY = 1;
-    const nr_uint destinationBinQueueRawIndex = (config.queueSize + 1) * (destinationBinY * binCountX + destinationBinX);
-    const nr_uint* destBinQueueBase = h_result + destinationBinQueueRawIndex;
+    const BinQueue<config.queueSize>& destBinQueueBase = h_result[0][destinationBinX][destinationBinY];
 
     const nr_uint x = destinationBinX * config.binWidth + config.binWidth / 2;
     const nr_uint y = destinationBinY * config.binHeight + config.binHeight / 2;
@@ -84,18 +87,18 @@ TEST(Binning, Rasterizer)
 
     ASSERT_SUCCESS(testee.load());
     ASSERT_SUCCESS(q.enqueueKernelCommand<2>(testee, global, local));
-    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_binQueues, false, sizeof(h_result) / sizeof(nr_float), h_result));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_binQueues, false, workGroupCount, h_result));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_overflow, false, 1, &isOverflowing));
     ASSERT_SUCCESS(q.await());
     ASSERT_FALSE(isOverflowing);
 
-    ASSERT_EQ(0, h_result[0]);  // queue for bin (0, 0) is not empty
-    ASSERT_EQ(0, h_result[1]);  // the first triangle is in it
-    ASSERT_EQ(1, h_result[2]);  // the second triangle is in it
-    ASSERT_EQ(0, h_result[3]);  // no more triangles
+    ASSERT_FALSE(h_result[0][0][0].isEmpty);  // queue for bin (0, 0) is not empty
+    ASSERT_EQ(0, h_result[0][0][0][0]);  // the first triangle is in it
+    ASSERT_EQ(1, h_result[0][0][0][1]);  // the second triangle is in it
+    ASSERT_EQ(0, h_result[0][0][0][2]);  // no more triangles
 
-    ASSERT_EQ(0, destBinQueueBase[0]); // the designated queue is not empty  
-    ASSERT_EQ(0, destBinQueueBase[1]); // the queue's first element points to the first triangle
-    ASSERT_EQ(1, destBinQueueBase[2]); // the queue's second element points to the second triangle
-    ASSERT_EQ(0, destBinQueueBase[3]); // queue end
+	ASSERT_FALSE(destBinQueueBase.isEmpty); // the designated queue is not empty  
+	ASSERT_EQ(0, destBinQueueBase[0]); // the queue's first element points to the first triangle
+	ASSERT_EQ(1, destBinQueueBase[1]); // the queue's second element points to the second triangle
+	ASSERT_EQ(0, destBinQueueBase[2]); // queue end
 }
