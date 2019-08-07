@@ -108,6 +108,11 @@ public:
 	{
 	}
 
+	TypesafeKernel()
+		: Kernel()
+	{
+	}
+
 	template <nr_uint Index>
 	cl_status setArg(const Type<Index>& arg)
 	{

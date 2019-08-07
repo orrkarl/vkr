@@ -7,7 +7,7 @@ namespace detail
 {
 
 Source::Source(const Context& context)
-	: Module(context, Module::Sources{ clcode::base, clcode::bin_rasterizer, clcode::fine_rasterizer, clcode::simplex_reducing, clcode::vertex_shading }), dim(0)
+	: Module(context, Module::Sources{ clcode::base, clcode::bin_rasterizer, clcode::fine_rasterizer, clcode::simplex_reducing, clcode::vertex_shading })
 {
 }
 
@@ -17,8 +17,6 @@ cl_status Source::build(const Device& dev, const nr_uint renderDimension, const 
 	opts.push_back(Module::CL_VERSION_12);
 	opts.push_back(Module::RenderDimension(renderDimension));
 	if (debug) opts.push_back(Module::DEBUG);
-
-	dim = renderDimension;
 
 	return Module::build(dev, opts);
 }
@@ -43,19 +41,9 @@ VertexReduceKernel Source::vertexReduce(cl_status* status) const
 	return VertexReduceKernel(*this, status);
 }
 
-Context Source::getRenderContext() const
-{
-	return Module::getContext();
-}
-
 Source::operator cl_program() const
 {
 	return Module::get();
-}
-
-nr_uint Source::getRenderDimension() const
-{
-	return dim;
 }
 
 } 

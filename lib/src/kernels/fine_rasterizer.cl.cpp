@@ -9,7 +9,12 @@ namespace detail
 extern const char* FINE_RASTER_KERNEL_NAME = "fine_rasterize";
 
 FineRasterizerKernel::FineRasterizerKernel(const Module& module, cl_status* err)
-	: TypesafeKernel<Buffer, Buffer, ScreenDimension, BinQueueConfig, nr_uint, Buffer, Buffer>(module, FINE_RASTER_KERNEL_NAME, err)
+	: TypesafeKernel(module, FINE_RASTER_KERNEL_NAME, err)
+{
+}
+
+FineRasterizerKernel::FineRasterizerKernel()
+	: TypesafeKernel()
 {
 }
 

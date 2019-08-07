@@ -34,14 +34,7 @@ public:
 
 	VertexReduceKernel vertexReduce(cl_status* status = nullptr) const;
 
-	Context getRenderContext() const;
-
 	operator cl_program() const;
-
-	nr_uint getRenderDimension() const;
-
-private:
-	nr_uint dim;
 };
 
 }

@@ -19,6 +19,8 @@ class FineRasterizerKernel : public TypesafeKernel<Buffer, Buffer, ScreenDimensi
 {
 public:
 	FineRasterizerKernel(const Module& module, cl_status* err = nullptr);
+
+	FineRasterizerKernel();
 };
 
 namespace clcode

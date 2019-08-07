@@ -18,6 +18,8 @@ class BinRasterizerKernel : public TypesafeKernel<Buffer, nr_uint, ScreenDimensi
 {
 public:
 	BinRasterizerKernel(const Module& module, cl_status* err = nullptr);
+
+	BinRasterizerKernel();
 };
 
 namespace clcode

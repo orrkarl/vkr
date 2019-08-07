@@ -13,6 +13,37 @@ SimplexReduceKernel::SimplexReduceKernel(const Module& module, cl_status* err)
 {
 }
 
+SimplexReduceKernel::SimplexReduceKernel()
+	: TypesafeKernel()
+{
+}
+
+cl_status SimplexReduceKernel::consume(const CommandQueue& q)
+{
+	return q.enqueueKernelCommand<1>(*this, m_range);
+}
+
+cl_status SimplexReduceKernel::setSimplexInputBuffer(const Buffer& in)
+{
+	return setArg<INPUT_BUFFER>(in);
+}
+
+cl_status SimplexReduceKernel::setTriangleOutputBuffer(const Buffer& out)
+{
+	return setArg<OUTPUT_BUFFER>(out);
+}
+
+void SimplexReduceKernel::setExecutionRange(const nr_uint primitiveCount)
+{
+	m_range.global.x = primitiveCount;
+	m_range.local.x = 1;
+}
+
+NDExecutionRange<1> SimplexReduceKernel::getExecutionRange() const
+{
+	return m_range;
+}
+
 namespace clcode
 {
 

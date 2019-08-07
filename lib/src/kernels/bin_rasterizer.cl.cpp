@@ -9,7 +9,12 @@ namespace detail
 extern const char* BIN_RASTER_KERNEL_NAME = "bin_rasterize";
 
 BinRasterizerKernel::BinRasterizerKernel(const Module& module, cl_status* err)
-	: TypesafeKernel<Buffer, nr_uint, ScreenDimension, BinQueueConfig, Buffer, Buffer, Buffer>(module, BIN_RASTER_KERNEL_NAME, err)
+	: TypesafeKernel(module, BIN_RASTER_KERNEL_NAME, err)
+{
+}
+
+BinRasterizerKernel::BinRasterizerKernel()
+	: TypesafeKernel()
 {
 }
 
