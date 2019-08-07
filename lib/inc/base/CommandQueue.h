@@ -14,6 +14,7 @@
 
 #include "Buffer.h"
 #include "Context.h"
+#include "Dispatch.h"
 #include "Event.h"
 #include "Kernel.h"
 #include "Wrapper.h"
@@ -23,18 +24,6 @@
 
 namespace nr
 {
-
-class CommandQueue;
-
-template <typename Consumer>
-class Dispatch
-{
-public:
-	cl_status operator()(nr::CommandQueue* q)
-	{
-		return static_cast<Consumer*>(this)->consume(q);
-	}
-};
 
 template <nr_uint dim>
 struct NDRange {};
@@ -245,13 +234,13 @@ public:
      * @param[out]  notify  event which will be notified when this command changes status; will be ignored if nullptr
      * @return      internal OpenCL error status
      */
-    template<nr_uint dim>
+    template<nr_uint dim, typename KernelLike>
     typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
-        const Kernel& kernel, 
+        const KernelLike& kernel, 
         const NDRange<dim>& global, const NDRange<dim>& local,
         const NDRange<dim>& offset, const std::vector<Event>& wait, Event* notify = nullptr) const
     {
-        return clEnqueueNDRangeKernel(object, kernel, dim, offset.data, global.data, local.data, wait.size(), wait.data(), (cl_event*) notify);
+        return clEnqueueNDRangeKernel(object, static_cast<cl_kernel>(kernel), dim, offset.data, global.data, local.data, wait.size(), wait.data(), (cl_event*) notify);
     }
 
     /**
@@ -265,13 +254,13 @@ public:
      * @param[out]  notify  event which will be notified when this command changes status; will be ignored if nullptr
      * @return      internal OpenCL error status
      */
-    template<nr_uint dim>
+    template<nr_uint dim, typename KernelLike>
     typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
-        const Kernel& kernel, 
+        const KernelLike& kernel, 
         const NDRange<dim>& global, const NDRange<dim>& local,
         const NDRange<dim>& offset = NDRange<dim>{}, Event* notify = nullptr) const
     {
-        return clEnqueueNDRangeKernel(object, kernel, dim, offset.data, global.data, local.data, 0, nullptr, (cl_event*) notify);
+        return clEnqueueNDRangeKernel(object, static_cast<cl_kernel>(kernel), dim, offset.data, global.data, local.data, 0, nullptr, (cl_event*) notify);
     }
 
 	/**
@@ -285,13 +274,13 @@ public:
 	 * @param[out]  notify  event which will be notified when this command changes status; will be ignored if nullptr
 	 * @return      internal OpenCL error status
 	 */
-	template<nr_uint dim>
+	template<nr_uint dim, typename KernelLike>
 	typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
-		const Kernel & kernel,
+		const KernelLike& kernel,
 		const NDExecutionRange<dim>& range,
 		const NDRange<dim> & offset, const std::vector<Event> & wait, Event * notify = nullptr) const
 	{
-		return clEnqueueNDRangeKernel(object, kernel, dim, offset.data, range.global.data, range.local.data, wait.size(), wait.data(), (cl_event*)notify);
+		return clEnqueueNDRangeKernel(object, static_cast<cl_kernel>(kernel), dim, offset.data, range.global.data, range.local.data, wait.size(), wait.data(), (cl_event*)notify);
 	}
 
 	/**
@@ -304,13 +293,13 @@ public:
 	 * @param[out]  notify  event which will be notified when this command changes status; will be ignored if nullptr
 	 * @return      internal OpenCL error status
 	 */
-	template<nr_uint dim>
+	template<nr_uint dim, typename KernelLike>
 	typename std::enable_if<1 <= dim && dim <= 3, cl_status>::type enqueueKernelCommand(
-		const Kernel & kernel,
+		const KernelLike& kernel,
 		const NDExecutionRange<dim>& range,
 		const NDRange<dim> & offset = NDRange<dim>{}, Event * notify = nullptr) const
 	{
-		return clEnqueueNDRangeKernel(object, kernel, dim, offset.data, range.global.data, range.local.data, 0, nullptr, (cl_event*)notify);
+		return clEnqueueNDRangeKernel(object, static_cast<cl_kernel>(kernel), dim, offset.data, range.global.data, range.local.data, 0, nullptr, (cl_event*)notify);
 	}
 
 	/**

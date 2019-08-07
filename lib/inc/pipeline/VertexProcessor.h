@@ -50,14 +50,10 @@ public:
 	cl_status consume(const CommandQueue& q);
 
 private:
-	cl_status setup();
-	cl_status setupSimplexReduce();
-	cl_status setupVertexReduce();
-
-	Kernel m_simplexReduce;
+	SimplexReduceKernel m_simplexReduce;
 	NDExecutionRange<1> m_simplexReduceRange{ 0, 0 };
 
-	Kernel m_vertexReduce;
+	VertexReduceKernel  m_vertexReduce;
 	NDExecutionRange<1> m_vertexReduceRange{ 0, 0 };
 
 	nr_uint m_currentRenderDimension = 0;

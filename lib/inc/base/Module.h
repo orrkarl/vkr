@@ -133,6 +133,8 @@ public:
 
 	Kernel createKernel(const string& name, cl_status* err = nullptr) const;
 
+	Kernel createKernel(const char* name, cl_status* err = nullptr) const;
+
 	string getBuildLog(Device device, cl_status* err = nullptr) const;
 
 	Context getContext(cl_status* err = nullptr) const;

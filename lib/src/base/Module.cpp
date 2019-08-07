@@ -117,7 +117,12 @@ cl_status Module::build(const Devices& devices, const Options& options)
 
 Kernel Module::createKernel(const string& name, cl_status* err) const
 {
-    return Kernel(clCreateKernel(object, name.c_str(), err));
+    return createKernel(name.c_str(), err);
+}
+
+Kernel Module::createKernel(const char* name, cl_status* err) const
+{
+	return Kernel(clCreateKernel(object, name, err));
 }
 
 string Module::finalizeOptions(const Options& options)

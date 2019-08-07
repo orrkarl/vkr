@@ -7,6 +7,12 @@
 #include "../base/Kernel.h"
 #include "../base/Module.h"
 
+#include "../kernels/base.cl.h"
+#include "../kernels/bin_rasterizer.cl.h"
+#include "../kernels/fine_rasterizer.cl.h"
+#include "../kernels/simplex_reducing.cl.h"
+#include "../kernels/vertex_shading.cl.h"
+
 namespace nr
 {
 
@@ -20,13 +26,13 @@ public:
 
 	cl_status build(const Device& dev, const nr_uint renderDimension, const nr_bool debug = true);
 
-	Kernel binRasterizer(cl_status* status = nullptr) const;
+	BinRasterizerKernel binRasterizer(cl_status* status = nullptr) const;
 
-	Kernel fineRasterizer(cl_status* status = nullptr) const;
+	FineRasterizerKernel fineRasterizer(cl_status* status = nullptr) const;
 
-	Kernel simplexReduce(cl_status* status = nullptr) const;
+	SimplexReduceKernel simplexReduce(cl_status* status = nullptr) const;
 
-	Kernel vertexReduce(cl_status* status = nullptr) const;
+	VertexReduceKernel vertexReduce(cl_status* status = nullptr) const;
 
 	Context getRenderContext() const;
 

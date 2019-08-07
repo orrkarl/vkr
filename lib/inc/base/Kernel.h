@@ -13,6 +13,8 @@
 #include "../general/predefs.h"
 
 #include <array>
+#include <tuple>
+#include <utility>
 
 #include "Wrapper.h"
 
@@ -32,7 +34,9 @@ public:
 
     explicit Kernel(const cl_kernel& kernel, const nr_bool retain = false);
 
-    Kernel(Module module, const string name, cl_status* err = nullptr);
+    Kernel(const Module& module, const string& name, cl_status* err = nullptr);
+
+	Kernel(const Module& module, const char* name, cl_status* err = nullptr);
 
     Kernel(const Kernel& other);
 
@@ -43,6 +47,8 @@ public:
     Kernel& operator=(Kernel&& other);
 
     operator cl_kernel() const;
+
+	cl_kernel get() const;
 
     /**
      * @brief sets one of the internal kernels arguments
@@ -87,6 +93,30 @@ public:
     {
         return clSetKernelArg(object, index, size, value);
     }
+};
+
+template <typename... Args>
+class TypesafeKernel : private Kernel
+{
+private:
+	template <nr_uint Index>
+	using Type = typename std::tuple_element<Index, std::tuple<Args...>>::type;
+
+public:
+	TypesafeKernel(const Module& module, const char* name, cl_status* err = nullptr)
+		: Kernel(module, name, err)
+	{
+	}
+
+	template <nr_uint Index>
+	cl_status setArg(const Type<Index>& arg)
+	{
+		return Kernel::setArg(Index, arg);
+	}
+
+	operator cl_kernel() const { return get(); }
+
+	cl_kernel get() const { return Kernel::get(); }
 };
 
 }

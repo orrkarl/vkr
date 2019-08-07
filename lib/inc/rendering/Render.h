@@ -117,6 +117,18 @@ enum class NRPrimitive : nr_uint
 	SIMPLEX
 };
 
+namespace detail
+{
+
+struct BinQueueConfig
+{
+	nr_uint binWidth;
+	nr_uint binHeight;
+	nr_uint queueSize;
+};
+
+}
+
 #pragma pack(pop)
 
 }

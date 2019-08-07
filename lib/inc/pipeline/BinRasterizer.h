@@ -15,13 +15,6 @@ namespace nr
 namespace detail
 {
 
-struct BinQueueConfig
-{
-    nr_uint binWidth;
-    nr_uint binHeight;
-    nr_uint queueSize;
-};
-
 struct NRAPI BinRasterizer : Kernel
 {
     static nr_uint getTotalBinQueueCount(const nr_uint workGroupCount, const ScreenDimension& dim, const BinQueueConfig config);

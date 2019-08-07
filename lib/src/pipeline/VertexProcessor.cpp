@@ -20,8 +20,12 @@ cl_status VertexProcessor::setRenderDimension(const Source& source)
 
 	auto ctx = source.getRenderContext();
 
-	parameters.far = Buffer::make<nr_float>(ctx, CL_MEM_READ_WRITE, m_currentRenderDimension);
-	parameters.near = Buffer::make<nr_float>(ctx, CL_MEM_READ_WRITE, m_currentRenderDimension);
+	parameters.far = Buffer::make<nr_float>(ctx, CL_MEM_READ_WRITE, m_currentRenderDimension, pret);
+	if (nr::error::isFailure(ret)) return ret;
+	parameters.near = Buffer::make<nr_float>(ctx, CL_MEM_READ_WRITE, m_currentRenderDimension, pret);
+	if (nr::error::isFailure(ret)) return ret;
+
+	m_vertexReduce.setArg<1>(parameters.near);
 
 	return CL_SUCCESS;
 }
@@ -40,9 +44,6 @@ cl_status VertexProcessor::consume(const CommandQueue& q)
 {	
 	cl_status ret;
 
-	ret = setup();
-	if (nr::error::isFailure(ret)) return ret;
-
 	ret = q.enqueueKernelCommand<1>(m_vertexReduce, m_vertexReduceRange);
 	if (nr::error::isFailure(ret)) return ret;
 
@@ -50,28 +51,6 @@ cl_status VertexProcessor::consume(const CommandQueue& q)
 	if (nr::error::isFailure(ret)) return ret;
 
 	return ret;
-}
-
-cl_status VertexProcessor::setup()
-{
-	cl_status err;
-	if (nr::error::isFailure(err = setupVertexReduce())) return err;
-	return setupSimplexReduce();
-}
-
-cl_status VertexProcessor::setupSimplexReduce()
-{
-	cl_status ret = CL_SUCCESS;
-
-	ret = m_simplexReduce.setArg(0, inputs.simplexes);
-	if (nr::error::isFailure(ret)) return ret;
-
-	return m_simplexReduce.setArg(1, outputs.result);
-}
-
-cl_status VertexProcessor::setupVertexReduce()
-{
-	return cl_status();
 }
 
 }

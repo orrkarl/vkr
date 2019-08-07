@@ -96,7 +96,7 @@ TEST(SimplexReducer, reducing)
 		Module::DEBUG
 	};
 
-	Module code(defaultContext, { clcode::base, clcode::simplex_reducing }, &err);
+	Module code(defaultContext, Module::Sources{ clcode::base, clcode::simplex_reducing }, &err);
 	ASSERT_SUCCESS(err);
 
 	ASSERT_SUCCESS(code.build(defaultDevice, options));

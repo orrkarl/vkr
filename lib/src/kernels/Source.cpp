@@ -1,11 +1,5 @@
 #include <kernels/Source.h>
 
-#include <kernels/base.cl.h>
-#include <kernels/bin_rasterizer.cl.h>
-#include <kernels/fine_rasterizer.cl.h>
-#include <kernels/simplex_reducing.cl.h>
-#include <kernels/vertex_shading.cl.h>
-
 namespace nr 
 { 
 
@@ -29,24 +23,24 @@ cl_status Source::build(const Device& dev, const nr_uint renderDimension, const 
 	return Module::build(dev, opts);
 }
 
-Kernel Source::binRasterizer(cl_status* status) const
+BinRasterizerKernel Source::binRasterizer(cl_status* status) const
 {
-	return Module::createKernel(clcode::BIN_RASTER_KERNEL_NAME, status);
+	return BinRasterizerKernel(*this, status);
 }
 
-Kernel Source::fineRasterizer(cl_status* status) const
+FineRasterizerKernel Source::fineRasterizer(cl_status* status) const
 {
-	return Module::createKernel(clcode::FINE_RASTER_KERNEL_NAME, status);
+	return FineRasterizerKernel(*this, status);
 }
 
-Kernel Source::simplexReduce(cl_status* status) const
+SimplexReduceKernel Source::simplexReduce(cl_status* status) const
 {
-	return Module::createKernel(clcode::SIMPLEX_REDUCE_KERNEL_NAME, status);
+	return SimplexReduceKernel(*this, status);
 }
 
-Kernel Source::vertexReduce(cl_status* status) const
+VertexReduceKernel Source::vertexReduce(cl_status* status) const
 {
-	return Module::createKernel(clcode::VERTEX_SHADE_KERNEL_NAME, status);
+	return VertexReduceKernel(*this, status);
 }
 
 Context Source::getRenderContext() const

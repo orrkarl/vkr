@@ -43,7 +43,7 @@ TEST(VertexShader, Perspective)
         Module::DEBUG
     };
 
-    Module code(defaultContext, {clcode::base, clcode::vertex_shading}, &err);
+    Module code(defaultContext, Module::Sources{clcode::base, clcode::vertex_shading}, &err);
     ASSERT_SUCCESS(err);
 
     ASSERT_SUCCESS(code.build(defaultDevice, options));

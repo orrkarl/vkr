@@ -15,8 +15,14 @@ Kernel::Kernel(const cl_kernel& kernel, const nr_bool retain)
 {
 }
 
-Kernel::Kernel(Module module, const string name, cl_status* err)
-    : Kernel(clCreateKernel(module, name.c_str(), err))
+Kernel::Kernel(const Module& module, const char* name, cl_status* err)
+	: Kernel(clCreateKernel(module, name, err))
+{
+}
+
+
+Kernel::Kernel(const Module& module, const string& name, cl_status* err)
+    : Kernel(module, name.c_str(), err)
 {
 }
 
@@ -47,5 +53,10 @@ Kernel::operator cl_kernel() const
 {
     return object;
 } 
+
+cl_kernel Kernel::get() const
+{
+	return object;
+}
 
 }
