@@ -85,12 +85,12 @@ TEST(Fine, ShadeTest)
 
     Fragment firstFrag;
     firstFrag.position = { screenDim.width / 5, screenDim.height / 2 };
-    firstFrag.color = { 255, 0, 0 };
+    firstFrag.color = { 255, 0, 0, 0 };
     firstFrag.depth = 1 / 0.5;
 
     Fragment secondFrag;
     secondFrag.position = firstFrag.position;
-    secondFrag.color = { 255, 0, 0 };
+    secondFrag.color = { 255, 0, 0, 0 };
     secondFrag.depth = firstFrag.depth / 1.1f;
 
     FrameBuffer frame;
@@ -117,8 +117,8 @@ TEST(Fine, ShadeTest)
 
     ASSERT_SUCCESS(testee.setFragment(firstFrag));
     ASSERT_SUCCESS(q.enqueueDispatchCommand(testee));
-    ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.color, false, 1, h_color));
-    ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.depth, false, 1, h_depth));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.color, false, 1, &h_color));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.depth, false, 1, &h_depth));
     ASSERT_SUCCESS(q.await());
 
     EXPECT_EQ(firstFrag.color, h_color[firstFrag.position.y][firstFrag.position.x]);
@@ -126,8 +126,8 @@ TEST(Fine, ShadeTest)
 
 	ASSERT_SUCCESS(testee.setFragment(secondFrag));
 	ASSERT_SUCCESS(q.enqueueDispatchCommand(testee));
-    ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.color, false, 1, h_color));
-    ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.depth, false, 1, h_depth));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.color, false, 1, &h_color));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.depth, false, 1, &h_depth));
     ASSERT_SUCCESS(q.await());
 
 	EXPECT_EQ(firstFrag.color, h_color[secondFrag.position.y][secondFrag.position.x]);

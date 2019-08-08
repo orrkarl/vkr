@@ -94,6 +94,19 @@ testing::AssertionResult validateBuffer(const nr::string& name, const nr_uint co
 	return ret;
 }
 
+template <typename T, nr_uint Width, nr_uint Height>
+void printBuffer(const T buffer[Height][Width])
+{
+	for (nr_int y = Height - 1; y >= 0; --y)
+	{
+		for (auto x = 0u; x < Width; ++x)
+		{
+			std::cout << buffer[y][x] << " ";
+		}
+		std::cout << "\n";
+	}
+}
+
 
 struct ScreenPosition
 {
