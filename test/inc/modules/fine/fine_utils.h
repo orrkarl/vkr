@@ -135,29 +135,24 @@ nr_float slope(const NDCPosition& p0, const NDCPosition& p1)
 	return (p1.y - p0.y) / (p1.x - p0.x);
 }
 
-template <nr_uint dim>
+template<nr_uint dim, nr_uint BinCountX, nr_uint BinCountY, nr_uint QueueSize, nr_uint Width, nr_uint Height>
 void tesselateBin(
 	const ScreenDimension& screenDim,
 	const Bin bin,
-	const nr_uint queueSize,
 	const nr_uint workGroup,
 	const nr_float expectedDepth,
 	const bool halfBin,
 	const nr_uint index,
 	Triangle<dim>* triangles,
-	nr_uint* binQueues,
-	nr::RawColorRGBA* expectedColorBuffer,
-	nr_float* expectedDepthBuffer)
+	BinQueues<BinCountX, BinCountY, QueueSize>* binQueues,
+	ColorBuffer<Width, Height> expectedColorBuffer,
+	DepthBuffer<Width, Height> expectedDepthBuffer)
 {
-	const nr_uint binCountY = nr_uint(ceil(nr_float(screenDim.height) / bin.height));
-	const nr_uint binCountX = nr_uint(ceil(nr_float(screenDim.width) / bin.width));
 	const nr_uint indexX = bin.x / bin.width;
 	const nr_uint indexY = bin.y / bin.height;
-	const nr_uint totalBinCount = binCountX * binCountY;
-	const nr_uint binOffset = binCountX * indexY + indexX;
 
 	Triangle<dim>* currentTriangle = triangles + index;
-	nr_uint* currentQueue = binQueues + (totalBinCount * workGroup + binOffset) * (queueSize + 1);
+	BinQueue<QueueSize> currentQueue = binQueues[workGroup][indexY][indexX];
 
 	const auto rightEdge = std::min(bin.x + bin.width, screenDim.width);
 	const auto topEdge = std::min(bin.y + bin.height, screenDim.height);
@@ -176,9 +171,9 @@ void tesselateBin(
 	{
 		mkTriangleInExactCoordinates(ndcBottomLeft, ndcTopLeft, ndcTopRight, expectedDepth, currentTriangle);
 
-		currentQueue[0] = 0;
-		currentQueue[1] = index;
-		currentQueue[2] = 0;
+		currentQueue.isEmpty = 0;
+		currentQueue[0] = index;
+		currentQueue[1] = 0;
 
 		const nr_float binSlope = slope(ndcFromPixelMid(screenTopRight, screenDim), ndcBottomLeft);
 
@@ -190,47 +185,44 @@ void tesselateBin(
 				auto tmpSlope = slope(midpoint, ndcBottomLeft);
 				if (tmpSlope > binSlope)
 				{
-					auto idx = y * screenDim.width + x;
-					expectedColorBuffer[idx] = RED;
-					expectedDepthBuffer[idx] = 1 / expectedDepth;
+					expectedColorBuffer[y][x] = RED;
+					expectedDepthBuffer[y][x] = 1 / expectedDepth;
 				}
 			}
 		}
-
 	}
 	else
 	{
 		mkTriangleInExactCoordinates(ndcBottomLeft, ndcTopLeft, ndcTopRight, expectedDepth, currentTriangle);
 		mkTriangleInExactCoordinates(ndcTopRight, ndcBottomRight, ndcBottomLeft, expectedDepth, currentTriangle + 1);
 
-		currentQueue[0] = 0;
-		currentQueue[1] = index;
-		currentQueue[2] = index + 1;
-		currentQueue[3] = 0;
+		currentQueue.isEmpty = 0;
+		currentQueue[0] = index;
+		currentQueue[1] = index + 1;
+		currentQueue[2] = 0;
 
 		for (auto y = bin.y; y < topEdge; ++y)
 		{
 			for (auto x = bin.x; x < rightEdge; ++x)
 			{
-				auto idx = y * screenDim.width + x;
-				expectedColorBuffer[idx] = RED;
-				expectedDepthBuffer[idx] = 1 / expectedDepth;
+				expectedColorBuffer[y][x] = RED;
+				expectedDepthBuffer[y][x] = 1 / expectedDepth;
 			}
 		}
 	}
 }
 
-template<nr_uint dim>
+template<nr_uint dim, nr_uint BinCountX, nr_uint BinCountY, nr_uint QueueSize, nr_uint Width, nr_uint Height>
 void tesselateScreen(
 	const ScreenDimension& screenDim,
-	const BinQueueConfig config,
+	const BinQueueConfig& config,
 	const nr_uint totalWorkGroupCount,
 	const nr_float expectedDepth,
 	const nr_uint triangleCount,
 	Triangle<dim>* triangles,
-	nr_uint* binQueues,
-	nr::RawColorRGBA* expectedColorBuffer,
-	nr_float* expectedDepthBuffer)
+	BinQueues<BinCountX, BinCountY, QueueSize>* binQueues,
+	ColorBuffer<Width, Height> expectedColorBuffer,
+	DepthBuffer<Width, Height> expectedDepthBuffer)
 {
 	assert(triangleCount != 0);
 	assert(triangles != nullptr);
@@ -238,21 +230,26 @@ void tesselateScreen(
 	assert(expectedColorBuffer != nullptr);
 	assert(expectedDepthBuffer != nullptr);
 
-	const nr_uint totalBinCount = nr_uint(ceil(nr_float(screenDim.width) / config.binWidth)) * nr_uint(ceil(nr_float(screenDim.height) / config.binHeight));
+	const nr_uint totalBinCount = BinCountX * BinCountY;
 	assert(triangleCount < 2 * totalBinCount);
 
-	for (auto i = 0u; i < totalBinCount * totalWorkGroupCount; ++i)
+	for (nr_uint g = 0; g < totalWorkGroupCount; g++)
 	{
-		binQueues[i * (config.queueSize + 1)] = 1;
+		for (nr_uint y = 0; y < BinCountY; ++y)
+		{
+			for (nr_uint x = 0; x < BinCountX; ++x)
+			{
+				binQueues[g][y][x].isEmpty = 1;
+			}
+		}
 	}
-
 
 	auto currentWorkGroup = 0u;
 	Bin currentBin{ config.binWidth, config.binHeight, 0, 0 };
 	
 	for (auto currentTriangle = 0; currentTriangle < triangleCount; currentTriangle += 2)
 	{
-		tesselateBin(screenDim, currentBin, config.queueSize, currentWorkGroup, expectedDepth, (triangleCount - currentTriangle) == 1, currentTriangle, triangles, binQueues, expectedColorBuffer, expectedDepthBuffer);
+		tesselateBin<dim, BinCountX, BinCountY, QueueSize, Width, Height>(screenDim, currentBin, currentWorkGroup, expectedDepth, (triangleCount - currentTriangle) == 1, currentTriangle, triangles, binQueues, expectedColorBuffer, expectedDepthBuffer);
 
 		if (currentBin.x + currentBin.width < screenDim.width)
 		{

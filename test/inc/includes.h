@@ -24,24 +24,23 @@ extern nr::Context defaultContext;
 extern nr::Device defaultDevice;
 extern nr::CommandQueue defaultCommandQueue;
 
-template <typename T>
-testing::AssertionResult validateBuffer(const nr::string& name, const nr_uint countX, const nr_uint countY, const T* expected, const T* actual, const nr_uint maxDiffs = 10)
+template <typename T, nr_uint Width, nr_uint Height>
+testing::AssertionResult validateBuffer(const nr::string& name, const T expected[Height][Width], const T actual[Height][Width], const nr_uint maxDiffs = 10)
 {
 	std::vector<std::pair<nr_uint, nr_uint>> diffIndices;
 
 	bool diffOverflow = false;
 	nr_ulong totalDiffs = 0;
 
-	for (auto i = 0u; i < countY; ++i)
+	for (auto y = 0u; y < Height; ++y)
 	{
-		for (auto j = 0u; j < countX; ++j)
+		for (auto x = 0u; x < Width; ++x)
 		{
-			auto idx = i * countX + j;
-			if (expected[idx] != actual[idx])
+			if (expected[y][x] != actual[y][x])
 			{
 				if (diffIndices.size() < maxDiffs)
 				{
-					diffIndices.push_back({ i, j });
+					diffIndices.push_back({ x, y });
 				}
 				else
 				{
@@ -62,34 +61,32 @@ testing::AssertionResult validateBuffer(const nr::string& name, const nr_uint co
 	{
 		nr_uint x = diffIndices[i].first;
 		nr_uint y = diffIndices[i].second;
-		nr_uint idx = y * countX + x;
-		ret << "\n\tAt (" << x << ", " << y << "): " << "expected - " << expected[idx] << ", actual - " << actual[idx];
+		ret << "\n\tAt (" << x << ", " << y << "): " << "expected - " << expected[y][x] << ", actual - " << actual[y][x];
 	}
 	if (diffOverflow)
 	{
 		ret << "\n\t... [ " << totalDiffs << " total differences ] ";
 	}
 
-	std::ofstream expectedLog;
-	expectedLog.open(name + "-expected.log");
-
-	std::ofstream actualLog;
-	actualLog.open(name + "-actual.log");
-
-	for (nr_int y = countY - 1; y >= 0; --y)
-	{
-		for (auto x = 0u; x < countX; ++x)
-		{
-			auto idx = y * countX + x;
-			expectedLog << expected[idx] << " ";
-			actualLog << actual[idx] << " ";
-		}
-		expectedLog << '\n';
-		actualLog << '\n';
-	}
-
-	expectedLog.close();
-	actualLog.close();
+	//std::ofstream expectedLog;
+	//expectedLog.open(name + "-expected.log");
+	//
+	//std::ofstream actualLog;
+	//actualLog.open(name + "-actual.log");
+	//
+	//for (nr_int y = Height - 1; y >= 0; --y)
+	//{
+	//	for (auto x = 0u; x < Width; ++x)
+	//	{
+	//		expectedLog << expected[y][x]<< " ";
+	//		actualLog << actual[y][x] << " ";
+	//	}
+	//	expectedLog << '\n';
+	//	actualLog << '\n';
+	//}
+	//
+	//expectedLog.close();
+	//actualLog.close();
 
 	return ret;
 }
