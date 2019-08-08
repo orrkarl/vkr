@@ -2,10 +2,13 @@
 
 #include <inc/includes.h>
 
+#include <base/Buffer.h>
 #include <base/Module.h>
+
 #include <kernels/base.cl.h>
 #include <kernels/bin_rasterizer.cl.h>
-#include <base/Buffer.h>
+
+#include <utils/StandardDispatch.h>
 
 #include "bin_utils.h"
 
@@ -14,25 +17,49 @@ using namespace nr::detail;
 using namespace testing;
 
 
-class ReduceTriangleBuffer : public Kernel
+class ReduceTriangleBuffer : public StandardDispatch<1, Buffer, nr_uint, Buffer>
 {
 public:
-    ReduceTriangleBuffer(Module module, cl_status* err)
-        : Kernel(module, "reduce_triangle_buffer_test", err)
+    ReduceTriangleBuffer(const Module& module, cl_status* err)
+        : StandardDispatch(module, "reduce_triangle_buffer_test", err)
     {
     }
 
-    cl_status load()
-    {
-        cl_status err = CL_SUCCESS;
-        if ((err = setArg(0, triangles)) != CL_SUCCESS) return err;
-        if ((err = setArg(1, offset)) != CL_SUCCESS) return err;
-        return setArg(2, result);
-    }
+	cl_status setTrianglesInputBuffer(const Buffer& buffer)
+	{
+		return setArg<0>(buffer);
+	}
 
-    Buffer triangles;
-    nr_uint offset;
-    Buffer result;
+	cl_status setTriangleOffset(const nr_uint offset)
+	{
+		return setArg<1>(offset);
+	}
+
+	cl_status setResultBuffer(const Buffer& buffer)
+	{
+		return setArg<2>(buffer);
+	}
+
+	void setExecutionRange(const nr_uint groupSize)
+	{
+		range.global.x = groupSize;
+		range.local.x = groupSize;
+	}
+};
+
+struct ReducedTriangle
+{
+	NDCPosition p0, p1, p2;
+
+	bool operator==(const ReducedTriangle& other) const
+	{
+		return p0 == other.p0 && p1 == other.p1 && p2 == other.p2;
+	}
+
+	friend std::ostream& operator<<(std::ostream& os, const ReducedTriangle& tri)
+	{
+		return os << "ReducesTriangle{" << tri.p0 << ", " << tri.p1 << ", " << tri.p2 << "}";
+	}
 };
 
 template<nr_uint dim>
@@ -57,23 +84,28 @@ void generateTriangleData(const nr_uint triangleCount, Triangle<dim>* buffer)
 }
 
 template<nr_uint dim>
-void extractNDCPosition(const nr_uint triangleCount, const Triangle<dim>* buffer, nr_float* result)
+void extractNDCPosition(const nr_uint triangleCount, const Triangle<dim>* buffer, ReducedTriangle* result)
 {
-    for (nr_uint i = 0; i < triangleCount * 3; ++i)
+    for (nr_uint i = 0; i < triangleCount; ++i)
     {
-        result[2 * i] = ((const Vertex<dim>*) buffer)[i].values[0];
-        result[2 * i + 1] = ((const Vertex<dim>*) buffer)[i].values[1];
+		result[i].p0.x = buffer[i][0][0];
+		result[i].p0.y = buffer[i][0][1];
+		
+		result[i].p1.x = buffer[i][1][0];
+		result[i].p1.y = buffer[i][1][1];
+
+		result[i].p2.x = buffer[i][2][0];
+		result[i].p2.y = buffer[i][2][1];
     }
 }
 
 
 TEST(Binning, ReduceTriangleBuffer)
 {
-    const nr_uint dim = 5;
+    constexpr const nr_uint dim = 5;
     const nr_uint triangleCount = 3;
     const nr_uint offset = 2;
-	const nr_uint point_count = dim + 1;
-	const nr_uint floatsPerTriangle = sizeof(Triangle<dim>) / sizeof(nr_float);
+	const nr_uint workGroupSize = 30;
     
     cl_status err = CL_SUCCESS; 
 
@@ -84,36 +116,31 @@ TEST(Binning, ReduceTriangleBuffer)
 
     Triangle<dim> h_triangles_raw[triangleCount + offset];
     Triangle<dim>* h_triangles = h_triangles_raw + offset;
-    const nr_uint triangleFloatCount = triangleCount * floatsPerTriangle;
 
     generateTriangleData<dim>(triangleCount, h_triangles);
-
-    const nr_uint expectedFloatCount = triangleCount * 3 * 2;
-    nr_float h_expected[expectedFloatCount];
+	
+	ReducedTriangle h_expected[triangleCount];
     extractNDCPosition<dim>(triangleCount, h_triangles, h_expected);
 
-    std::vector<nr_float> h_actual(expectedFloatCount);
+    std::array<ReducedTriangle, triangleCount> h_actual;
 
-    auto d_triangle = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, floatsPerTriangle * (offset + triangleCount), (nr_float*) h_triangles_raw, &err);
+    auto d_triangle = Buffer::make<Triangle<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, offset + triangleCount, h_triangles_raw, &err);
     ASSERT_SUCCESS(err);
-    auto d_result = Buffer::make<nr_float>(defaultContext, CL_MEM_WRITE_ONLY, 2 * point_count * triangleCount, &err);
+    auto d_result = Buffer::make<ReducedTriangle>(defaultContext, CL_MEM_WRITE_ONLY, triangleCount, &err);
     ASSERT_SUCCESS(err);
     
     auto test = ReduceTriangleBuffer(code, &err);
     ASSERT_SUCCESS(err);
 
-    test.triangles = d_triangle;
-    test.offset    = offset;
-    test.result    = d_result;
-    
-    NDRange<1> local  = { 30 };
-    NDRange<1> global = { 1 };
+	test.setExecutionRange(workGroupSize);
 
-    ASSERT_SUCCESS(test.load());
-    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(test, global, local));
-    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, expectedFloatCount, h_actual.data()));
+	ASSERT_SUCCESS(test.setTrianglesInputBuffer(d_triangle));
+	ASSERT_SUCCESS(test.setTriangleOffset(offset));
+	ASSERT_SUCCESS(test.setResultBuffer(d_result));
+    ASSERT_SUCCESS(q.enqueueDispatchCommand(test));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, triangleCount, h_actual.data()));
     ASSERT_SUCCESS(q.await());
 
-    ASSERT_THAT(h_actual, ElementsAreArray(h_expected, expectedFloatCount));
+    ASSERT_THAT(h_actual, ElementsAreArray(h_expected, triangleCount));
 }
 
