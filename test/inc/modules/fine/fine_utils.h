@@ -8,6 +8,12 @@
 const RawColorRGBA RED = { 255, 0, 0 };
 const nr::Module::Macro TEST_FINE("_TEST_FINE");
 
+template <nr_uint Width, nr_uint Height>
+using ColorBuffer = nr::RawColorRGBA[Width][Height];
+
+template <nr_uint Width, nr_uint Height>
+using DepthBuffer = Depth[Width][Height];
+
 template<nr_uint dim>
 void mkTriangleInCoordinates(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, Triangle<dim>* triangle)
 {
@@ -55,7 +61,7 @@ void mkTriangleFullyInBin(const ScreenDimension& screenDim, const Bin& bin, cons
     mkTriangleInExactCoordinates<dim>(top_left, bottom_right, bottom_left, distance, triangle + index);
 }
 
-template<nr_uint dim>
+template<nr_uint dim, nr_uint BinCountX, nr_uint BinCountY, nr_uint QueueSize>
 void fillTriangles(
     const ScreenDimension& screenDim, 
     const BinQueueConfig config,
@@ -63,18 +69,30 @@ void fillTriangles(
     const nr_float expectedDepth,
     const nr_uint batchSize, 
     Triangle<dim>* triangles,
-    nr_uint* binQueues)
+    BinQueues<BinCountX, BinCountY, QueueSize>* binQueues)
 {
     const nr_uint binCountX = ceil(((nr_float) screenDim.width) / config.binWidth);
     const nr_uint binCountY = ceil(((nr_float) screenDim.height) / config.binHeight);
+
+	ASSERT_EQ(binCountX, BinCountX);
+	ASSERT_EQ(binCountY, BinCountY);
+	ASSERT_EQ(config.queueSize, QueueSize);
+	ASSERT_GE(QueueSize, 3);
+
     const nr_uint totalBinCount = binCountX * binCountY;
 
     const nr_uint elementsPerGroup = totalBinCount * (config.queueSize + 1);
 
-    for (nr_uint i = 0; i < elementsPerGroup * totalWorkGroupCount; i += config.queueSize + 1)
-    {
-        binQueues[i] = 1;
-    }
+	for (auto g = 0u; g < totalWorkGroupCount; ++g)
+	{
+		for (auto y = 0u; y < binCountY; ++y)
+		{
+			for (auto x = 0u; x < binCountX; ++x)
+			{
+				binQueues[0][x][y].isEmpty = 1;
+			}
+		}
+	}
 
     nr_uint i = 0;
     nr_uint g = 0;
@@ -93,17 +111,14 @@ void fillTriangles(
             mkTriangleFullyInBin(screenDim, bin, pow(expectedDepth, 0.5), i, triangles);
             mkTriangleFullyInBin(screenDim, bin, expectedDepth, i + 1, triangles);
             mkTriangleFullyInBin(screenDim, bin, pow(expectedDepth, 0.3), i + 2, triangles);
-            
-            binOffset = (y * binCountX + x) * (config.queueSize + 1);
-            currentQueueBase = g * elementsPerGroup + binOffset;
 
             if (g == i / batchSize)
             {
-                binQueues[currentQueueBase] = 0;
-                binQueues[currentQueueBase + 1] = i;
-                binQueues[currentQueueBase + 2] = i + 1;
-                binQueues[currentQueueBase + 3] = i + 2;
-                if (config.queueSize > 3) binQueues[currentQueueBase + 4] = 0;
+                binQueues[g][x][y].isEmpty = 0;
+                binQueues[g][x][y][0] = i;
+                binQueues[g][x][y][1] = i + 1;
+                binQueues[g][x][y][2] = i + 2;
+                if (config.queueSize > 3) binQueues[g][x][y][3] = 0;
             }
             else
             {
@@ -262,13 +277,14 @@ nr::Module mkFineModule(const nr_uint dim, cl_status* err)
     return ret;
 }
 
-testing::AssertionResult validateDepth(const nr_float* depthBuffer, const ScreenDimension& screenDim, const nr_float defaultDepth, const nr_float expectedDepth)
+template <nr_uint Width, nr_uint Height>
+testing::AssertionResult validateDepth(const DepthBuffer<Width, Height> depthBuffer, const nr_float defaultDepth, const nr_float expectedDepth)
 {
-	for (nr_uint y = 0; y < screenDim.height; ++y)
+	for (nr_uint y = 0; y < Height; ++y)
 	{
-		for (nr_uint x = 0; x < screenDim.width; ++x)
+		for (nr_uint x = 0; x < Width; ++x)
 		{
-			nr_float actualDepth = depthBuffer[y * screenDim.width + x];
+			nr_float actualDepth = depthBuffer[x][y];
 			nr_float expected = 1 / expectedDepth;
 			if (std::abs(actualDepth - defaultDepth) > 10e-5 && std::abs(actualDepth - expected) > 10e-5)
 			{
