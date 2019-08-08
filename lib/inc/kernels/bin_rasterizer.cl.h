@@ -82,8 +82,6 @@ public:
 		range.local.y = binCountY;
 	}
 
-	using TypesafeKernel::operator cl_kernel;
-
 private:
 	static constexpr const nr_uint TRIANGLE_BUFFER = 0;
 	static constexpr const nr_uint TRIANGLE_COUNT = 1;

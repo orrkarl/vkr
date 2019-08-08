@@ -10,41 +10,53 @@
 
 #include <rendering/Render.h>
 
+#include <utils/StandardDispatch.h>
+
 #include "fine_utils.h"
 
 using namespace nr;
 using namespace nr::detail;
 using namespace testing;
 
-struct PointInTriangle : Kernel
+struct PointInTriangle : StandardDispatch<1, Buffer, ScreenPosition, ScreenDimension, Buffer>
 {    
-    PointInTriangle(Module code, cl_status* err)
-        : Kernel(code, "is_point_in_triangle_test", err)
+    PointInTriangle(const Module& code, cl_status* err)
+        : StandardDispatch(code, "is_point_in_triangle_test", err)
     {
     }
 
-    cl_status load()
-    {
-        cl_status err = CL_SUCCESS;
-        nr_uint argc = 0;
+	cl_status setTriangleInputBuffer(const Buffer& buffer)
+	{
+		return setArg<0>(buffer);
+	}
 
-        if ((err = setArg(argc++, triangle)) != CL_SUCCESS) return err;
-        if ((err = setArg(argc++, position)) != CL_SUCCESS) return err;
-        if ((err = setArg(argc++, screenDim)) != CL_SUCCESS) return err;
-        return setArg(argc, result);
-    }
+	cl_status setPosition(const ScreenPosition& pos)
+	{
+		return setArg<1>(pos);
+	}
 
-    Buffer triangle;
-    ScreenPosition position;
-    ScreenDimension screenDim;
-    Buffer result; 
+	cl_status setDimension(const ScreenDimension& dim)
+	{
+		return setArg<2>(dim);
+	}
+
+	cl_status setResultBuffer(const Buffer& res)
+	{
+		return setArg<3>(res);
+	}
+
+	void setExecutionRange(const nr_uint s)
+	{
+		range.global.x = s;
+		range.local.x = s;
+	}
 };
 
 TEST(Fine, PointInTriangle)
 {
     cl_status err = CL_SUCCESS;
 
-    const nr_uint dim = 6;
+    constexpr const nr_uint dim = 6;
 
     Triangle<dim> triangle;
     const NDCPosition left_bottom  = { -0.5, -0.5 };
@@ -52,7 +64,7 @@ TEST(Fine, PointInTriangle)
     const NDCPosition top          = { 0, 0.5 };
     mkTriangleInCoordinates(left_bottom, top, right_bottom, &triangle);
 
-    const ScreenDimension screenDim  = { 1920, 1080 };
+    constexpr const ScreenDimension screenDim  = { 1920, 1080 };
     const ScreenPosition origin      = { (nr_uint) (0.5 * 1920), (nr_uint) (0.5 * 1080) };
     const ScreenPosition belowBottom = { (nr_uint) (0.5 * 1920), (nr_uint) (0.1 * 1080) };
     const ScreenPosition justInside  = { (nr_uint) (0.65 * 1920), (nr_uint) (0.4 * 1080) };
@@ -67,37 +79,33 @@ TEST(Fine, PointInTriangle)
     auto testee = PointInTriangle(code, &err);
     ASSERT_SUCCESS(err);
 
-    auto d_triangle = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(triangle) / sizeof(nr_float), (nr_float*) &triangle, &err);
+    auto d_triangle = Buffer::make<Triangle<dim>>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, &triangle, &err);
     ASSERT_SUCCESS(err);
 
     auto d_result = Buffer::make<nr_bool>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, &h_result, &err);
     ASSERT_SUCCESS(err);
 
-    testee.triangle = d_triangle;
-    testee.screenDim = screenDim;
-    testee.result = d_result;
+	testee.setExecutionRange(1);
 
-    NDRange<1> global = {1};
-    NDRange<1> local  = {1};
+	ASSERT_SUCCESS(testee.setTriangleInputBuffer(d_triangle));
+	ASSERT_SUCCESS(testee.setDimension(screenDim));
+	ASSERT_SUCCESS(testee.setResultBuffer(d_result));
 
-    testee.position = origin;
-    ASSERT_SUCCESS(testee.load());
-    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(testee, global, local));
+    ASSERT_SUCCESS(testee.setPosition(origin));
+    ASSERT_SUCCESS(q.enqueueDispatchCommand(testee));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, 1, &h_result));
     ASSERT_SUCCESS(q.await());
-    ASSERT_EQ(true, h_result);
+    EXPECT_TRUE(h_result);
 
-    testee.position = belowBottom;
-    ASSERT_SUCCESS(testee.load());
-    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(testee, global, local));
+	ASSERT_SUCCESS(testee.setPosition(belowBottom));
+	ASSERT_SUCCESS(q.enqueueDispatchCommand(testee));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, 1, &h_result));
     ASSERT_SUCCESS(q.await());
-    ASSERT_EQ(false, h_result);
+    EXPECT_FALSE(h_result);
 
-    testee.position = justInside;
-    ASSERT_SUCCESS(testee.load());
-    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(testee, global, local));
+	ASSERT_SUCCESS(testee.setPosition(justInside));
+	ASSERT_SUCCESS(q.enqueueDispatchCommand(testee));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, 1, &h_result));
     ASSERT_SUCCESS(q.await());
-    ASSERT_EQ(true, h_result);
+	EXPECT_TRUE(h_result);
 }

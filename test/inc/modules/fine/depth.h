@@ -55,7 +55,7 @@ TEST(Fine, Depth)
     {
 		for (nr_uint y = 0; y < screenDim.height; ++y)
 		{
-			h_colorBuffer[x][y] = { 0, 0, 0 };
+			h_colorBuffer[x][y] = { 0, 0, 0, 0 };
 			h_depthBuffer[x][y] = defaultDepth;
 		}
     }
@@ -65,7 +65,7 @@ TEST(Fine, Depth)
     auto code = mkFineModule(dim, &err);
     ASSERT_SUCCESS(err);
 	
-    auto testee = FineRasterizer(code, &err);
+    auto testee = FineRasterizerKernel(code, &err);
     ASSERT_SUCCESS(err);
 	
     auto q = defaultCommandQueue;
@@ -81,18 +81,15 @@ TEST(Fine, Depth)
     auto d_binQueues = Buffer::make<Queues>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, totalWorkGroupCount, h_binQueues.get(), &err);
     ASSERT_SUCCESS(err);
 	
-    testee.triangleData = d_triangles;
-    testee.dim = screenDim;
-    testee.binQueueConfig = config;
-    testee.binQueues = d_binQueues;
-    testee.workGroupCount = totalWorkGroupCount;
-    testee.frameBuffer = frame;
-	
-    NDRange<2> global = { binCountX, binCountY };
-    NDRange<2> local  = { binCountX, binCountY / totalWorkGroupCount };
+	testee.setExecutionRange(binCountX, binCountY, totalWorkGroupCount);
 
-    ASSERT_SUCCESS(testee.load());
-    ASSERT_SUCCESS(q.enqueueKernelCommand<2>(testee, global, local));
+	ASSERT_SUCCESS(testee.setTriangleInputBuffer(d_triangles));
+	ASSERT_SUCCESS(testee.setScreenDimensions(screenDim));
+	ASSERT_SUCCESS(testee.setBinQueuesConfig(config));
+	ASSERT_SUCCESS(testee.setBinQueuesBuffer(d_binQueues));
+	ASSERT_SUCCESS(testee.setWorkGroupCount(totalWorkGroupCount));
+	ASSERT_SUCCESS(testee.setFrameBuffer(frame));
+    ASSERT_SUCCESS(q.enqueueDispatchCommand(testee));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.color, false, 1, cBuffer.get()));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.depth, false, 1, dBuffer.get()));
     ASSERT_SUCCESS(q.await());

@@ -37,6 +37,8 @@ public:
 		return range;
 	}
 
+	using TypesafeKernel::operator cl_kernel;
+
 protected:
 	NDExecutionRange<dim> range;
 };
