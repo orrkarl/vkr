@@ -33,7 +33,7 @@ struct BinQueue
 };
 
 template <nr_uint BinCountX, nr_uint BinCountY, nr_uint QueueSize>
-using BinQueues = BinQueue<QueueSize>[BinCountX][BinCountY];
+using BinQueues = BinQueue<QueueSize>[BinCountY][BinCountX];
 
 const Module::Macro TEST_BINNING("_TEST_BINNING");
 

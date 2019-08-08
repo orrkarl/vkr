@@ -74,12 +74,12 @@ TEST(Fine, ShadeTest)
 	ColorBuffer h_color;
 	DepthBuffer h_depth;
 
-    for (nr_uint x = 0; x < screenDim.width; ++x)
+	for (nr_uint y = 0; y < screenDim.height; ++y)
     {
-		for (nr_uint y = 0; y < screenDim.height; ++y)
+		for (nr_uint x = 0; x < screenDim.width; ++x)
 		{
-			h_color[x][y] = { 0, 0, 0, 0 };
-			h_depth[x][y] = 1;
+			h_color[y][x] = { 0, 0, 0, 0 };
+			h_depth[y][x] = 1;
 		}
     }
 
@@ -110,6 +110,8 @@ TEST(Fine, ShadeTest)
 
 	testee.setExecutionRange(1);
 
+	std::cout << &h_color[firstFrag.position.y][firstFrag.position.x] - &h_color[0][0] << std::endl;
+
 	ASSERT_SUCCESS(testee.setScreenDimensions(screenDim));
 	ASSERT_SUCCESS(testee.setFrameBuffer(frame));
 
@@ -119,8 +121,8 @@ TEST(Fine, ShadeTest)
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.depth, false, 1, h_depth));
     ASSERT_SUCCESS(q.await());
 
-    EXPECT_EQ(firstFrag.color, h_color[firstFrag.position.x][firstFrag.position.y]);
-    EXPECT_EQ(firstFrag.depth, h_depth[firstFrag.position.x][firstFrag.position.y]);
+    EXPECT_EQ(firstFrag.color, h_color[firstFrag.position.y][firstFrag.position.x]);
+    EXPECT_EQ(firstFrag.depth, h_depth[firstFrag.position.y][firstFrag.position.x]);
 
 	ASSERT_SUCCESS(testee.setFragment(secondFrag));
 	ASSERT_SUCCESS(q.enqueueDispatchCommand(testee));
@@ -128,6 +130,6 @@ TEST(Fine, ShadeTest)
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.depth, false, 1, h_depth));
     ASSERT_SUCCESS(q.await());
 
-	EXPECT_EQ(firstFrag.color, h_color[secondFrag.position.x][secondFrag.position.y]);
-	EXPECT_EQ(firstFrag.depth, h_depth[secondFrag.position.x][secondFrag.position.y]);
+	EXPECT_EQ(firstFrag.color, h_color[secondFrag.position.y][secondFrag.position.x]);
+	EXPECT_EQ(firstFrag.depth, h_depth[secondFrag.position.y][secondFrag.position.x]);
 }

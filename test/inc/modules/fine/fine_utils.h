@@ -9,10 +9,10 @@ const RawColorRGBA RED = { 255, 0, 0 };
 const nr::Module::Macro TEST_FINE("_TEST_FINE");
 
 template <nr_uint Width, nr_uint Height>
-using ColorBuffer = nr::RawColorRGBA[Width][Height];
+using ColorBuffer = nr::RawColorRGBA[Height][Width];
 
 template <nr_uint Width, nr_uint Height>
-using DepthBuffer = Depth[Width][Height];
+using DepthBuffer = Depth[Height][Width];
 
 template<nr_uint dim>
 void mkTriangleInCoordinates(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, Triangle<dim>* triangle)
@@ -89,7 +89,7 @@ void fillTriangles(
 		{
 			for (auto x = 0u; x < binCountX; ++x)
 			{
-				binQueues[0][x][y].isEmpty = 1;
+				binQueues[0][y][x].isEmpty = 1;
 			}
 		}
 	}
@@ -114,11 +114,11 @@ void fillTriangles(
 
             if (g == i / batchSize)
             {
-                binQueues[g][x][y].isEmpty = 0;
-                binQueues[g][x][y][0] = i;
-                binQueues[g][x][y][1] = i + 1;
-                binQueues[g][x][y][2] = i + 2;
-                if (config.queueSize > 3) binQueues[g][x][y][3] = 0;
+                binQueues[g][y][x].isEmpty = 0;
+                binQueues[g][y][x][0] = i;
+                binQueues[g][y][x][1] = i + 1;
+                binQueues[g][y][x][2] = i + 2;
+                if (config.queueSize > 3) binQueues[g][y][x][3] = 0;
             }
             else
             {
@@ -284,7 +284,7 @@ testing::AssertionResult validateDepth(const DepthBuffer<Width, Height> depthBuf
 	{
 		for (nr_uint x = 0; x < Width; ++x)
 		{
-			nr_float actualDepth = depthBuffer[x][y];
+			nr_float actualDepth = depthBuffer[y][x];
 			nr_float expected = 1 / expectedDepth;
 			if (std::abs(actualDepth - defaultDepth) > 10e-5 && std::abs(actualDepth - expected) > 10e-5)
 			{

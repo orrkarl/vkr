@@ -51,12 +51,12 @@ TEST(Fine, Depth)
     Fragment expected;
     expected.color = RED;
 
-	for (nr_uint x = 0; x < screenDim.width; ++x)
+	for (nr_uint y = 0; y < screenDim.height; ++y)
     {
-		for (nr_uint y = 0; y < screenDim.height; ++y)
+		for (nr_uint x = 0; x < screenDim.width; ++x)
 		{
-			h_colorBuffer[x][y] = { 0, 0, 0, 0 };
-			h_depthBuffer[x][y] = defaultDepth;
+			h_colorBuffer[y][x] = { 0, 0, 0, 0 };
+			h_depthBuffer[y][x] = defaultDepth;
 		}
     }
     
