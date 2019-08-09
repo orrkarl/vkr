@@ -107,20 +107,20 @@ public:
      * @brief ensures that all of the waiting commands will be transfered to the device side queue
      * @return internal OpenCL call error status
      */
-    cl_status flush();
+    cl_status flush() const;
 
     /**
      * @brief waits for the command queue to be empty - no commands wait for execution
      * @see finish
      * @return internal OpenCL call error status
      */
-    cl_status await();
+    cl_status await() const;
 
     /**
      * @brief waits for the command queue to be empty - no commands wait for execution
      * @return internal OpenCL call error status
      */
-    cl_status finish();
+    cl_status finish() const;
     
     /**
      * @brief enqueues a buffer read command - moving data from a device buffer to host memory
@@ -310,7 +310,7 @@ public:
 	 * @return      internal	OpenCL error status
 	 */
 	template <typename T>
-	cl_status enqueueDispatchCommand(const Dispatch<T>& dispatch)
+	cl_status enqueueDispatchCommand(const Dispatch<T>& dispatch) const
 	{
 		return dispatch(*this);
 	}

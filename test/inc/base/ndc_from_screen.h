@@ -1,48 +1,48 @@
 #pragma once
 
-#include "base_utils.h"
+#include <base/Buffer.h>
+
 #include <array>
+
+#include "base_utils.h"
 
 using namespace nr;
 using namespace nr::detail;
 using namespace testing;
 
-void ndcFromScreenTestTemplate(NDCFromScreen kernel, CommandQueue q, const ScreenPosition& screen, const ScreenDimension& dim, const NDCPosition& expected)
+void ndcFromScreenTestTemplate(NDCFromScreen& kernel, const CommandQueue& q, const ScreenPosition& screen, const ScreenDimension& dim, const NDCPosition& expected)
 {
     NDCPosition result;
     cl_status err = CL_SUCCESS;
 
-    NDRange<1> global{1};
-    NDRange<1> local{1};
+	kernel.setExecutionRange(1);
     
-    kernel.position  = screen;
-    kernel.dimension = dim;
-    kernel.result	 = Buffer::make<NDCPosition>(defaultContext, CL_MEM_READ_WRITE, 1, &err);
-    ASSERT_SUCCESS(err);
+    auto d_result = Buffer::make<NDCPosition>(defaultContext, CL_MEM_READ_WRITE, 1, &err);
 
-    ASSERT_SUCCESS(kernel.load());
-    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(kernel, global, local));
-    ASSERT_SUCCESS(q.enqueueBufferReadCommand(kernel.result, false, 1, &result));
+	ASSERT_SUCCESS(kernel.setPosition(screen));
+	ASSERT_SUCCESS(kernel.setDimension(dim));
+	ASSERT_SUCCESS(kernel.setResultBuffer(d_result));
+    ASSERT_SUCCESS(q.enqueueDispatchCommand(kernel));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, 1, &result));
     ASSERT_SUCCESS(q.await());
     
     ASSERT_TRUE(comparePoints(expected, result, dim));
 }
 
-void checkConversionBounded(NDCFromScreen kernel, CommandQueue q, const ScreenPosition& screen, const ScreenDimension& dim)
+void checkConversionBounded(NDCFromScreen& kernel, const CommandQueue& q, const ScreenPosition& screen, const ScreenDimension& dim)
 {
     NDCPosition result;
     cl_status err = CL_SUCCESS;
 
-    NDRange<1> global{1};
-    NDRange<1> local{1};
-    
-    kernel.position  = screen;
-    kernel.dimension = dim;
-    kernel.result    = Buffer::make<NDCPosition>(defaultContext, CL_MEM_READ_WRITE, 1, &err);
+	kernel.setExecutionRange(1);
 
-    ASSERT_SUCCESS(kernel.load());
-    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(kernel, global, local));
-    ASSERT_SUCCESS(q.enqueueBufferReadCommand(kernel.result, false, 1, &result));
+	auto d_result = Buffer::make<NDCPosition>(defaultContext, CL_MEM_READ_WRITE, 1, &err);
+
+	ASSERT_SUCCESS(kernel.setPosition(screen));
+	ASSERT_SUCCESS(kernel.setDimension(dim));
+	ASSERT_SUCCESS(kernel.setResultBuffer(d_result));
+	ASSERT_SUCCESS(q.enqueueDispatchCommand(kernel));
+	ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, 1, &result));
     ASSERT_SUCCESS(q.await());
     
     ASSERT_LE(result.x, 1.0f)  << "Converted X value too big! Result: "   << result << ", original: " << screen << " | Screen dim: " << dim;

@@ -4,58 +4,73 @@
 
 #include <base/Module.h>
 #include <base/Kernel.h>
+
 #include <rendering/Render.h>
+
+#include <utils/StandardDispatch.h>
 
 using namespace nr;
 using namespace testing;
 
 
-struct NDCFromScreen : Kernel
+struct NDCFromScreen : StandardDispatch<1, ScreenPosition, ScreenDimension, Buffer>
 {   
 public:
-    NDCFromScreen(Module module, cl_status* err = nullptr)
-        : Kernel(module, "ndc_from_screen_test", err)
+    NDCFromScreen(const Module& module, cl_status* err = nullptr)
+        : StandardDispatch(module, "ndc_from_screen_test", err)
     {
     }
 
-    cl_status load()
-    {
-        cl_status err = CL_SUCCESS;
-        if ((err = setArg(0, position)) != CL_SUCCESS) return err;
-        if ((err = setArg(1, dimension)) != CL_SUCCESS) return err;        
-        return setArg(2, result);
-    }
+	cl_status setPosition(const ScreenPosition& pos)
+	{
+		return setArg<0>(pos);
+	}
 
-    ScreenPosition position;
-    ScreenDimension dimension;
-    Buffer result;
+	cl_status setDimension(const ScreenDimension& dim)
+	{
+		return setArg<1>(dim);
+	}
+
+	cl_status setResultBuffer(const Buffer& buffer)
+	{
+		return setArg<2>(buffer);
+	}
+
+	void setExecutionRange(const nr_uint s)
+	{
+		range.global.x = s;
+		range.local.x = s;
+	}
 };
 
-struct ScreenFromNDC : Kernel
+struct ScreenFromNDC : StandardDispatch<1, NDCPosition, ScreenDimension, Buffer>
 {   
 public:
-    ScreenFromNDC(Module module, cl_status* err = nullptr)
-        : Kernel(module, "screen_from_ndc_test", err)
+    ScreenFromNDC(const Module& module, cl_status* err = nullptr)
+        : StandardDispatch(module, "screen_from_ndc_test", err)
     {
     }
 
-    cl_status load()
-    {
-        cl_status err = CL_SUCCESS;
-        if ((err = setArg(0, ndcPosition)) != CL_SUCCESS) return err;
-        if ((err = setArg(1, dimension)) != CL_SUCCESS) return err;        
-        err = setArg(2, result);
-        return err;
-    }
+	cl_status setPosition(const NDCPosition& pos)
+	{
+		return setArg<0>(pos);
+	}
 
-    cl_status getResult(ScreenPosition* res) 
-    {
-        return defaultCommandQueue.enqueueBufferReadCommand(result, true, 1, res);
-    } 
+	cl_status setDimension(const ScreenDimension& dim)
+	{
+		return setArg<1>(dim);
+	}
 
-    NDCPosition ndcPosition;
-    ScreenDimension dimension;
-    Buffer result;
+	cl_status setResultBuffer(const Buffer& buffer)
+	{
+		return setArg<2>(buffer);
+	}
+
+	void setExecutionRange(const nr_uint s)
+	{
+		range.global.x = s;
+		range.local.x = s;
+	}
 };
 
 

@@ -7,23 +7,22 @@
 using namespace nr;
 using namespace nr::detail;
 
-void screenFromNDCTestTemplate(ScreenFromNDC kernel, CommandQueue q, const NDCPosition& ndc, const ScreenDimension& dim, const ScreenPosition& expected)
+void screenFromNDCTestTemplate(ScreenFromNDC& kernel, const CommandQueue& q, const NDCPosition& ndc, const ScreenDimension& dim, const ScreenPosition& expected)
 {
 	cl_status err = CL_SUCCESS;
 
-    NDRange<1> global{1};
-    NDRange<1> local{1};
-    
-    kernel.ndcPosition = ndc;
-    kernel.dimension   = dim;
-	kernel.result = Buffer::make<ScreenPosition>(defaultContext, CL_MEM_WRITE_ONLY, 1, &err);
+	auto d_result = Buffer::make<ScreenPosition>(defaultContext, CL_MEM_WRITE_ONLY, 1, &err);
 
-    ASSERT_SUCCESS(kernel.load());
-    ASSERT_SUCCESS(q.enqueueKernelCommand<1>(kernel, global, local));
+	kernel.setExecutionRange(1);
+
+	ASSERT_SUCCESS(kernel.setDimension(dim));
+	ASSERT_SUCCESS(kernel.setPosition(ndc));
+	ASSERT_SUCCESS(kernel.setResultBuffer(d_result));
+    ASSERT_SUCCESS(q.enqueueDispatchCommand(kernel));
     ASSERT_SUCCESS(q.await());
 
     ScreenPosition result;
-    ASSERT_SUCCESS(kernel.getResult(&result));
+    ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, true, 1, &result));
 
     ASSERT_EQ(expected, result) << "Screen from NDC didn't return correct values";
 }

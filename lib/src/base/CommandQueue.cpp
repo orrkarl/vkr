@@ -46,17 +46,17 @@ CommandQueue::operator cl_command_queue() const
     return object;
 }    
 
-cl_status CommandQueue::flush()
+cl_status CommandQueue::flush() const
 {
     return clFlush(object);
 }
 
-cl_status CommandQueue::await()
+cl_status CommandQueue::await() const
 {
     return clFinish(object);
 }
 
-cl_status CommandQueue::finish()
+cl_status CommandQueue::finish() const
 {
     return clFinish(object);
 }
