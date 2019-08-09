@@ -195,7 +195,7 @@ public:
 	 * @return      internal OpenCL error status
 	 */
 	template<typename T>
-	cl_status enqueueBufferWriteCommand(const Buffer& buffer, nr_bool block, nr_uint count, T* data, const std::vector<Event>& wait, nr_uint offset = 0, Event * notify = nullptr) const
+	cl_status enqueueBufferWriteCommand(const Buffer& buffer, nr_bool block, nr_uint count, const T* data, const std::vector<Event>& wait, nr_uint offset = 0, Event * notify = nullptr) const
 	{
 		return clEnqueueWriteBuffer(
 			object, buffer, block, offset * sizeof(T), count * sizeof(T), data,
@@ -215,7 +215,7 @@ public:
 	 * @return      internal OpenCL error status
 	 */
 	template<typename T>
-	cl_status enqueueBufferWriteCommand(const Buffer& buffer, nr_bool block, nr_uint count, T* data, nr_uint offset = 0, Event * notify = nullptr) const
+	cl_status enqueueBufferWriteCommand(const Buffer& buffer, nr_bool block, nr_uint count, const T* data, nr_uint offset = 0, Event * notify = nullptr) const
 	{
 		return clEnqueueWriteBuffer(
 			object, buffer, block, offset * sizeof(T), count * sizeof(T), data,

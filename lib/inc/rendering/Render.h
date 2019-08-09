@@ -42,6 +42,8 @@ struct RawColorRGBA
     }
 };
 
+using Depth = nr_float;
+
 struct FrameBuffer
 {
     Buffer color;

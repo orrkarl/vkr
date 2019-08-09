@@ -150,8 +150,7 @@ struct NDCPosition
     }
 };
 
-typedef nr_uint Index;
-typedef nr_float Depth;
+using Index = nr_uint;
 
 struct Fragment
 {
