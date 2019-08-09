@@ -81,15 +81,13 @@ void fillTriangles(
 
     const nr_uint totalBinCount = binCountX * binCountY;
 
-    const nr_uint elementsPerGroup = totalBinCount * (config.queueSize + 1);
-
 	for (auto g = 0u; g < totalWorkGroupCount; ++g)
 	{
 		for (auto y = 0u; y < binCountY; ++y)
 		{
 			for (auto x = 0u; x < binCountX; ++x)
 			{
-				binQueues[0][y][x].isEmpty = 1;
+				binQueues[g][y][x].isEmpty = 1;
 			}
 		}
 	}
@@ -152,7 +150,7 @@ void tesselateBin(
 	const nr_uint indexY = bin.y / bin.height;
 
 	Triangle<dim>* currentTriangle = triangles + index;
-	BinQueue<QueueSize> currentQueue = binQueues[workGroup][indexY][indexX];
+	BinQueue<QueueSize>& currentQueue = binQueues[workGroup][indexY][indexX];
 
 	const auto rightEdge = std::min(bin.x + bin.width, screenDim.width);
 	const auto topEdge = std::min(bin.y + bin.height, screenDim.height);

@@ -192,10 +192,6 @@ kernel void fine_rasterize(
 		p2.x = triangle_data[current_queue_element][2][0];
 		p2.y = triangle_data[current_queue_element][2][1];
 
-		//DEBUG_ITEM_SPECIFIC7(1, 1, 0, "Triangle %d - [ (%f, %f), (%f, %f), (%f, %f) ]\n", current_queue_element, p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
-	
-		//DEBUG_MESSAGE9("{%d %d} -> Triangle %d - [ (%f, %f), (%f, %f), (%f, %f) ]\n", x, y, current_queue_element, p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
-
         for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, x * config.bin_width + config.bin_width); ++frag_x)
         {
             for (uint frag_y = y * config.bin_height; frag_y < min(screen_dim.height, y * config.bin_height + config.bin_height); ++frag_y)

@@ -35,6 +35,36 @@ struct BinQueue
 template <nr_uint BinCountX, nr_uint BinCountY, nr_uint QueueSize>
 using BinQueues = BinQueue<QueueSize>[BinCountY][BinCountX];
 
+template <nr_uint BinCountX, nr_uint BinCountY, nr_uint QueueSize>
+std::ostream& operator<<(std::ostream& os, const BinQueues<BinCountX, BinCountY, QueueSize>& binQueues)
+{
+	os << "Bin Queues:\n";
+	for (auto y = 0u; y < BinCountY; ++y)
+	{
+		for (auto x = 0u; x < BinCountX; ++x)
+		{
+			os << "\t{ " << x << ", " << y << " } -> ";
+			if (binQueues[y][x].isEmpty)
+			{
+				os << "[empty]\n";
+			}
+			else
+			{
+				for (auto i = 0u; i < QueueSize; ++i)
+				{
+					if (binQueues[y][x][i] == 0 && i != 0)
+							break;
+
+					os << binQueues[y][x][i] << ' ';
+				}
+				os << '\n';
+			}
+		}
+	}
+
+	return os;
+}
+
 const Module::Macro TEST_BINNING("_TEST_BINNING");
 
 template<nr_uint dim>

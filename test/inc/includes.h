@@ -12,6 +12,7 @@
 
 #include <array>
 #include <fstream>
+#include <functional>
 
 #pragma once
 
@@ -24,8 +25,8 @@ extern nr::Context defaultContext;
 extern nr::Device defaultDevice;
 extern nr::CommandQueue defaultCommandQueue;
 
-template <typename T, nr_uint Width, nr_uint Height>
-testing::AssertionResult validateBuffer(const nr::string& name, const T expected[Height][Width], const T actual[Height][Width], const nr_uint maxDiffs = 10)
+template <typename T, nr_uint Width, nr_uint Height, typename Comparator>
+testing::AssertionResult validateBuffer(const nr::string& name, const T expected[Height][Width], const T actual[Height][Width], Comparator cmp, const nr_uint maxDiffs = 10)
 {
 	std::vector<std::pair<nr_uint, nr_uint>> diffIndices;
 
@@ -36,7 +37,7 @@ testing::AssertionResult validateBuffer(const nr::string& name, const T expected
 	{
 		for (auto x = 0u; x < Width; ++x)
 		{
-			if (expected[y][x] != actual[y][x])
+			if (!cmp(expected[y][x], actual[y][x]))
 			{
 				if (diffIndices.size() < maxDiffs)
 				{
@@ -89,6 +90,18 @@ testing::AssertionResult validateBuffer(const nr::string& name, const T expected
 	//actualLog.close();
 
 	return ret;
+}
+
+template <typename T, nr_uint Width, nr_uint Height>
+testing::AssertionResult validateBuffer(const nr::string& name, const T expected[Height][Width], const T actual[Height][Width])
+{
+	return validateBuffer<T, Width, Height>(name, expected, actual, std::equal_to<T>());
+}
+
+template <nr_uint Width, nr_uint Height>
+testing::AssertionResult validateBuffer(const nr::string& name, const nr_float expected[Height][Width], const nr_float actual[Height][Width])
+{
+	return validateBuffer<nr_float, Width, Height>(name, expected, actual, [](const nr_float f0, const nr_float f1) { return std::abs(f0 - f1) < 10e-5; });
 }
 
 template <typename T, nr_uint Width, nr_uint Height>

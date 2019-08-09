@@ -15,13 +15,14 @@ using namespace nr;
 using namespace nr::detail;
 using namespace testing;
 
+// Don't run this test with high screen dimensions as floating point impercision reners it useless there
 TEST(Fine, Rasterizer)
 {
 	cl_status err = CL_SUCCESS;
 
 	constexpr const nr_uint dim = 5;
-	constexpr const ScreenDimension screenDim = { 16, 16 };
-	constexpr const BinQueueConfig config = { 8, 8, 10 };
+	constexpr const ScreenDimension screenDim = { 640, 640 };
+	constexpr const BinQueueConfig config = { 64, 64, 10 };
 	constexpr const nr_uint binCountX = compileTimeCeil(((nr_float)screenDim.width) / config.binWidth);
 	constexpr const nr_uint binCountY = compileTimeCeil(((nr_float)screenDim.height) / config.binHeight);
 	
@@ -29,7 +30,6 @@ TEST(Fine, Rasterizer)
 	using ColorBuffer = ColorBuffer<screenDim.width, screenDim.height>;
 	using DepthBuffer = DepthBuffer<screenDim.width, screenDim.height>;
 	
-	const nr_uint totalScreenSize = screenDim.width * screenDim.height;
 	const nr_uint totalWorkGroupCount = 1;
 
 	const nr_float defaultDepth = 1;
@@ -54,7 +54,6 @@ TEST(Fine, Rasterizer)
 			
 			expectedColorBuffer[0][y][x] = { 0, 0, 0, 0 };
 			expectedDepthBuffer[0][y][x] = defaultDepth;
-
 		}
 	}
 
@@ -64,7 +63,7 @@ TEST(Fine, Rasterizer)
 	auto code = mkFineModule(dim, &err);
 	ASSERT_SUCCESS(err);
 
-	auto testee = FineRasterizer(code, &err);
+	auto testee = FineRasterizerKernel(code, &err);
 	ASSERT_SUCCESS(err);
 
 	auto q = defaultCommandQueue;
@@ -80,21 +79,18 @@ TEST(Fine, Rasterizer)
 	auto d_binQueues = Buffer::make<Queues>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, totalWorkGroupCount, h_binQueues.get(), &err);
 	ASSERT_SUCCESS(err);
 
-	testee.triangleData = d_triangles;
-	testee.dim = screenDim;
-	testee.binQueueConfig = config;
-	testee.binQueues = d_binQueues;
-	testee.workGroupCount = totalWorkGroupCount;
-	testee.frameBuffer = frame;
-
-	NDRange<2> global = { binCountX, binCountY };
-	NDRange<2> local = { binCountX, binCountY / totalWorkGroupCount };
-
-	ASSERT_SUCCESS(testee.load());
-	ASSERT_SUCCESS(q.enqueueKernelCommand<2>(testee, global, local));
+	testee.setExecutionRange(binCountX, binCountY, totalWorkGroupCount);
+	
+	ASSERT_SUCCESS(testee.setTriangleInputBuffer(d_triangles));
+	ASSERT_SUCCESS(testee.setScreenDimensions(screenDim));
+	ASSERT_SUCCESS(testee.setBinQueuesConfig(config));
+	ASSERT_SUCCESS(testee.setBinQueuesBuffer(d_binQueues));
+	ASSERT_SUCCESS(testee.setWorkGroupCount(totalWorkGroupCount));
+	ASSERT_SUCCESS(testee.setFrameBuffer(frame));
+	ASSERT_SUCCESS(q.enqueueDispatchCommand(testee));
 	ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.color, false, 1, h_colorBuffer.get()));
 	ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.depth, false, 1, h_depthBuffer.get()));
 	ASSERT_SUCCESS(q.await());
 	EXPECT_TRUE((validateBuffer<nr::RawColorRGBA, screenDim.width, screenDim.height>("color", expectedColorBuffer[0], h_colorBuffer[0])));
-	EXPECT_TRUE((validateBuffer<Depth, screenDim.width, screenDim.height>("depth", expectedDepthBuffer[0], h_depthBuffer[0])));
+	EXPECT_TRUE((validateBuffer<screenDim.width, screenDim.height>("depth", expectedDepthBuffer[0], h_depthBuffer[0])));
 }
