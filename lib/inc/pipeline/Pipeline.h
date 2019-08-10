@@ -33,13 +33,15 @@ public:
 
 	cl_status setFarPlane(const nr_float* far) const;
 
-	cl_status render(const Buffer& primitives, const NRPrimitive& primitiveType, const nr_uint primitiveCount) const;
+	cl_status render(const Buffer& primitives, const NRPrimitive& primitiveType, const nr_uint primitiveCount);
 
 	cl_status copyFrameBuffer(RawColorRGBA* bitmap) const;
-
-	cl_status fence() const;
-
+	
 private:
+	cl_status clearDepthBuffer() const;
+								 
+	cl_status clearColorBuffer() const;
+
 	detail::BinQueueConfig			m_binQueueConfig;
 	Buffer							m_binQueues;
 	detail::BinRasterizerKernel		m_binRaster;
@@ -51,8 +53,11 @@ private:
 	Buffer							m_farPlane;
 	detail::FineRasterizerKernel	m_fineRaster;
 	FrameBuffer						m_frame;
+	nr_uint							m_lastPrimitiveCount;
 	Buffer							m_nearPlane;
-	Buffer							m_reducedSimplices;
+	Buffer							m_overflowNotifier;
+	Buffer							m_reducedSimplexes;
+	Buffer							m_reducedVertecies;
 	ScreenDimension					m_screenDimension;
 	detail::SimplexReduceKernel		m_simplexReduce;
 	detail::VertexReduceKernel		m_vertexReduce;

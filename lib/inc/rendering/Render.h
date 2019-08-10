@@ -16,6 +16,8 @@ struct ScreenDimension
 {
     nr_uint width, height;
 
+	nr_uint getTotalSize() const { return width * height; }
+
     friend std::ostream& operator<<(std::ostream& os, const ScreenDimension& dim)
     {
         return os << "ScreenDimension{" << dim.width << ", " << dim.height << "}";
