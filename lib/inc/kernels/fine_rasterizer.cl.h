@@ -49,7 +49,7 @@ public:
 		return setArg<BIN_QUEUE_CONFIG>(config);
 	}
 
-	cl_status setWorkGroupCount(const nr_uint workGroupCount)
+	cl_status setBinningWorkGroupCount(const nr_uint workGroupCount)
 	{
 		return setArg<WORK_GROUP_COUNT>(workGroupCount);
 	}

@@ -1,3 +1,5 @@
+#include <kernels/Source.h>
+
 #include <pipeline/Pipeline.h>
 
 #include <utils/rendermath.h>
@@ -5,9 +7,16 @@
 namespace nr
 {
 
-Pipeline::Pipeline(const Context& context, const CommandQueue& queue, cl_status* err)
-	: m_binQueueConfig{ 64, 64, 256 }, m_clearColor{ 0, 0, 0, 0 }, m_clearDepth(1.0f), m_commandQueue(queue), m_context(context), m_renderDimension(0), m_lastPrimitiveCount(0), m_screenDimension{ 0, 0 }
+Pipeline::Pipeline(const Context& context, const Device& device, const CommandQueue& queue, cl_status* err)
+	: m_binQueueConfig{ 64, 64, 255 }, m_binRasterWorkGroupCount(1), m_clearColor{ 0, 0, 0, 0 }, m_clearDepth(1.0f), m_commandQueue(queue), m_context(context), m_device(device), m_renderDimension(0), m_screenDimension{ 0, 0 }
 {
+	m_overflowNotifier = Buffer::make<nr_bool>(context, CL_MEM_READ_WRITE, 1, err);
+	if (error::isFailure(*err)) return;
+
+	m_globalBatchIndex = Buffer::make<nr_uint>(context, CL_MEM_READ_WRITE, 1, err);
+	if (error::isFailure(*err)) return;
+
+
 }
 
 cl_status Pipeline::setRenderDimension(const nr_uint dim)
@@ -21,10 +30,40 @@ cl_status Pipeline::setRenderDimension(const nr_uint dim)
 	cl_status ret = CL_SUCCESS;
 	auto pret = &ret;
 
+	detail::Source s(m_context);
+	ret = s.build(m_device, dim, true);
+	if (error::isFailure(ret)) return ret;
+
+	m_binRaster = s.binRasterizer();
+	if (error::isFailure(ret)) return ret;
+
+	m_fineRaster = s.fineRasterizer();
+	if (error::isFailure(ret)) return ret;
+
+	m_simplexReduce = s.simplexReduce();
+	if (error::isFailure(ret)) return ret;
+
+	m_vertexReduce = s.vertexReduce();
+	if (error::isFailure(ret)) return ret;
+
 	m_nearPlane = Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE, 1, pret);
 	if (error::isFailure(ret)) return ret;
 	m_farPlane = Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE, 1, pret);
 	if (error::isFailure(ret)) return ret;
+
+	ret = m_vertexReduce.setNearPlaneBuffer(m_nearPlane);
+	if (error::isFailure(ret)) return ret;
+	ret = m_vertexReduce.setFarPlaneBuffer(m_farPlane);
+	if (error::isFailure(ret)) return ret;
+
+	ret = m_binRaster.setBinQueueConfig(m_binQueueConfig);
+	if (error::isFailure(ret)) return ret;
+	ret = m_binRaster.setGlobalBatchIndex(m_globalBatchIndex);
+	if (error::isFailure(ret)) return ret;
+	
+	ret = m_fineRaster.setBinQueuesConfig(m_binQueueConfig);
+	if (error::isFailure(ret)) return ret;
+	return m_fineRaster.setBinningWorkGroupCount(m_binRasterWorkGroupCount);
 }
 
 void Pipeline::setClearColor(const RawColorRGBA& color)
@@ -72,7 +111,7 @@ cl_status Pipeline::setFarPlane(const nr_float* far) const
 	return m_commandQueue.enqueueBufferWriteCommand(m_farPlane, false, m_renderDimension, far);
 }
 
-cl_status Pipeline::render(const Buffer& primitives, const NRPrimitive& primitiveType, const nr_uint primitiveCount)
+cl_status Pipeline::render(const VertexBuffer& primitives, const NRPrimitive& primitiveType, const nr_uint primitiveCount)
 {
 	if (primitiveType != NRPrimitive::SIMPLEX) return CL_INVALID_VALUE;
 
@@ -80,29 +119,30 @@ cl_status Pipeline::render(const Buffer& primitives, const NRPrimitive& primitiv
 	auto perr = &err;
 	nr_bool overflow;
 
-	if (primitiveCount > m_lastPrimitiveCount)
+	if (primitives.vertecies.count<nr_float>() < nr_size(primitiveCount) * (nr_size(m_renderDimension) + 1) * nr_size(m_renderDimension))
 	{
-		m_reducedSimplexes = Buffer(m_context, CL_MEM_READ_WRITE, nr_size(detail::triangleCount(m_renderDimension, primitiveCount)) * 3 * (nr_size(m_renderDimension) + 1) * sizeof(nr_float), perr);
-		if (error::isFailure(err)) return err;
-
-		m_reducedVertecies = Buffer(m_context, CL_MEM_READ_WRITE, (nr_size(m_renderDimension) + 1) * nr_size(m_renderDimension) * nr_size(primitiveCount) * sizeof(nr_float), perr);
-		if (error::isFailure(err)) return err;
-
-		m_lastPrimitiveCount = primitiveCount;
+		return CL_INVALID_VALUE;
 	}
 
-	constexpr auto binRasterWorkGroups = 1u;
-	m_binRaster.setExecutionRange(m_screenDimension, m_binQueueConfig, binRasterWorkGroups);
-	m_fineRaster.setExecutionRange(m_screenDimension, m_binQueueConfig, binRasterWorkGroups);
+	m_binRaster.setExecutionRange(m_screenDimension, m_binQueueConfig, m_binRasterWorkGroupCount);
+	m_fineRaster.setExecutionRange(m_screenDimension, m_binQueueConfig, m_binRasterWorkGroupCount);
 	m_simplexReduce.setExecutionRange(primitiveCount);
 	m_vertexReduce.setExecutionRange(primitiveCount * m_renderDimension);
 
 	m_vertexReduce.setSimplexInputBuffer(primitives);
-	m_vertexReduce.setSimplexOutputBuffer(m_reducedVertecies);
-	m_simplexReduce.setSimplexInputBuffer(m_reducedVertecies);
-	m_simplexReduce.setTriangleOutputBuffer(m_reducedSimplexes);
-	m_binRaster.setTriangleInputBuffer(m_reducedSimplexes);
-	m_fineRaster.setTriangleInputBuffer(m_reducedSimplexes);
+	if (error::isFailure(err)) return err;
+	m_vertexReduce.setSimplexOutputBuffer(primitives.reducedVertecies);
+	if (error::isFailure(err)) return err;
+	m_simplexReduce.setSimplexInputBuffer(primitives.reducedVertecies);
+	if (error::isFailure(err)) return err;
+	m_simplexReduce.setTriangleOutputBuffer(primitives.reducedSimplices);
+	if (error::isFailure(err)) return err;
+	m_binRaster.setTriangleInputBuffer(primitives.reducedSimplices);
+	if (error::isFailure(err)) return err;
+	m_binRaster.setTriangleCount(detail::triangleCount(m_renderDimension, primitiveCount));
+	if (error::isFailure(err)) return err;
+	m_fineRaster.setTriangleInputBuffer(primitives.reducedSimplices);
+	if (error::isFailure(err)) return err;
 
 	err = m_commandQueue.enqueueDispatchCommand(m_vertexReduce);
 	if (error::isFailure(err)) return err;
