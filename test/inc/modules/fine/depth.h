@@ -87,7 +87,7 @@ TEST(Fine, Depth)
 	ASSERT_SUCCESS(testee.setScreenDimensions(screenDim));
 	ASSERT_SUCCESS(testee.setBinQueuesConfig(config));
 	ASSERT_SUCCESS(testee.setBinQueuesBuffer(d_binQueues));
-	ASSERT_SUCCESS(testee.setWorkGroupCount(totalWorkGroupCount));
+	ASSERT_SUCCESS(testee.setBinningWorkGroupCount(totalWorkGroupCount));
 	ASSERT_SUCCESS(testee.setFrameBuffer(frame));
     ASSERT_SUCCESS(q.enqueueDispatchCommand(testee));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.color, false, 1, cBuffer.get()));
