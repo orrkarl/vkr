@@ -102,6 +102,11 @@ private:
 	template <nr_uint Index>
 	using Type = typename std::tuple_element<Index, std::tuple<Args...>>::type;
 
+#ifdef _DEBUG
+protected:
+	std::array<nr_bool, sizeof...(Args)> setIndices{ false };
+#endif
+
 public:
 	TypesafeKernel(const Module& module, const char* name, cl_status* err = nullptr)
 		: Kernel(module, name, err)
@@ -116,6 +121,9 @@ public:
 	template <nr_uint Index>
 	cl_status setArg(const Type<Index>& arg)
 	{
+#ifdef _DEBUG
+		setIndices[Index] = true;
+#endif
 		return Kernel::setArg(Index, arg);
 	}
 

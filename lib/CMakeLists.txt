@@ -22,7 +22,6 @@ ADD_LIBRARY(Nraster SHARED
 	src/pipeline/SimplexReducer.cpp
 	src/pipeline/VertexShader.cpp
 	src/pipeline/Pipeline.cpp
-	src/pipeline/VertexBuffer.cpp
 
 	src/utils/converters.cpp
 	src/utils/rendermath.cpp)

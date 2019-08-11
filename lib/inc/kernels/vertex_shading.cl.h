@@ -4,6 +4,8 @@
 
 #include "../utils/StandardDispatch.h"
 
+#include <iostream>
+
 namespace nr
 {
 

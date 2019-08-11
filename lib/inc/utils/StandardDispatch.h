@@ -29,6 +29,18 @@ public:
 
 	cl_status consume(const CommandQueue& q) const
 	{
+		if (!std::all_of(setIndices.cbegin(), setIndices.cend(), [](const nr_bool b) {return b; }))
+		{
+			std::cerr << "Not all kernel arguments are set - { ";
+			for (auto i = 0u; i < sizeof...(Args); ++i)
+			{
+				if (!setIndices[i])
+				{
+					std::cerr << i << " ";
+				}
+			}
+			std::cerr << "}\n";
+		}
 		return q.enqueueKernelCommand(TypesafeKernel::get(), range);
 	}
 

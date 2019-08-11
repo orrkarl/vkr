@@ -2,6 +2,7 @@
 
 #include <pipeline/Pipeline.h>
 
+#include <utils/converters.h>
 #include <utils/rendermath.h>
 
 namespace nr
@@ -9,7 +10,7 @@ namespace nr
 
 const ScreenDimension Pipeline::MAX_SCREEN_DIM = { 2048, 2048 };
 
-Pipeline::Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, cl_status* err)
+Pipeline::Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const nr_uint dim, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, cl_status* err)
 	: m_binQueueConfig(config), m_binRasterWorkGroupCount(binRasterWorkGroupCount), m_clearColor{ 0, 0, 0, 0 }, m_clearDepth(1.0f), m_commandQueue(queue), m_context(context), m_device(device), m_renderDimension(0), m_screenDimension{ 0, 0 }
 {
 	m_overflowNotifier = Buffer::make<nr_bool>(context, CL_MEM_READ_WRITE, 1, err);
@@ -18,16 +19,15 @@ Pipeline::Pipeline(const Context& context, const Device& device, const CommandQu
 	m_globalBatchIndex = Buffer::make<nr_uint>(context, CL_MEM_READ_WRITE, 1, err);
 	if (error::isFailure(*err)) return;
 
+	*err = setRenderDimension(dim);
+	if (error::isFailure(*err)) return;
+
 	*err = preallocate(MAX_SCREEN_DIM, config, binRasterWorkGroupCount);
 }
 
 cl_status Pipeline::setRenderDimension(const nr_uint dim)
 {
-	if (dim < m_renderDimension)
-	{
-		m_renderDimension = dim;
-		return CL_SUCCESS;
-	}
+	m_renderDimension = dim;
 
 	cl_status ret = CL_SUCCESS;
 	auto pret = &ret;
@@ -61,6 +61,8 @@ cl_status Pipeline::setRenderDimension(const nr_uint dim)
 	ret = m_binRaster.setBinQueueConfig(m_binQueueConfig);
 	if (error::isFailure(ret)) return ret;
 	ret = m_binRaster.setGlobalBatchIndex(m_globalBatchIndex);
+	if (error::isFailure(ret)) return ret;
+	ret = m_binRaster.setOvereflowNotifier(m_overflowNotifier);
 	if (error::isFailure(ret)) return ret;
 	
 	ret = m_fineRaster.setBinQueuesConfig(m_binQueueConfig);
@@ -143,9 +145,9 @@ cl_status Pipeline::setFarPlane(const nr_float* far) const
 	return m_commandQueue.enqueueBufferWriteCommand(m_farPlane, false, m_renderDimension, far);
 }
 
-cl_status Pipeline::render(const VertexBuffer& primitives, const NRPrimitive& primitiveType, const nr_uint primitiveCount)
+cl_status Pipeline::render(const VertexBuffer& primitives, const Primitive& primitiveType, const nr_uint primitiveCount)
 {
-	if (primitiveType != NRPrimitive::SIMPLEX) return CL_INVALID_VALUE;
+	if (primitiveType != Primitive::SIMPLEX) return CL_INVALID_VALUE;
 
 	cl_status err = CL_SUCCESS;
 	auto perr = &err;
@@ -177,17 +179,37 @@ cl_status Pipeline::render(const VertexBuffer& primitives, const NRPrimitive& pr
 	if (error::isFailure(err)) return err;
 
 	err = m_commandQueue.enqueueDispatchCommand(m_vertexReduce);
-	if (error::isFailure(err)) return err;
+	if (error::isFailure(err))
+	{
+		std::cerr << "Could not enqueue vertex reduce! " << utils::stringFromCLError(err) << std::endl;
+		return err;
+	}
 	err = m_commandQueue.enqueueDispatchCommand(m_simplexReduce);
-	if (error::isFailure(err)) return err;
+	if (error::isFailure(err))
+	{
+		std::cerr << "Could not enqueue simplex reduce! " << utils::stringFromCLError(err) << std::endl;
+		return err;
+	}
 	err = m_commandQueue.enqueueDispatchCommand(m_binRaster);
-	if (error::isFailure(err)) return err;
+	if (error::isFailure(err))
+	{
+		std::cerr << "Could not enqueue bin raster! " << utils::stringFromCLError(err) << std::endl;
+		return err;
+	}
 	err = m_commandQueue.enqueueDispatchCommand(m_fineRaster);
-	if (error::isFailure(err)) return err;
+	if (error::isFailure(err))
+	{
+		std::cerr << "Could not enqueue fine raster! " << utils::stringFromCLError(err) << std::endl;
+		return err;
+	}
 	err = m_commandQueue.enqueueBufferReadCommand(m_overflowNotifier, false, 1, &overflow);
 	if (error::isFailure(err)) return err;
 	err = m_commandQueue.await();
-	if (error::isFailure(err)) return err;
+	if (error::isFailure(err))
+	{
+		std::cerr << "Could not process command queue! " << utils::stringFromCLError(err) << std::endl;
+		return err;
+	}
 
 	if (overflow) return CL_OUT_OF_RESOURCES;
 
@@ -196,7 +218,7 @@ cl_status Pipeline::render(const VertexBuffer& primitives, const NRPrimitive& pr
 
 cl_status Pipeline::copyFrameBuffer(RawColorRGBA* bitmap) const
 {
-	return m_commandQueue.enqueueBufferReadCommand(m_frame.color, true, bitmap);
+	return m_commandQueue.enqueueBufferReadCommand(m_frame.color, true, m_screenDimension.getTotalSize(), bitmap);
 }
 
 }

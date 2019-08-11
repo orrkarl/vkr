@@ -12,9 +12,9 @@ namespace nr
 namespace detail
 {
 
-nr_uint triangleCount(const nr_uint dim, const nr_uint simplexCount);
+NRAPI nr_uint triangleCount(const nr_uint dim, const nr_uint simplexCount);
 
-std::pair<nr_uint, nr_uint> getBinCount(const ScreenDimension& screenDim, const BinQueueConfig& config);
+NRAPI std::pair<nr_uint, nr_uint> getBinCount(const ScreenDimension& screenDim, const BinQueueConfig& config);
 
 }
 

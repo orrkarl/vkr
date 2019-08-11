@@ -15,12 +15,10 @@
 namespace nr
 {
 
-class Pipeline
+class NRAPI Pipeline
 {
 public:
-	Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, cl_status* err);
-
-	cl_status setRenderDimension(const nr_uint dim);
+	Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const nr_uint dim, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, cl_status* err);
 
 	void setClearColor(const RawColorRGBA& color);
 
@@ -34,7 +32,7 @@ public:
 
 	cl_status setFarPlane(const nr_float* far) const;
 
-	cl_status render(const VertexBuffer& primitives, const NRPrimitive& primitiveType, const nr_uint primitiveCount);
+	cl_status render(const VertexBuffer& primitives, const Primitive& primitiveType, const nr_uint primitiveCount);
 
 	cl_status copyFrameBuffer(RawColorRGBA* bitmap) const;
 	
@@ -44,6 +42,8 @@ private:
 	cl_status clearColorBuffer() const;
 
 	cl_status preallocate(const ScreenDimension& screenDim, const detail::BinQueueConfig& config, const nr_uint binRasterWorkGroupCounts);
+
+	cl_status setRenderDimension(const nr_uint dim);
 
 	static const ScreenDimension MAX_SCREEN_DIM;
 

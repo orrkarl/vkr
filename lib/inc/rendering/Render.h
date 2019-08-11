@@ -116,7 +116,7 @@ struct Triangle
 	Vertex<dim>& operator[](const nr_uint index) { return points[index]; }
 };
 
-enum class NRPrimitive : nr_uint
+enum class Primitive : nr_uint
 {
 	SIMPLEX
 };
