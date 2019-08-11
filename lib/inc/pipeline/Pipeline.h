@@ -18,7 +18,7 @@ namespace nr
 class Pipeline
 {
 public:
-	Pipeline(const Context& context, const Device& device, const CommandQueue& queue, cl_status* err);
+	Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, cl_status* err);
 
 	cl_status setRenderDimension(const nr_uint dim);
 
@@ -42,6 +42,10 @@ private:
 	cl_status clearDepthBuffer() const;
 								 
 	cl_status clearColorBuffer() const;
+
+	cl_status preallocate(const ScreenDimension& screenDim, const detail::BinQueueConfig& config, const nr_uint binRasterWorkGroupCounts);
+
+	static const ScreenDimension MAX_SCREEN_DIM;
 
 	const detail::BinQueueConfig	m_binQueueConfig;
 	Buffer							m_binQueues;

@@ -156,7 +156,7 @@ struct Fragment
 {
     ScreenPosition position;
     nr::RawColorRGBA color;
-    Depth depth;
+    nr::Depth depth;
 };
 
 // convert 2d index from 2d array to 1d flat array index

@@ -7,8 +7,10 @@
 namespace nr
 {
 
-Pipeline::Pipeline(const Context& context, const Device& device, const CommandQueue& queue, cl_status* err)
-	: m_binQueueConfig{ 64, 64, 255 }, m_binRasterWorkGroupCount(1), m_clearColor{ 0, 0, 0, 0 }, m_clearDepth(1.0f), m_commandQueue(queue), m_context(context), m_device(device), m_renderDimension(0), m_screenDimension{ 0, 0 }
+const ScreenDimension Pipeline::MAX_SCREEN_DIM = { 2048, 2048 };
+
+Pipeline::Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, cl_status* err)
+	: m_binQueueConfig(config), m_binRasterWorkGroupCount(binRasterWorkGroupCount), m_clearColor{ 0, 0, 0, 0 }, m_clearDepth(1.0f), m_commandQueue(queue), m_context(context), m_device(device), m_renderDimension(0), m_screenDimension{ 0, 0 }
 {
 	m_overflowNotifier = Buffer::make<nr_bool>(context, CL_MEM_READ_WRITE, 1, err);
 	if (error::isFailure(*err)) return;
@@ -16,7 +18,7 @@ Pipeline::Pipeline(const Context& context, const Device& device, const CommandQu
 	m_globalBatchIndex = Buffer::make<nr_uint>(context, CL_MEM_READ_WRITE, 1, err);
 	if (error::isFailure(*err)) return;
 
-
+	*err = preallocate(MAX_SCREEN_DIM, config, binRasterWorkGroupCount);
 }
 
 cl_status Pipeline::setRenderDimension(const nr_uint dim)
@@ -78,7 +80,37 @@ void Pipeline::setClearDepth(const Depth& depth)
 
 cl_status Pipeline::viewport(const ScreenDimension& screenDim)
 {
-	return cl_status();
+	if (screenDim.getTotalSize() > MAX_SCREEN_DIM.getTotalSize())
+	{
+		return CL_OUT_OF_RESOURCES;
+	}
+
+	m_screenDimension = screenDim;
+
+	auto ret = m_binRaster.setScreenDimension(screenDim);
+	if (error::isFailure(ret)) return ret;
+	return m_fineRaster.setScreenDimensions(screenDim);
+}
+
+cl_status Pipeline::preallocate(const ScreenDimension& screenDim, const detail::BinQueueConfig& config, const nr_uint binRasterWorkGroupCount)
+{
+	cl_status err = CL_SUCCESS;
+	auto perr = &err;
+
+	const auto binCount = detail::getBinCount(screenDim, config);
+	
+	m_binQueues = Buffer::make<nr_uint>(m_context, CL_MEM_READ_WRITE, binCount.first * binCount.second * binRasterWorkGroupCount * (config.queueSize + 1), perr);
+	if (error::isFailure(err)) return err;
+	m_binRaster.setBinQueuesBuffer(m_binQueues);
+	if (error::isFailure(err)) return err;
+	m_fineRaster.setBinQueuesBuffer(m_binQueues);
+	if (error::isFailure(err)) return err;
+	
+	m_frame.color = Buffer::make<RawColorRGBA>(m_context, CL_MEM_READ_WRITE, screenDim.getTotalSize(), perr);
+	if (error::isFailure(err)) return err;
+	m_frame.depth = Buffer::make<Depth>(m_context, CL_MEM_READ_WRITE, screenDim.getTotalSize(), perr);
+	if (error::isFailure(err)) return err;
+	return m_fineRaster.setFrameBuffer(m_frame);
 }
 
 cl_status Pipeline::clear() const

@@ -24,7 +24,8 @@ ADD_LIBRARY(Nraster SHARED
 	src/pipeline/Pipeline.cpp
 	src/pipeline/VertexBuffer.cpp
 
-	src/utils/converters.cpp)
+	src/utils/converters.cpp
+	src/utils/rendermath.cpp)
 
 TARGET_COMPILE_DEFINITIONS(Nraster PRIVATE NR_EXPORT)
 

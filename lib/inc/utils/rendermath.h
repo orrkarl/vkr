@@ -2,7 +2,9 @@
 
 #include "../general/predefs.h"
 
-#include <cmath>
+#include <utility>
+
+#include "../rendering/Render.h"
 
 namespace nr
 {
@@ -10,10 +12,9 @@ namespace nr
 namespace detail
 {
 
-nr_uint triangleCount(const nr_uint dim, const nr_uint simplexCount)
-{
-	return dim * (dim - 1) * (dim - 2) * simplexCount;
-}
+nr_uint triangleCount(const nr_uint dim, const nr_uint simplexCount);
+
+std::pair<nr_uint, nr_uint> getBinCount(const ScreenDimension& screenDim, const BinQueueConfig& config);
 
 }
 
