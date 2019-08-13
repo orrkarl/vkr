@@ -36,16 +36,16 @@ bool App::init()
 	return true;
 }
 
-App::App(const nr::string& name, const nr::ScreenDimension& m_renderDimension, const nr_uint renderDimension, const nr_uint simplexCount)
-	: m_bitmap(new nr::RawColorRGBA[m_renderDimension.width * m_renderDimension.height]), m_far(new nr_float[renderDimension]), m_name(name), m_near(new nr_float[renderDimension]), m_renderDimension(renderDimension), m_screenDim(m_renderDimension), m_h_simplexes(new nr_float[renderDimension * (renderDimension + 1) * simplexCount]), m_simplexCount(simplexCount)
+App::App(const nr::string& name, const nr::ScreenDimension& screenDim, const nr_uint renderDimension)
+	: m_bitmap(new nr::RawColorRGBA[screenDim.width * screenDim.height]), m_name(name), m_renderDimension(renderDimension), m_screenDim(screenDim), m_pipeline({ 64, 64, 2047 }, 1)
 {
 }
 
-nr_int App::run()
+nr_status App::run()
 {
 	cl_status status = CL_SUCCESS;
 
-	if (!initialize()) return status;
+	if (!initialize()) return -1;
 	
 	glViewport(0, 0, m_screenDim.width, m_screenDim.height);
 	glClearColor(0, 0, 0, 1);
@@ -61,142 +61,23 @@ nr_int App::run()
 	return status;
 }
 
-nr_uint App::getSimplexCount()
-{
-	return m_simplexCount;
-}
-
-void App::setNearPlane(const nr_float* near)
-{
-	for (auto i = 0u; i < m_renderDimension; ++i)
-	{
-		m_near[i] = near[i];
-	}
-}
-
-void App::setFarPlane(const nr_float* far)
-{
-	for (auto i = 0u; i < m_renderDimension; ++i)
-	{
-		m_far[i] = far[i];
-	}
-}
-
-GLFWwindow* App::getWindow()
-{
-	return m_window;
-}
-
-void App::clearBuffers(cl_status* err)
-{
-	*err = m_commandQueue.enqueueBufferFillCommand<nr_uint>(m_binRasterizer.binQueues, 0u);
-	if (nr::error::isFailure(*err)) return;
-
-	*err = m_commandQueue.enqueueBufferFillCommand<nr::RawColorRGBA>(m_fineRasterizer.frameBuffer.color, { 0, 0, 0, 0 });
-	if (nr::error::isFailure(*err)) return;
-
-	*err = m_commandQueue.enqueueBufferFillCommand<nr_float>(m_fineRasterizer.frameBuffer.depth, 0.0f);
-}
-
 void App::destroy()
 {
 	glfwDestroyWindow(m_window);
 }
 
-void App::draw(cl_status* err)
+nr_status App::draw(const nr::VertexBuffer& vb, const nr::Primitive& type, const nr_uint primitiveCount)
 {
-	if (nr::error::isFailure(*err = m_vertexShader.load()))
-	{
-		std::cerr << "Could not load vertex shader arguments: " << nr::utils::stringFromCLError(*err) << '\n';
-		return;
-	}
-	if (nr::error::isFailure(*err = m_commandQueue.enqueueKernelCommand<1>(m_vertexShader, m_vertexShaderGlobalSize, m_vertexShaderLocalSize)))
-	{
-		std::cerr << "Could not execute vertex shader: " << nr::utils::stringFromCLError(*err) << '\n';
-		return;
-	}
+	nr_status ret = m_pipeline.clear();
+	if (nr::error::isFailure(ret)) return ret;
 
-	if (nr::error::isFailure(*err = m_simplexReducer.load()))
-	{
-		std::cerr << "Could not load simplex reducer arguments: " << nr::utils::stringFromCLError(*err) << '\n';
-		return;
-	}
-	if (nr::error::isFailure(*err = m_commandQueue.enqueueKernelCommand<1>(m_simplexReducer, m_simplexReducerGlobalSize, m_simplexReducerLocalSize)))
-	{
-		std::cerr << "Could not execute simplex reducer: " << nr::utils::stringFromCLError(*err) << '\n';
-		return;
-	}
+	ret = m_pipeline.render(vb, type, primitiveCount);
+	if (nr::error::isFailure(ret)) return ret;
 
-	if (nr::error::isFailure(*err = m_binRasterizer.load()))
-	{
-		std::cerr << "Could not load bin rasterizer arguments" << nr::utils::stringFromCLError(*err) << '\n';
-		return;
-	}
-	if (nr::error::isFailure(*err = m_commandQueue.enqueueKernelCommand<2>(m_binRasterizer, m_binRasterizerGlobalSize, m_binRasterizerLocalSize)))
-	{
-		std::cerr << "Could not execute bin rasterizer: " << nr::utils::stringFromCLError(*err) << '\n';
-		return;
-	}
-
-	if (nr::error::isFailure(*err = m_fineRasterizer.load()))
-	{
-		std::cerr <<  "Could not load fine rasterizer arguments" << nr::utils::stringFromCLError(*err) << '\n';
-		return;
-	}
-	if (nr::error::isFailure(*err = m_commandQueue.enqueueKernelCommand<2>(m_fineRasterizer, m_fineRasterizerGlobalSize, m_fineRasterizerLocalSize)))
-	{
-		std::cerr << "Could not execute fine rasterizer: " << nr::utils::stringFromCLError(*err) << '\n';
-		return;
-	}
-
-	*err = m_commandQueue.enqueueBufferReadCommand(m_fineRasterizer.frameBuffer.color, true, m_screenDim.width * m_screenDim.height, m_bitmap.get());
-	if (nr::error::isFailure(*err))
-	{
-		std::cerr << "Could not load nr frame buffer: " << nr::utils::stringFromCLError(*err) << '\n';
-		return;
-	}
-
-	//nr::detail::BinQueueConfig config{ 32, 32, 120 };
-	//
-	//const nr_uint binRasterWorkGroupCount = 1;
-	//const nr_uint binCountX = ceil(((nr_float)m_screenDim.width) / config.binWidth);
-	//const nr_uint binCountY = ceil(((nr_float)m_screenDim.height) / config.binHeight);
-	//const nr_uint totalBinCount = binCountX * binCountY;
-	//
-	//const nr_uint trianglesPerSimplex = m_renderDimension * (m_renderDimension - 1) * (m_renderDimension - 2) / 6;
-	//const nr_uint triangleCount = trianglesPerSimplex * m_simplexCount;
-	//const nr_uint totalFloatCount = (m_renderDimension + 1) * 3 * triangleCount;
-	//
-	//std::unique_ptr<nr_uint[]> binQueues(new nr_uint[totalBinCount * binRasterWorkGroupCount * (config.queueSize + 1)]);
-	//m_commandQueue.enqueueBufferReadCommand(m_fineRasterizer.binQueues, true, binQueues.get());
-	//for (auto g = 0u; g < binRasterWorkGroupCount; ++g)
-	//{
-	//	for (nr_int y = binCountY - 1; y >= 0; --y)
-	//	{
-	//		for (auto x = 0u; x < binCountX; ++x)
-	//		{
-	//			std::cout << "Bin queue [ " << x << ", " << y << " ]:\t";
-	//			for (auto i = 0u; i < config.queueSize + 1; ++i)
-	//			{
-	//				std::cout << binQueues[(g * totalBinCount + y * binCountX + x) * (config.queueSize + 1) + i] << " ";
-	//			}
-	//			std::cout << std::endl;
-	//		}
-	//	}
-	//}
-	//
-	//std::unique_ptr<nr::Triangle<4>[]> triangles(new nr::Triangle<4>[triangleCount]);
-	//
-	//m_commandQueue.enqueueBufferReadCommand(m_binRasterizer.triangleData, true, reinterpret_cast<nr_float*>(triangles.get()));
-	//for (auto tri = 0u; tri < triangleCount; ++tri)
-	//{
-	//	std::cout << "Triangle " << tri << ":\t" << triangles[tri] << std::endl;
-	//}
-
-	glDrawPixels(m_screenDim.width, m_screenDim.height, GL_RGBA, GL_UNSIGNED_BYTE, m_bitmap.get());
+	glfwSwapBuffers(m_window);
 }
 
-bool App::initCL()
+bool App::initRenderingPipeline()
 {
 	cl_status ret = CL_SUCCESS;
 	auto pret = &ret;
@@ -241,7 +122,7 @@ bool App::initCL()
 		return false;
 	}
 
-	m_device = devices[0];
+	auto device = devices[0];
 
 	const cl_context_properties props[3] = { CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>((cl_platform_id)defaultPlatform), 0 };
 	m_context = nr::Context(props, CL_DEVICE_TYPE_GPU, pret);
@@ -251,10 +132,24 @@ bool App::initCL()
 		return false;
 	}
 
-	m_commandQueue = nr::CommandQueue(m_context, m_device, (cl_command_queue_properties)CL_QUEUE_PROFILING_ENABLE, pret);
+	m_commandQueue = nr::CommandQueue(m_context, device, (cl_command_queue_properties)CL_QUEUE_PROFILING_ENABLE, pret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not create OpenCL CommandQueue: " << nr::utils::stringFromCLError(ret) << '\n';
+		return false;
+	}
+
+	m_pipeline.init(m_context, device, m_commandQueue, m_renderDimension, pret);
+	if (nr::error::isFailure(ret))
+	{
+		std::cerr << "Could not initialize rendering pipeline: " << nr::utils::stringFromCLError(ret) << '\n';
+		return false;
+	}
+
+	ret = m_pipeline.viewport(m_screenDim);
+	if (nr::error::isFailure(ret))
+	{
+		std::cerr << "Could not initialize rendering pipeline viewport: " << nr::utils::stringFromCLError(ret) << '\n';
 		return false;
 	}
 
@@ -264,8 +159,8 @@ bool App::initCL()
 bool App::initialize()
 {
 	if (!initGL()) return false;
-	if (!initCL()) return false;
 	if (!initRenderingPipeline()) return false;
+	if (nr::error::isFailure(init(m_context, m_pipeline))) return false;
 	
 	return true;
 }
@@ -300,212 +195,18 @@ bool App::initGL()
 	return true;
 }
 
-bool App::initRenderingPipeline()
+GLFWwindow* App::getWindow()
 {
-	cl_status ret = CL_SUCCESS;
-
-	nr::detail::BinQueueConfig config{48, 48, 120};
-
-	const nr_uint binRasterWorkGroupCount = 1;
-	const nr_uint binCountX = ceil(((nr_float)m_screenDim.width) / config.binWidth);
-	const nr_uint binCountY = ceil(((nr_float)m_screenDim.height) / config.binHeight);
-	const nr_uint totalBinCount = binCountX * binCountY;
-	const nr_uint totalScreenDim = m_screenDim.width * m_screenDim.height;
-	const nr_uint trianglesPerSimplex = m_renderDimension * (m_renderDimension - 1) * (m_renderDimension - 2) / 6;
-	const nr_uint triangleCount = trianglesPerSimplex * m_simplexCount;
-	const nr_uint totalFloatCount = (m_renderDimension + 1) * 3 * triangleCount;
-	
-	nr::Module::Options opts = { nr::Module::RenderDimension(m_renderDimension), nr::Module::DEBUG, nr::Module::CL_VERSION_12 };
-	nr::Module::Sources srcs = {
-		nr::detail::clcode::base,
-		nr::detail::clcode::bin_rasterizer,
-		nr::detail::clcode::fine_rasterizer,
-		nr::detail::clcode::simplex_reducing,
-		nr::detail::clcode::vertex_shading
-	};
-	
-	auto fullModule = nr::Module(m_context, srcs, &ret);
-	if (nr::error::isFailure(ret))
-	{
-		std::cerr << "Could not initialize pipeline module: " << nr::utils::stringFromCLError(ret) << '\n';
-		return false;
-	}
-	ret = fullModule.build(m_device, opts);
-	if (nr::error::isFailure(ret))
-	{
-		std::cerr << "Could not initialize pipeline module: " << nr::utils::stringFromCLError(ret) << '\n';
-		auto buildLog = fullModule.getBuildLog(m_device, &ret);
-		if (nr::error::isFailure(ret))
-		{
-			std::cerr << "Could not aquire pipeline module build log: " << nr::utils::stringFromCLError(ret) << '\n';
-		}
-		else if (buildLog.size() > 0)
-		{
-			std::cerr << "Errors while building pipeline module:\n" << buildLog << '\n';
-		}
-		return false;
-	}
-
-	auto buildLog = fullModule.getBuildLog(m_device, &ret);
-	if (nr::error::isFailure(ret))
-	{
-		std::cerr << "Could not aquire pipeline module build log: " << nr::utils::stringFromCLError(ret) << '\n';
-		return false;
-	}
-	if (buildLog.size() > 0)
-	{
-		std::cerr << "Warnings while building pipeline module:\n" << buildLog << '\n';
-	}
-
-	m_binRasterizer = nr::detail::BinRasterizer(fullModule, &ret);
-	if (nr::error::isFailure(ret))
-	{
-		std::cerr << "Could not initialize bin rasterizer kernel: " << nr::utils::stringFromCLError(ret) << '\n';
-		return false;
-	}
-
-	m_fineRasterizer = nr::detail::FineRasterizer(fullModule, &ret);
-	if (nr::error::isFailure(ret))
-	{
-		std::cerr << "Could not initialize fine rasterizer kernel: " << nr::utils::stringFromCLError(ret) << '\n';
-		return false;
-	}
-
-	m_simplexReducer = nr::detail::SimplexReducer(fullModule, &ret);
-	if (nr::error::isFailure(ret))
-	{
-		std::cerr << "Could not initialize simplex reducer kernel: " << nr::utils::stringFromCLError(ret) << '\n';
-		return false;
-	}
-
-	m_vertexShader = nr::detail::VertexShader(fullModule, &ret);
-	if (nr::error::isFailure(ret))
-	{
-		std::cerr << "Could not initialize vertex shader kernel: " << nr::utils::stringFromCLError(ret) << '\n';
-		return false;
-	}
-
-	// Vertex Shader
-	m_vertexShader.points = nr::Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, (m_renderDimension + 1) * m_renderDimension * m_simplexCount, m_h_simplexes.get(), &ret);
-	if (nr::error::isFailure(ret))
-	{
-		std::cerr << "Could not initialize vertex shader point buffer: " << nr::utils::stringFromCLError(ret) << '\n';
-		return false;
-	}
-
-	m_vertexShader.near = nr::Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, m_renderDimension, m_near.get(), &ret);
-	if (nr::error::isFailure(ret))
-	{
-		std::cerr << "Could not initialize vertex shader near buffer: " << nr::utils::stringFromCLError(ret) << '\n';
-		return false;
-	}
-
-	m_vertexShader.far = nr::Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, m_renderDimension, m_far.get(), &ret);
-	if (nr::error::isFailure(ret))
-	{
-		std::cerr << "Could not initialize vertex shader far buffer: " << nr::utils::stringFromCLError(ret) << '\n';
-		return false;
-	}
-
-	m_vertexShader.result = nr::Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE, (m_renderDimension + 1) * m_renderDimension * m_simplexCount, &ret);
-	if (nr::error::isFailure(ret))
-	{
-		std::cerr << "Could not initialize vertex shader result buffer: " << nr::utils::stringFromCLError(ret) << '\n';
-		return false;
-	}
-
-	m_vertexShaderGlobalSize = { m_renderDimension * m_simplexCount };
-	m_vertexShaderLocalSize = { 1 };
-
-	// Simplex Reducer
-	m_simplexReducer.simplexes = m_vertexShader.result;
-	m_simplexReducer.result = nr::Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE, totalFloatCount, &ret);
-	if (nr::error::isFailure(ret))
-	{
-		std::cerr << "Could not initialize simplex reducer result buffer: " << nr::utils::stringFromCLError(ret) << '\n';
-		return false;
-	}
-
-	m_simplexReducerGlobalSize = { m_simplexCount };
-	m_simplexReducerLocalSize = { 1 };
-
-	// Bin rasterizer
-	m_binRasterizer.triangleData = m_simplexReducer.result;
-	m_binRasterizer.triangleCount = triangleCount;
-	m_binRasterizer.dimension = m_screenDim;
-	m_binRasterizer.binQueueConfig = config;
-	
-	m_binRasterizer.hasOverflow = nr::Buffer::make<nr_uint>(m_context, CL_MEM_WRITE_ONLY, 1, &ret);
-	if (nr::error::isFailure(ret))
-	{
-		std::cerr << "Could not initialize bin rasterizer overflow buffer: " << nr::utils::stringFromCLError(ret) << '\n';
-		return false;
-	}
-
-	m_binRasterizer.binQueues = nr::Buffer::make<nr_uint>(m_context, CL_MEM_READ_WRITE, binRasterWorkGroupCount * totalBinCount * (config.queueSize + 1), &ret);
-	if (nr::error::isFailure(ret))
-	{
-		std::cerr << "Could not initialize bin rasterizer queues: " << nr::utils::stringFromCLError(ret) << '\n';
-		return false;
-	}
-
-	m_binRasterizer.batchIndex = nr::Buffer::make<nr_uint>(m_context, CL_MEM_READ_WRITE, 1, &ret);
-	if (nr::error::isFailure(ret))
-	{
-		std::cerr << "Could not initialize bin rasterizer batch inde  buffer: " << nr::utils::stringFromCLError(ret) << '\n';
-		return false;
-	}
-
-	m_binRasterizerGlobalSize = { binRasterWorkGroupCount * binCountX, binCountY };
-	m_binRasterizerLocalSize = { binCountX, binCountY };
-
-	// Fine rasterizer
-	m_fineRasterizer.triangleData = m_binRasterizer.triangleData;
-	m_fineRasterizer.workGroupCount = binRasterWorkGroupCount;
-	m_fineRasterizer.dim = m_screenDim;
-	m_fineRasterizer.binQueueConfig = config;
-	m_fineRasterizer.binQueues = m_binRasterizer.binQueues;
-	
-	m_fineRasterizer.frameBuffer = nr::FrameBuffer();
-	m_fineRasterizer.frameBuffer.color = nr::Buffer::make<nr::RawColorRGBA>(m_context, CL_MEM_READ_WRITE, m_screenDim.width * m_screenDim.height, &ret);
-	if (nr::error::isFailure(ret))
-	{
-		std::cerr << "Could not initialize color buffer: " << nr::utils::stringFromCLError(ret) << '\n';
-		return false;
-	}
-	m_fineRasterizer.frameBuffer.depth = nr::Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE, m_screenDim.width * m_screenDim.height, &ret);
-	if (nr::error::isFailure(ret))
-	{
-		std::cerr << "Could not initialize depth buffer: " << nr::utils::stringFromCLError(ret) << '\n';
-		return false;
-	}
-
-	m_fineRasterizerGlobalSize = { binCountX, binCountY };
-	m_fineRasterizerLocalSize = { binCountX / binRasterWorkGroupCount, binCountY };
-
-	return true;
-}
-
-void App::loadData(cl_status* err)
-{
-	*err = m_commandQueue.enqueueBufferWriteCommand(m_vertexShader.points, false, m_simplexCount * m_renderDimension * (m_renderDimension + 1), m_h_simplexes.get());
+	return m_window;
 }
 
 void App::loop(cl_status* err)
 {
 	while (!glfwWindowShouldClose(m_window))
 	{
-		update();
-		loadData(err);
+		*err = update(m_commandQueue, m_pipeline);
 		if (nr::error::isFailure(*err)) return;
 		
-		clearBuffers(err);
-		if (nr::error::isFailure(*err)) return;
-		
-		draw(err);
-		if (nr::error::isFailure(*err)) return;
-		
-		glfwSwapBuffers(m_window);
 		glfwPollEvents();
 	}
 }

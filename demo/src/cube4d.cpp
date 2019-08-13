@@ -58,17 +58,19 @@ class DynamicCube4dApp : public App
 {
 public:
 	DynamicCube4dApp(const nr_uint divisions)
-		: App("Dynamic Cube4d", nr::ScreenDimension{ 640, 480 }, dim, 48), divisions(divisions)
+		: App("Dynamic Cube4d", nr::ScreenDimension{ 640, 480 }, dim), divisions(divisions), m_hostVertecies(new Tetrahedron[48])
 	{
-		setNearPlane(h_near);
-		setFarPlane(h_far);
 	}
 
 protected:
-	void update() override
+	nr_status update(const nr::CommandQueue& queue, nr::Pipeline& pipeline) override
 	{
 		const nr_float angle = tick * (2 * M_PI) / divisions;
-		tick = (tick + 1) % divisions;
+
+		transform(m_hostVertecies.get(), angle);
+		nr_status ret = queue.enqueueBufferWriteCommand(m_vertecies, true, 48, m_hostVertecies.get());
+		if (nr::error::isFailure(ret)) return ret;
+		return pipeline.render(m_vertecies, nr::Primitive::SIMPLEX, 48);
 
 		if (glfwGetKey(getWindow(), GLFW_KEY_S) == GLFW_PRESS)
 		{
@@ -77,22 +79,44 @@ protected:
 			std::cout << "Angle: " << 180 * angle / nr_float(M_PI) << " (deg)" << std::endl;
 		}
 
-		transform(reinterpret_cast<Tetrahedron*>(getHostSimplexes<4>()), angle);
+		tick = (tick + 1) % divisions;
+
+		return CL_SUCCESS;
+	}
+
+	nr_status init(const nr::Context& renderContext, nr::Pipeline& pipeline) override
+	{
+		nr_status ret = CL_SUCCESS;
+		auto pret = &ret;
+
+		m_vertecies = nr::VertexBuffer::make<dim>(renderContext, 48, pret);
+		if (nr::error::isFailure(ret)) return ret;
+
+		ret = pipeline.setFarPlane(h_far);
+		if (nr::error::isFailure(ret)) return ret;
+
+		ret = pipeline.setNearPlane(h_near);
+		if (nr::error::isFailure(ret)) return ret;
+
+		pipeline.setClearColor({ 0, 0, 0, 0 });
+		pipeline.setClearDepth(0.0f);
+
+		return ret;
 	}
 
 private:
 	nr_uint tick = 0;
 	const nr_uint divisions;
+	nr::VertexBuffer m_vertecies;
+	std::unique_ptr<Tetrahedron[]> m_hostVertecies;
 };
 
 class StaticCube4dApp : public App
 {
 public:
 	StaticCube4dApp(const nr_float angle)
-		: App("Static Cube4d", nr::ScreenDimension{ 640, 480 }, dim, 48), angle(angle)
+		: App("Static Cube4d", nr::ScreenDimension{ 640, 480 }, dim), angle(angle), m_hostVertecies(new Tetrahedron[48])
 	{
-		setNearPlane(h_near);
-		setFarPlane(h_far);
 	}
 
 	StaticCube4dApp(const nr_uint tick, const nr_uint divisions)
@@ -101,22 +125,60 @@ public:
 	}
 
 protected:
-	void update() override
+	nr_status update(const nr::CommandQueue& queue, nr::Pipeline& pipeline) override
 	{
+		if (firstRun)
+		{
+			firstRun = false;
+			return draw(queue, pipeline);
+		}
+
 		if (glfwGetKey(getWindow(), GLFW_KEY_R) == GLFW_PRESS)
 		{
 			std::cout << "Angle: " << angle << " (rad)" << std::endl;
 		}
+
 		if (glfwGetKey(getWindow(), GLFW_KEY_D) == GLFW_PRESS)
 		{
 			std::cout << "Angle: " << 180 * angle / nr_float(M_PI) << " (deg)" << std::endl;
 		}
 
-		transform(reinterpret_cast<Tetrahedron*>(getHostSimplexes<dim>()), angle);
+		return CL_SUCCESS;
+	}
+	
+	nr_status init(const nr::Context& renderContext, nr::Pipeline& pipeline) override
+	{
+		nr_status ret = CL_SUCCESS;
+		auto pret = &ret;
+
+		m_vertecies = nr::VertexBuffer::make<dim>(renderContext, 48, pret);
+		if (nr::error::isFailure(ret)) return ret;
+
+		ret = pipeline.setFarPlane(h_far);
+		if (nr::error::isFailure(ret)) return ret;
+
+		ret = pipeline.setNearPlane(h_near);
+		if (nr::error::isFailure(ret)) return ret;
+
+		pipeline.setClearColor({ 0, 0, 0, 0 });
+		pipeline.setClearDepth(0.0f);
+
+		return ret;
 	}
 
 private:
+	nr_status draw(const nr::CommandQueue& queue, nr::Pipeline& pipeline)
+	{
+		transform(m_hostVertecies.get(), angle);
+		nr_status ret = queue.enqueueBufferWriteCommand(m_vertecies, true, 48, m_hostVertecies.get());
+		if (nr::error::isFailure(ret)) return ret;
+		return pipeline.render(m_vertecies, nr::Primitive::SIMPLEX, 48);
+	}
+
 	const nr_float angle;
+	bool firstRun = true;
+	nr::VertexBuffer m_vertecies;
+	std::unique_ptr<Tetrahedron[]> m_hostVertecies;
 };
 
 int main(const int argc, const char* argv[])

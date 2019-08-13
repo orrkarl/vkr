@@ -5,6 +5,8 @@
 #include "../base/Buffer.h"
 #include "../base/CommandQueue.h"
 
+#include "../rendering/Render.h"
+
 #include "../utils/rendermath.h"
 
 namespace nr
@@ -13,22 +15,47 @@ namespace nr
 class VertexBuffer
 {
 public:
-	template <typename T>
-	VertexBuffer(const Context& context, const nr_uint dimension, const nr_uint primitiveCount, const T* data, cl_status* err)
-		:	vertecies(context, CL_MEM_READ_WRITE, (dimension + 1) * primitiveCount * sizeof(T), err),
-			reducedVertecies(context, CL_MEM_READ_WRITE, (dimension + 1) * primitiveCount * sizeof(T), err),
-			reducedSimplices(context, CL_MEM_READ_WRITE, (dimension + 1) * detail::triangleCount(dimension, primitiveCount) * sizeof(T), err)
+	template <nr_uint Dimension>
+	static VertexBuffer make(const Context& context, const nr_uint primitiveCount, Simplex<Dimension>* data, cl_status* err)
 	{
+		auto vertecies = Buffer::make<Simplex<Dimension>>(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, primitiveCount, data, err);
+		if (error::isFailure(*err)) return VertexBuffer();
+		auto reducedVertecies = Buffer::make<Simplex<Dimension>>(context, CL_MEM_READ_WRITE, primitiveCount, err);
+		if (error::isFailure(*err)) return VertexBuffer();
+		auto reducedSimplices = Buffer::make<Triangle<Dimension>>(context, CL_MEM_READ_WRITE, detail::triangleCount(Dimension, primitiveCount), err);
+		if (error::isFailure(*err)) return VertexBuffer();
+
+		return VertexBuffer(vertecies, reducedVertecies, reducedSimplices);
 	}
+
+	template <nr_uint Dimension>
+	static VertexBuffer make(const Context& context, const nr_uint primitiveCount, cl_status* err)
+	{
+		auto vertecies = Buffer::make<Simplex<Dimension>>(context, CL_MEM_READ_WRITE, primitiveCount, err);
+		if (error::isFailure(*err)) return VertexBuffer();
+		auto reducedVertecies = Buffer::make<Simplex<Dimension>>(context, CL_MEM_READ_WRITE, primitiveCount, err);
+		if (error::isFailure(*err)) return VertexBuffer();
+		auto reducedSimplices = Buffer::make<Triangle<Dimension>>(context, CL_MEM_READ_WRITE, detail::triangleCount(Dimension, primitiveCount), err);
+		if (error::isFailure(*err)) return VertexBuffer();
+
+		return VertexBuffer(vertecies, reducedVertecies, reducedSimplices);
+	}
+
+	VertexBuffer() {}
 
 	operator Buffer() const { return vertecies; }
 
 private:
+	VertexBuffer(const Buffer vertecies, const Buffer reducedVertecies, const Buffer reducedSimplices)
+		: vertecies(vertecies), reducedSimplices(reducedSimplices), reducedVertecies(reducedVertecies)
+	{
+	}
+
 	friend class Pipeline;
 
-	const Buffer vertecies;
-	const Buffer reducedVertecies;
-	const Buffer reducedSimplices;
-};
+	Buffer vertecies;
+	Buffer reducedVertecies;
+	Buffer reducedSimplices;
+};	
 
 }

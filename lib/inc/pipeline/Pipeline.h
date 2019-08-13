@@ -20,9 +20,15 @@ class NRAPI Pipeline
 public:
 	Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const nr_uint dim, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, cl_status* err);
 
+	Pipeline(const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount);
+
+	Pipeline();
+
 	void setClearColor(const RawColorRGBA& color);
 
 	void setClearDepth(const Depth& depth);
+
+	void init(const Context& context, const Device& device, const CommandQueue& queue, const nr_uint dim, cl_status* err);
 
 	cl_status viewport(const ScreenDimension& screenDim);
 

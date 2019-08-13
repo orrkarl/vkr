@@ -75,7 +75,7 @@ bool initCL(nr::Context& context, nr::Device& device, nr::CommandQueue& queue)
 
 	if (!devices.size())
 	{
-		std::cerr << "No OpenCL devices found!" << '\n';
+		std::cerr << "No OpenCL devices found! " << '\n';
 		return false;
 	}
 
@@ -136,7 +136,7 @@ bool initGL(GLFWwindow*& wnd, const nr::ScreenDimension& screenDim, const nr::st
 		std::cerr << "Could not initialize GLEW: " << glewGetErrorString(err) << '\n';
 		return false;
 	}
-
+	 
 	glfwSetKeyCallback(wnd, keyCallback);
 	glfwSwapInterval(1);
 
@@ -160,34 +160,47 @@ int main(const int argc, const char* argv[])
 	if (!initCL(ctx, dev, q)) return EXIT_FAILURE;
 	if (!initGL(wnd, screenDim, "Triangle3d")) return EXIT_FAILURE;
 
-	auto vb = nr::VertexBuffer(ctx, dim, 1, &h_triangle, pret);
+	auto vb = nr::VertexBuffer::make(ctx, 1, &h_triangle, pret);
 	if (nr::error::isFailure(ret))
 	{
-		std::cerr << "Could not create vertex buffer!\n";
+		std::cerr << "Could not create vertex buffer! " << nr::utils::stringFromCLError(ret) << std::endl;
 		return ret;
 	}
 
 	auto p = nr::Pipeline(ctx, dev, q, dim, { 64, 64, 255 }, 1, pret);
 	if (nr::error::isFailure(ret))
 	{
-		std::cerr << "Coult not create pipeline!\n";
+		std::cerr << "Coult not create pipeline! " << nr::utils::stringFromCLError(ret) << std::endl;
 		return ret;
 	}
 	ret = p.viewport(screenDim);
 	if (nr::error::isFailure(ret))
 	{
-		std::cerr << "Could not set viewport!\n";
+		std::cerr << "Could not set viewport! " << nr::utils::stringFromCLError(ret) << std::endl;
 		return ret;
 	}
 	p.setClearColor({ 0, 0, 0, 0 });
 	p.setClearDepth(1.0f);
+
+	ret = p.setNearPlane(h_near);
+	if (nr::error::isFailure(ret))
+	{
+		std::cerr << "Could not set near plane! " << nr::utils::stringFromCLError(ret) << std::endl;
+		return ret;
+	}
+	ret = p.setFarPlane(h_far);
+	if (nr::error::isFailure(ret))
+	{
+		std::cerr << "Could not set far plane! " << nr::utils::stringFromCLError(ret) << std::endl;
+		return ret;
+	}
 
 	while (!glfwWindowShouldClose(wnd))
 	{
 		ret = p.clear();
 		if (nr::error::isFailure(ret))
 		{
-			std::cerr << "Could clear framebuffer!\n";
+			std::cerr << "Could clear framebuffer! " << nr::utils::stringFromCLError(ret) << std::endl;
 			return ret;
 		}
 
@@ -201,7 +214,7 @@ int main(const int argc, const char* argv[])
 		ret = p.copyFrameBuffer(bitmap.get());
 		if (nr::error::isFailure(ret))
 		{
-			std::cerr << "Could not copy framebuffer!\n";
+			std::cerr << "Could not copy framebuffer! " << nr::utils::stringFromCLError(ret) << std::endl;
 			return ret;
 		}
 

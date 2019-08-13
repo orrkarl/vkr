@@ -35,6 +35,7 @@ typedef char nr_char;
 typedef bool nr_bool;
 
 typedef cl_int cl_status;
+typedef cl_status nr_status;
 
 typedef size_t nr_size;
 

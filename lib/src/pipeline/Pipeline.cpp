@@ -10,9 +10,28 @@ namespace nr
 
 const ScreenDimension Pipeline::MAX_SCREEN_DIM = { 2048, 2048 };
 
-Pipeline::Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const nr_uint dim, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, cl_status* err)
-	: m_binQueueConfig(config), m_binRasterWorkGroupCount(binRasterWorkGroupCount), m_clearColor{ 0, 0, 0, 0 }, m_clearDepth(1.0f), m_commandQueue(queue), m_context(context), m_device(device), m_renderDimension(0), m_screenDimension{ 0, 0 }
+Pipeline::Pipeline(const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount)
+	: m_binQueueConfig(config), m_binRasterWorkGroupCount(binRasterWorkGroupCount), m_clearColor{ 0, 0, 0, 0 }, m_clearDepth(1.0f), m_renderDimension(0), m_screenDimension{ 0, 0 }
 {
+}
+
+Pipeline::Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const nr_uint dim, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, cl_status* err)
+	:  Pipeline(config, binRasterWorkGroupCount)
+{	
+	init(context, device, queue, dim, err);
+}
+
+Pipeline::Pipeline()
+	: Pipeline({64, 64, 255}, 1)
+{
+}
+
+void Pipeline::init(const Context& context, const Device& device, const CommandQueue& queue, const nr_uint dim, cl_status* err)
+{
+	m_context = context;
+	m_device = device;
+	m_commandQueue = queue;
+
 	m_overflowNotifier = Buffer::make<nr_bool>(context, CL_MEM_READ_WRITE, 1, err);
 	if (error::isFailure(*err)) return;
 
@@ -22,7 +41,7 @@ Pipeline::Pipeline(const Context& context, const Device& device, const CommandQu
 	*err = setRenderDimension(dim);
 	if (error::isFailure(*err)) return;
 
-	*err = preallocate(MAX_SCREEN_DIM, config, binRasterWorkGroupCount);
+	*err = preallocate(MAX_SCREEN_DIM, m_binQueueConfig, m_binRasterWorkGroupCount);
 }
 
 cl_status Pipeline::setRenderDimension(const nr_uint dim)
@@ -48,9 +67,9 @@ cl_status Pipeline::setRenderDimension(const nr_uint dim)
 	m_vertexReduce = s.vertexReduce();
 	if (error::isFailure(ret)) return ret;
 
-	m_nearPlane = Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE, 1, pret);
+	m_nearPlane = Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE, dim, pret);
 	if (error::isFailure(ret)) return ret;
-	m_farPlane = Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE, 1, pret);
+	m_farPlane = Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE, dim, pret);
 	if (error::isFailure(ret)) return ret;
 
 	ret = m_vertexReduce.setNearPlaneBuffer(m_nearPlane);
@@ -153,7 +172,10 @@ cl_status Pipeline::render(const VertexBuffer& primitives, const Primitive& prim
 	auto perr = &err;
 	nr_bool overflow;
 
-	if (primitives.vertecies.count<nr_float>() < nr_size(primitiveCount) * (nr_size(m_renderDimension) + 1) * nr_size(m_renderDimension))
+	auto elementCount = primitives.vertecies.count<nr_float>(perr);
+	if (error::isFailure(err)) return err;
+
+	if (elementCount < nr_size(primitiveCount) * (nr_size(m_renderDimension) + 1) * nr_size(m_renderDimension))
 	{
 		return CL_INVALID_VALUE;
 	}
