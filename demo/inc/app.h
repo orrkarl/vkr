@@ -26,7 +26,7 @@ public:
 	nr_status run();
 
 protected:
-	virtual nr_status update(const nr::CommandQueue& queue, nr::Pipeline& pipeline) = 0;
+	virtual nr_status update(const nr::CommandQueue& queue) = 0;
 
 	virtual nr_status init(const nr::Context& renderContext, nr::Pipeline& pipeline) = 0;
 

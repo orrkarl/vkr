@@ -74,7 +74,14 @@ nr_status App::draw(const nr::VertexBuffer& vb, const nr::Primitive& type, const
 	ret = m_pipeline.render(vb, type, primitiveCount);
 	if (nr::error::isFailure(ret)) return ret;
 
+	ret = m_pipeline.copyFrameBuffer(m_bitmap.get());
+	if (nr::error::isFailure(ret)) return ret;
+
+	glDrawPixels(m_screenDim.width, m_screenDim.height, GL_RGBA, GL_UNSIGNED_BYTE, m_bitmap.get());
+
 	glfwSwapBuffers(m_window);
+
+	return ret;
 }
 
 bool App::initRenderingPipeline()
@@ -204,7 +211,7 @@ void App::loop(cl_status* err)
 {
 	while (!glfwWindowShouldClose(m_window))
 	{
-		*err = update(m_commandQueue, m_pipeline);
+		*err = update(m_commandQueue);
 		if (nr::error::isFailure(*err)) return;
 		
 		glfwPollEvents();

@@ -80,14 +80,6 @@ kernel void shade_vertex(
 
     perspective_bounded(near[0], far[0], near[1], far[1], result[index]);
     normalize_step(points[index], near, far, 2, result[index]);
-
-//	if (IS_GLOBAL_HEAD)
-//	{
-//		DEBUG_MESSAGE("Triangle:\n");
-//		DEBUG_MESSAGE4("\t[ %f %f %f %f ]\n", points[0][0], points[0][1], points[0][2], points[0][3]);
-//		DEBUG_MESSAGE4("\t[ %f %f %f %f ]\n", points[1][0], points[1][1], points[1][2], points[1][3]);
-//		DEBUG_MESSAGE4("\t[ %f %f %f %f ]\n", points[2][0], points[2][1], points[2][2], points[2][3]);
-//	}
 }
 
 )__CODE__";

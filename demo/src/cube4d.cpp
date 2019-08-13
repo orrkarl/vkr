@@ -63,14 +63,15 @@ public:
 	}
 
 protected:
-	nr_status update(const nr::CommandQueue& queue, nr::Pipeline& pipeline) override
+	nr_status update(const nr::CommandQueue& queue) override
 	{
 		const nr_float angle = tick * (2 * M_PI) / divisions;
 
 		transform(m_hostVertecies.get(), angle);
-		nr_status ret = queue.enqueueBufferWriteCommand(m_vertecies, true, 48, m_hostVertecies.get());
+		nr_status ret = queue.enqueueBufferWriteCommand(m_vertecies, false, 48, m_hostVertecies.get());
 		if (nr::error::isFailure(ret)) return ret;
-		return pipeline.render(m_vertecies, nr::Primitive::SIMPLEX, 48);
+		ret = draw(m_vertecies, nr::Primitive::SIMPLEX, 48);
+		if (nr::error::isFailure(ret)) return ret;
 
 		if (glfwGetKey(getWindow(), GLFW_KEY_S) == GLFW_PRESS)
 		{
@@ -125,12 +126,12 @@ public:
 	}
 
 protected:
-	nr_status update(const nr::CommandQueue& queue, nr::Pipeline& pipeline) override
+	nr_status update(const nr::CommandQueue& queue) override
 	{
 		if (firstRun)
 		{
 			firstRun = false;
-			return draw(queue, pipeline);
+			return draw(queue);
 		}
 
 		if (glfwGetKey(getWindow(), GLFW_KEY_R) == GLFW_PRESS)
@@ -167,12 +168,12 @@ protected:
 	}
 
 private:
-	nr_status draw(const nr::CommandQueue& queue, nr::Pipeline& pipeline)
+	nr_status draw(const nr::CommandQueue& queue)
 	{
 		transform(m_hostVertecies.get(), angle);
-		nr_status ret = queue.enqueueBufferWriteCommand(m_vertecies, true, 48, m_hostVertecies.get());
+		nr_status ret = queue.enqueueBufferWriteCommand(m_vertecies, false, 48, m_hostVertecies.get());
 		if (nr::error::isFailure(ret)) return ret;
-		return pipeline.render(m_vertecies, nr::Primitive::SIMPLEX, 48);
+		return App::draw(m_vertecies, nr::Primitive::SIMPLEX, 48);
 	}
 
 	const nr_float angle;
