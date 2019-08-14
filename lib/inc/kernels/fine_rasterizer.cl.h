@@ -85,7 +85,7 @@ public:
 		range.global.y = binCountY;
 
 		range.local.x = binCountX;
-		range.local.y = binCountY / workGroupCount;
+		range.local.y = binCountY;
 	}
 
 private:

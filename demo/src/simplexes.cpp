@@ -25,12 +25,9 @@ class SimplexesApp : public App
 {
 public:
 	SimplexesApp()
-		: App("Simplexes", nr::ScreenDimension{ 640, 480 }, dim, SimplexesApp::COUNT)
+		: App("Simplexes", nr::ScreenDimension{ 640, 480 }, dim), m_simplices(new Tetrahedron[SimplexesApp::COUNT])
 	{
-		setNearPlane(h_near);
-		setFarPlane(h_far);
-
-		setup(reinterpret_cast<Tetrahedron*>(getHostSimplexes<dim>()));
+		setup(m_simplices.get());
 	}
 
 	static void setup(Tetrahedron* result)
@@ -69,12 +66,45 @@ public:
 	}
 
 protected:
-	void update() override
+	nr_status update(const nr::CommandQueue& queue) override
 	{
+		if (firstRun)
+		{
+			firstRun = false;
+			auto ret = queue.enqueueBufferWriteCommand(m_d_simplices, true, COUNT, m_simplices.get());
+			if (nr::error::isFailure(ret)) return ret;
+			return App::draw(m_d_simplices, nr::Primitive::SIMPLEX, COUNT);
+		}
+
+		return CL_SUCCESS;
+	}
+
+	nr_status init(const nr::Context& renderContext, nr::Pipeline& pipeline) override
+	{
+		nr_status ret = CL_SUCCESS;
+		auto pret = &ret;
+
+		m_d_simplices = nr::VertexBuffer::make<dim>(renderContext, 48, pret);
+		if (nr::error::isFailure(ret)) return ret;
+
+		ret = pipeline.setFarPlane(h_far);
+		if (nr::error::isFailure(ret)) return ret;
+
+		ret = pipeline.setNearPlane(h_near);
+		if (nr::error::isFailure(ret)) return ret;
+
+		pipeline.setClearColor({ 0, 0, 0, 0 });
+		pipeline.setClearDepth(1.0f);
+
+		return ret;
 	}
 
 private:
 	static const nr_uint COUNT = 5;
+
+	std::unique_ptr<Tetrahedron[]> m_simplices;
+	nr::VertexBuffer m_d_simplices;
+	bool firstRun = true;
 };
 
 int main(const int argc, const char* argv[])
