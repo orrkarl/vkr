@@ -137,6 +137,7 @@ cl_status Pipeline::preallocate(const ScreenDimension& screenDim, const detail::
 cl_status Pipeline::clear() const
 {
 	cl_status ret = CL_SUCCESS;
+
 	ret = clearColorBuffer();
 
 	if (error::isFailure(ret)) return ret;

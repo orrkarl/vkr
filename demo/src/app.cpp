@@ -73,7 +73,7 @@ nr_status App::draw(const nr::VertexBuffer& vb, const nr::Primitive& type, const
 
 	ret = m_pipeline.render(vb, type, primitiveCount);
 	if (nr::error::isFailure(ret)) return ret;
-
+	
 	ret = m_pipeline.copyFrameBuffer(m_bitmap.get());
 	if (nr::error::isFailure(ret)) return ret;
 

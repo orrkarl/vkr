@@ -100,7 +100,7 @@ protected:
 		if (nr::error::isFailure(ret)) return ret;
 
 		pipeline.setClearColor({ 0, 0, 0, 0 });
-		pipeline.setClearDepth(0.0f);
+		pipeline.setClearDepth(1.0f);
 
 		return ret;
 	}
@@ -162,7 +162,7 @@ protected:
 		if (nr::error::isFailure(ret)) return ret;
 
 		pipeline.setClearColor({ 0, 0, 0, 0 });
-		pipeline.setClearDepth(0.0f);
+		pipeline.setClearDepth(1.0f);
 
 		return ret;
 	}
