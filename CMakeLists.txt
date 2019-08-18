@@ -34,8 +34,8 @@ FIND_PACKAGE(OpenCL REQUIRED)
 
 
 # Adding Nraster itself
-ADD_SUBDIRECTORY(lib)
-SET(NRASTER_ALL_INCLUDES ${PROJECT_SOURCE_DIR}/lib/inc)
+ADD_SUBDIRECTORY(project)
+SET(NRASTER_ALL_INCLUDES ${PROJECT_SOURCE_DIR}/project/inc)
 
 
 # Conditional packeges and targets
