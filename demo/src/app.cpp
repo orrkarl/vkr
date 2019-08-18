@@ -1,5 +1,7 @@
 #include <app.h>
 
+#include <chrono>
+
 #include <base/Device.h>
 #include <base/Module.h>
 #include <base/Platform.h>
@@ -37,7 +39,7 @@ bool App::init()
 }
 
 App::App(const nr::string& name, const nr::ScreenDimension& screenDim, const nr_uint renderDimension)
-	: m_bitmap(new nr::RawColorRGBA[screenDim.width * screenDim.height]), m_name(name), m_renderDimension(renderDimension), m_screenDim(screenDim), m_pipeline({ 64, 64, 255 }, 4)
+	: m_bitmap(new nr::RawColorRGBA[screenDim.width * screenDim.height]), m_name(name), m_renderDimension(renderDimension), m_screenDim(screenDim), m_pipeline({ 64, 64, 2047 }, 1)
 {
 }
 
@@ -71,8 +73,17 @@ nr_status App::draw(const nr::VertexBuffer& vb, const nr::Primitive& type, const
 	nr_status ret = m_pipeline.clear();
 	if (nr::error::isFailure(ret)) return ret;
 
+	auto t0 = std::chrono::system_clock::now();
+
 	ret = m_pipeline.render(vb, type, primitiveCount);
 	if (nr::error::isFailure(ret)) return ret;
+
+	auto t1 = std::chrono::system_clock::now();
+
+	auto diff = std::chrono::duration<nr_double>(t1 - t0);
+
+	std::cout << "Rendering took " << 1000 * diff.count() << "ms\n";
+	std::cout << "Copying framebuffer!\n";
 	
 	ret = m_pipeline.copyFrameBuffer(m_bitmap.get());
 	if (nr::error::isFailure(ret)) return ret;

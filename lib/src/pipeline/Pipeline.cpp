@@ -1,6 +1,9 @@
-#include <kernels/Source.h>
-
 #include <pipeline/Pipeline.h>
+
+#include <iostream>
+
+
+#include <kernels/Source.h>
 
 #include <utils/converters.h>
 #include <utils/rendermath.h>
@@ -234,7 +237,11 @@ cl_status Pipeline::render(const VertexBuffer& primitives, const Primitive& prim
 		return err;
 	}
 
-	if (overflow) return CL_OUT_OF_RESOURCES;
+	if (overflow)
+	{
+		//return CL_OUT_OF_RESOURCES;
+		std::cout << "Overflow detected!\n";
+	}
 
 	return err;
 }
