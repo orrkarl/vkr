@@ -1,13 +1,14 @@
 #pragma once
 
-#include <inc/includes.h>
-
 #include <base/Module.h>
 #include <base/Buffer.h>
 #include <kernels/base.cl.h>
 #include <kernels/simplex_reducing.cl.h>
 
 #include <utility>
+
+#include "../../includes.h"
+
 
 using namespace nr;
 using namespace nr::detail;

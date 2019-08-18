@@ -1,19 +1,17 @@
-#include <inc/includes.h>
+#include "includes.h"
 
 #include <base/Module.h>
 #include <base/Platform.h>
-
-using namespace nr;
 
 nr::Device defaultDevice = nr::Device();
 nr::Context defaultContext = nr::Context();
 nr::CommandQueue defaultCommandQueue = nr::CommandQueue();
 
-void testCompilation(const nr::Module::Options options, string configurationName, std::initializer_list<string> codes)
+void testCompilation(const nr::Module::Options options, nr::string configurationName, std::initializer_list<nr::string> codes)
 {
     cl_status err = CL_SUCCESS;
 
-    Module code(defaultContext, codes, &err);
+	nr::Module code(defaultContext, codes, &err);
     ASSERT_SUCCESS(err);
 
     cl_status buildErr = code.build(defaultDevice, options);
@@ -54,9 +52,9 @@ testing::AssertionResult isSuccess(const cl_status& err)
 nr::Module::Options mkStandardOptions(const nr_uint dim)
 {
     return nr::Module::Options{
-                Module::CL_VERSION_12, 
-                Module::DEBUG, 
-                Module::RenderDimension(dim)
+                nr::Module::CL_VERSION_12, 
+                nr::Module::DEBUG, 
+                nr::Module::RenderDimension(dim)
             };
 }
 
@@ -65,8 +63,8 @@ cl_status init()
     cl_status ret = CL_SUCCESS;
     auto pret = &ret;
 
-    auto platforms = Platform::getAvailablePlatforms(pret);
-    if (error::isFailure(ret)) return ret;
+    auto platforms = nr::Platform::getAvailablePlatforms(pret);
+    if (nr::error::isFailure(ret)) return ret;
 
     if (!platforms.size())
     {
@@ -77,7 +75,7 @@ cl_status init()
     auto defaultPlatform = platforms[0];
     
     auto devices = defaultPlatform.getDevicesByType(CL_DEVICE_TYPE_GPU, pret);
-    if (error::isFailure(ret)) return ret;
+    if (nr::error::isFailure(ret)) return ret;
 
     if (!devices.size())
     {
@@ -88,13 +86,13 @@ cl_status init()
     defaultDevice = devices[0];
 
     const cl_context_properties props[3] = { CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>((cl_platform_id) defaultPlatform), 0};
-    auto context = Context(props, CL_DEVICE_TYPE_GPU, pret);
-    if (error::isFailure(ret)) return ret;
+    auto context = nr::Context(props, CL_DEVICE_TYPE_GPU, pret);
+    if (nr::error::isFailure(ret)) return ret;
 
     defaultContext = context;
 
-	auto q = CommandQueue(context, devices[0], (cl_command_queue_properties) CL_QUEUE_PROFILING_ENABLE, pret);
-	if (error::isFailure(ret)) return ret;
+	auto q = nr::CommandQueue(context, devices[0], (cl_command_queue_properties) CL_QUEUE_PROFILING_ENABLE, pret);
+	if (nr::error::isFailure(ret)) return ret;
 
 	defaultCommandQueue = q;
 

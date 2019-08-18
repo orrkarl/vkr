@@ -1,8 +1,9 @@
 #pragma once
 
-#include <inc/includes.h>
-
 #include <kernels/vertex_shading.cl.h>
+
+#include "../../includes.h"
+
 
 using namespace nr;
 using namespace testing;

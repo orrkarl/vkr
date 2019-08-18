@@ -1,9 +1,10 @@
 #pragma once
 
-#include <inc/includes.h>
 #include <kernels/base.cl.h>
 #include <kernels/bin_rasterizer.cl.h>
 #include <rendering/Render.h>
+
+#include "../../includes.h"
 
 using namespace nr;
 using namespace testing;

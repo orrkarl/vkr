@@ -1,7 +1,5 @@
-#include "inc/includes.h"
-
-#include "inc/base/all.h"
-#include "inc/modules/all_module_tests.h"
+#include "includes.h"
+#include "modules/all.h"
 
 #include <iostream>
 
@@ -10,7 +8,7 @@ int main(int argc, char **argv)
     cl_status initStatus = CL_SUCCESS;
     if ((initStatus = init()) != CL_SUCCESS) 
     {
-        std::cerr << "init failed: " << utils::stringFromCLError(initStatus) << std::endl;
+        std::cerr << "init failed: " << nr::utils::stringFromCLError(initStatus) << std::endl;
         return initStatus;
     }
 	

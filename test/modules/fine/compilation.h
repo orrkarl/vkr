@@ -1,7 +1,5 @@
 #pragma once
 
-#include <inc/includes.h>
-
 #include <kernels/base.cl.h>
 #include <kernels/fine_rasterizer.cl.h>
 

@@ -1,6 +1,6 @@
-#include <inc/includes.h>
-
 #include <kernels/simplex_reducing.cl.h>
+
+#include "../../includes.h"
 
 using namespace nr;
 using namespace testing;

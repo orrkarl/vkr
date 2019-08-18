@@ -1,6 +1,6 @@
 ADD_EXECUTABLE(NrasterTest 
 	tests.cpp
-	src/includes.cpp)
+	includes.cpp)
 
 TARGET_LINK_LIBRARIES(NrasterTest 
 	PRIVATE Nraster
@@ -8,7 +8,6 @@ TARGET_LINK_LIBRARIES(NrasterTest
 	PRIVATE gmock)
 
 TARGET_INCLUDE_DIRECTORIES(NrasterTest 
-	PRIVATE .
 	PRIVATE ${NRASTER_ALL_INCLUDES}
 	PRIVATE ${gtest_INCLUDE_DIRS}
 	PRIVATE ${OpenCL_INCLUDE_DIRS})

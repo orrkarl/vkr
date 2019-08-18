@@ -1,9 +1,10 @@
 #pragma once
 
-#include <inc/includes.h>
-#include <inc/modules/binning/bin_utils.h>
 #include <rendering/Render.h>
 #include <pipeline/BinRasterizer.h>
+
+#include "../../includes.h"
+#include "../binning/bin_utils.h"
 
 const RawColorRGBA RED = { 255, 0, 0 };
 const nr::Module::Macro TEST_FINE("_TEST_FINE");

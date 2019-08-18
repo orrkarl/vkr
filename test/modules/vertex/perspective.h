@@ -2,13 +2,13 @@
 
 #include <cmath>
 
-#include <inc/includes.h>
-
 #include <base/Module.h>
 #include <base/Buffer.h>
 #include <kernels/base.cl.h>
 #include <kernels/vertex_shading.cl.h>
 #include <pipeline/VertexShader.h>
+
+#include "../../includes.h"
 
 using namespace nr;
 using namespace nr::detail;
