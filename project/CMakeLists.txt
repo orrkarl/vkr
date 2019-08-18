@@ -13,15 +13,11 @@ ADD_LIBRARY(Nraster SHARED
 	src/kernels/base.cl.cpp
 	src/kernels/bin_rasterizer.cl.cpp
 	src/kernels/fine_rasterizer.cl.cpp
-	src/kernels/simplex_reducing.cl.cpp
-	src/kernels/Source.cpp
-	src/kernels/vertex_shading.cl.cpp
+	src/kernels/simplex_reducer.cl.cpp
+	src/kernels/vertex_reducer.cl.cpp
 
-	src/pipeline/BinRasterizer.cpp
-	src/pipeline/FineRasterizer.cpp
-	src/pipeline/SimplexReducer.cpp
-	src/pipeline/VertexShader.cpp
 	src/pipeline/Pipeline.cpp
+	src/pipeline/Source.cpp
 
 	src/utils/converters.cpp
 	src/utils/rendermath.cpp)
@@ -32,8 +28,5 @@ TARGET_LINK_LIBRARIES(Nraster
 	PUBLIC ${OpenCL_LIBRARIES})
 
 TARGET_INCLUDE_DIRECTORIES(Nraster
-	PUBLIC ${OpenCL_INCLUDE_DIRS}
-	PUBLIC inc)
+	PUBLIC ${OpenCL_INCLUDE_DIRS})
 	
-MESSAGE(${OpenCL_INCLUDE_DIRS})
-MESSAGE(${OpenCL_LIBRARIES})

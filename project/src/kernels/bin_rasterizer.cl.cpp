@@ -1,4 +1,4 @@
-#include <kernels/bin_rasterizer.cl.h>
+#include "bin_rasterizer.cl.h"
 
 namespace nr
 {

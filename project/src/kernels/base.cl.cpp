@@ -1,4 +1,4 @@
-#include <kernels/base.cl.h>
+#include "base.cl.h"
 
 namespace nr
 {

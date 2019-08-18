@@ -1,6 +1,6 @@
 ADD_EXECUTABLE(NrasterTest 
-	tests.cpp
-	includes.cpp)
+	src/tests.cpp
+	src/includes.cpp)
 
 TARGET_LINK_LIBRARIES(NrasterTest 
 	PRIVATE Nraster

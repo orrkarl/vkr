@@ -1,12 +1,11 @@
-#include <pipeline/Pipeline.h>
+#include "Pipeline.h"
+
+#include "../utils/converters.h"
+#include "../utils/rendermath.h"
+
+#include "Source.h"
 
 #include <iostream>
-
-
-#include <kernels/Source.h>
-
-#include <utils/converters.h>
-#include <utils/rendermath.h>
 
 namespace nr
 {
@@ -64,10 +63,10 @@ cl_status Pipeline::setRenderDimension(const nr_uint dim)
 	m_fineRaster = s.fineRasterizer();
 	if (error::isFailure(ret)) return ret;
 
-	m_simplexReduce = s.simplexReduce();
+	m_simplexReduce = s.simplexReducer();
 	if (error::isFailure(ret)) return ret;
 
-	m_vertexReduce = s.vertexReduce();
+	m_vertexReduce = s.vertexReducer();
 	if (error::isFailure(ret)) return ret;
 
 	m_nearPlane = Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE, dim, pret);
