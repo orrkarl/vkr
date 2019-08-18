@@ -2,9 +2,9 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include <app.h>
-#include <linalg.h>
-#include <utils.h>
+#include "app.h"
+#include "linalg.h"
+#include "utils.h"
 
 const nr_uint dim = 4;
 

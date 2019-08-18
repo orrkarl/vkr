@@ -1,11 +1,10 @@
 INCLUDE_DIRECTORIES(
-	PUBLIC inc
 	PUBLIC ${NRASTER_ALL_INCLUDES}
 	PUBLIC ${OpenGL_INCLUDE_DIRS}
 	PUBLIC ${glew_INCLUDE_DIRS}
 	PUBLIC ${glfw_INCLUDE_DIRS})
 
-ADD_LIBRARY(NrasterDemoUtils src/utils.cpp src/linalg.cpp src/app.cpp)
+ADD_LIBRARY(NrasterDemoUtils utils.cpp linalg.cpp app.cpp)
 
 TARGET_LINK_LIBRARIES(NrasterDemoUtils 
 	PUBLIC Nraster
@@ -13,13 +12,13 @@ TARGET_LINK_LIBRARIES(NrasterDemoUtils
 	PUBLIC glfw
 	PUBLIC glew)
 
-ADD_EXECUTABLE(Triangle3d src/triangle3d.cpp)
+ADD_EXECUTABLE(Triangle3d triangle3d.cpp)
 TARGET_LINK_LIBRARIES(Triangle3d NrasterDemoUtils)
 
-ADD_EXECUTABLE(Cube4d src/cube4d.cpp)
+ADD_EXECUTABLE(Cube4d cube4d.cpp)
 TARGET_LINK_LIBRARIES(Cube4d NrasterDemoUtils)
 
-ADD_EXECUTABLE(Simpelxes src/simplexes.cpp)
+ADD_EXECUTABLE(Simpelxes simplexes.cpp)
 TARGET_LINK_LIBRARIES(Simpelxes NrasterDemoUtils)
 
 IF(WIN32)

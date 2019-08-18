@@ -1,4 +1,5 @@
-#include <linalg.h>
+#include "linalg.h"
+
 #include <cstring>
 #include <cmath>
 
