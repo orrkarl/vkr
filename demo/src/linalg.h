@@ -2,7 +2,7 @@
 
 #include <ostream>
 
-#include <general/predefs.h>
+#include <NR/nr.h>
 
 typedef enum _Axis
 {

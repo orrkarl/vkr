@@ -1,4 +1,4 @@
-#include <kernels/simplex_reducing.cl.h>
+#include <kernels/simplex_reducer.cl.h>
 
 #include "../../includes.h"
 

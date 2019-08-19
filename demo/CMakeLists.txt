@@ -1,5 +1,5 @@
 INCLUDE_DIRECTORIES(
-	PUBLIC ${NRASTER_ALL_INCLUDES}
+	PUBLIC ${NRASTER_INCLUDE_DIRS}
 	PUBLIC ${OpenGL_INCLUDE_DIRS}
 	PUBLIC ${glew_INCLUDE_DIRS}
 	PUBLIC ${glfw_INCLUDE_DIRS})
@@ -21,42 +21,35 @@ TARGET_LINK_LIBRARIES(Cube4d NrasterDemoUtils)
 ADD_EXECUTABLE(Simpelxes src/simplexes.cpp)
 TARGET_LINK_LIBRARIES(Simpelxes NrasterDemoUtils)
 
+SET(ALL_DEMOS "Triangle3d Cube4d Simplexes")
+
 IF(WIN32)
     # Copy DLL files to output directory. Yes, this is digusting, but nothing else worked :(
 	
-	ADD_CUSTOM_COMMAND(TARGET Triangle3d PRE_LINK
+	ADD_CUSTOM_COMMAND(
+		TARGET Triangle3d Cube4d Simpelxes 
+		PRE_LINK
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		"${PROJECT_BINARY_DIR}/lib/Nraster.dll"         
-		$<TARGET_FILE_DIR:Triangle3d>
-	)
-		
-	ADD_CUSTOM_COMMAND(TARGET Cube4d PRE_LINK
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		"${PROJECT_BINARY_DIR}/lib/Nraster.dll"         
-		$<TARGET_FILE_DIR:Cube4d>
+		"${PROJECT_BINARY_DIR}/project/Nraster.dll"         
+		${CMAKE_CURRENT_BINARY_DIR}
 	)
 
 	IF(CMAKE_BUILD_TYPE STREQUAL Debug)
-		ADD_CUSTOM_COMMAND(TARGET Triangle3d PRE_LINK
+		ADD_CUSTOM_COMMAND(
+			TARGET Triangle3d Cube4d Simpelxes
+			PRE_LINK
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			"${PROJECT_BINARY_DIR}/bin/glewd.dll"         
-			$<TARGET_FILE_DIR:Triangle3d>
-		)
-		ADD_CUSTOM_COMMAND(TARGET Cube4d PRE_LINK
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different
-			"${PROJECT_BINARY_DIR}/bin/glewd.dll"         
-			$<TARGET_FILE_DIR:Cube4d>
+			${CMAKE_CURRENT_BINARY_DIR}
 		)	
 	ELSE()
-		ADD_CUSTOM_COMMAND(TARGET Triangle3d PRE_LINK
+		ADD_CUSTOM_COMMAND(
+			TARGET Triangle3d Cube4d Simpelxes
+			PRE_LINK
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
-				"${PROJECT_BINARY_DIR}/bin/glew.dll"         
-				$<TARGET_FILE_DIR:Triangle3d>
-		)
-		ADD_CUSTOM_COMMAND(TARGET Cube4d PRE_LINK
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different
-				"${PROJECT_BINARY_DIR}/bin/glew.dll"         
-				$<TARGET_FILE_DIR:Cube4d>
+			"${PROJECT_BINARY_DIR}/bin/glew.dll"         
+			${CMAKE_CURRENT_BINARY_DIR}
 		)
 	ENDIF()
+
 ENDIF()

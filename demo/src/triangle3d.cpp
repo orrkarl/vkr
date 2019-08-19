@@ -1,19 +1,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <general/predefs.h>
-
-#include <base/CommandQueue.h>
-#include <base/Context.h>
-#include <base/Device.h>
-#include <base/Platform.h>
-
-#include <pipeline/Pipeline.h>
-#include <pipeline/VertexBuffer.h>
-
-#include <rendering/Render.h>
-
-#include <utils/converters.h>
+#include <NR/nr.h>
 
 constexpr const nr_uint dim = 3;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <kernels/vertex_shading.cl.h>
+#include <kernels/vertex_reducer.cl.h>
 
 #include "../../includes.h"
 

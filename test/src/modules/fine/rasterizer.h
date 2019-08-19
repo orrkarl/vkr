@@ -61,7 +61,7 @@ TEST(Fine, Rasterizer)
 	auto code = mkFineModule(dim, &err);
 	ASSERT_SUCCESS(err);
 
-	auto testee = FineRasterizerKernel(code, &err);
+	auto testee = FineRasterizer(code, &err);
 	ASSERT_SUCCESS(err);
 
 	auto q = defaultCommandQueue;

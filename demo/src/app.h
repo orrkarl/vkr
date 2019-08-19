@@ -5,14 +5,7 @@
 
 #include <memory>
 
-#include <base/CommandQueue.h>
-#include <base/Context.h>
-
-#include <general/predefs.h>
-
-#include <pipeline/Pipeline.h>
-
-#include <rendering/Render.h>
+#include <NR/nr.h>
 
 class App
 {

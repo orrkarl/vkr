@@ -6,13 +6,7 @@
 #include <chrono>
 #include <iostream>
 
-#include <general/predefs.h>
-
-#include <base/Buffer.h>
-#include <base/CommandQueue.h>
-#include <base/Kernel.h>
-#include <base/Module.h>
-
+#include <NR/nr.h>
 
 #include "linalg.h"
 

@@ -3,7 +3,8 @@
 #include <base/Module.h>
 #include <base/Buffer.h>
 #include <kernels/base.cl.h>
-#include <kernels/simplex_reducing.cl.h>
+#include <kernels/simplex_reducer.cl.h>
+#include <pipeline/SimplexReducer.h>
 
 #include <utility>
 
@@ -99,7 +100,7 @@ TEST(SimplexReducer, reducing)
 
 	ASSERT_SUCCESS(code.build(defaultDevice, options));
 
-	auto testee = SimplexReduceKernel(code, &err);
+	auto testee = SimplexReducer(code, &err);
 	ASSERT_SUCCESS(err);
 
 	auto q = defaultCommandQueue;

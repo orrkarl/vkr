@@ -55,7 +55,7 @@ TEST(Binning, Rasterizer)
     auto code = mkBinningModule(dim, triangleCount, &err);
     ASSERT_SUCCESS(err);
 
-    auto testee = BinRasterizerKernel(code, &err);
+    auto testee = BinRasterizer(code, &err);
     ASSERT_SUCCESS(err);
 
     auto d_triangles = Buffer::make<Triangle<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles, &err);

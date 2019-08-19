@@ -5,8 +5,8 @@
 #include <base/Module.h>
 #include <base/Buffer.h>
 #include <kernels/base.cl.h>
-#include <kernels/vertex_shading.cl.h>
-#include <pipeline/VertexShader.h>
+#include <kernels/vertex_reducer.cl.h>
+#include <pipeline/VertexReducer.h>
 
 #include "../../includes.h"
 
@@ -48,7 +48,7 @@ TEST(VertexShader, Perspective)
 
     ASSERT_SUCCESS(code.build(defaultDevice, options));
 
-    auto testee = VertexReduceKernel(code, &err);
+    auto testee = VertexReducer(code, &err);
     ASSERT_SUCCESS(err);
 
     auto q = defaultCommandQueue;

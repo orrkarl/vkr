@@ -4,7 +4,7 @@
 #include <base/CommandQueue.h>
 #include <base/Module.h>
 
-#include <general/predefs.h>
+#include <predefs.h>
 
 #include <rendering/Render.h>
 

@@ -1,18 +1,7 @@
 #include "app.h"
 
 #include <chrono>
-
-#include <base/Device.h>
-#include <base/Module.h>
-#include <base/Platform.h>
-
-#include <kernels/base.cl.h>
-#include <kernels/bin_rasterizer.cl.h>
-#include <kernels/fine_rasterizer.cl.h>
-#include <kernels/simplex_reducing.cl.h>
-#include <kernels/vertex_shading.cl.h>
-
-#include <utils/converters.h>
+#include <iostream>
 
 void errorCallback(int error, const char* description)
 {
