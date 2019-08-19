@@ -4,10 +4,10 @@
 
 #include <NR/nr.h>
 
-typedef enum _Axis
+enum Axis
 {
 	X = 0, Y = 1, Z = 2, W = 3, Q = 4
-} Axis;
+};
 
 struct Vector
 {

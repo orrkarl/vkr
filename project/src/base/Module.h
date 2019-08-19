@@ -39,13 +39,13 @@ public:
 	 */
 	struct NRAPI Option
 	{
-		public:
-			Option(const string& value);
-		
-			const string& getOption() const;
+	public:
+		Option(const string& value);
+	
+		const string& getOption() const;
 
-		protected:
-			const string value;
+	protected:
+		const string value;
 	};
 
 	typedef std::vector<Option> Options;

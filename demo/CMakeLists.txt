@@ -21,8 +21,6 @@ TARGET_LINK_LIBRARIES(Cube4d NrasterDemoUtils)
 ADD_EXECUTABLE(Simpelxes src/simplexes.cpp)
 TARGET_LINK_LIBRARIES(Simpelxes NrasterDemoUtils)
 
-SET(ALL_DEMOS "Triangle3d Cube4d Simplexes")
-
 IF(WIN32)
     # Copy DLL files to output directory. Yes, this is digusting, but nothing else worked :(
 	
