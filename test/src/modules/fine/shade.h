@@ -58,7 +58,7 @@ struct ShadeTest : public StandardDispatch<1, Fragment, ScreenDimension, Buffer,
 	}
 };
 
-TEST(Fine, ShadeTest)
+TEST(Fine, Shade)
 {
     cl_status err = CL_SUCCESS;
 
@@ -107,8 +107,6 @@ TEST(Fine, ShadeTest)
     ASSERT_SUCCESS(err);
 
 	testee.setExecutionRange(1);
-
-	std::cout << &h_color[firstFrag.position.y][firstFrag.position.x] - &h_color[0][0] << std::endl;
 
 	ASSERT_SUCCESS(testee.setScreenDimensions(screenDim));
 	ASSERT_SUCCESS(testee.setFrameBuffer(frame));

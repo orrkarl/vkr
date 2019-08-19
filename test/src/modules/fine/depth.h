@@ -79,6 +79,8 @@ TEST(Fine, Depth)
     auto d_binQueues = Buffer::make<Queues>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, totalWorkGroupCount, h_binQueues.get(), &err);
     ASSERT_SUCCESS(err);
 	
+	std::cout << binCountX << ", " << binCountY << '\n';
+	std::cout << binCountX * binCountY << '\n';
 	testee.setExecutionRange(binCountX, binCountY, totalWorkGroupCount);
 
 	ASSERT_SUCCESS(testee.setTriangleInputBuffer(d_triangles));
