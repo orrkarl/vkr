@@ -10,17 +10,23 @@
 namespace nr
 {
 
+const nr_uint Pipeline::DEFAULT_BATCH_SIZE = 256;
 const ScreenDimension Pipeline::MAX_SCREEN_DIM = { 2048, 2048 };
 
-Pipeline::Pipeline(const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount)
-	: m_binQueueConfig(config), m_binRasterWorkGroupCount(binRasterWorkGroupCount), m_clearColor{ 0, 0, 0, 0 }, m_clearDepth(1.0f), m_renderDimension(0), m_screenDimension{ 0, 0 }
+Pipeline::Pipeline(const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, const nr_uint batchSize)
+	: m_binQueueConfig(config), m_binRasterWorkGroupCount(binRasterWorkGroupCount),  m_batchSize(batchSize), m_clearColor{ 0, 0, 0, 0 }, m_clearDepth(1.0f), m_renderDimension(0), m_screenDimension{ 0, 0 }
 {
 }
 
-Pipeline::Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const nr_uint dim, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, cl_status* err)
-	:  Pipeline(config, binRasterWorkGroupCount)
-{	
+Pipeline::Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const nr_uint dim, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, const nr_uint batchSize, cl_status* err)
+	: Pipeline(config, binRasterWorkGroupCount, batchSize)
+{
 	init(context, device, queue, dim, err);
+}
+
+Pipeline::Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const nr_uint dim, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, cl_status* err)
+	:  Pipeline(context, device, queue, dim, config, binRasterWorkGroupCount, DEFAULT_BATCH_SIZE, err)
+{	
 }
 
 Pipeline::Pipeline()
@@ -54,7 +60,7 @@ cl_status Pipeline::setRenderDimension(const nr_uint dim)
 	auto pret = &ret;
 
 	detail::Source s(m_context);
-	ret = s.build(m_device, dim, true);
+	ret = s.build(m_device, dim, m_batchSize, true);
 	if (error::isFailure(ret)) return ret;
 
 	m_binRaster = s.binRasterizer();
@@ -238,8 +244,8 @@ cl_status Pipeline::render(const VertexBuffer& primitives, const Primitive& prim
 
 	if (overflow)
 	{
-		//return CL_OUT_OF_RESOURCES;
-		std::cout << "Overflow detected!\n";
+		return CL_OUT_OF_RESOURCES;
+		//std::cout << "Overflow detected!\n";
 	}
 
 	return err;

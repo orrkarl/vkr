@@ -10,14 +10,6 @@ using namespace nr;
 using namespace testing;
 using namespace nr::detail;
 
-struct Bin
-{
-	nr_uint width;
-	nr_uint height;
-    nr_uint x;
-    nr_uint y;
-};
-
 template <nr_uint QueueSize>
 struct BinQueue
 {

@@ -20,9 +20,11 @@ namespace nr
 class NRAPI Pipeline
 {
 public:
+	Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const nr_uint dim, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, const nr_uint batchSize, cl_status* err);
+
 	Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const nr_uint dim, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, cl_status* err);
 
-	Pipeline(const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount);
+	Pipeline(const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, const nr_uint batchSize = DEFAULT_BATCH_SIZE);
 
 	Pipeline();
 
@@ -53,8 +55,10 @@ private:
 
 	cl_status setRenderDimension(const nr_uint dim);
 
+	static const nr_uint		 DEFAULT_BATCH_SIZE;
 	static const ScreenDimension MAX_SCREEN_DIM;
 
+	const nr_uint					m_batchSize;
 	const detail::BinQueueConfig	m_binQueueConfig;
 	Buffer							m_binQueues;
 	detail::BinRasterizer			m_binRaster;

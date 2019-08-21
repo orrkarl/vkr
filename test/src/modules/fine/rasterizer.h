@@ -13,7 +13,7 @@ using namespace nr;
 using namespace nr::detail;
 using namespace testing;
 
-// Don't run this test with high screen dimensions as floating point impercision reners it useless there
+// Don't run this test with high screen dimensions as floating point impercision renders it useless there
 TEST(Fine, Rasterizer)
 {
 	cl_status err = CL_SUCCESS;

@@ -15,7 +15,7 @@ nr_uint triangleCount(const nr_uint dim, const nr_uint simplexCount)
 
 std::pair<nr_uint, nr_uint> getBinCount(const ScreenDimension& screenDim, const BinQueueConfig& config)
 {
-	return { std::ceil(nr_float(screenDim.width) / config.binWidth) , std::ceil(nr_float(screenDim.height) / config.binHeight) };
+	return { static_cast<nr_uint>(std::ceil(nr_float(screenDim.width) / config.binWidth)), static_cast<nr_uint>(std::ceil(nr_float(screenDim.height) / config.binHeight)) };
 }
 
 }

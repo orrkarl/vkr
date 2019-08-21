@@ -37,8 +37,8 @@ TEST(Fine, Depth)
     const nr_float expectedDepth = 0.5;
 
     const nr_uint triangleCount = 3 * totalBinCount;
-    std::unique_ptr<Triangle<dim>[]> h_triangles(new Triangle<dim>[triangleCount]);
-    std::unique_ptr<Queues[]> h_binQueues(new Queues[totalWorkGroupCount]);
+    auto h_triangles = std::make_unique<Triangle<dim>[]>(triangleCount);
+	auto h_binQueues = std::make_unique<Queues[]>(totalWorkGroupCount);
 
 	std::unique_ptr<ColorBuffer[]> cBuffer(new ColorBuffer[1]);
     std::unique_ptr<DepthBuffer[]> dBuffer(new DepthBuffer[1]);
@@ -79,8 +79,6 @@ TEST(Fine, Depth)
     auto d_binQueues = Buffer::make<Queues>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, totalWorkGroupCount, h_binQueues.get(), &err);
     ASSERT_SUCCESS(err);
 	
-	std::cout << binCountX << ", " << binCountY << '\n';
-	std::cout << binCountX * binCountY << '\n';
 	testee.setExecutionRange(binCountX, binCountY, totalWorkGroupCount);
 
 	ASSERT_SUCCESS(testee.setTriangleInputBuffer(d_triangles));
@@ -92,6 +90,5 @@ TEST(Fine, Depth)
     ASSERT_SUCCESS(q.enqueueDispatchCommand(testee));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.color, false, 1, cBuffer.get()));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.depth, false, 1, dBuffer.get()));
-    ASSERT_SUCCESS(q.await());
     ASSERT_TRUE((validateDepth<screenDim.width, screenDim.height>(h_depthBuffer, defaultDepth, expectedDepth)));
 }

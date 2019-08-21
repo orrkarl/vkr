@@ -15,8 +15,9 @@ extern const char* bin_rasterizer = R"__CODE__(
 
 // -------------------------------------- Types and defines -------------------------------------- 
 
-// DON'T CHANGE THIS 
-#define BATCH_COUNT (256)
+#ifndef BATCH_COUNT
+	#define BATCH_COUNT (256)
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -154,33 +155,32 @@ kernel void bin_rasterize(
         *has_overflow = false;
     }
 
+	// wait for GLOBAL batch index initialization
+    barrier(CLK_GLOBAL_MEM_FENCE);
+
     if (is_init_manager)
     {
-        current_batch_index = 0;
+        current_batch_index = get_group_id(0) * BATCH_COUNT;
+		bin_queues[bin_queue_base] = 1;
     }
 
     // wait for LOCAL batch index initialization
     barrier(CLK_LOCAL_MEM_FENCE);
 
-    // wait for GLOBAL batch index initialization
-    barrier(CLK_GLOBAL_MEM_FENCE);
-
-    bin_queues[bin_queue_base] = 1;
 
     for(;;)
     {
-        barrier(CLK_LOCAL_MEM_FENCE);
-
-        // Aquire a batch (update the local and global batch index)
-        if (is_init_manager)
-        {
-            current_batch_index = atomic_add(g_batch_index, BATCH_COUNT);
-        }
-
-        barrier(CLK_LOCAL_MEM_FENCE);
+		//if (IS_GROUP_HEAD)
+		//{
+		//	DEBUG_MESSAGE1("[%d] -> Iteration!\n", get_group_id(0));
+		//}
 
         if (*has_overflow)
         {
+			//if (IS_GROUP_HEAD)
+			//{
+			//	DEBUG_MESSAGE1("[%d] -> Overflow!\n", get_group_id(0));
+			//}
             return;
         }
         
@@ -201,6 +201,8 @@ kernel void bin_rasterize(
             reduced_triangles_y);
         //wait_group_events(1, &batch_acquisition);
 
+		barrier(CLK_LOCAL_MEM_FENCE);
+
         for (private uint i = 0; i < batch_actual_size; ++i)
         {
             if (
@@ -219,6 +221,7 @@ kernel void bin_rasterize(
             // An overflowing queue was detected
             if (current_queue_index >= config.queue_size + bin_queue_base + 1)
             {
+				//DEBUG_ITEM_SPECIFIC4(3, 2, 0, "current index: %d, queue size: %d, batch count: %d, actual_batch_count: %d\n", current_queue_index - bin_queue_base - 1, config.queue_size, BATCH_COUNT, batch_actual_size);
                 *has_overflow = true;
                 break;
             }
@@ -229,7 +232,15 @@ kernel void bin_rasterize(
             // Queue is finished
             bin_queues[current_queue_index] = 0;
         }
-    }     
+
+        // Aquire a batch (update the local batch index)
+        if (is_init_manager)
+        {
+            current_batch_index += get_num_groups(0) * BATCH_COUNT;
+        }
+
+		barrier(CLK_LOCAL_MEM_FENCE);
+    }    
 }
 
 // -------------------------------------- Tests --------------------------------------

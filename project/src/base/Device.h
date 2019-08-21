@@ -39,6 +39,8 @@ public:
     operator cl_device_id() const;
 
     const cl_device_id& get() const;
+
+	string name() const;
 };
 
 }

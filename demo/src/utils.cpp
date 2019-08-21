@@ -171,8 +171,3 @@ void cube4dToSimplices(const Vector cube[16], Tetrahedron simplices[6 * 8])
         result_idx += 6;
     }
 }
-
-void reduce4Cube(const Vector cube[16], Tetrahedron result[6 * 8])
-{
-    cube4dToSimplices(cube, result);
-}

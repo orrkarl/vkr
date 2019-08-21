@@ -150,6 +150,14 @@ struct NDCPosition
     }
 };
 
+struct Bin
+{
+	nr_uint width;
+	nr_uint height;
+	nr_uint x;
+	nr_uint y;
+};
+
 using Index = nr_uint;
 
 struct Fragment

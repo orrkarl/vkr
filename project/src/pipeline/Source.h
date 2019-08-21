@@ -23,7 +23,7 @@ class Source : private Module
 public:
 	Source(const Context& context);
 
-	cl_status build(const Device& dev, const nr_uint renderDimension, const nr_bool debug = true);
+	cl_status build(const Device& dev, const nr_uint renderDimension, const nr_uint binBatchSize, const nr_bool debug = true);
 
 	BinRasterizer binRasterizer(cl_status* status = nullptr) const;
 

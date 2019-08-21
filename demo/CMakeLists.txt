@@ -25,7 +25,23 @@ IF(WIN32)
     # Copy DLL files to output directory. Yes, this is digusting, but nothing else worked :(
 	
 	ADD_CUSTOM_COMMAND(
-		TARGET Triangle3d Cube4d Simpelxes 
+		TARGET Triangle3d
+		PRE_LINK
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		"${PROJECT_BINARY_DIR}/project/Nraster.dll"         
+		${CMAKE_CURRENT_BINARY_DIR}
+	)
+	
+	ADD_CUSTOM_COMMAND(
+		TARGET Cube4d
+		PRE_LINK
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		"${PROJECT_BINARY_DIR}/project/Nraster.dll"         
+		${CMAKE_CURRENT_BINARY_DIR}
+	)
+	
+	ADD_CUSTOM_COMMAND(
+		TARGET Simpelxes
 		PRE_LINK
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		"${PROJECT_BINARY_DIR}/project/Nraster.dll"         

@@ -1,5 +1,7 @@
 #include "Device.h"
 
+#include <memory>
+
 namespace nr
 {
 Device::Device()
@@ -42,6 +44,17 @@ Device::operator cl_device_id() const
 const cl_device_id& Device::get() const
 {
     return object;
+}
+
+string Device::name() const
+{
+	nr_size len;
+	clGetDeviceInfo(object, CL_DEVICE_NAME, 0, nullptr, &len);
+
+	auto ret = std::make_unique<nr_char[]>(len);
+
+	clGetDeviceInfo(object, CL_DEVICE_NAME, len, ret.get(), nullptr);
+	return string(ret.get(), len);
 }
 
 }

@@ -30,6 +30,3 @@ struct Tetrahedron
 void reduce4Simplex(const Tetrahedron& tetrahedron, Triangle4d result[4]);
 
 void cube4dToSimplices(const Vector cube[16], Tetrahedron simplices[6 * 8]);
-
-// Reduce a 4-cbue to Triangles
-void reduce4Cube(const Vector cube[16], Tetrahedron result[6 * 8 * 4]); 
