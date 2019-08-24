@@ -26,10 +26,10 @@ TEST(Pipeline, Sanity)
 	cl_status ret = CL_SUCCESS;
 	auto pret = &ret;
 
-	constexpr nr::ScreenDimension screenDim = { 640, 640 };
+	constexpr nr::ScreenDimension screenDim = { 640, 480 };
 	constexpr nr_uint workGroupCount = 7;
 	constexpr nr_uint batchSize = 4;
-	constexpr nr::detail::BinQueueConfig config = { 40, 40, batchSize + 1 };
+	constexpr nr::detail::BinQueueConfig config = { 64, 64, (batchSize + 1) * workGroupCount };
 
 	auto bins = nr::detail::getBinCount(screenDim, config);
 	const nr_uint count = workGroupCount * bins.first * bins.second * batchSize;
