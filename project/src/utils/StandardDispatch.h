@@ -13,22 +13,23 @@ class StandardDispatch : protected TypesafeKernel<Args...>, public Dispatch<Stan
 {
 public:
 	StandardDispatch(const Module& module, const char* name, cl_status* err)
-		: TypesafeKernel(module, name, err), range{}
+		: TypesafeKernel<Args...>(module, name, err), range{}
 	{
 	}
 
 	StandardDispatch(const Module& module, const string& name, cl_status* err)
-		: TypesafeKernel(module, name, err), range{}
+		: TypesafeKernel<Args...>(module, name, err), range{}
 	{
 	}
 
 	StandardDispatch()
-		: TypesafeKernel(), range{}
+		: TypesafeKernel<Args...>(), range{}
 	{
 	}
 
 	cl_status consume(const CommandQueue& q) const
 	{
+#ifdef _DEBUG
 		if (!std::all_of(setIndices.cbegin(), setIndices.cend(), [](const nr_bool b) {return b; }))
 		{
 			std::cerr << "Not all kernel arguments are set - { ";
@@ -41,7 +42,8 @@ public:
 			}
 			std::cerr << "}\n";
 		}
-		return q.enqueueKernelCommand(TypesafeKernel::get(), range);
+#endif
+		return q.enqueueKernelCommand(TypesafeKernel<Args...>::get(), range);
 	}
 
 	NDExecutionRange<dim> getExecutionRange() const
@@ -49,7 +51,7 @@ public:
 		return range;
 	}
 
-	using TypesafeKernel::operator cl_kernel;
+	using TypesafeKernel<Args...>::operator cl_kernel;
 
 protected:
 	NDExecutionRange<dim> range;

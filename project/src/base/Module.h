@@ -109,18 +109,6 @@ public:
 	}
 	
 	template<typename T>
-	cl_status build(const Options& options, std::function<void(Module, T*)> callback, T* userData)
-	{
-		auto dev = static_cast<cl_device_id>(Device::getDefault());
-		return clBuildProgram(
-			object, 
-			1, &dev, 
-			Module::finalizeOptions(options).c_str(), 
-			static_cast<void(CL_CALLBACK *)(cl_program, void*)>([callback](cl_program prog, void* data){callback(Module(prog, true), reinterpret_cast<T*>(data));}), 
-			userData);
-	}
-
-	template<typename T>
 	cl_status build(const Devices& devices, const Options& options, void(*callback)(Module, T*), T* userData)
 	{
 		return clBuildProgram(
