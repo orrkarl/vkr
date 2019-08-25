@@ -186,7 +186,7 @@ int main(const int argc, const char* argv[])
 {
 	if (!App::init()) return EXIT_FAILURE;
 
-	auto app = StaticCube4dApp(25, 40);
+	auto app = DynamicCube4dApp(40);
 	auto ret = app.run();
 
 	App::deinit();

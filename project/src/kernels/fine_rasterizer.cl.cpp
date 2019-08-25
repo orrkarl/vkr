@@ -144,7 +144,7 @@ kernel void fine_rasterize(
 
         if (current_queue_bases[i][0]) 
         {
-			//DEBUG_ITEM_SPECIFIC1(0, 3, 0, "Empty queue detected: %d\n", i);
+			//DEBUG_MESSAGE1("Empty queue detected: %d\n", i);
             current_queue_elements[i] = config.queue_size + 1;
         }
         else
