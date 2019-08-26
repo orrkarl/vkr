@@ -13,7 +13,7 @@ Event::Event(const cl_event& event, const nr_bool retain)
 {
 }
 
-Event::Event(Context context, cl_status* err)
+Event::Event(const Context& context, cl_status* err)
     : Wrapped(clCreateUserEvent(context, err))
 {
 }

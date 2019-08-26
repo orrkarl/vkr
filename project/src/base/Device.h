@@ -1,9 +1,9 @@
 /**
- * @file Device.h
+ * @file
  * @author Orr Karl (karlor041@gmail.com)
- * @brief Wrapping OpenCL cl_device_id 
- * @version 0.5.9
- * @date 2019-06-30
+ * @brief provides a C++ style wrapper for cl_device
+ * @version 0.6.0
+ * @date 2019-08-26
  * 
  * @copyright Copyright (c) 2019
  * 
@@ -20,12 +20,19 @@ namespace nr
 /**
  * @brief Represents an OpenCL physical device, such as a specific GPU exsiting in the computer.
  * 
+ * This class is mostly used for configuration and initialization
  */
 class NRAPI Device : public Wrapper<cl_device_id>
 {
 public:
     Device();
 
+    /**
+	 * @brief Convertes a raw OpenCL device to the C++ wrapper
+	 * 
+	 * @param device object to own
+	 * @param retain should the reference count for the object be incremented
+	 */
     explicit Device(const cl_device_id& device, const nr_bool retain = false);
 
     Device(const Device& other);
@@ -36,10 +43,25 @@ public:
 
     Device& operator=(Device&& other);
 
+    /**
+	 * @brief access the underlying opencl device
+	 * 
+	 * @return cl_device_id raw opencl device
+	 */
     operator cl_device_id() const;
 
+    /**
+	 * @brief access the underlying opencl device
+	 * 
+	 * @return const cl_device_id& raw opencl device
+	 */
     const cl_device_id& get() const;
 
+    /**
+     * @brief Queries for the device name
+     * 
+     * @return string the device name
+     */
 	string name() const;
 };
 
