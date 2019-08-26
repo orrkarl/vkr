@@ -1,9 +1,9 @@
 /**
- * @file Context.h
+ * @file
  * @author Orr Karl (karlor041@gmail.com)
- * @brief Wrapping the OpenCL context
- * @version 0.5.9
- * @date 2019-06-30
+ * @brief provides a C++ style device Context class
+ * @version 0.6.0
+ * @date 2019-08-26
  * 
  * @copyright Copyright (c) 2019
  * 
@@ -24,21 +24,41 @@ namespace nr
 /**
  * @brief bare wrapper for cl_context, for a more comfortable interface.
  * 
- * @par
- * The OpenCL context is a container for many of the basic OpenCL components, such as buffers or programs.
- * 
+ * The OpenCL context, behind the stages, is a container for many of the basic OpenCL components, such as buffers or programs.
  */
 class NRAPI Context : public Wrapper<cl_context>
 {
 public:
+    /**
+     * @brief Construct a null context
+     * 
+     */
     Context();
 
+    /**
+	 * @brief Convertes a raw OpenCL context to C++ wrapper
+	 * 
+	 * @param context object to own
+	 * @param retain should the reference count for the object be incremented
+	 */
     explicit Context(const cl_context& context, const nr_bool retain = false);
 
     Context(const Context& other);
 
     Context(Context&& other);
 
+    /**
+     * @brief Construct a context object, bound to some devices with certain properties
+     * 
+     * Refer to the OpenCL clCreateContext documentation for detailed explenation of the context properties
+     * @note wraps clCreateContext
+     * @tparam T user data callback type
+     * @param properties context properties
+     * @param devices devices bound to the context
+     * @param callback context message callback
+     * @param userData data to be passed to the context each time it's called
+     * @param[out] err internal OpenCL error status
+     */
     template<typename T>
     Context(
         const cl_context_properties* properties, 
@@ -57,11 +77,32 @@ public:
     {
     }
 
+    /**
+     * @brief Construct a context object, bound to some devices with certain properties
+     * 
+     * Refer to the OpenCL clCreateContext documentation for detailed explenation of the context properties
+     * @note wraps clCreateContext
+     * @param properties context properties
+     * @param devices devices bound to the context
+     * @param[out] err internal OpenCL error status
+     */
     Context(
         const cl_context_properties* properties, 
         std::vector<Device>& devices, 
         cl_status* err = nullptr);
 
+    /**
+     * @brief Construct a new Context object, bound to all available devices of a ceratin type
+     * 
+     * Refer to the OpenCL clCreateContext documentation for detailed explenation of the context properties
+     * @note wraps clCreateContextFromType
+     * @tparam T user data callback type
+     * @param properties context properties
+     * @param deviceType bound devices type
+     * @param callback context message callback
+     * @param userData data to be passed to the context each time it's called
+     * @param[out] err internal OpenCL error status
+     */
     template<typename T>
     Context(
         const cl_context_properties* properties, 
@@ -83,6 +124,8 @@ public:
     /**
      * @brief an 'easy to use' constructor for a Context. Using the given properties and collects all of the Devices of a certain type
      * 
+     * Refer to the OpenCL clCreateContext documentation for detailed explenation of the context properties
+     * @note wraps clCreateContextFromType
      * @param       properties  context properties
      * @param       deviceType  type of collected devices. Will default to GPU.
      * @param[out]  err OpenCL internal call error status
@@ -96,6 +139,11 @@ public:
 
     Context& operator=(Context&& other);
 
+    /**
+     * @brief provides access to the underlying OpenCL context
+     * 
+     * @return cl_context underlying context
+     */
     operator cl_context() const;
 };
 

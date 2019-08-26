@@ -153,6 +153,11 @@ public:
 
     CommandQueue& operator=(CommandQueue&& other);
 
+    /**
+     * @brief provides access to the underlying OpenCL command queue
+     * 
+     * @return cl_command_queue underlying OpenCL command queue
+     */
     operator cl_command_queue() const;
 
     /**
