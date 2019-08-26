@@ -1,3 +1,13 @@
+/**
+ * @file nr.h
+ * @author Orr Karl (karlor041@gmail.com)
+ * @brief Public interface for Nraster library
+ * @version 0.6.0
+ * @date 2019-08-26
+ *
+ * @copyright Copyright (c) 2019
+ *
+ */
 #pragma once
 
 #include "../../src/predefs.h"

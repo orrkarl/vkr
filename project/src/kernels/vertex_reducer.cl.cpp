@@ -1,4 +1,4 @@
-#include "vertex_reducer.cl.h"
+ #include "vertex_reducer.cl.h"
 
 namespace nr
 {
