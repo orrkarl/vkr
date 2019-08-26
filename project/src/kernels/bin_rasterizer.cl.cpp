@@ -169,17 +169,8 @@ kernel void bin_rasterize(
 
     for(;;)
     {
-		//if (IS_GROUP_HEAD)
-		//{
-		//	//DEBUG_MESSAGE1("[%d] -> Iteration!\n", get_group_id(0));
-		//}
-
         if (*has_overflow)
         {
-			//if (IS_GROUP_HEAD)
-			//{
-			//	//DEBUG_MESSAGE1("[%d] -> Overflow!\n", get_group_id(0));
-			//}
             return;
         }
         
@@ -201,8 +192,6 @@ kernel void bin_rasterize(
         //wait_group_events(1, &batch_acquisition);
 
 		barrier(CLK_LOCAL_MEM_FENCE);
-		//DEBUG_ITEM_SPECIFIC3(14, 3, 0, "[%d %d] -> actual batch size: %d\n", get_global_id(0), get_global_id(1), batch_actual_size);
-		//DEBUG_ITEM_SPECIFIC5(14, 3, 0, "[%d %d] -> triangle count: %d, current batch index: %d, delta: %d\n", get_global_id(0), get_global_id(1), triangle_count, current_batch_index, triangle_count - current_batch_index);
 
         for (private uint i = 0; i < batch_actual_size; ++i)
         {
@@ -222,7 +211,6 @@ kernel void bin_rasterize(
             // An overflowing queue was detected
             if (current_queue_index >= config.queue_size + bin_queue_base + 1)
             {
-				////DEBUG_ITEM_SPECIFIC4(3, 2, 0, "current index: %d, queue size: %d, batch count: %d, actual_batch_count: %d\n", current_queue_index - bin_queue_base - 1, config.queue_size, BATCH_COUNT, batch_actual_size);
                 *has_overflow = true;
                 break;
             }
@@ -232,7 +220,6 @@ kernel void bin_rasterize(
         {
             // Queue is finished
             bin_queues[current_queue_index] = 0;
-			//DEBUG_ITEM_SPECIFIC3(14, 3, 0, "[%d %d] -> current queue index: %d\n", get_global_id(0), get_global_id(1), current_queue_index - bin_queue_base - 1);
         }
 
         // Aquire a batch (update the local batch index)

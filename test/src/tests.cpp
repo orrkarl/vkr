@@ -1,5 +1,5 @@
 #include "includes.h"
-//#include "modules/all.h"
+#include "modules/all.h"
 #include "pipeline/all.h"
 
 #include <iostream>

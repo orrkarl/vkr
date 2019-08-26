@@ -70,9 +70,6 @@ nr_status App::draw(const nr::VertexBuffer& vb, const nr::Primitive& type, const
 	auto t1 = std::chrono::system_clock::now();
 
 	auto diff = std::chrono::duration<nr_double>(t1 - t0);
-
-	std::cout << "Rendering took " << 1000 * diff.count() << "ms\n";
-	std::cout << "Copying framebuffer!\n";
 	
 	ret = m_pipeline.copyFrameBuffer(m_bitmap.get());
 	if (nr::error::isFailure(ret)) return ret;
@@ -202,9 +199,9 @@ bool App::initGL()
 	return true;
 }
 
-GLFWwindow* App::getWindow()
+bool App::isKeyPressed(int key)
 {
-	return m_window;
+	return glfwGetKey(m_window, key) == GLFW_PRESS;
 }
 
 void App::loop(cl_status* err)

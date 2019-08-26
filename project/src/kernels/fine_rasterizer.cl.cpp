@@ -73,7 +73,6 @@ bool is_point_in_triangle(const NDCPosition p0, const NDCPosition p1, const NDCP
 
 bool is_queue_ended(global const Index* triangle_queue, uint queue_head_idx, uint queue_size)
 {
-	//DEBUG_ITEM_SPECIFIC1(0, 3, 0, "current queue head index: %d\n", queue_head_idx);
     return queue_head_idx < queue_size && (triangle_queue[queue_head_idx] || !queue_head_idx);
 }
 
@@ -86,7 +85,6 @@ uint pick_queue(global const Index** triangle_queues, uint* current_queue_heads,
     {
         if (is_queue_ended(triangle_queues[i], current_queue_heads[i], queue_size))
         {
-			//DEBUG_ITEM_SPECIFIC1(0, 3, 0, "queue is valid: %d\n", i);
             if (current_queue == work_group_count)
             {
                 current_queue = i;
@@ -140,11 +138,8 @@ kernel void fine_rasterize(
     {
         current_queue_bases[i] = bin_queues + bin_queue_offset + i * elements_per_group;
 		
-		//DEBUG_ITEM_SPECIFIC6(0, 3, 0, "Empty queue [%d]: %d %d %d %d %d\n", i, current_queue_bases[i][0], current_queue_bases[i][1], current_queue_bases[i][2], current_queue_bases[i][3], current_queue_bases[i][4]);
-
         if (current_queue_bases[i][0]) 
         {
-			//DEBUG_MESSAGE1("Empty queue detected: %d\n", i);
             current_queue_elements[i] = config.queue_size + 1;
         }
         else
@@ -166,14 +161,6 @@ kernel void fine_rasterize(
         
         current_queue_element = current_queue_bases[current_queue][current_queue_elements[current_queue]];
 		
-		//DEBUG_ITEM_SPECIFIC4(5, 3, 0, "[%d, %d] -> current queue element: [%d]:%d\n", get_global_id(0), get_global_id(1), current_queue, current_queue_element);
-		//DEBUG_ITEM_SPECIFIC4(5, 3, 0, "[%d, %d] -> current queue element: [%d]:%d\n", get_global_id(0), get_global_id(1), current_queue, current_queue_element);
-		//DEBUG_ITEM_SPECIFIC4(6, 3, 0, "[%d, %d] -> current queue element: [%d]:%d\n", get_global_id(0), get_global_id(1), current_queue, current_queue_element);
-		//DEBUG_ITEM_SPECIFIC4(5, 4, 0, "[%d, %d] -> current queue element: [%d]:%d\n", get_global_id(0), get_global_id(1), current_queue, current_queue_element);
-		//DEBUG_ITEM_SPECIFIC4(6, 4, 0, "[%d, %d] -> current queue element: [%d]:%d\n", get_global_id(0), get_global_id(1), current_queue, current_queue_element);
-		//DEBUG_ITEM_SPECIFIC3(0, 3, 0, "[%d, %d] -> current queue: %d\n", get_global_id(0), get_global_id(1), current_queue);
-		//return;
-
 		p0.x = triangle_data[current_queue_element][0][0];
 		p0.y = triangle_data[current_queue_element][0][1];
 
@@ -182,8 +169,6 @@ kernel void fine_rasterize(
 
 		p2.x = triangle_data[current_queue_element][2][0];
 		p2.y = triangle_data[current_queue_element][2][1];
-
-		//DEBUG_ITEM_SPECIFIC8(5, 3, 0, "[%d, %d] -> {(%f, %f), (%f, %f), (%f, %f)}\n", get_global_id(0), get_global_id(1), p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
 
         for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, x * config.bin_width + config.bin_width); ++frag_x)
         {

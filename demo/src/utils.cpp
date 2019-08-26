@@ -108,10 +108,18 @@ void tetrahadrlize3Cube(const Vector cube[8], Tetrahedron result[6])
     reduceToFaces(cube, faces);
 
     nr_uint i0, i1, i2;
+
     getNextFace(faces[0], faces, 0, i0);
     getNextFace(faces[0], faces, i0, i1);
+	if (i1 > 5)
+	{
+		std::cerr << "Oopsy!" << std::endl;
+	}
     getNextFace(faces[0], faces, i1, i2);
-
+	if (i2 > 5)
+	{
+		std::cerr << "Oopsy!" << std::endl;
+	}
     result[0].points[0] = faces[0];
     result[0].points[1] = faces[i0 * 4];
     result[0].points[2] = faces[i0 * 4 + 1];

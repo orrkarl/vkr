@@ -25,7 +25,7 @@ protected:
 
 	nr_status draw(const nr::VertexBuffer& vb, const nr::Primitive& type, const nr_uint primitiveCount);
 
-	GLFWwindow* getWindow();
+	bool isKeyPressed(int key);
 
 private:
 	void destroy();
