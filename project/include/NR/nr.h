@@ -4,7 +4,7 @@
  * @brief Public interface for Nraster library
  * @version 0.6.0
  * @date 2019-08-26
- *
+ * @note the Nraster public API isn't really a thing yet and is very unstable
  * @copyright Copyright (c) 2019
  *
  */

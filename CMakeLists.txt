@@ -15,8 +15,8 @@ OPTION(BUILD_DOCS  "builds the Nraster documentation (requires Doxygen)" ON)
 SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(VERSION_MAJOR 0 CACHE STRING "Nraster major version")
-SET(VERSION_MINOR 5 CACHE STRING "Nraster minor version")
-SET(VERSION_PATCH 9 CACHE STRING "Nraster patch version")
+SET(VERSION_MINOR 6 CACHE STRING "Nraster minor version")
+SET(VERSION_PATCH 0 CACHE STRING "Nraster patch version")
 
 
 # Platform specific settings:
