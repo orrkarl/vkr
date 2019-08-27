@@ -53,7 +53,6 @@ public:
 	 * @param context parent context of this buffer
 	 * @param flags memory access flags. Do not pass CL_MEM_COPY_HOST_PTR or CL_MEM_USE_HOST_PTR, as no host pointer is passed in this version
 	 * @param count amount of elements this buffer should hold
-	 * @param data host pointer, will be used according to flags
 	 * @param[out] status function success status
 	 * @return Buffer a size-fitting buffer
 	 */
@@ -70,35 +69,44 @@ public:
 	Buffer();
 
 	/**
-	 * @brief Construct a new Buffer object of given size; wraps clCreateBuffer
+	 * @brief Construct a new Buffer object of given size
 	 * 
-	 * Refer to the OpenCL clCreateBuffer documentation for detailed explenation of the memory flags and error status
-	 * @param context parent context of this buffer
+	 * @note wraps clCreateBuffer
+	 * @note Refer to the OpenCL clCreateBuffer documentation for detailed explenation of the memory flags and error status
+	 * @param context parent context of this bu	ffer
 	 * @param flags memory access flags. Do not pass CL_MEM_COPY_HOST_PTR or CL_MEM_USE_HOST_PTR, as no host pointer is passed in this version
 	 * @param size the buffer size (in bytes)
-	 * @param[out] err function success status
+	 * @param[out] err internal OpenCL call status
 	 */
 	Buffer(const Context& context, const cl_mem_flags& flags, const nr_size& size, cl_status* err = nullptr);
 
 	/**
-	 * @brief Construct a new Buffer object of given size; wraps clCreateBuffer
+	 * @brief Construct a new Buffer object of given size
 	 * 
-	 * Refer to the OpenCL clCreateBuffer documentation for detailed explenation of the memory flags and error status
+	 * @note wraps clCreateBuffer
+	 * @note Refer to the OpenCL clCreateBuffer documentation for detailed explenation of the memory flags and error status
 	 * @param context parent context of this buffer
 	 * @param flags memory access flags
-	 * @param size the buffer size (in bytes)
-	 * @param[out] err function success status
+	 * @param size buffer size (in bytes)
+	 * @param data raw host pointer, used according with the memory flags
+	 * @param[out] error internal OpenCL call status
 	 */
 	Buffer(const Context& context, const cl_mem_flags& flags, const nr_size& size, void* data = nullptr, cl_status* error = nullptr);
 
 	/**
 	 * @brief Convertes a raw OpenCL buffer to C++ wrapper
 	 * 
+     * This method allowes the class to "take ownership" of the lower OpenCL type; It may retain (increase the reference count) of the object
 	 * @param buffer object to own
 	 * @param retain should the reference count for the object be incremented
 	 */
 	explicit Buffer(const cl_mem& buffer, const nr_bool retain = false);
 
+	/**
+	 * @brief Copy constructor
+	 * 
+	 * @param other copied buffer
+	 */
 	Buffer(const Buffer& other);
 
 	Buffer(Buffer&& other);

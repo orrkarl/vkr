@@ -30,7 +30,13 @@ class CommandQueue;
 template <typename Consumer>
 class Dispatch
 {
-public:
+public:	
+	/**
+	 * @brief passing the command queue to the underlying user type
+	 * 
+	 * @param q command queue
+	 * @return cl_status user OpenCL calls status 
+	 */
 	cl_status operator()(const nr::CommandQueue& q) const
 	{
 		return static_cast<const Consumer*>(this)->consume(q);

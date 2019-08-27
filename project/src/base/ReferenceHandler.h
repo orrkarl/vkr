@@ -14,8 +14,9 @@
 
 /**
  * @brief Template supertype for reference handlers, to be specialized for each OpenCL basic type. 
- * Should provide "release" and "retain", 2 static methods which handle the type's reference count
  * 
+ * Should provide "release" and "retain", 2 static methods which handle the type's reference count.
+ * Have a look at ReferenceHandler<cl_device_id> for an example
  * @tparam cl_type The handled OpenCL type
  */
 template<typename cl_type>

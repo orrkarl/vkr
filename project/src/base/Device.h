@@ -21,15 +21,21 @@ namespace nr
  * @brief Represents an OpenCL physical device, such as a specific GPU exsiting in the computer.
  * 
  * This class is mostly used for configuration and initialization
+ * @note creating a device should be done with a Platform, and one shouldn't call the ctor's of Device directly
  */
 class NRAPI Device : public Wrapper<cl_device_id>
 {
 public:
+    /**
+     * @brief constructs a null device
+     * 
+     */
     Device();
 
     /**
 	 * @brief Convertes a raw OpenCL device to the C++ wrapper
 	 * 
+     * This method allowes the class to "take ownership" of the lower OpenCL type; It may retain (increase the reference count) of the object
 	 * @param device object to own
 	 * @param retain should the reference count for the object be incremented
 	 */

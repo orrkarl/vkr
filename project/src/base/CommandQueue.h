@@ -106,6 +106,12 @@ struct NDRange<3>
 	};
 };
 
+/**
+ * @brief Typical data reuired to execute a kernel
+ * 
+ * @see template NDRange
+ * @tparam dim execution dimension
+ */
 template <nr_uint dim>
 struct NDExecutionRange
 {
@@ -115,14 +121,14 @@ struct NDExecutionRange
 /**
  * @brief Wrapper class for OpenCL command queue, allowing for a more type safe and 'cpp-esque' interface.
  * 
- * Every importent interaction with the device has to go throw this class: kernel execution, buffer read\write and other types of memory access
+ * Every importent interaction with the device has to go throw this class: kernel execution, buffer read\ write and other types of memory access
  * @note This class is written as a "lazy" wrapper: I will only implement functions if I intend on using them, which is why many functions of cl_command_queue aren't implemented
  */
 class NRAPI CommandQueue : public Wrapper<cl_command_queue>
 {
 public:
     /**
-     * @brief Construct a null command queue; this cannot be used at all
+     * @brief Construct a null command queue
      * 
      */
     CommandQueue();
@@ -130,6 +136,7 @@ public:
     /**
 	 * @brief Convertes a raw OpenCL command queue to the C++ wrapper
 	 * 
+     * This method allowes the class to "take ownership" of the lower OpenCL type; It may retain (increase the reference count) of the object
 	 * @param commandQueue object to own
 	 * @param retain should the reference count for the object be incremented
 	 */
