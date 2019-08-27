@@ -1,3 +1,13 @@
+/**
+ * @file
+ * @author Orr Karl (karlor041@gmail.com)
+ * @brief implements the bin rasterizer kernel
+ * @version 0.6.0
+ * @date 2019-08-27
+ * 
+ * @copyright Copyright (c) 2019
+ * 
+ */
 #pragma once
 
 #include "../predefs.h"
@@ -16,6 +26,19 @@ namespace nr
 namespace detail
 {
 
+/**
+ * @brief Accessing the third stage in the raster pipeline
+ * 
+ * The bin rasterizer is the third stage in the raster pipeline. It's job is to divide the triangles to bins. A bin is just a rectangle
+ * of pixels of the screen of known width and height. By dividing the triangles to queues we can run a later fine rasterizer on a per bin basis.
+ * 
+ * @par
+ * This stage divides the triangles into bin queues: queues of known size, where each queue is assigned to a specific bin. Each queue contains indices
+ * to the triangle buffer. Since the exect load on each queue cannot be pre-determinated, each queue has to mark it's own ending.
+ * If the queue is empty, it's first element (which is the is empty flag) will be set. Otherwise it will be zero and the queue 
+ * will have data in it. After the last triangle index is assigned (and if there is still room in the queue), the queue will be declared ended with
+ * 0.
+ */
 class BinRasterizer : public StandardDispatch<2, Buffer, nr_uint, ScreenDimension, BinQueueConfig, Buffer, Buffer, Buffer>
 {
 public:

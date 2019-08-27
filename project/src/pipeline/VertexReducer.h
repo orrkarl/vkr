@@ -27,6 +27,7 @@ namespace detail
  * The vertex reducer is the first stage in the raster pipeline. It's job is to reduce each vertex dimensions - 
  * take the homogenous N dimensional input and transform it into a 2D position with some extra data (such as 'depth'), to be used in 
  * the next pipeline operations.
+ * @par
  * As of right now, this stage runs repeating perspective projections on each dimension.
  * @par
  * This stage takes 4 inputs: the vertex input buffer, the perspective near and far planes and an output target buffer.
@@ -71,7 +72,7 @@ public:
 	/**
 	 * @brief Set the perspective near plane
 	 * 
-	 * The buffer is expected to contain N elements (one float each).
+	 * The buffer is expected to contain N elements (N floats each).
 	 * Each element specifices the lower bound of the repeating perspective projections at it's coordinate
 	 * @param near perspective near plane
 	 * @return cl_status internal OpenCL call status
@@ -84,7 +85,7 @@ public:
 	/**
 	 * @brief Set the perspective far plane
 	 * 
-	 * The buffer is expected to contain N elements (one float each).
+	 * The buffer is expected to contain N elements (N floats each).
 	 * Each element specifices the upper bound of the repeating perspective projections at it's coordinate
 	 * @param far perspective far plane
 	 * @return cl_status internal OpenCL call status
