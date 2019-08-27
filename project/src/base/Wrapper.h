@@ -1,8 +1,9 @@
 /**
  * @file Wrapper.h
- * @author Orr Karl (karlor041@gmail.com)
  * @brief Wrapping OpenCL built in reference handling, implementing copy and move constructors and operators accordingly
  * @see ReferenceHandler.h
+ * 
+ * @author Orr Karl (karlor041@gmail.com)
  * @version 0.5.9
  * @date 2019-06-30
  * 
