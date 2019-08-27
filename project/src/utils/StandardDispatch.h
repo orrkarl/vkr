@@ -1,3 +1,13 @@
+/**
+ * @file
+ * @author Orr Karl (karlor041@gmail.com)
+ * @brief Implements a execution range aware, typesafe kernel
+ * @version 0.6.0
+ * @date 2019-08-27
+ * 
+ * @copyright Copyright (c) 2019
+ * 
+ */
 #pragma once
 
 #include "../base/CommandQueue.h"
@@ -8,6 +18,13 @@
 namespace nr
 {
 
+/**
+ * @brief A kernel which holds it's own execution sizes
+ * 
+ * This class is ment to be inherited from in order to modify the execution range in a more encapsulated way
+ * @tparam dim kernel execution dimension
+ * @tparam Args kernel argument types
+ */
 template <nr_uint dim, typename... Args>
 class StandardDispatch : protected TypesafeKernel<Args...>, public Dispatch<StandardDispatch<dim, Args...>>
 {
@@ -27,6 +44,13 @@ public:
 	{
 	}
 
+	/**
+	 * @brief implements Dispatch
+	 * 
+	 * enqueues this kernel with it's execution range
+	 * @param q command queue
+	 * @return cl_status internal OpenCL call status
+	 */
 	cl_status consume(const CommandQueue& q) const
 	{
 #ifdef _DEBUG
