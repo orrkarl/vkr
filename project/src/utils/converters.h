@@ -1,3 +1,13 @@
+/**
+ * @file
+ * @author Orr Karl (karlor041@gmail.com)
+ * @brief Utility file for converting useful types
+ * @version 0.6.0
+ * @date 2019-08-30
+ * 
+ * @copyright Copyright (c) 2019
+ * 
+ */
 #pragma once
 
 #include "../predefs.h"

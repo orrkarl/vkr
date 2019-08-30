@@ -1,3 +1,13 @@
+/**
+ * @file
+ * @author Orr Karl (karlor041@gmail.com)
+ * @brief rendering related data structures
+ * @version 0.6.0
+ * @date 2019-08-30
+ * 
+ * @copyright Copyright (c) 2019
+ * 
+ */
 #pragma once
 
 #include "../predefs.h"
@@ -21,6 +31,11 @@ struct ScreenDimension
 {
     nr_uint width, height;
 
+    /**
+     * @brief get the pixel count in this screen dimension
+     * 
+     * @return  pixel count
+     */
 	nr_uint getTotalSize() const { return width * height; }
 
     friend std::ostream& operator<<(std::ostream& os, const ScreenDimension& dim)
