@@ -18,7 +18,6 @@ TEST(Fine, Rasterizer)
 {
 	cl_status err = CL_SUCCESS;
 
-	constexpr const nr_uint dim = 5;
 	constexpr const ScreenDimension screenDim = { 640, 640 };
 	constexpr const BinQueueConfig config = { 64, 64, 10 };
 	constexpr const nr_uint binCountX = compileTimeCeil(((nr_float)screenDim.width) / config.binWidth);
@@ -34,7 +33,7 @@ TEST(Fine, Rasterizer)
 	const nr_float expectedDepth = 0.5f;
 
 	const nr_uint triangleCount = 3;
-	std::unique_ptr<Triangle<dim>[]> h_triangles(new Triangle<dim>[triangleCount]);
+	std::unique_ptr<Triangle<3>[]> h_triangles(new Triangle<3>[triangleCount]);
 	std::unique_ptr<Queues[]> h_binQueues(new Queues[totalWorkGroupCount]);
 
 	std::unique_ptr<ColorBuffer[]> h_colorBuffer(new ColorBuffer[1]);
@@ -55,10 +54,10 @@ TEST(Fine, Rasterizer)
 		}
 	}
 
-	tesselateScreen<dim, binCountX, binCountY, config.queueSize, screenDim.width, screenDim.height>(
+	tesselateScreen<binCountX, binCountY, config.queueSize, screenDim.width, screenDim.height>(
 		screenDim, config, totalWorkGroupCount, expectedDepth, triangleCount, h_triangles.get(), h_binQueues.get(), expectedColorBuffer[0], expectedDepthBuffer[0]);
 
-	auto code = mkFineModule(dim, err);
+	auto code = mkFineModule(err);
 	ASSERT_SUCCESS(err);
 
 	auto testee = FineRasterizer(code, err);
@@ -72,7 +71,7 @@ TEST(Fine, Rasterizer)
 	frame.depth = Buffer::make<DepthBuffer>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, h_depthBuffer.get(), err);
 	ASSERT_SUCCESS(err);
 
-	auto d_triangles = Buffer::make<Triangle<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles.get(), err);
+	auto d_triangles = Buffer::make<Triangle<3>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles.get(), err);
 	ASSERT_SUCCESS(err);
 	auto d_binQueues = Buffer::make<Queues>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, totalWorkGroupCount, h_binQueues.get(), err);
 	ASSERT_SUCCESS(err);

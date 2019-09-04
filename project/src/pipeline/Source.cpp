@@ -21,7 +21,6 @@ cl_status Source::build(const Device& dev, const nr_uint renderDimension, const 
 {
 	Module::Options opts;
 	opts.push_back(Module::CL_VERSION_12);
-	opts.push_back(Module::RenderDimension(renderDimension));
 	opts.push_back(Module::Macro("BATCH_COUNT", std::to_string(binBatchSize)));
 	if (debug) opts.push_back(Module::DEBUG);
 

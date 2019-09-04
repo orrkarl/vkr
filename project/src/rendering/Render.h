@@ -87,11 +87,16 @@ struct Vertex
 {
     nr_float values[dim + 1];
 
-    bool operator==(const Vertex& other) const
-    {
-        for (auto i = 0; i < dim + 1; ++i) 
-            if (std::abs(values[i] - other[i]) > 10e-6)
-                return false;
+	bool operator==(const Vertex& other) const
+	{
+		for (auto i = 0; i < dim + 1; ++i)
+		{
+			if (std::abs(values[i] - other[i]) > 10e-6)
+			{
+				printf("%f vs %f\n", values[i], other[i]);
+				return false;
+			}
+		}
 
         return true;
     }

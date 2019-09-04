@@ -89,19 +89,6 @@ public:
 	};
 
 	/**
-	 * @brief Represents the Nraster Render Dimension macro, passed to NR module during compilation
-	 */
-	struct NRAPI RenderDimension : Macro
-	{
-		/**
-		 * @brief Constructs a NR render dimension directive
-		 * 
-		 * @param dimension desired rendering dimension
-		 */
-		RenderDimension(const nr_uint& dimension);
-	};
-
-	/**
 	 * @brief Wraps the "-clstd" OpenCL option
 	 * 
 	 * Use this class to fix the OpenCL device code version
@@ -294,10 +281,6 @@ public:
 	static const CLVersion CL_VERSION_20;
 	static const CLVersion CL_VERSION_12;
 	static const CLVersion CL_VERSION_11;
-
-	static const RenderDimension _3D;
-	static const RenderDimension _4D;
-	static const RenderDimension _5D;
 };
 
 }

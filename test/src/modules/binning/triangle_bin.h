@@ -49,7 +49,7 @@ struct TriangleInBin : StandardDispatch<1, Buffer, Buffer, Bin, ScreenDimension,
 	}
 };
 
-void testBin(TriangleInBin testee, CommandQueue q, const nr_uint dimension, const Bin& bin, const ScreenDimension& dim, nr_float* triangle_x, nr_float* triangle_y)
+void testBin(TriangleInBin testee, const CommandQueue& q, const Bin& bin, const ScreenDimension& dim, nr_float* triangle_x, nr_float* triangle_y)
 {
     cl_status err = CL_SUCCESS;
 
@@ -98,14 +98,12 @@ void testBin(TriangleInBin testee, CommandQueue q, const nr_uint dimension, cons
 
 TEST(Binning, IsSimplexInBin)
 {
-    const nr_uint dim = 5;
-
     cl_status err = CL_SUCCESS; 
 
     nr_float triangle_x[3];
     nr_float triangle_y[3];
 
-    auto code = mkBinningModule(dim, 1, err);
+    auto code = mkBinningModule(1, err);
     ASSERT_SUCCESS(err);
 
     auto test = TriangleInBin(code, err);
@@ -114,6 +112,6 @@ TEST(Binning, IsSimplexInBin)
     const ScreenDimension screenDim{1920, 1080};
     const Bin bin{32, 32, 800, 800};
 
-    testBin(test, defaultCommandQueue, dim, bin, screenDim, triangle_x, triangle_y);
+    testBin(test, defaultCommandQueue, bin, screenDim, triangle_x, triangle_y);
 }
 

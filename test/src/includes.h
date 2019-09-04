@@ -181,7 +181,7 @@ NDCPosition ndcFromPixelMid(const ScreenPosition& screen, const nr::ScreenDimens
 // Check if a status value indicates success, return well formatted message O.W
 testing::AssertionResult isSuccess(const cl_status& err);
 
-nr::Module::Options mkStandardOptions(const nr_uint dim);
+nr::Module::Options mkStandardOptions();
 
 cl_status init();
 

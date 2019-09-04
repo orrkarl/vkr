@@ -49,12 +49,11 @@ testing::AssertionResult isSuccess(const cl_status& err)
     else return testing::AssertionFailure() << nr::utils::stringFromCLError(err) << " (" << err << ')';
 }
 
-nr::Module::Options mkStandardOptions(const nr_uint dim)
+nr::Module::Options mkStandardOptions()
 {
     return nr::Module::Options{
                 nr::Module::CL_VERSION_12, 
                 nr::Module::DEBUG, 
-                nr::Module::RenderDimension(dim)
             };
 }
 

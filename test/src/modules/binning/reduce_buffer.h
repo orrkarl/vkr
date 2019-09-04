@@ -60,8 +60,7 @@ struct ReducedTriangle
 	}
 };
 
-template<nr_uint dim>
-void generateTriangleData(const nr_uint triangleCount, Triangle<dim>* buffer)
+void generateTriangleData(const nr_uint triangleCount, Triangle<3>* buffer)
 {
     nr_float diff = 2.0f / (triangleCount - 1);
     nr_float base = -1;
@@ -73,16 +72,12 @@ void generateTriangleData(const nr_uint triangleCount, Triangle<dim>* buffer)
             buffer[i].points[j].values[0] = base + i * diff;
             buffer[i].points[j].values[1] = base + i * diff;
 
-            for (nr_uint k = 2; k < dim - 2; ++k)
-            {
-                buffer[i].points[j].values[k] = -2;
-            }
+			buffer[i].points[j].values[2] = -2;
         }
     }
 }
 
-template<nr_uint dim>
-void extractNDCPosition(const nr_uint triangleCount, const Triangle<dim>* buffer, ReducedTriangle* result)
+void extractNDCPosition(const nr_uint triangleCount, const Triangle<3>* buffer, ReducedTriangle* result)
 {
     for (nr_uint i = 0; i < triangleCount; ++i)
     {
@@ -107,22 +102,22 @@ TEST(Binning, ReduceTriangleBuffer)
     
     cl_status err = CL_SUCCESS; 
 
-    auto code = mkBinningModule(dim, triangleCount + offset, err);
+    auto code = mkBinningModule(triangleCount + offset, err);
     ASSERT_SUCCESS(err);
 
     auto q = defaultCommandQueue;
 
-    Triangle<dim> h_triangles_raw[triangleCount + offset];
-    Triangle<dim>* h_triangles = h_triangles_raw + offset;
+    Triangle<3> h_triangles_raw[triangleCount + offset];
+    Triangle<3>* h_triangles = h_triangles_raw + offset;
 
-    generateTriangleData<dim>(triangleCount, h_triangles);
+    generateTriangleData(triangleCount, h_triangles);
 	
 	ReducedTriangle h_expected[triangleCount];
-    extractNDCPosition<dim>(triangleCount, h_triangles, h_expected);
+    extractNDCPosition(triangleCount, h_triangles, h_expected);
 
     std::array<ReducedTriangle, triangleCount> h_actual;
 
-    auto d_triangle = Buffer::make<Triangle<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, offset + triangleCount, h_triangles_raw, err);
+    auto d_triangle = Buffer::make<Triangle<3>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, offset + triangleCount, h_triangles_raw, err);
     ASSERT_SUCCESS(err);
     auto d_result = Buffer::make<ReducedTriangle>(defaultContext, CL_MEM_WRITE_ONLY, triangleCount, err);
     ASSERT_SUCCESS(err);

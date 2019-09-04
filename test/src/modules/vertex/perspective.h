@@ -39,7 +39,6 @@ TEST(VertexShader, Perspective)
     Module::Options options = 
     {
         Module::CL_VERSION_12, 
-        Module::RenderDimension(dim), 
         Module::DEBUG
     };
 

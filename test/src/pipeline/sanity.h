@@ -9,8 +9,6 @@
 
 #include "utils.h"
 
-constexpr const nr_uint dim = 3;
-
 nr_float h_near[]
 {
 	-5, -5, 0.5
@@ -35,13 +33,13 @@ TEST(Pipeline, Sanity)
 
 	auto bitmap = std::make_unique<nr::RawColorRGBA[]>(screenDim.getTotalSize());
 	
-	auto triangles = std::make_unique<nr::Simplex<dim>[]>(count);
+	auto triangles = std::make_unique<nr::Simplex<3>[]>(count);
 	fillTriangleBuffer(screenDim, config, workGroupCount, batchSize, 0.5f, triangles.get());
 
 	auto vb = nr::VertexBuffer::make(defaultContext, count, triangles.get(), ret);
 	ASSERT_SUCCESS(ret);
 
-	auto p = nr::Pipeline(defaultContext, defaultDevice, defaultCommandQueue, dim, config, workGroupCount, batchSize, ret);
+	auto p = nr::Pipeline(defaultContext, defaultDevice, defaultCommandQueue, 3, config, workGroupCount, batchSize, ret);
 	ASSERT_SUCCESS(ret);
 
 	ret = p.viewport(screenDim);

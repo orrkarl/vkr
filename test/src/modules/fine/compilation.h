@@ -11,7 +11,7 @@ using namespace testing;
 
 TEST(Fine, Compilation)
 {
-    testCompilation(Module::Options{Module::CL_VERSION_12, Module::RenderDimension(10)}, "production 10d", {clcode::base, clcode::fine_rasterizer});
-    testCompilation(Module::Options{Module::CL_VERSION_12, Module::RenderDimension(8), Module::DEBUG, TEST_FINE}, "debug/testing 8d", {clcode::base, clcode::fine_rasterizer});
+    testCompilation(Module::Options{ Module::CL_VERSION_12 }, "production", {clcode::base, clcode::fine_rasterizer});
+    testCompilation(Module::Options{ Module::CL_VERSION_12, Module::DEBUG, TEST_FINE }, "debug/testing", {clcode::base, clcode::fine_rasterizer});
 }
 

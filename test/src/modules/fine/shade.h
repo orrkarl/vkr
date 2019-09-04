@@ -97,7 +97,7 @@ TEST(Fine, Shade)
     frame.depth = Buffer::make<DepthBuffer>(defaultContext, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, 1, &h_depth, err);
     ASSERT_SUCCESS(err);
     
-    auto code = mkFineModule(dim, err);
+    auto code = mkFineModule(err);
     ASSERT_SUCCESS(err);
 
     auto testee = ShadeTest(code, err);

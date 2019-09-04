@@ -17,8 +17,6 @@ using namespace testing;
 TEST(Binning, Rasterizer)
 {
     cl_status err = CL_SUCCESS; 
-
-    const nr_uint dim = 4;
     
     // Don't change this - test not generic enough
     const nr_uint triangleCount = 2;
@@ -46,19 +44,19 @@ TEST(Binning, Rasterizer)
 
     const nr_uint x = destinationBinX * config.binWidth + config.binWidth / 2;
     const nr_uint y = destinationBinY * config.binHeight + config.binHeight / 2;
-    Triangle<dim> h_triangles[triangleCount];
+    Triangle<3> h_triangles[triangleCount];
     mkTriangleInCoords(x, y, screenDim, h_triangles);
     mkTriangleInCoords(x, y, screenDim, h_triangles + 1);
     
     CommandQueue q = defaultCommandQueue;
 
-    auto code = mkBinningModule(dim, triangleCount, err);
+    auto code = mkBinningModule(triangleCount, err);
     ASSERT_SUCCESS(err);
 
     auto testee = BinRasterizer(code, err);
     ASSERT_SUCCESS(err);
 
-    auto d_triangles = Buffer::make<Triangle<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles, err);
+    auto d_triangles = Buffer::make<Triangle<3>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles, err);
     ASSERT_SUCCESS(err);
 
     auto d_overflow = Buffer::make<nr_uint>(defaultContext, CL_MEM_READ_WRITE, 1, err);

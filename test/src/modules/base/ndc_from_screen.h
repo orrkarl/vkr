@@ -60,7 +60,7 @@ TEST(Base, NDCFromScreen)
     Module base(defaultContext, clcode::base, err);
     ASSERT_SUCCESS(err);
 
-    ASSERT_SUCCESS(base.build(defaultDevice, Module::Options{Module::_3D}));
+    ASSERT_SUCCESS(base.build(defaultDevice, Module::Options{Module::CL_VERSION_12}));
 
     auto ndc_from_screen = NDCFromScreen(base, err);
     ASSERT_SUCCESS(err);

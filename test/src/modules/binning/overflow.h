@@ -17,7 +17,6 @@ TEST(Binning, RasterizerOverflow)
 {
     cl_status err = CL_SUCCESS; 
 
-    constexpr const nr_uint dim = 4;
     constexpr const nr_uint triangleCount = 400;
     constexpr const nr_uint workGroupCount = 2;
     constexpr const ScreenDimension screenDim = {4, 10};
@@ -32,20 +31,20 @@ TEST(Binning, RasterizerOverflow)
 
     auto q = defaultCommandQueue;
 
-	std::unique_ptr<Triangle<dim>[]> h_triangles_(new Triangle<dim>[triangleCount]);
+	std::unique_ptr<Triangle<3>[]> h_triangles_(new Triangle<3>[triangleCount]);
 	auto h_triangles = h_triangles_.get();
     for (nr_uint i = 0; i < triangleCount; ++i)
     {
         mkTriangleInCoords(0, 0, screenDim, h_triangles + i);
     }
     
-    auto code = mkBinningModule(dim, triangleCount, err);
+    auto code = mkBinningModule(triangleCount, err);
     ASSERT_SUCCESS(err);
 
     auto testee = BinRasterizer(code, err);
     ASSERT_SUCCESS(err);
     
-    auto d_triangles = Buffer::make<Triangle<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles, err);
+    auto d_triangles = Buffer::make<Triangle<3>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles, err);
     ASSERT_SUCCESS(err);
 
     auto d_overflow = Buffer::make<nr_uint>(defaultContext, CL_MEM_READ_WRITE, 1, err);

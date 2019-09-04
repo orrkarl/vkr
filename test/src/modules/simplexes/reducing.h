@@ -23,11 +23,7 @@ struct ReducedSimplex
 
 	bool operator==(const ReducedSimplex<dim>& other) const
 	{
-		for (auto i = 0; i < 3; ++i)
-			if (triangles[i] != other[i])
-				return false;
-
-		return true;
+		return triangles[0] == other.triangles[0];
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const ReducedSimplex& simplex)
@@ -43,36 +39,23 @@ struct ReducedSimplex
 	Triangle<dim>& operator[](const nr_uint index) { return triangles[index]; }
 };
 
-void setupSimplexes(const nr_uint count, Simplex<4>* original, ReducedSimplex<4>* result)
+void setupSimplexes(const nr_uint count, Simplex<3>* original, ReducedSimplex<3>* result)
 {
 	auto curr = 0.0f;
 
 	for (auto i = 0; i < count; ++i)
 	{
-		for (auto j = 0u; j < 4; ++j)
+		for (auto j = 0u; j < 3; ++j)
 		{
 			original[i][j][0] = curr;
 			original[i][j][1] = curr;
-			original[i][j][2] = curr;
-			original[i][j][3] = curr++;
-			original[i][j][4] = nanf("");
+			original[i][j][2] = curr++;
+			original[i][j][3] = 3.1415f;
 		}
 
 		result[i][0][0] = original[i][0];
 		result[i][0][1] = original[i][1];
 		result[i][0][2] = original[i][2];
-
-		result[i][1][0] = original[i][0];
-		result[i][1][1] = original[i][1];
-		result[i][1][2] = original[i][3];
-
-		result[i][2][0] = original[i][0];
-		result[i][2][1] = original[i][2];
-		result[i][2][2] = original[i][3];
-
-		result[i][3][0] = original[i][1];
-		result[i][3][1] = original[i][2];
-		result[i][3][2] = original[i][3];
 	}
 }
 
@@ -80,18 +63,16 @@ TEST(SimplexReducer, reducing)
 {
 	cl_status err = CL_SUCCESS;
 
-	constexpr const nr_uint dim = 4;
 	const nr_uint simplexCount = 3;
 
-	Simplex<dim> orig[simplexCount];
-	ReducedSimplex<dim> expected[simplexCount];
-	ReducedSimplex<dim> result[simplexCount];
+	Simplex<3> orig[simplexCount];
+	ReducedSimplex<3> expected[simplexCount];
+	ReducedSimplex<3> result[simplexCount];
 	setupSimplexes(simplexCount, orig, expected);
 	
 	Module::Options options =
 	{
 		Module::CL_VERSION_12,
-		Module::RenderDimension(dim),
 		Module::DEBUG
 	};
 
@@ -106,9 +87,9 @@ TEST(SimplexReducer, reducing)
 	auto q = defaultCommandQueue;
 	ASSERT_SUCCESS(err);
 
-	auto d_orig = Buffer::make<Simplex<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, simplexCount, orig, err);
+	auto d_orig = Buffer::make<Simplex<3>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, simplexCount, orig, err);
 	ASSERT_SUCCESS(err); 
-	auto d_res = Buffer::make<ReducedSimplex<dim>>(defaultContext, CL_MEM_WRITE_ONLY, simplexCount, err);
+	auto d_res = Buffer::make<ReducedSimplex<3>>(defaultContext, CL_MEM_WRITE_ONLY, simplexCount, err);
 	ASSERT_SUCCESS(err);
 
 	testee.setExecutionRange(simplexCount);
@@ -121,6 +102,6 @@ TEST(SimplexReducer, reducing)
 
 	for (auto i = 0u; i < simplexCount; ++i)
 	{
-		ASSERT_EQ(expected[i], result[i]) << i;
+		ASSERT_EQ(expected[i], result[i]);
 	}
 }
