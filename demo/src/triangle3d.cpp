@@ -3,11 +3,11 @@
 
 #include <NR/nr.h>
 
-nr::Simplex<3> h_triangle
+nr::Triangle h_triangle
 {
-	nr::Vertex<3>{ -5, -2.5,   3 },
-	nr::Vertex<3>{  0,	  5, 2.5 },
-	nr::Vertex<3>{  5, -2.5,   2 }
+	nr::Vertex{ -5, -2.5,   3 },
+	nr::Vertex{  0,	  5, 2.5 },
+	nr::Vertex{  5, -2.5,   2 }
 };
 
 nr_float h_near[3]

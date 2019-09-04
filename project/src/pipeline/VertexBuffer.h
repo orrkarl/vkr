@@ -40,13 +40,13 @@ public:
 	 * @param[out] err internal OpenCL call status
 	 * @return VertexBuffer result (will be a null buffer if an error has occured)
 	 */
-	static VertexBuffer make(const Context& context, const nr_uint primitiveCount, Simplex<3>* data, cl_status& err)
+	static VertexBuffer make(const Context& context, const nr_uint primitiveCount, Triangle* data, cl_status& err)
 	{
-		auto vertecies = Buffer::make<Simplex<3>>(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, primitiveCount, data, err);
+		auto vertecies = Buffer::make<Triangle>(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, primitiveCount, data, err);
 		if (error::isFailure(err)) return VertexBuffer();
-		auto reducedVertecies = Buffer::make<Simplex<3>>(context, CL_MEM_READ_WRITE, primitiveCount, err);
+		auto reducedVertecies = Buffer::make<Triangle>(context, CL_MEM_READ_WRITE, primitiveCount, err);
 		if (error::isFailure(err)) return VertexBuffer();
-		auto reducedSimplices = Buffer::make<Triangle<3>>(context, CL_MEM_READ_WRITE, detail::triangleCount(3, primitiveCount), err);
+		auto reducedSimplices = Buffer::make<Triangle>(context, CL_MEM_READ_WRITE, detail::triangleCount(3, primitiveCount), err);
 		if (error::isFailure(err)) return VertexBuffer();
 
 		return VertexBuffer(vertecies, reducedVertecies, reducedSimplices);
@@ -63,11 +63,11 @@ public:
 	 */
 	static VertexBuffer make(const Context& context, const nr_uint primitiveCount, cl_status& err)
 	{
-		auto vertecies = Buffer::make<Simplex<3>>(context, CL_MEM_READ_WRITE, primitiveCount, err);
+		auto vertecies = Buffer::make<Triangle>(context, CL_MEM_READ_WRITE, primitiveCount, err);
 		if (error::isFailure(err)) return VertexBuffer();
-		auto reducedVertecies = Buffer::make<Simplex<3>>(context, CL_MEM_READ_WRITE, primitiveCount, err);
+		auto reducedVertecies = Buffer::make<Triangle>(context, CL_MEM_READ_WRITE, primitiveCount, err);
 		if (error::isFailure(err)) return VertexBuffer();
-		auto reducedSimplices = Buffer::make<Triangle<3>>(context, CL_MEM_READ_WRITE, detail::triangleCount(3, primitiveCount), err);
+		auto reducedSimplices = Buffer::make<Triangle>(context, CL_MEM_READ_WRITE, detail::triangleCount(3, primitiveCount), err);
 		if (error::isFailure(err)) return VertexBuffer();
 
 		return VertexBuffer(vertecies, reducedVertecies, reducedSimplices);

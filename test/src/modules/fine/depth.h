@@ -36,7 +36,7 @@ TEST(Fine, Depth)
     const nr_float expectedDepth = 0.5;
 
     const nr_uint triangleCount = 3 * totalBinCount;
-    auto h_triangles = std::make_unique<Triangle<3>[]>(triangleCount);
+    auto h_triangles = std::make_unique<Triangle[]>(triangleCount);
 	auto h_binQueues = std::make_unique<Queues[]>(totalWorkGroupCount);
 
 	std::unique_ptr<ColorBuffer[]> cBuffer(new ColorBuffer[1]);
@@ -73,7 +73,7 @@ TEST(Fine, Depth)
     frame.depth = Buffer::make<DepthBuffer>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, dBuffer.get(), err);
     ASSERT_SUCCESS(err);
 	
-    auto d_triangles = Buffer::make<Triangle<3>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles.get(), err);
+    auto d_triangles = Buffer::make<Triangle>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles.get(), err);
     ASSERT_SUCCESS(err);
     auto d_binQueues = Buffer::make<Queues>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, totalWorkGroupCount, h_binQueues.get(), err);
     ASSERT_SUCCESS(err);

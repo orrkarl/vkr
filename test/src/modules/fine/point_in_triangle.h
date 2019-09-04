@@ -54,7 +54,7 @@ TEST(Fine, PointInTriangle)
 {
     cl_status err = CL_SUCCESS;
 
-    Triangle<3> triangle;
+    Triangle triangle;
     const NDCPosition left_bottom  = { -0.5, -0.5 };
     const NDCPosition right_bottom = { 0.5, -0.5 };
     const NDCPosition top          = { 0, 0.5 };
@@ -75,7 +75,7 @@ TEST(Fine, PointInTriangle)
     auto testee = PointInTriangle(code, err);
     ASSERT_SUCCESS(err);
 
-    auto d_triangle = Buffer::make<Triangle<3>>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, &triangle, err);
+    auto d_triangle = Buffer::make<Triangle>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, &triangle, err);
     ASSERT_SUCCESS(err);
 
     auto d_result = Buffer::make<nr_bool>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, &h_result, err);

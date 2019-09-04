@@ -33,7 +33,7 @@ TEST(Pipeline, Sanity)
 
 	auto bitmap = std::make_unique<nr::RawColorRGBA[]>(screenDim.getTotalSize());
 	
-	auto triangles = std::make_unique<nr::Simplex<3>[]>(count);
+	auto triangles = std::make_unique<nr::Triangle[]>(count);
 	fillTriangleBuffer(screenDim, config, workGroupCount, batchSize, 0.5f, triangles.get());
 
 	auto vb = nr::VertexBuffer::make(defaultContext, count, triangles.get(), ret);

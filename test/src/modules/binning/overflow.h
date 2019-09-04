@@ -31,7 +31,7 @@ TEST(Binning, RasterizerOverflow)
 
     auto q = defaultCommandQueue;
 
-	std::unique_ptr<Triangle<3>[]> h_triangles_(new Triangle<3>[triangleCount]);
+	std::unique_ptr<Triangle[]> h_triangles_(new Triangle[triangleCount]);
 	auto h_triangles = h_triangles_.get();
     for (nr_uint i = 0; i < triangleCount; ++i)
     {
@@ -44,7 +44,7 @@ TEST(Binning, RasterizerOverflow)
     auto testee = BinRasterizer(code, err);
     ASSERT_SUCCESS(err);
     
-    auto d_triangles = Buffer::make<Triangle<3>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles, err);
+    auto d_triangles = Buffer::make<Triangle>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles, err);
     ASSERT_SUCCESS(err);
 
     auto d_overflow = Buffer::make<nr_uint>(defaultContext, CL_MEM_READ_WRITE, 1, err);

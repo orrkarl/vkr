@@ -79,21 +79,17 @@ struct FrameBuffer
 
 /**
  * @brief A homogenous point in N-d space
- * 
- * @tparam dim point dimension
  */
-template<nr_uint dim>
 struct Vertex
 {
-    nr_float values[dim + 1];
+    nr_float values[4];
 
 	bool operator==(const Vertex& other) const
 	{
-		for (auto i = 0; i < dim + 1; ++i)
+		for (auto i = 0; i < 4; ++i)
 		{
 			if (std::abs(values[i] - other[i]) > 10e-6)
 			{
-				printf("%f vs %f\n", values[i], other[i]);
 				return false;
 			}
 		}
@@ -101,14 +97,19 @@ struct Vertex
         return true;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const Vertex<dim>& self)
+	bool operator!=(const Vertex& other) const
+	{
+		return !(*this == other);
+	}
+
+    friend std::ostream& operator<<(std::ostream& os, const Vertex& self)
     {
-        os << "Point<" << dim << ">{ ";
-        for (auto i = 0; i < dim; ++i)
+        os << "Point{ ";
+        for (auto i = 0; i < 3; ++i)
         {
             os << self[i] << ", ";
         }
-        return os << self[dim] << " }";
+        return os << self[3] << " }";
     }
 
     nr_float operator[](const nr_uint index) const { return values[index]; }
@@ -117,31 +118,13 @@ struct Vertex
 };
 
 /**
- * @brief A N-1 dimensional simplex, embedded in N dimensional space (with homogenous coordinates)
- * 
- * @tparam dim point dimension
+ * @brief Triangle, embedded in 3 dimensional space (with homogenous coordinates)
  */
-template<nr_uint dim>
-struct Simplex
-{
-    Vertex<dim> points[dim];
-
-	Vertex<dim> operator[](const nr_uint index) const { return points[index]; }
-
-	Vertex<dim>& operator[](const nr_uint index) { return points[index]; }
-};
-
-/**
- * @brief Triangle, embedded in N dimensional space (with homogenous coordinates)
- * 
- * @tparam dim 
- */
-template<nr_uint dim>
 struct Triangle
 {
-    Vertex<dim> points[3];
+    Vertex points[3];
 
-	bool operator==(const Triangle<dim>& other) const
+	bool operator==(const Triangle& other) const
 	{
 		for (auto i = 0; i < 3; ++i)
 			if (points[i] != other[i])
@@ -155,9 +138,9 @@ struct Triangle
 		return os << "Triangle{" << tri.points[0] << ", " << tri.points[1] << ", " << tri.points[2] << "}";
 	}
 
-	Vertex<dim> operator[](const nr_uint index) const { return points[index]; }
+	Vertex operator[](const nr_uint index) const { return points[index]; }
 
-	Vertex<dim>& operator[](const nr_uint index) { return points[index]; }
+	Vertex& operator[](const nr_uint index) { return points[index]; }
 };
 
 /**

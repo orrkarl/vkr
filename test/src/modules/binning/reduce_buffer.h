@@ -60,7 +60,7 @@ struct ReducedTriangle
 	}
 };
 
-void generateTriangleData(const nr_uint triangleCount, Triangle<3>* buffer)
+void generateTriangleData(const nr_uint triangleCount, Triangle* buffer)
 {
     nr_float diff = 2.0f / (triangleCount - 1);
     nr_float base = -1;
@@ -77,7 +77,7 @@ void generateTriangleData(const nr_uint triangleCount, Triangle<3>* buffer)
     }
 }
 
-void extractNDCPosition(const nr_uint triangleCount, const Triangle<3>* buffer, ReducedTriangle* result)
+void extractNDCPosition(const nr_uint triangleCount, const Triangle* buffer, ReducedTriangle* result)
 {
     for (nr_uint i = 0; i < triangleCount; ++i)
     {
@@ -107,8 +107,8 @@ TEST(Binning, ReduceTriangleBuffer)
 
     auto q = defaultCommandQueue;
 
-    Triangle<3> h_triangles_raw[triangleCount + offset];
-    Triangle<3>* h_triangles = h_triangles_raw + offset;
+    Triangle h_triangles_raw[triangleCount + offset];
+    Triangle* h_triangles = h_triangles_raw + offset;
 
     generateTriangleData(triangleCount, h_triangles);
 	
@@ -117,7 +117,7 @@ TEST(Binning, ReduceTriangleBuffer)
 
     std::array<ReducedTriangle, triangleCount> h_actual;
 
-    auto d_triangle = Buffer::make<Triangle<3>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, offset + triangleCount, h_triangles_raw, err);
+    auto d_triangle = Buffer::make<Triangle>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, offset + triangleCount, h_triangles_raw, err);
     ASSERT_SUCCESS(err);
     auto d_result = Buffer::make<ReducedTriangle>(defaultContext, CL_MEM_WRITE_ONLY, triangleCount, err);
     ASSERT_SUCCESS(err);

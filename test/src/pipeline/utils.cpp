@@ -1,8 +1,8 @@
 #include "utils.h"
 
-nr::Simplex<3> mkTriangleInExactCoordinates(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, const nr_float distance)
+nr::Triangle mkTriangleInExactCoordinates(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, const nr_float distance)
 {
-	nr::Simplex<3> triangle;
+	nr::Triangle triangle;
 	triangle.points[0].values[0] = p0.x;
 	triangle.points[0].values[1] = p0.y;
 
@@ -23,7 +23,7 @@ nr::Simplex<3> mkTriangleInExactCoordinates(const NDCPosition p0, const NDCPosit
 	return triangle;
 }
 
-nr::Simplex<3> mkTriangleFullyInBin(const nr::ScreenDimension & screenDim, const Bin & bin, const nr_float distance)
+nr::Triangle mkTriangleFullyInBin(const nr::ScreenDimension & screenDim, const Bin & bin, const nr_float distance)
 {
 	ScreenPosition top_left_screen = { bin.x + 1, bin.y + bin.height - 2 };
 	ScreenPosition bottom_left_screen = { bin.x + 1, bin.y + 1 };
@@ -40,7 +40,7 @@ void fillTriangleBuffer(
 	const nr::ScreenDimension& screenDim, const nr::detail::BinQueueConfig config,
 	const nr_uint workGroupCount, const nr_uint batchSize,
 	const nr_float distance,
-	nr::Simplex<3> * triangles)
+	nr::Triangle * triangles)
 {
 	Bin current;
 	current.width = config.binWidth;

@@ -33,7 +33,7 @@ TEST(Fine, Rasterizer)
 	const nr_float expectedDepth = 0.5f;
 
 	const nr_uint triangleCount = 3;
-	std::unique_ptr<Triangle<3>[]> h_triangles(new Triangle<3>[triangleCount]);
+	std::unique_ptr<Triangle[]> h_triangles(new Triangle[triangleCount]);
 	std::unique_ptr<Queues[]> h_binQueues(new Queues[totalWorkGroupCount]);
 
 	std::unique_ptr<ColorBuffer[]> h_colorBuffer(new ColorBuffer[1]);
@@ -71,7 +71,7 @@ TEST(Fine, Rasterizer)
 	frame.depth = Buffer::make<DepthBuffer>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, h_depthBuffer.get(), err);
 	ASSERT_SUCCESS(err);
 
-	auto d_triangles = Buffer::make<Triangle<3>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles.get(), err);
+	auto d_triangles = Buffer::make<Triangle>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles.get(), err);
 	ASSERT_SUCCESS(err);
 	auto d_binQueues = Buffer::make<Queues>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, totalWorkGroupCount, h_binQueues.get(), err);
 	ASSERT_SUCCESS(err);

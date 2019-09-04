@@ -15,7 +15,7 @@ using ColorBuffer = nr::RawColorRGBA[Height][Width];
 template <nr_uint Width, nr_uint Height>
 using DepthBuffer = Depth[Height][Width];
 
-void mkTriangleInExactCoordinates(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, const nr_float distance, Triangle<3> & triangle)
+void mkTriangleInExactCoordinates(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, const nr_float distance, Triangle & triangle)
 {
 	triangle.points[0].values[0] = p0.x;
 	triangle.points[0].values[1] = p0.y;
@@ -30,17 +30,17 @@ void mkTriangleInExactCoordinates(const NDCPosition p0, const NDCPosition p1, co
 	triangle.points[2].values[2] = distance;
 }
 
-void mkTriangleInCoordinates(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, const nr_float minDistance, Triangle<3> & triangle)
+void mkTriangleInCoordinates(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, const nr_float minDistance, Triangle & triangle)
 {
 	mkTriangleInExactCoordinates(p0, p1, p2, minDistance + (1 - minDistance) * rand() / RAND_MAX, triangle);
 }
 
-void mkTriangleInCoordinates(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, Triangle<3>& triangle)
+void mkTriangleInCoordinates(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, Triangle& triangle)
 {
     mkTriangleInCoordinates(p0, p1, p2, 0, triangle);
 }
 
-void mkTriangleFullyInBin(const ScreenDimension& screenDim, const Bin& bin, const nr_float distance, Triangle<3>& triangle)
+void mkTriangleFullyInBin(const ScreenDimension& screenDim, const Bin& bin, const nr_float distance, Triangle& triangle)
 {
     ScreenPosition top_left_screen     = { bin.x, bin.y + bin.height - 1 };
     ScreenPosition bottom_left_screen  = { bin.x, bin.y };
@@ -60,7 +60,7 @@ void fillTriangles(
     const nr_uint totalWorkGroupCount,
     const nr_float expectedDepth,
     const nr_uint batchSize, 
-    Triangle<3>* triangles,
+    Triangle* triangles,
     BinQueues<BinCountX, BinCountY, QueueSize>* binQueues)
 {
     const nr_uint binCountX = ceil(((nr_float) screenDim.width) / config.binWidth);
@@ -133,7 +133,7 @@ void tesselateBin(
 	const nr_float expectedDepth,
 	const bool halfBin,
 	const nr_uint index,
-	Triangle<3>* triangles,
+	Triangle* triangles,
 	BinQueues<BinCountX, BinCountY, QueueSize>* binQueues,
 	ColorBuffer<Width, Height> expectedColorBuffer,
 	DepthBuffer<Width, Height> expectedDepthBuffer)
@@ -208,7 +208,7 @@ void tesselateScreen(
 	const nr_uint totalWorkGroupCount,
 	const nr_float expectedDepth,
 	const nr_uint triangleCount,
-	Triangle<3>* triangles,
+	Triangle* triangles,
 	BinQueues<BinCountX, BinCountY, QueueSize>* binQueues,
 	ColorBuffer<Width, Height> expectedColorBuffer,
 	DepthBuffer<Width, Height> expectedDepthBuffer)
