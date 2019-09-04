@@ -14,7 +14,7 @@ public:
 
 	static bool init();
 
-	App(const nr::string& name, const nr::ScreenDimension& screenDim, const nr_uint renderDimension);
+	App(const nr::string& name, const nr::ScreenDimension& screenDim);
 
 	nr_status run();
 

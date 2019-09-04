@@ -27,8 +27,8 @@ bool App::init()
 	return true;
 }
 
-App::App(const nr::string& name, const nr::ScreenDimension& screenDim, const nr_uint renderDimension)
-	: m_bitmap(new nr::RawColorRGBA[screenDim.width * screenDim.height]), m_name(name), m_renderDimension(renderDimension), m_screenDim(screenDim), m_pipeline({ 64, 64, 256 }, 8)
+App::App(const nr::string& name, const nr::ScreenDimension& screenDim)
+	: m_bitmap(new nr::RawColorRGBA[screenDim.width * screenDim.height]), m_name(name), m_renderDimension(3), m_screenDim(screenDim), m_pipeline({ 64, 64, 256 }, 8)
 {
 }
 

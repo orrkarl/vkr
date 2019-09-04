@@ -3,13 +3,11 @@
 
 #include <NR/nr.h>
 
-constexpr const nr_uint dim = 3;
-
-nr::Simplex<dim> h_triangle
+nr::Simplex<3> h_triangle
 {
-	nr::Vertex<dim>{ -5, -2.5,   3, 1 },
-	nr::Vertex<dim>{  0,	5, 2.5, 1 },
-	nr::Vertex<dim>{  5, -2.5,   2, 1 }
+	nr::Vertex<3>{ -5, -2.5,   3 },
+	nr::Vertex<3>{  0,	  5, 2.5 },
+	nr::Vertex<3>{  5, -2.5,   2 }
 };
 
 nr_float h_near[3]
@@ -144,7 +142,7 @@ int main(const int argc, const char* argv[])
 	std::unique_ptr<nr::RawColorRGBA[]> bitmap(new nr::RawColorRGBA[screenDim.getTotalSize()]);
 
 	if (!initCL(ctx, dev, q)) return EXIT_FAILURE;
-	if (!initGL(wnd, screenDim, "Triangle3d")) return EXIT_FAILURE;
+	if (!initGL(wnd, screenDim, "Triangle")) return EXIT_FAILURE;
 
 	auto vb = nr::VertexBuffer::make(ctx, 1, &h_triangle, ret);
 	if (nr::error::isFailure(ret))
@@ -153,7 +151,7 @@ int main(const int argc, const char* argv[])
 		return ret;
 	}
 
-	auto p = nr::Pipeline(ctx, dev, q, dim, { 64, 64, 255 }, 1, ret);
+	auto p = nr::Pipeline(ctx, dev, q, 3, { 64, 64, 255 }, 1, ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Coult not create pipeline! " << nr::utils::stringFromCLError(ret) << std::endl;
@@ -190,7 +188,7 @@ int main(const int argc, const char* argv[])
 			return ret;
 		}
 
-		ret = p.render(vb, nr::Primitive::SIMPLEX, 1);
+		ret = p.render(vb, nr::Primitive::TRIANGLE, 1);
 		if (nr::error::isFailure(ret))
 		{
 			std::cerr << "Could not render! " << nr::utils::stringFromCLError(ret) << std::endl;

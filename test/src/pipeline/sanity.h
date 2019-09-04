@@ -59,7 +59,7 @@ TEST(Pipeline, Sanity)
 	ret = p.clear();
 	ASSERT_SUCCESS(ret);
 
-	ret = p.render(vb, nr::Primitive::SIMPLEX, count);
+	ret = p.render(vb, nr::Primitive::TRIANGLE, count);
 	ASSERT_SUCCESS(ret);
 
 	ret = p.copyFrameBuffer(bitmap.get());

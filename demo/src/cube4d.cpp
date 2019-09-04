@@ -6,61 +6,78 @@
 #include "linalg.h"
 #include "utils.h"
 
-const nr_uint dim = 4;
-
 Vector h_cube[]
 {
-    Vector(-1, -1, -1, -1, 1),
-    Vector(-1, -1, -1,  1, 1),
-    Vector(-1, -1,  1, -1, 1),
-    Vector(-1, -1,  1,  1, 1),
-    Vector(-1,  1, -1, -1, 1),
-    Vector(-1,  1, -1,  1, 1),
-    Vector(-1,  1,  1, -1, 1),
-    Vector(-1,  1,  1,  1, 1),
-    Vector( 1, -1, -1, -1, 1),
-    Vector( 1, -1, -1,  1, 1),
-    Vector( 1, -1,  1, -1, 1),
-    Vector( 1, -1,  1,  1, 1),
-    Vector( 1,  1, -1, -1, 1),
-    Vector( 1,  1, -1,  1, 1),
-    Vector( 1,  1,  1, -1, 1),
-    Vector( 1,  1,  1,  1, 1),
+	{ -1.0f, -1.0f, -1.0f },
+	{ -1.0f, -1.0f,  1.0f },
+	{ -1.0f,  1.0f,  1.0f },
+	{  1.0f,  1.0f, -1.0f }, 
+	{ -1.0f, -1.0f, -1.0f },
+	{ -1.0f,  1.0f, -1.0f },
+	{  1.0f, -1.0f,  1.0f },
+	{ -1.0f, -1.0f, -1.0f },
+	{  1.0f, -1.0f, -1.0f },
+	{  1.0f,  1.0f, -1.0f },
+	{  1.0f, -1.0f, -1.0f },
+	{ -1.0f, -1.0f, -1.0f },
+	{ -1.0f, -1.0f, -1.0f },
+	{ -1.0f,  1.0f,  1.0f },
+	{ -1.0f,  1.0f, -1.0f },
+	{  1.0f, -1.0f,  1.0f },
+	{ -1.0f, -1.0f,  1.0f },
+	{ -1.0f, -1.0f, -1.0f },
+	{ -1.0f,  1.0f,  1.0f },
+	{ -1.0f, -1.0f,  1.0f },
+	{  1.0f, -1.0f,  1.0f },
+	{  1.0f,  1.0f,  1.0f },
+	{  1.0f, -1.0f, -1.0f },
+	{  1.0f,  1.0f, -1.0f },
+	{  1.0f, -1.0f, -1.0f },
+	{  1.0f,  1.0f,  1.0f },
+	{  1.0f, -1.0f,  1.0f },
+	{  1.0f,  1.0f,  1.0f },
+	{  1.0f,  1.0f, -1.0f },
+	{ -1.0f,  1.0f, -1.0f },
+	{  1.0f,  1.0f,  1.0f },
+	{ -1.0f,  1.0f, -1.0f },
+	{ -1.0f,  1.0f,  1.0f },
+	{  1.0f,  1.0f,  1.0f },
+	{ -1.0f,  1.0f,  1.0f },
+	{  1.0f, -1.0f,  1.0f }
 };
 
 nr_float h_near[]
 {
-    -5, -5, 0.5, 0.5
+    -5, -5, 0.5
 };
 
 nr_float h_far[]
 {
-    5, 5, 10, 10
+    5, 5, 10
 };
 
-void transform(const Matrix& mat, Tetrahedron simplices[48])
+void transform(const Matrix& mat, Triangle simplices[12])
 {
-	Vector cube[16];
-	for (auto i = 0; i < 16; ++i)
+	for (auto i = 0; i < 12; ++i)
 	{
-		cube[i] = mat * h_cube[i];
+		simplices[i].points[0] = mat * h_cube[3 * i];
+		simplices[i].points[1] = mat * h_cube[3 * i + 1];
+		simplices[i].points[2] = mat * h_cube[3 * i + 2];
 	}
-
-	cube4dToSimplices(cube, simplices);
 }
 
-void transform(const nr_float angle, Tetrahedron simplices[48])
+void transform(const nr_float angle, Triangle simplices[12])
 {
     Matrix r = Matrix::rotation(Y, Z, angle);
-    Matrix t = Matrix::translation(1.5, 1.5, 3, 3);
+    Matrix t = Matrix::translation(1.5, 1.5, 3);
 	transform(t * r, simplices);
 }
 
-class RotatingCube4dApp : public App
+class RotatingCubeApp : public App
 {
 public:
-	RotatingCube4dApp(const nr_uint divisions)
-		: App("Rotating Cube4d", nr::ScreenDimension{ 640, 480 }, dim), divisions(divisions), m_hostVertecies(new Tetrahedron[48])
+	RotatingCubeApp(const nr_uint divisions)
+		: App("Rotating Cube", nr::ScreenDimension{ 640, 480 }), divisions(divisions), m_hostVertecies(new Triangle[12])
 	{
 	}
 
@@ -70,9 +87,9 @@ protected:
 		const nr_float angle = tick * (2 * M_PI) / divisions;
 
 		transform(angle, m_hostVertecies.get());
-		nr_status ret = queue.enqueueBufferWriteCommand(m_vertecies, false, 48, m_hostVertecies.get());
+		nr_status ret = queue.enqueueBufferWriteCommand(m_vertecies, false, 12, m_hostVertecies.get());
 		if (nr::error::isFailure(ret)) return ret;
-		ret = draw(m_vertecies, nr::Primitive::SIMPLEX, 48);
+		ret = draw(m_vertecies, nr::Primitive::TRIANGLE, 12);
 		if (nr::error::isFailure(ret)) return ret;
 
 		if (isKeyPressed(GLFW_KEY_S))
@@ -91,7 +108,7 @@ protected:
 	{
 		nr_status ret = CL_SUCCESS;
 
-		m_vertecies = nr::VertexBuffer::make<dim>(renderContext, 48, ret);
+		m_vertecies = nr::VertexBuffer::make(renderContext, 12, ret);
 		if (nr::error::isFailure(ret)) return ret;
 
 		ret = pipeline.setFarPlane(h_far);
@@ -110,19 +127,19 @@ private:
 	nr_uint tick = 0;
 	const nr_uint divisions;
 	nr::VertexBuffer m_vertecies;
-	std::unique_ptr<Tetrahedron[]> m_hostVertecies;
+	std::unique_ptr<Triangle[]> m_hostVertecies;
 };
 
-class StaticCube4dApp : public App
+class StaticCubeApp : public App
 {
 public:
-	StaticCube4dApp(const nr_float angle)
-		: App("Static Cube4d", nr::ScreenDimension{ 640, 480 }, dim), angle(angle), m_hostVertecies(new Tetrahedron[48])
+	StaticCubeApp(const nr_float angle)
+		: App("Static Cube", nr::ScreenDimension{ 640, 480 }), angle(angle), m_hostVertecies(new Triangle[12])
 	{
 	}
 
-	StaticCube4dApp(const nr_uint tick, const nr_uint divisions)
-		: StaticCube4dApp(tick * 2 * M_PI / divisions)
+	StaticCubeApp(const nr_uint tick, const nr_uint divisions)
+		: StaticCubeApp(tick * 2 * M_PI / divisions)
 	{
 	}
 
@@ -152,7 +169,7 @@ protected:
 	{
 		nr_status ret = CL_SUCCESS;
 
-		m_vertecies = nr::VertexBuffer::make<dim>(renderContext, 48, ret);
+		m_vertecies = nr::VertexBuffer::make(renderContext, 12, ret);
 		if (nr::error::isFailure(ret)) return ret;
 
 		ret = pipeline.setFarPlane(h_far);
@@ -171,22 +188,22 @@ private:
 	nr_status draw(const nr::CommandQueue& queue)
 	{
 		transform(angle, m_hostVertecies.get());
-		nr_status ret = queue.enqueueBufferWriteCommand(m_vertecies, false, 48, m_hostVertecies.get());
+		nr_status ret = queue.enqueueBufferWriteCommand(m_vertecies, false, 12, m_hostVertecies.get());
 		if (nr::error::isFailure(ret)) return ret;
-		return App::draw(m_vertecies, nr::Primitive::SIMPLEX, 48);
+		return App::draw(m_vertecies, nr::Primitive::TRIANGLE, 12);
 	}
 
 	const nr_float angle;
 	bool firstRun = true;
 	nr::VertexBuffer m_vertecies;
-	std::unique_ptr<Tetrahedron[]> m_hostVertecies;
+	std::unique_ptr<Triangle[]> m_hostVertecies;
 };
 
-class DynamicCube4dApp : public App
+class DynamicCubeApp : public App
 {
 public:
-	DynamicCube4dApp()
-		: App("Dynamic Cube4d", nr::ScreenDimension{ 640, 480 }, dim), m_offsetAngle(0), m_offsetW(3), m_offsetX(1.5), m_offsetY(1.5), m_offsetZ(3), m_hostVertecies(new Tetrahedron[48])
+	DynamicCubeApp()
+		: App("Dynamic Cube", nr::ScreenDimension{ 640, 480 }), m_offsetAngle(0), m_offsetX(1.5), m_offsetY(1.5), m_offsetZ(3), m_hostVertecies(new Triangle[12])
 	{
 	}
 
@@ -202,9 +219,6 @@ protected:
 		m_offsetZ += DELTA_Z * isKeyPressed(GLFW_KEY_DOWN);
 		m_offsetZ -= DELTA_Z * isKeyPressed(GLFW_KEY_UP);
 
-		m_offsetW += DELTA_W * isKeyPressed(GLFW_KEY_RIGHT);
-		m_offsetW -= DELTA_W * isKeyPressed(GLFW_KEY_LEFT);
-
 		m_offsetAngle += DELTA_ANGLE * isKeyPressed(GLFW_KEY_SPACE);
 
 		return draw(queue);
@@ -214,7 +228,7 @@ protected:
 	{
 		nr_status ret = CL_SUCCESS;
 
-		m_vertecies = nr::VertexBuffer::make<dim>(renderContext, 48, ret);
+		m_vertecies = nr::VertexBuffer::make(renderContext, 12, ret);
 		if (nr::error::isFailure(ret)) return ret;
 
 		ret = pipeline.setFarPlane(h_far);
@@ -233,18 +247,17 @@ private:
 	static constexpr nr_float DELTA_X = 0.3;
 	static constexpr nr_float DELTA_Y = 0.3;
 	static constexpr nr_float DELTA_Z = 0.3;
-	static constexpr nr_float DELTA_W = 0.3;
 
 	nr_status draw(const nr::CommandQueue& queue)
 	{
-		transform(Matrix::translation(m_offsetX, m_offsetY, m_offsetZ, m_offsetW) * Matrix::rotation(X, Y, m_offsetAngle), m_hostVertecies.get());
-		auto err = queue.enqueueBufferWriteCommand(m_vertecies, false, 48, m_hostVertecies.get());
+		transform(Matrix::translation(m_offsetX, m_offsetY, m_offsetZ) * Matrix::rotation(X, Y, m_offsetAngle), m_hostVertecies.get());
+		auto err = queue.enqueueBufferWriteCommand(m_vertecies, false, 12, m_hostVertecies.get());
 		if (nr::error::isFailure(err)) return err;
-		return App::draw(m_vertecies, nr::Primitive::SIMPLEX, 48);
+		return App::draw(m_vertecies, nr::Primitive::TRIANGLE, 12);
 	}
 
-	std::unique_ptr<Tetrahedron[]> m_hostVertecies;
-	nr_float m_offsetAngle, m_offsetW, m_offsetX, m_offsetY, m_offsetZ;
+	std::unique_ptr<Triangle[]> m_hostVertecies;
+	nr_float m_offsetAngle, m_offsetX, m_offsetY, m_offsetZ;
 	nr::VertexBuffer m_vertecies;
 };
 
@@ -252,7 +265,7 @@ int main(const int argc, const char* argv[])
 {
 	if (!App::init()) return EXIT_FAILURE;
 
-	auto app = DynamicCube4dApp();
+	auto app = DynamicCubeApp();
 	auto ret = app.run();
 
 	App::deinit();

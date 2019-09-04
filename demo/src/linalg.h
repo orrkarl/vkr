@@ -6,14 +6,15 @@
 
 enum Axis
 {
-	X = 0, Y = 1, Z = 2, W = 3, Q = 4
+	X = 0, Y = 1, Z = 2, W = 3
 };
 
 struct Vector
 {
-    nr_float data[5];
-    
-    explicit Vector(nr_float x, nr_float y, nr_float z, nr_float w, nr_float q);
+    nr_float data[4];
+
+	Vector(nr_float x, nr_float y, nr_float z, nr_float w);
+	Vector(nr_float x, nr_float y, nr_float z);
     explicit Vector();
 
     nr_float& operator[](const Axis axis);
@@ -34,10 +35,10 @@ struct Vector
 
 struct Matrix
 {
-    nr_float data[5][5];
+    nr_float data[4][4];
 
     Matrix();
-    Matrix(const nr_float data[5][5]);
+    Matrix(const nr_float data[4][4]);
     Matrix(const nr_float diagonal);
     Matrix(const Matrix& other);
     Matrix(Matrix&& other);
@@ -54,8 +55,8 @@ struct Matrix
 
     static Matrix rotation(const Axis source, const Axis dest, const nr_float radians);
     static Matrix scale(const nr_float s);
-	static Matrix scale(const nr_float x, const nr_float y, const nr_float z, const nr_float w);
-    static Matrix translation(const nr_float x, const nr_float y, const nr_float z, const nr_float w);
+	static Matrix scale(const nr_float x, const nr_float y, const nr_float z);
+    static Matrix translation(const nr_float x, const nr_float y, const nr_float z);
     static Matrix identity();
 
 	friend std::ostream& operator<<(std::ostream& os, const Matrix& mat);

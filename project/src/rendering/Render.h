@@ -161,7 +161,7 @@ struct Triangle
  */
 enum class Primitive : nr_uint
 {
-	SIMPLEX
+	TRIANGLE
 };
 
 namespace detail

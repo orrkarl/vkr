@@ -173,7 +173,7 @@ cl_status Pipeline::setFarPlane(const nr_float* far) const
 
 cl_status Pipeline::render(const VertexBuffer& primitives, const Primitive& primitiveType, const nr_uint primitiveCount)
 {
-	if (primitiveType != Primitive::SIMPLEX) return CL_INVALID_VALUE;
+	if (primitiveType != Primitive::TRIANGLE) return CL_INVALID_VALUE;
 
 	cl_status err = CL_SUCCESS;
 	nr_bool overflow;

@@ -34,21 +34,19 @@ public:
 	 * @brief Factory method for creating buffers
 	 * 
 	 * Since, as of right now, there is now way to pass anything other than simplices to NR, the vertex buffer can only contain those.
-	 * @tparam Dimension current render dimension
 	 * @param context parent context
 	 * @param primitiveCount how many simplex should be allocated
 	 * @param data simplices pointer to be copied
 	 * @param[out] err internal OpenCL call status
 	 * @return VertexBuffer result (will be a null buffer if an error has occured)
 	 */
-	template <nr_uint Dimension>
-	static VertexBuffer make(const Context& context, const nr_uint primitiveCount, Simplex<Dimension>* data, cl_status& err)
+	static VertexBuffer make(const Context& context, const nr_uint primitiveCount, Simplex<3>* data, cl_status& err)
 	{
-		auto vertecies = Buffer::make<Simplex<Dimension>>(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, primitiveCount, data, err);
+		auto vertecies = Buffer::make<Simplex<3>>(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, primitiveCount, data, err);
 		if (error::isFailure(err)) return VertexBuffer();
-		auto reducedVertecies = Buffer::make<Simplex<Dimension>>(context, CL_MEM_READ_WRITE, primitiveCount, err);
+		auto reducedVertecies = Buffer::make<Simplex<3>>(context, CL_MEM_READ_WRITE, primitiveCount, err);
 		if (error::isFailure(err)) return VertexBuffer();
-		auto reducedSimplices = Buffer::make<Triangle<Dimension>>(context, CL_MEM_READ_WRITE, detail::triangleCount(Dimension, primitiveCount), err);
+		auto reducedSimplices = Buffer::make<Triangle<3>>(context, CL_MEM_READ_WRITE, detail::triangleCount(3, primitiveCount), err);
 		if (error::isFailure(err)) return VertexBuffer();
 
 		return VertexBuffer(vertecies, reducedVertecies, reducedSimplices);
@@ -58,20 +56,18 @@ public:
 	 * @brief Factory method for creating buffers
 	 * 
 	 * Since, as of right now, there is now way to pass anything other than simplices to NR, the vertex buffer can only contain those.
-	 * @tparam Dimension current render dimension
 	 * @param context parent context
 	 * @param primitiveCount how many simplex should be allocated
 	 * @param[out] err internal OpenCL call status
 	 * @return VertexBuffer result (will be a null buffer if an error has occured)
 	 */
-	template <nr_uint Dimension>
 	static VertexBuffer make(const Context& context, const nr_uint primitiveCount, cl_status& err)
 	{
-		auto vertecies = Buffer::make<Simplex<Dimension>>(context, CL_MEM_READ_WRITE, primitiveCount, err);
+		auto vertecies = Buffer::make<Simplex<3>>(context, CL_MEM_READ_WRITE, primitiveCount, err);
 		if (error::isFailure(err)) return VertexBuffer();
-		auto reducedVertecies = Buffer::make<Simplex<Dimension>>(context, CL_MEM_READ_WRITE, primitiveCount, err);
+		auto reducedVertecies = Buffer::make<Simplex<3>>(context, CL_MEM_READ_WRITE, primitiveCount, err);
 		if (error::isFailure(err)) return VertexBuffer();
-		auto reducedSimplices = Buffer::make<Triangle<Dimension>>(context, CL_MEM_READ_WRITE, detail::triangleCount(Dimension, primitiveCount), err);
+		auto reducedSimplices = Buffer::make<Triangle<3>>(context, CL_MEM_READ_WRITE, detail::triangleCount(3, primitiveCount), err);
 		if (error::isFailure(err)) return VertexBuffer();
 
 		return VertexBuffer(vertecies, reducedVertecies, reducedSimplices);
