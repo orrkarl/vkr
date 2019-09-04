@@ -100,7 +100,7 @@ public:
 	 * @param buffer object to own
 	 * @param retain should the reference count for the object be incremented
 	 */
-	explicit Buffer(const cl_mem& buffer, const nr_bool retain = false);
+	Buffer(const cl_mem& buffer, const nr_bool retain, cl_status& status);
 
 	/**
 	 * @brief Copy constructor

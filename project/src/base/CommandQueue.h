@@ -140,7 +140,7 @@ public:
 	 * @param commandQueue object to own
 	 * @param retain should the reference count for the object be incremented
 	 */
-    explicit CommandQueue(const cl_command_queue& commandQueue, const nr_bool retain = false);
+    CommandQueue(const cl_command_queue& commandQueue, const nr_bool retain, cl_status& status);
 
     /**
      * @brief Creates a bound and valid command queue; wraps clCreateCommandQueue

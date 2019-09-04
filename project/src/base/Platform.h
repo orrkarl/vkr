@@ -48,7 +48,7 @@ public:
      * @param platform raw cl_platform_id object
      * @param retain unused in this version, as a cl_platform_id has no reference count
      */
-    explicit Platform(const cl_platform_id& platform, const nr_bool retain = false);
+    explicit Platform(const cl_platform_id& platform);
 
     Platform(const Platform& other);
 

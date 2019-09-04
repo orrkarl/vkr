@@ -10,13 +10,13 @@ Kernel::Kernel()
 {
 }
 
-Kernel::Kernel(const cl_kernel& kernel, const nr_bool retain)
-    : Wrapped(kernel, retain)
+Kernel::Kernel(const cl_kernel& kernel, const nr_bool retain, cl_status& status)
+    : Wrapped(kernel, retain, status)
 {
 }
 
 Kernel::Kernel(const Module& module, const char* name, cl_status& err)
-	: Kernel(clCreateKernel(module, name, &err))
+	: Wrapped(clCreateKernel(module, name, &err))
 {
 }
 
@@ -57,6 +57,11 @@ Kernel::operator cl_kernel() const
 cl_kernel Kernel::get() const
 {
 	return object;
+}
+
+Kernel::Kernel(const cl_kernel kernel)
+	: Wrapped(kernel)
+{
 }
 
 }

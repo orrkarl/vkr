@@ -40,7 +40,7 @@ public:
 	 * @param event object to own
 	 * @param retain should the reference count for the object be incremented
 	 */
-    explicit Event(const cl_event& event, const nr_bool retain = false);
+    Event(const cl_event& event, const nr_bool retain, cl_status& status);
 
     /**
      * @brief Creates a new event, bound to a ceratin context
@@ -49,7 +49,7 @@ public:
      * @param context parent context for this event
      * @param[out] err internal OpenCL call status
      */
-    explicit Event(const Context& context, cl_status& err);
+    Event(const Context& context, cl_status& err);
 
     Event(const Event& other);
 

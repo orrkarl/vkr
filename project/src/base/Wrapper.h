@@ -45,10 +45,10 @@ public:
      * @param object raw OpenCL object
      * @param retainObject should the object reference count be incremented
      */
-    explicit Wrapper(const cl_type object, const nr_bool retainObject = false)
+    Wrapper(const cl_type object, const nr_bool retainObject, cl_status& status)
         : object(object)
     {
-        if (retainObject) retain();
+        if (retainObject) status = retain();
     }
 
     ~Wrapper()
@@ -118,6 +118,11 @@ public:
 
 protected:
     typedef Wrapper<cl_type> Wrapped;
+
+	Wrapper(const cl_type object)
+		: object(object)
+	{
+	}
 
     cl_type object;
 };

@@ -41,7 +41,7 @@ public:
 	 * @param context object to own
 	 * @param retain should the reference count for the object be incremented
 	 */
-    explicit Context(const cl_context& context, const nr_bool retain = false);
+    Context(const cl_context& context, const nr_bool retain, cl_status& status);
 
     Context(const Context& other);
 

@@ -58,10 +58,11 @@ Module::Module(const Context& context, const Sources& codes, cl_status& err)
     object = clCreateProgramWithSource(context, static_cast<nr_uint>(codes.size()), &codesRaw[0], nullptr, &err);
 }
 
-Module::Module(const cl_program& module, const nr_bool retain)
-    : Wrapped(module, retain)
+Module::Module(const cl_program& module, const nr_bool retain, cl_status& status)
+	: Wrapped(module, retain, status)
 {
 }
+
 
 Module::Module(const Module& other)
     : Wrapped(other)
@@ -122,7 +123,7 @@ Kernel Module::createKernel(const string& name, cl_status& err) const
 
 Kernel Module::createKernel(const char* name, cl_status& err) const
 {
-	return Kernel(clCreateKernel(object, name, &err));
+	return Kernel(*this, name, err);
 }
 
 string Module::finalizeOptions(const Options& options)
@@ -149,7 +150,8 @@ Context Module::getContext(cl_status& err) const
 {
 	cl_context ret;
 	err = clGetProgramInfo(object, CL_PROGRAM_CONTEXT, sizeof(ret), &ret, nullptr);
-	return Context(ret, true);
+	if (error::isFailure(err)) return Context();
+	return Context(ret, true, err);
 }
 
 const Module::Macro           Module::DEBUG               = Module::Macro("_DEBUG");

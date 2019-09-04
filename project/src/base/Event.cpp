@@ -8,8 +8,8 @@ Event::Event()
 {
 }
 
-Event::Event(const cl_event& event, const nr_bool retain)
-    : Wrapped(event, retain)
+Event::Event(const cl_event& event, const nr_bool retain, cl_status& status)
+    : Wrapped(event, retain, status)
 {
 }
 

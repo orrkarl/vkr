@@ -18,8 +18,8 @@ Buffer::Buffer()
 {
 }
 
-Buffer::Buffer(const cl_mem& buffer, const nr_bool retain)
-	: Wrapped(buffer, retain)
+Buffer::Buffer(const cl_mem& buffer, const nr_bool retain, cl_status& status)
+	: Wrapped(buffer, retain, status)
 {
 }
 

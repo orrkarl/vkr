@@ -9,8 +9,8 @@ Device::Device()
 {
 }
 
-Device::Device(const cl_device_id& device, const nr_bool retain)
-    : Wrapped(device, retain)
+Device::Device(const cl_device_id& device, const nr_bool retain, cl_status& status)
+    : Wrapped(device, retain, status)
 {
 }
 

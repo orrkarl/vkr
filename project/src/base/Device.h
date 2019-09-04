@@ -39,7 +39,7 @@ public:
 	 * @param device object to own
 	 * @param retain should the reference count for the object be incremented
 	 */
-    explicit Device(const cl_device_id& device, const nr_bool retain = false);
+    Device(const cl_device_id& device, const nr_bool retain, cl_status& status);
 
     Device(const Device& other);
 

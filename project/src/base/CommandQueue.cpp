@@ -7,8 +7,8 @@ CommandQueue::CommandQueue()
 {
 }
 
-CommandQueue::CommandQueue(const cl_command_queue& commandQueue, const nr_bool retain)
-    : Wrapped(commandQueue, retain)
+CommandQueue::CommandQueue(const cl_command_queue& commandQueue, const nr_bool retain, cl_status& status)
+    : Wrapped(commandQueue, retain, status)
 {
 }
 

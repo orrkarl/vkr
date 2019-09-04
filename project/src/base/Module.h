@@ -156,7 +156,7 @@ public:
 	 * @param module object to own
 	 * @param retain should the reference count for the object be incremented
 	 */
-    explicit Module(const cl_program& module, const nr_bool retain = false);
+    Module(const cl_program& module, const nr_bool retain, cl_status& status);
 
     Module(const Module& other);
 
