@@ -47,7 +47,7 @@ public:
 	 * @param module kernel containing module
 	 * @param[out] err internal OpenCL call status
 	 */
-	VertexReducer(const Module& module, cl_status* err = nullptr)
+	VertexReducer(const Module& module, cl_status& err)
 		: StandardDispatch(module, VERTEX_REDUCE_KERNEL_NAME, err)
 	{
 	}

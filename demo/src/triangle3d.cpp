@@ -25,9 +25,8 @@ nr_float h_far[3]
 bool initCL(nr::Context& context, nr::Device& device, nr::CommandQueue& queue)
 {
 	cl_status ret = CL_SUCCESS;
-	auto pret = &ret;
 
-	auto platforms = nr::Platform::getAvailablePlatforms(pret);
+	auto platforms = nr::Platform::getAvailablePlatforms(ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not aquire available OpenCL platforms: " << nr::utils::stringFromCLError(ret) << '\n';
@@ -42,7 +41,7 @@ bool initCL(nr::Context& context, nr::Device& device, nr::CommandQueue& queue)
 
 	auto defaultPlatform = platforms[0];
 
-	auto devices = defaultPlatform.getDevicesByType(CL_DEVICE_TYPE_GPU, pret);
+	auto devices = defaultPlatform.getDevicesByType(CL_DEVICE_TYPE_GPU, ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not aquire OpenCL devices: " << nr::utils::stringFromCLError(ret) << '\n';
@@ -53,7 +52,7 @@ bool initCL(nr::Context& context, nr::Device& device, nr::CommandQueue& queue)
 	{
 		std::cerr << "No OpenCL supported GPU's found; falling back to CL_DEVICE_TYPE_ALL" << '\n';
 
-		devices = defaultPlatform.getDevicesByType(CL_DEVICE_TYPE_ALL, pret);
+		devices = defaultPlatform.getDevicesByType(CL_DEVICE_TYPE_ALL, ret);
 		if (nr::error::isFailure(ret))
 		{
 			std::cerr << "Could not aquire OpenCL devices: " << nr::utils::stringFromCLError(ret) << '\n';
@@ -70,14 +69,14 @@ bool initCL(nr::Context& context, nr::Device& device, nr::CommandQueue& queue)
 	device = devices[0];
 
 	const cl_context_properties props[3] = { CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>((cl_platform_id)defaultPlatform), 0 };
-	context = nr::Context(props, CL_DEVICE_TYPE_GPU, pret);
+	context = nr::Context(props, CL_DEVICE_TYPE_GPU, ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not create OpenCL context: " << nr::utils::stringFromCLError(ret) << '\n';
 		return false;
 	}
 
-	queue = nr::CommandQueue(context, device, (cl_command_queue_properties)CL_QUEUE_PROFILING_ENABLE, pret);
+	queue = nr::CommandQueue(context, device, (cl_command_queue_properties)CL_QUEUE_PROFILING_ENABLE, ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not create OpenCL CommandQueue: " << nr::utils::stringFromCLError(ret) << '\n';
@@ -134,7 +133,6 @@ bool initGL(GLFWwindow*& wnd, const nr::ScreenDimension& screenDim, const nr::st
 int main(const int argc, const char* argv[])
 {
 	cl_status ret = CL_SUCCESS;
-	auto pret = &ret;
 
 	constexpr nr::ScreenDimension screenDim = { 640, 480 };
 
@@ -148,14 +146,14 @@ int main(const int argc, const char* argv[])
 	if (!initCL(ctx, dev, q)) return EXIT_FAILURE;
 	if (!initGL(wnd, screenDim, "Triangle3d")) return EXIT_FAILURE;
 
-	auto vb = nr::VertexBuffer::make(ctx, 1, &h_triangle, pret);
+	auto vb = nr::VertexBuffer::make(ctx, 1, &h_triangle, ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not create vertex buffer! " << nr::utils::stringFromCLError(ret) << std::endl;
 		return ret;
 	}
 
-	auto p = nr::Pipeline(ctx, dev, q, dim, { 64, 64, 255 }, 1, pret);
+	auto p = nr::Pipeline(ctx, dev, q, dim, { 64, 64, 255 }, 1, ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Coult not create pipeline! " << nr::utils::stringFromCLError(ret) << std::endl;

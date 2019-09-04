@@ -12,8 +12,8 @@ namespace nr
 namespace detail 
 {
 
-Source::Source(const Context& context)
-	: Module(context, Module::Sources{ clcode::base, clcode::bin_rasterizer, clcode::fine_rasterizer, clcode::simplex_reduce, clcode::vertex_reduce })
+Source::Source(const Context& context, cl_status& status)
+	: Module(context, Module::Sources{ clcode::base, clcode::bin_rasterizer, clcode::fine_rasterizer, clcode::simplex_reduce, clcode::vertex_reduce }, status)
 {
 }
 
@@ -28,22 +28,22 @@ cl_status Source::build(const Device& dev, const nr_uint renderDimension, const 
 	return Module::build(dev, opts);
 }
 
-BinRasterizer Source::binRasterizer(cl_status* status) const
+BinRasterizer Source::binRasterizer(cl_status& status) const
 {
 	return BinRasterizer(*this, status);
 }
 
-FineRasterizer Source::fineRasterizer(cl_status* status) const
+FineRasterizer Source::fineRasterizer(cl_status& status) const
 {
 	return FineRasterizer(*this, status);
 }
 
-SimplexReducer Source::simplexReducer(cl_status* status) const
+SimplexReducer Source::simplexReducer(cl_status& status) const
 {
 	return SimplexReducer(*this, status);
 }
 
-VertexReducer Source::vertexReducer(cl_status* status) const
+VertexReducer Source::vertexReducer(cl_status& status) const
 {
 	return VertexReducer(*this, status);
 }

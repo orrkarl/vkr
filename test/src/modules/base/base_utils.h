@@ -16,7 +16,7 @@ using namespace testing;
 struct NDCFromScreen : StandardDispatch<1, ScreenPosition, ScreenDimension, Buffer>
 {   
 public:
-    NDCFromScreen(const Module& module, cl_status* err = nullptr)
+    NDCFromScreen(const Module& module, cl_status& err)
         : StandardDispatch(module, "ndc_from_screen_test", err)
     {
     }
@@ -46,7 +46,7 @@ public:
 struct ScreenFromNDC : StandardDispatch<1, NDCPosition, ScreenDimension, Buffer>
 {   
 public:
-    ScreenFromNDC(const Module& module, cl_status* err = nullptr)
+    ScreenFromNDC(const Module& module, cl_status& err)
         : StandardDispatch(module, "screen_from_ndc_test", err)
     {
     }

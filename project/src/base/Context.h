@@ -65,7 +65,7 @@ public:
         std::vector<Device>& devices, 
         const std::function<void(const char* errinfo, const void* clinfo, size_t size, T* userData)> callback,
         T* userData,
-        cl_status* err = nullptr)
+        cl_status& err)
         : Wrapped(
             clCreateContext(
                 properties, 
@@ -73,7 +73,7 @@ public:
                 static_cast<void(CL_CALLBACK *)(const char*, const void*, size_t, void*)>(
                     [callback](const char* errinfo, const void* clinfo, size_t size, void* userData){callback(errinfo, clinfo, size, (T*) userData);}),
                 userData, 
-                err))
+                &err))
     {
     }
 
@@ -89,7 +89,7 @@ public:
     Context(
         const cl_context_properties* properties, 
         std::vector<Device>& devices, 
-        cl_status* err = nullptr);
+        cl_status& err);
 
     /**
      * @brief Construct a new Context object, bound to all available devices of a ceratin type
@@ -109,7 +109,7 @@ public:
         cl_device_type deviceType, 
         const std::function<void(const char* errinfo, const void* clinfo, size_t size, T* userData)> callback,
         T* userData,
-        cl_status* err = nullptr)
+        cl_status& err)
         : Wrapped(
             clCreateContextFromType(
                 properties, 
@@ -117,7 +117,7 @@ public:
                 static_cast<void(CL_CALLBACK *)(const char*, const void*, size_t, void*)>(
                     [callback](const char* errinfo, const void* clinfo, size_t size, void* userData){callback(errinfo, clinfo, size, (T*) userData);}),
                 userData, 
-                err))
+                &err))
     {
     }
 
@@ -132,8 +132,22 @@ public:
      */
     Context(
         const cl_context_properties* properties, 
-        cl_device_type deviceType = CL_DEVICE_TYPE_GPU,          
-        cl_status* err = nullptr);
+        cl_device_type deviceType,          
+        cl_status& err);
+
+	/**
+	 * @brief an 'easier to use' constructor for a Context. Using the given properties and collects all of the GPU devices
+	 *
+	 * Refer to the OpenCL clCreateContext documentation for detailed explenation of the context properties
+	 * @note wraps clCreateContextFromType
+	 * @see Context::Context(const cl_context_properties* properties, cl_device_type deviceType, cl_status& err)
+	 * @param       properties  context properties
+	 * @param       deviceType  type of collected devices. Will default to GPU.
+	 * @param[out]  err OpenCL internal call error status
+	 */
+	Context(
+		const cl_context_properties* properties,
+		cl_status& err);
 
     Context& operator=(const Context& other);
 

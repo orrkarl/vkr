@@ -60,23 +60,23 @@ TEST(Fine, Depth)
     
     fillTriangles<dim, binCountX, binCountY, config.queueSize>(screenDim, config, totalWorkGroupCount, expectedDepth, 256, h_triangles.get(), h_binQueues.get());
 	
-    auto code = mkFineModule(dim, &err);
+    auto code = mkFineModule(dim, err);
     ASSERT_SUCCESS(err);
 	
-    auto testee = FineRasterizer(code, &err);
+    auto testee = FineRasterizer(code, err);
     ASSERT_SUCCESS(err);
 	
     auto q = defaultCommandQueue;
 	
     FrameBuffer frame;
-    frame.color = Buffer::make<ColorBuffer>(defaultContext, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, 1, cBuffer.get(), &err);
+    frame.color = Buffer::make<ColorBuffer>(defaultContext, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, 1, cBuffer.get(), err);
     ASSERT_SUCCESS(err);
-    frame.depth = Buffer::make<DepthBuffer>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, dBuffer.get(), &err);
+    frame.depth = Buffer::make<DepthBuffer>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, dBuffer.get(), err);
     ASSERT_SUCCESS(err);
 	
-    auto d_triangles = Buffer::make<Triangle<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles.get(), &err);
+    auto d_triangles = Buffer::make<Triangle<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles.get(), err);
     ASSERT_SUCCESS(err);
-    auto d_binQueues = Buffer::make<Queues>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, totalWorkGroupCount, h_binQueues.get(), &err);
+    auto d_binQueues = Buffer::make<Queues>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, totalWorkGroupCount, h_binQueues.get(), err);
     ASSERT_SUCCESS(err);
 	
 	testee.setExecutionRange(binCountX, binCountY, totalWorkGroupCount);

@@ -39,22 +39,22 @@ TEST(Binning, RasterizerOverflow)
         mkTriangleInCoords(0, 0, screenDim, h_triangles + i);
     }
     
-    auto code = mkBinningModule(dim, triangleCount, &err);
+    auto code = mkBinningModule(dim, triangleCount, err);
     ASSERT_SUCCESS(err);
 
-    auto testee = BinRasterizer(code, &err);
+    auto testee = BinRasterizer(code, err);
     ASSERT_SUCCESS(err);
     
-    auto d_triangles = Buffer::make<Triangle<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles, &err);
+    auto d_triangles = Buffer::make<Triangle<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles, err);
     ASSERT_SUCCESS(err);
 
-    auto d_overflow = Buffer::make<nr_uint>(defaultContext, CL_MEM_READ_WRITE, 1, &err);
+    auto d_overflow = Buffer::make<nr_uint>(defaultContext, CL_MEM_READ_WRITE, 1, err);
     ASSERT_SUCCESS(err);
 
-    auto d_binQueues = Buffer::make<Queues>(defaultContext, CL_MEM_READ_WRITE, workGroupCount, &err);
+    auto d_binQueues = Buffer::make<Queues>(defaultContext, CL_MEM_READ_WRITE, workGroupCount, err);
     ASSERT_SUCCESS(err);
 
-    auto d_batchIndex = Buffer::make<nr_uint>(defaultContext, CL_MEM_READ_WRITE, 1, &err);
+    auto d_batchIndex = Buffer::make<nr_uint>(defaultContext, CL_MEM_READ_WRITE, 1, err);
     ASSERT_SUCCESS(err);
 
 	testee.setExecutionRange(binCountX, binCountY, workGroupCount);

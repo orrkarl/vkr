@@ -22,8 +22,8 @@ CommandQueue::CommandQueue(CommandQueue&& other)
 {
 }
 
-CommandQueue::CommandQueue(const Context& context, const Device& device, cl_command_queue_properties properties, cl_status* err)
-    : Wrapped(clCreateCommandQueue(context, device, properties, err))
+CommandQueue::CommandQueue(const Context& context, const Device& device, cl_command_queue_properties properties, cl_status& err)
+    : Wrapped(clCreateCommandQueue(context, device, properties, &err))
 {
 }
 

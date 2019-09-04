@@ -49,7 +49,7 @@ public:
      * @param context parent context for this event
      * @param[out] err internal OpenCL call status
      */
-    explicit Event(const Context& context, cl_status* err = nullptr);
+    explicit Event(const Context& context, cl_status& err);
 
     Event(const Event& other);
 

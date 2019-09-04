@@ -12,7 +12,7 @@ using namespace testing;
 
 struct TriangleInBin : StandardDispatch<1, Buffer, Buffer, Bin, ScreenDimension, Buffer>
 {
-    TriangleInBin(const Module& module, cl_status* err)
+    TriangleInBin(const Module& module, cl_status& err)
         : StandardDispatch(module, "is_triangle_in_bin_test", err)
     {
     }
@@ -54,16 +54,16 @@ void testBin(TriangleInBin testee, CommandQueue q, const nr_uint dimension, cons
     cl_status err = CL_SUCCESS;
 
     cl_bool h_result = CL_FALSE;
-    auto d_result = Buffer::make(defaultContext, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, 1, &h_result, &err);
+    auto d_result = Buffer::make(defaultContext, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, 1, &h_result, err);
     ASSERT_SUCCESS(err);
 
     nr_float defaultValue = -2.0;
     nr_int defaultValueAsInt = * (nr_int*) &defaultValue; 
     memset(triangle_x, defaultValueAsInt, 3 * sizeof(nr_float));
     memset(triangle_y, defaultValueAsInt, 3 * sizeof(nr_float));
-    auto d_triangle_x = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3, triangle_x, &err);
+    auto d_triangle_x = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3, triangle_x, err);
     ASSERT_SUCCESS(err);
-    auto d_triangle_y = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3, triangle_x, &err);
+    auto d_triangle_y = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 3, triangle_x, err);
     ASSERT_SUCCESS(err);
 
 	testee.setExecutionRange(1);
@@ -105,10 +105,10 @@ TEST(Binning, IsSimplexInBin)
     nr_float triangle_x[3];
     nr_float triangle_y[3];
 
-    auto code = mkBinningModule(dim, 1, &err);
+    auto code = mkBinningModule(dim, 1, err);
     ASSERT_SUCCESS(err);
 
-    auto test = TriangleInBin(code, &err);
+    auto test = TriangleInBin(code, err);
     ASSERT_SUCCESS(err);
 
     const ScreenDimension screenDim{1920, 1080};

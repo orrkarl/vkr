@@ -83,12 +83,12 @@ Module::Option mkTriangleTestCountMacro(const nr_uint triangleTestCount)
     return Module::Macro("TOTAL_TRIANGLE_COUNT", std::to_string(triangleTestCount));
 }
 
-Module mkBinningModule(const nr_uint dim, const nr_uint triangleTestCount, cl_status* err)
+Module mkBinningModule(const nr_uint dim, const nr_uint triangleTestCount, cl_status& err)
 {
     auto opts = mkStandardOptions(dim);
     opts.push_back(TEST_BINNING);
     opts.push_back(mkTriangleTestCountMacro(triangleTestCount));
     auto ret = Module(defaultContext, Module::Sources{clcode::base, clcode::bin_rasterizer}, err);
-    *err = ret.build(defaultDevice, opts);
+    err = ret.build(defaultDevice, opts);
     return ret;
 }

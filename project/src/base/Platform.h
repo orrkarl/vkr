@@ -34,7 +34,7 @@ public:
      * @param[out] err internal OpenCL call status
      * @return std::vector<Platform> all host available platforms
      */
-    static std::vector<Platform> getAvailablePlatforms(cl_status* err);
+    static std::vector<Platform> getAvailablePlatforms(cl_status& err);
 
     /**
      * @brief Construct a null platform
@@ -67,7 +67,7 @@ public:
      * @param[out] err internal OpenCL call status
      * @return std::vector<Device> 
      */
-    std::vector<Device> getDevicesByType(cl_device_type type, cl_status* err);
+    std::vector<Device> getDevicesByType(cl_device_type type, cl_status& err);
 };
 
 }

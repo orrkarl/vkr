@@ -42,7 +42,7 @@ public:
 	 * The actual code is collected from the cl files
 	 * @param context parent context
 	 */
-	Source(const Context& context);
+	Source(const Context& context, cl_status& status);
 
 	/**
 	 * @brief builds the source module
@@ -61,7 +61,7 @@ public:
 	 * @param[out] status 
 	 * @return BinRasterizer bin rasterizer kernel
 	 */
-	BinRasterizer binRasterizer(cl_status* status = nullptr) const;
+	BinRasterizer binRasterizer(cl_status& status) const;
 
 	/**
 	 * @brief Aquires a FineRasterizer kernel
@@ -69,7 +69,7 @@ public:
 	 * @param[out] status 
 	 * @return FineRasterizer fine rasterizer kernel
 	 */
-	FineRasterizer fineRasterizer(cl_status* status = nullptr) const;
+	FineRasterizer fineRasterizer(cl_status& status) const;
 
 	/**
 	 * @brief Aquires a SimplexReducer kernel
@@ -77,7 +77,7 @@ public:
 	 * @param[out] status 
 	 * @return SimplexReducer simplex reducer kernel
 	 */
-	SimplexReducer simplexReducer(cl_status* status = nullptr) const;
+	SimplexReducer simplexReducer(cl_status& status) const;
 
 	/**
 	 * @brief Aquires a VertexReducer kernel
@@ -85,7 +85,7 @@ public:
 	 * @param[out] status 
 	 * @return VertexReducer vertex reducer kernel
 	 */
-	VertexReducer vertexReducer(cl_status* status = nullptr) const;
+	VertexReducer vertexReducer(cl_status& status) const;
 
 	operator cl_program() const;
 };

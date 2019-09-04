@@ -40,7 +40,7 @@ public:
 	 * @return Buffer a size-fitting buffer
 	 */
 	template <typename T>
-	static Buffer make(const Context& context, const cl_mem_flags& flags, const nr_uint& count, T* data, cl_status* status = nullptr)
+	static Buffer make(const Context& context, const cl_mem_flags& flags, const nr_uint& count, T* data, cl_status& status)
 	{
 		return Buffer(context, flags, static_cast<nr_size>(count * sizeof(T)), data, status);
 	}
@@ -57,7 +57,7 @@ public:
 	 * @return Buffer a size-fitting buffer
 	 */
 	template <typename T>
-	static Buffer make(const Context& context, const cl_mem_flags& flags, const nr_uint& count, cl_status* status = nullptr)
+	static Buffer make(const Context& context, const cl_mem_flags& flags, const nr_uint& count, cl_status& status)
 	{
 		return make<T>(context, flags, count, nullptr, status);
 	}
@@ -78,11 +78,11 @@ public:
 	 * @param size the buffer size (in bytes)
 	 * @param[out] err internal OpenCL call status
 	 */
-	Buffer(const Context& context, const cl_mem_flags& flags, const nr_size& size, cl_status* err = nullptr);
+	Buffer(const Context& context, const cl_mem_flags& flags, const nr_size& size, cl_status& err);
 
 	/**
 	 * @brief Construct a new Buffer object of given size
-	 * 
+	 *
 	 * @note wraps clCreateBuffer
 	 * @note Refer to the OpenCL clCreateBuffer documentation for detailed explenation of the memory flags and error status
 	 * @param context parent context of this buffer
@@ -91,7 +91,7 @@ public:
 	 * @param data raw host pointer, used according with the memory flags
 	 * @param[out] error internal OpenCL call status
 	 */
-	Buffer(const Context& context, const cl_mem_flags& flags, const nr_size& size, void* data = nullptr, cl_status* error = nullptr);
+	Buffer(const Context& context, const cl_mem_flags& flags, const nr_size& size, void* data, cl_status& error);
 
 	/**
 	 * @brief Convertes a raw OpenCL buffer to C++ wrapper
@@ -135,7 +135,7 @@ public:
      * @param[out] err internal OpenCL call error status
 	 * @return nr_size the buffer size (in bytes)
      */
-	nr_size size(cl_status* err = nullptr) const;
+	nr_size size(cl_status& err) const;
 
 	/**
 	 * @brief Get the amount of elements of type T which the buffer can hold
@@ -145,7 +145,7 @@ public:
 	 * @return nr_size buffer capacity for elements of type T
 	 */
 	template <typename T>
-	nr_size count(cl_status* err = nullptr) const
+	nr_size count(cl_status& err) const
 	{
 		return size(err) / sizeof(T);
 	}

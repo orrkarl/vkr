@@ -3,13 +3,13 @@
 namespace nr
 {
 
-Buffer::Buffer(const Context& context, const cl_mem_flags& flags, const nr_size& size, cl_status* err)
+Buffer::Buffer(const Context& context, const cl_mem_flags& flags, const nr_size& size, cl_status& err)
 	: Buffer(context, flags, size, nullptr, err)
 {
 }
 
-Buffer::Buffer(const Context& context, const cl_mem_flags& flags, const nr_size& size, void* data, cl_status* error)
-	: Wrapped(clCreateBuffer(context, flags, size, data, error))
+Buffer::Buffer(const Context& context, const cl_mem_flags& flags, const nr_size& size, void* data, cl_status& error)
+	: Wrapped(clCreateBuffer(context, flags, size, data, &error))
 {
 }
 
@@ -55,11 +55,10 @@ const cl_mem& Buffer::get() const
 	return object;
 }
 
-nr_size Buffer::size(cl_status* err) const
+nr_size Buffer::size(cl_status& err) const
 {
 	nr_size ret = 0;
-	auto status = clGetMemObjectInfo(object, CL_MEM_SIZE, sizeof(nr_size), &ret, nullptr);
-	if (err) *err = status;
+	err = clGetMemObjectInfo(object, CL_MEM_SIZE, sizeof(nr_size), &ret, nullptr);
 	return ret;
 }
 

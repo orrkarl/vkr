@@ -32,7 +32,7 @@ private:
 	bool initRenderingPipeline();
 	bool initialize();
 	bool initGL();
-	void loop(cl_status* err);
+	void loop(cl_status& err);
 
 	std::unique_ptr<nr::RawColorRGBA[]>	m_bitmap; 
 	nr::CommandQueue					m_commandQueue;

@@ -18,7 +18,7 @@ using namespace testing;
 class ReduceTriangleBuffer : public StandardDispatch<1, Buffer, nr_uint, Buffer>
 {
 public:
-    ReduceTriangleBuffer(const Module& module, cl_status* err)
+    ReduceTriangleBuffer(const Module& module, cl_status& err)
         : StandardDispatch(module, "reduce_triangle_buffer_test", err)
     {
     }
@@ -107,7 +107,7 @@ TEST(Binning, ReduceTriangleBuffer)
     
     cl_status err = CL_SUCCESS; 
 
-    auto code = mkBinningModule(dim, triangleCount + offset, &err);
+    auto code = mkBinningModule(dim, triangleCount + offset, err);
     ASSERT_SUCCESS(err);
 
     auto q = defaultCommandQueue;
@@ -122,12 +122,12 @@ TEST(Binning, ReduceTriangleBuffer)
 
     std::array<ReducedTriangle, triangleCount> h_actual;
 
-    auto d_triangle = Buffer::make<Triangle<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, offset + triangleCount, h_triangles_raw, &err);
+    auto d_triangle = Buffer::make<Triangle<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, offset + triangleCount, h_triangles_raw, err);
     ASSERT_SUCCESS(err);
-    auto d_result = Buffer::make<ReducedTriangle>(defaultContext, CL_MEM_WRITE_ONLY, triangleCount, &err);
+    auto d_result = Buffer::make<ReducedTriangle>(defaultContext, CL_MEM_WRITE_ONLY, triangleCount, err);
     ASSERT_SUCCESS(err);
     
-    auto test = ReduceTriangleBuffer(code, &err);
+    auto test = ReduceTriangleBuffer(code, err);
     ASSERT_SUCCESS(err);
 
 	test.setExecutionRange(workGroupSize);

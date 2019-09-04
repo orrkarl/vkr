@@ -95,20 +95,20 @@ TEST(SimplexReducer, reducing)
 		Module::DEBUG
 	};
 
-	Module code(defaultContext, Module::Sources{ clcode::base, clcode::simplex_reduce }, &err);
+	Module code(defaultContext, Module::Sources{ clcode::base, clcode::simplex_reduce }, err);
 	ASSERT_SUCCESS(err);
 
 	ASSERT_SUCCESS(code.build(defaultDevice, options));
 
-	auto testee = SimplexReducer(code, &err);
+	auto testee = SimplexReducer(code, err);
 	ASSERT_SUCCESS(err);
 
 	auto q = defaultCommandQueue;
 	ASSERT_SUCCESS(err);
 
-	auto d_orig = Buffer::make<Simplex<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, simplexCount, orig, &err);
+	auto d_orig = Buffer::make<Simplex<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, simplexCount, orig, err);
 	ASSERT_SUCCESS(err); 
-	auto d_res = Buffer::make<ReducedSimplex<dim>>(defaultContext, CL_MEM_WRITE_ONLY, simplexCount, &err);
+	auto d_res = Buffer::make<ReducedSimplex<dim>>(defaultContext, CL_MEM_WRITE_ONLY, simplexCount, err);
 	ASSERT_SUCCESS(err);
 
 	testee.setExecutionRange(simplexCount);

@@ -29,12 +29,12 @@ template <nr_uint dim, typename... Args>
 class StandardDispatch : protected TypesafeKernel<Args...>, public Dispatch<StandardDispatch<dim, Args...>>
 {
 public:
-	StandardDispatch(const Module& module, const char* name, cl_status* err)
+	StandardDispatch(const Module& module, const char* name, cl_status& err)
 		: TypesafeKernel<Args...>(module, name, err), range{}
 	{
 	}
 
-	StandardDispatch(const Module& module, const string& name, cl_status* err)
+	StandardDispatch(const Module& module, const string& name, cl_status& err)
 		: TypesafeKernel<Args...>(module, name, err), range{}
 	{
 	}

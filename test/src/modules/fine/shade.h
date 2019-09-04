@@ -18,7 +18,7 @@ using namespace testing;
 
 struct ShadeTest : public StandardDispatch<1, Fragment, ScreenDimension, Buffer, Buffer>
 {
-    ShadeTest(Module code, cl_status* err)
+    ShadeTest(Module code, cl_status& err)
         : StandardDispatch(code, "shade_test", err)
     {
     }
@@ -92,15 +92,15 @@ TEST(Fine, Shade)
     secondFrag.depth = firstFrag.depth / 1.1f;
 
     FrameBuffer frame;
-    frame.color = Buffer::make<ColorBuffer>(defaultContext, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, 1, &h_color, &err);
+    frame.color = Buffer::make<ColorBuffer>(defaultContext, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, 1, &h_color, err);
     ASSERT_SUCCESS(err);
-    frame.depth = Buffer::make<DepthBuffer>(defaultContext, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, 1, &h_depth, &err);
+    frame.depth = Buffer::make<DepthBuffer>(defaultContext, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, 1, &h_depth, err);
     ASSERT_SUCCESS(err);
     
-    auto code = mkFineModule(dim, &err);
+    auto code = mkFineModule(dim, err);
     ASSERT_SUCCESS(err);
 
-    auto testee = ShadeTest(code, &err);
+    auto testee = ShadeTest(code, err);
     ASSERT_SUCCESS(err);
 
     auto q = defaultCommandQueue;

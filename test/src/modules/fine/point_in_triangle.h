@@ -18,7 +18,7 @@ using namespace testing;
 
 struct PointInTriangle : StandardDispatch<1, Buffer, ScreenPosition, ScreenDimension, Buffer>
 {    
-    PointInTriangle(const Module& code, cl_status* err)
+    PointInTriangle(const Module& code, cl_status& err)
         : StandardDispatch(code, "is_point_in_triangle_test", err)
     {
     }
@@ -71,16 +71,16 @@ TEST(Fine, PointInTriangle)
 
     auto q = defaultCommandQueue;
 
-    auto code = mkFineModule(dim, &err);
+    auto code = mkFineModule(dim, err);
     ASSERT_SUCCESS(err);
 
-    auto testee = PointInTriangle(code, &err);
+    auto testee = PointInTriangle(code, err);
     ASSERT_SUCCESS(err);
 
-    auto d_triangle = Buffer::make<Triangle<dim>>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, &triangle, &err);
+    auto d_triangle = Buffer::make<Triangle<dim>>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, &triangle, err);
     ASSERT_SUCCESS(err);
 
-    auto d_result = Buffer::make<nr_bool>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, &h_result, &err);
+    auto d_result = Buffer::make<nr_bool>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, &h_result, err);
     ASSERT_SUCCESS(err);
 
 	testee.setExecutionRange(1);

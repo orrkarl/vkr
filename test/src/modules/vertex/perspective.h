@@ -43,24 +43,24 @@ TEST(VertexShader, Perspective)
         Module::DEBUG
     };
 
-    Module code(defaultContext, Module::Sources{clcode::base, clcode::vertex_reduce}, &err);
+    Module code(defaultContext, Module::Sources{clcode::base, clcode::vertex_reduce}, err);
     ASSERT_SUCCESS(err);
 
     ASSERT_SUCCESS(code.build(defaultDevice, options));
 
-    auto testee = VertexReducer(code, &err);
+    auto testee = VertexReducer(code, err);
     ASSERT_SUCCESS(err);
 
     auto q = defaultCommandQueue;
     ASSERT_SUCCESS(err);
 
-    auto d_point = Buffer::make<Vertex<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 1, &p, &err);
+    auto d_point = Buffer::make<Vertex<dim>>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 1, &p, err);
     ASSERT_SUCCESS(err);
-    auto d_near = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, near, &err);
+    auto d_near = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, near, err);
     ASSERT_SUCCESS(err);
-    auto d_far = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, far, &err);
+    auto d_far = Buffer::make<nr_float>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, dim, far, err);
     ASSERT_SUCCESS(err);
-    auto d_result = Buffer::make<Vertex<dim>>(defaultContext, CL_MEM_READ_WRITE, 1, &err);
+    auto d_result = Buffer::make<Vertex<dim>>(defaultContext, CL_MEM_READ_WRITE, 1, err);
     ASSERT_SUCCESS(err);
 
 	testee.setExecutionRange(1);

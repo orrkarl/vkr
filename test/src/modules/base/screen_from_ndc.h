@@ -11,7 +11,7 @@ void screenFromNDCTestTemplate(ScreenFromNDC& kernel, const CommandQueue& q, con
 {
 	cl_status err = CL_SUCCESS;
 
-	auto d_result = Buffer::make<ScreenPosition>(defaultContext, CL_MEM_WRITE_ONLY, 1, &err);
+	auto d_result = Buffer::make<ScreenPosition>(defaultContext, CL_MEM_WRITE_ONLY, 1, err);
 
 	kernel.setExecutionRange(1);
 
@@ -31,12 +31,12 @@ TEST(Base, ScreenFromNDC)
 {
     cl_status err = CL_SUCCESS; 
 
-    Module base(defaultContext, clcode::base, &err);
+    Module base(defaultContext, clcode::base, err);
     ASSERT_SUCCESS(err);
 
     ASSERT_SUCCESS(base.build(defaultDevice, Module::Options{Module::CL_VERSION_12, Module::_3D}));
 
-    auto screen_from_ndc = ScreenFromNDC(base, &err);
+    auto screen_from_ndc = ScreenFromNDC(base, err);
     ASSERT_SUCCESS(err);
 
     screenFromNDCTestTemplate(screen_from_ndc, defaultCommandQueue, NDCPosition{-1.0f, -1.0f}, ScreenDimension{100, 100}, ScreenPosition{0, 0});

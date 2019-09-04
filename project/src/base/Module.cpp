@@ -42,20 +42,20 @@ Module::Module()
 {
 }
 
-Module::Module(const Context& context, const string& code, cl_status* err)
+Module::Module(const Context& context, const string& code, cl_status& err)
     : Wrapped()
 {
     size_t s = code.size();
     auto code_ptr = code.c_str();
-    object = clCreateProgramWithSource(context, 1, &code_ptr, &s, err);
+    object = clCreateProgramWithSource(context, 1, &code_ptr, &s, &err);
 }
 
-Module::Module(const Context& context, const Sources& codes, cl_status* err)
+Module::Module(const Context& context, const Sources& codes, cl_status& err)
     : Wrapped() 
 {
     std::vector<const nr_char*> codesRaw(codes.size());
     std::transform(codes.cbegin(), codes.cend(), codesRaw.begin(), std::mem_fn(&string::c_str));
-    object = clCreateProgramWithSource(context, static_cast<nr_uint>(codes.size()), &codesRaw[0], nullptr, err);
+    object = clCreateProgramWithSource(context, static_cast<nr_uint>(codes.size()), &codesRaw[0], nullptr, &err);
 }
 
 Module::Module(const cl_program& module, const nr_bool retain)
@@ -115,14 +115,14 @@ cl_status Module::build(const Devices& devices, const Options& options)
         nullptr);
 }
 
-Kernel Module::createKernel(const string& name, cl_status* err) const
+Kernel Module::createKernel(const string& name, cl_status& err) const
 {
     return createKernel(name.c_str(), err);
 }
 
-Kernel Module::createKernel(const char* name, cl_status* err) const
+Kernel Module::createKernel(const char* name, cl_status& err) const
 {
-	return Kernel(clCreateKernel(object, name, err));
+	return Kernel(clCreateKernel(object, name, &err));
 }
 
 string Module::finalizeOptions(const Options& options)
@@ -136,27 +136,19 @@ string Module::finalizeOptions(const Options& options)
     return ret;    
 }
 
-string Module::getBuildLog(Device device, cl_status* err) const
+string Module::getBuildLog(Device device, cl_status& err) const
 {
 	nr_size len = 0;
-	*err = clGetProgramBuildInfo(object, device, CL_PROGRAM_BUILD_LOG, len, nullptr, &len);
+	err = clGetProgramBuildInfo(object, device, CL_PROGRAM_BUILD_LOG, len, nullptr, &len);
 	std::unique_ptr<nr_char[]> str = std::make_unique<nr_char[]>(len);
-	*err = clGetProgramBuildInfo(object, device, CL_PROGRAM_BUILD_LOG, len, str.get(), nullptr);
+	err = clGetProgramBuildInfo(object, device, CL_PROGRAM_BUILD_LOG, len, str.get(), nullptr);
 	return string(str.get());
 }
 
-Context Module::getContext(cl_status* err) const
+Context Module::getContext(cl_status& err) const
 {
 	cl_context ret;
-	if (err)
-	{
-		*err = clGetProgramInfo(object, CL_PROGRAM_CONTEXT, sizeof(ret), &ret, nullptr);
-	}
-	else
-	{
-		clGetProgramInfo(object, CL_PROGRAM_CONTEXT, sizeof(ret), &ret, nullptr);
-	}
-
+	err = clGetProgramInfo(object, CL_PROGRAM_CONTEXT, sizeof(ret), &ret, nullptr);
 	return Context(ret, true);
 }
 

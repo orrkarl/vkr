@@ -45,7 +45,7 @@ public:
 	 * @param module kernel containing module
 	 * @param[out] err internal OpenCL call status
 	 */
-	FineRasterizer(const Module& module, cl_status* err = nullptr)
+	FineRasterizer(const Module& module, cl_status& err)
 		: StandardDispatch(module, FINE_RASTER_KERNEL_NAME, err)
 	{
 	}

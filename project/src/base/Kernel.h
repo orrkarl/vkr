@@ -60,7 +60,7 @@ public:
      * @param name kernel name in the module
      * @param[out] err internal OpenCL call status
      */
-    Kernel(const Module& module, const string& name, cl_status* err = nullptr);
+    Kernel(const Module& module, const string& name, cl_status& err);
 
     /**
      * @brief Constructs a kenrel object
@@ -73,7 +73,7 @@ public:
      * @param name kernel name in the module
      * @param[out] err internal OpenCL call status
      */
-	Kernel(const Module& module, const char* name, cl_status* err = nullptr);
+	Kernel(const Module& module, const char* name, cl_status& err);
 
     Kernel(const Kernel& other);
 
@@ -174,12 +174,12 @@ public:
     /**
      * @brief Construct a Typesafe kernel
      * 
-     * @note delegates to Kernel::Kernel(const Module& module, const char* name, cl_status* err = nullptr)
+     * @note delegates to Kernel::Kernel(const Module& module, const char* name, cl_status& err)
      * @param module OpenCL module containing the kernel
      * @param name kernel name in the module
      * @param err internal OpenCL call status
      */
-	TypesafeKernel(const Module& module, const char* name, cl_status* err = nullptr)
+	TypesafeKernel(const Module& module, const char* name, cl_status& err)
 		: Kernel(module, name, err)
 	{
 	}

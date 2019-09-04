@@ -26,26 +26,31 @@ Context::Context(Context&& other)
 Context::Context(
     const cl_context_properties* properties, 
     std::vector<Device>& devices, 
-    cl_status* err)
+    cl_status& err)
     : Wrapped(
         clCreateContext(
             properties, 
             cl_uint(devices.size()), &devices.front().get(), 
             nullptr, nullptr, 
-            err))
+            &err))
 {
 }
 
 Context::Context(
     const cl_context_properties* properties, 
     cl_device_type deviceType,          
-    cl_status* err)
+    cl_status& err)
     : Wrapped(
         clCreateContextFromType(
             properties, 
             deviceType,
             nullptr, nullptr, 
-            err))
+            &err))
+{
+}
+
+Context::Context(const cl_context_properties* properties, cl_status& err)
+	: Context(properties, CL_DEVICE_TYPE_GPU, err)
 {
 }
 

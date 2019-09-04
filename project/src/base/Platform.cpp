@@ -5,7 +5,7 @@
 namespace nr
 {
 
-std::vector<Platform> Platform::getAvailablePlatforms(cl_status* err)
+std::vector<Platform> Platform::getAvailablePlatforms(cl_status& err)
 {
     cl_uint platformCount;
     clGetPlatformIDs(0, nullptr, &platformCount);
@@ -56,7 +56,7 @@ Platform::operator cl_platform_id() const
     return object;
 }
 
-std::vector<Device> Platform::getDevicesByType(cl_device_type type, cl_status* err)
+std::vector<Device> Platform::getDevicesByType(cl_device_type type, cl_status& err)
 {
     cl_uint deviceCount;
     clGetDeviceIDs(object, type, 0, nullptr, &deviceCount);

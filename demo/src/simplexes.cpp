@@ -82,9 +82,8 @@ protected:
 	nr_status init(const nr::Context& renderContext, nr::Pipeline& pipeline) override
 	{
 		nr_status ret = CL_SUCCESS;
-		auto pret = &ret;
 
-		m_d_simplices = nr::VertexBuffer::make<dim>(renderContext, 48, pret);
+		m_d_simplices = nr::VertexBuffer::make<dim>(renderContext, 48, ret);
 		if (nr::error::isFailure(ret)) return ret;
 
 		ret = pipeline.setFarPlane(h_far);

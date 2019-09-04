@@ -24,7 +24,6 @@ nr_float h_far[]
 TEST(Pipeline, Sanity)
 {
 	cl_status ret = CL_SUCCESS;
-	auto pret = &ret;
 
 	constexpr nr::ScreenDimension screenDim = { 640, 480 };
 	constexpr nr_uint workGroupCount = 7;
@@ -39,10 +38,10 @@ TEST(Pipeline, Sanity)
 	auto triangles = std::make_unique<nr::Simplex<dim>[]>(count);
 	fillTriangleBuffer(screenDim, config, workGroupCount, batchSize, 0.5f, triangles.get());
 
-	auto vb = nr::VertexBuffer::make(defaultContext, count, triangles.get(), pret);
+	auto vb = nr::VertexBuffer::make(defaultContext, count, triangles.get(), ret);
 	ASSERT_SUCCESS(ret);
 
-	auto p = nr::Pipeline(defaultContext, defaultDevice, defaultCommandQueue, dim, config, workGroupCount, batchSize, pret);
+	auto p = nr::Pipeline(defaultContext, defaultDevice, defaultCommandQueue, dim, config, workGroupCount, batchSize, ret);
 	ASSERT_SUCCESS(ret);
 
 	ret = p.viewport(screenDim);

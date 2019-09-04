@@ -42,7 +42,7 @@ nr_status App::run()
 	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
-	loop(&status);
+	loop(status);
 	if (nr::error::isFailure(status))
 	{
 		std::cerr << "Error detected at main loop: " << nr::utils::stringFromCLError(status) << '\n';
@@ -84,9 +84,9 @@ nr_status App::draw(const nr::VertexBuffer& vb, const nr::Primitive& type, const
 bool App::initRenderingPipeline()
 {
 	cl_status ret = CL_SUCCESS;
-	auto pret = &ret;
+	
 
-	auto platforms = nr::Platform::getAvailablePlatforms(pret);
+	auto platforms = nr::Platform::getAvailablePlatforms(ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not aquire available OpenCL platforms: " << nr::utils::stringFromCLError(ret) << '\n';
@@ -101,7 +101,7 @@ bool App::initRenderingPipeline()
 
 	auto defaultPlatform = platforms[0];
 
-	auto devices = defaultPlatform.getDevicesByType(CL_DEVICE_TYPE_GPU, pret);
+	auto devices = defaultPlatform.getDevicesByType(CL_DEVICE_TYPE_GPU, ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not aquire OpenCL devices: " << nr::utils::stringFromCLError(ret) << '\n';
@@ -112,7 +112,7 @@ bool App::initRenderingPipeline()
 	{
 		std::cerr << "No OpenCL supported GPU's found; falling back to CL_DEVICE_TYPE_ALL" << '\n';
 
-		devices = defaultPlatform.getDevicesByType(CL_DEVICE_TYPE_ALL, pret);
+		devices = defaultPlatform.getDevicesByType(CL_DEVICE_TYPE_ALL, ret);
 		if (nr::error::isFailure(ret))
 		{
 			std::cerr << "Could not aquire OpenCL devices: " << nr::utils::stringFromCLError(ret) << '\n';
@@ -129,21 +129,21 @@ bool App::initRenderingPipeline()
 	auto device = devices[0];
 
 	const cl_context_properties props[3] = { CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>((cl_platform_id)defaultPlatform), 0 };
-	m_context = nr::Context(props, CL_DEVICE_TYPE_GPU, pret);
+	m_context = nr::Context(props, CL_DEVICE_TYPE_GPU, ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not create OpenCL context: " << nr::utils::stringFromCLError(ret) << '\n';
 		return false;
 	}
 
-	m_commandQueue = nr::CommandQueue(m_context, device, (cl_command_queue_properties)CL_QUEUE_PROFILING_ENABLE, pret);
+	m_commandQueue = nr::CommandQueue(m_context, device, (cl_command_queue_properties)CL_QUEUE_PROFILING_ENABLE, ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not create OpenCL CommandQueue: " << nr::utils::stringFromCLError(ret) << '\n';
 		return false;
 	}
 
-	m_pipeline.init(m_context, device, m_commandQueue, m_renderDimension, pret);
+	m_pipeline.init(m_context, device, m_commandQueue, m_renderDimension, ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not initialize rendering pipeline: " << nr::utils::stringFromCLError(ret) << '\n';
@@ -204,12 +204,12 @@ bool App::isKeyPressed(int key)
 	return glfwGetKey(m_window, key) == GLFW_PRESS;
 }
 
-void App::loop(cl_status* err)
+void App::loop(cl_status& err)
 {
 	while (!glfwWindowShouldClose(m_window))
 	{
-		*err = update(m_commandQueue);
-		if (nr::error::isFailure(*err)) return;
+		err = update(m_commandQueue);
+		if (nr::error::isFailure(err)) return;
 		
 		glfwPollEvents();
 	}

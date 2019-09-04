@@ -150,7 +150,7 @@ public:
      * @param properties command queue properties
      * @param[out] err function success status
      */
-    CommandQueue(const Context& context, const Device& device, cl_command_queue_properties properties, cl_status* err = nullptr);
+    CommandQueue(const Context& context, const Device& device, cl_command_queue_properties properties, cl_status& err);
 
     CommandQueue(const CommandQueue& other);
 
@@ -244,7 +244,7 @@ public:
 	cl_status enqueueBufferReadCommand(const Buffer& buffer, nr_bool block, T* data, Event* notify = nullptr) const
 	{
         cl_status status;
-        auto s = buffer.size(&status);
+        auto s = buffer.size(status);
         if (error::isFailure(status)) return status;
 		return clEnqueueReadBuffer(
 			object, buffer, block, 0, s, data,
@@ -467,7 +467,7 @@ public:
 			"enqueueBufferFillCommand: value size has to be one of {1, 2, 4, 8, 16, 32, 64, 128}");
 
 		cl_status err = CL_SUCCESS;
-		auto s = buffer.size(&err);
+		auto s = buffer.size(err);
 		if (nr::error::isFailure(err))
 		{
 			return err;

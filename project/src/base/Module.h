@@ -136,7 +136,7 @@ public:
 	 * @param code raw OpenCL device code
      * @param[out] err internal OpenCL call status
 	 */
-	Module(const Context& context, const string& code, cl_status* err = nullptr);
+	Module(const Context& context, const string& code, cl_status& err);
 
 	/**
 	 * @brief Constructs a modul object a multiple sources, bound to a given context
@@ -147,7 +147,7 @@ public:
 	 * @param codes raw OpenCL device codes
      * @param[out] err internal OpenCL call status
 	 */
-	Module(const Context& context, const Sources& codes, cl_status* err = nullptr);
+	Module(const Context& context, const Sources& codes, cl_status& err);
 
 	/**
 	 * @brief Convertes a raw OpenCL program to C++ wrapper
@@ -253,7 +253,7 @@ public:
 	 * @param[out] err internal OpenCL call status
 	 * @return Kernel generated kernel object
 	 */
-	Kernel createKernel(const string& name, cl_status* err = nullptr) const;
+	Kernel createKernel(const string& name, cl_status& err) const;
 
 	/**
 	 * @brief Create a Kernel object from this module
@@ -262,7 +262,7 @@ public:
 	 * @param[out] err internal OpenCL call status
 	 * @return Kernel generated kernel object
 	 */
-	Kernel createKernel(const char* name, cl_status* err = nullptr) const;
+	Kernel createKernel(const char* name, cl_status& err) const;
 
 	/**
 	 * @brief Get the Build Log object
@@ -273,9 +273,9 @@ public:
 	 * @param[out] err internal OpenCL call status
 	 * @return string 
 	 */
-	string getBuildLog(Device device, cl_status* err = nullptr) const;
+	string getBuildLog(Device device, cl_status& err) const;
 
-	Context getContext(cl_status* err = nullptr) const;
+	Context getContext(cl_status& err) const;
 
 private:
 	/**
