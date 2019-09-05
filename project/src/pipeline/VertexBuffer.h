@@ -46,10 +46,8 @@ public:
 		if (error::isFailure(err)) return VertexBuffer();
 		auto reducedVertecies = Buffer::make<Triangle>(context, CL_MEM_READ_WRITE, primitiveCount, err);
 		if (error::isFailure(err)) return VertexBuffer();
-		auto reducedSimplices = Buffer::make<Triangle>(context, CL_MEM_READ_WRITE, detail::triangleCount(3, primitiveCount), err);
-		if (error::isFailure(err)) return VertexBuffer();
 
-		return VertexBuffer(vertecies, reducedVertecies, reducedSimplices);
+		return VertexBuffer(vertecies, reducedVertecies);
 	}
 
 	/**
@@ -67,10 +65,8 @@ public:
 		if (error::isFailure(err)) return VertexBuffer();
 		auto reducedVertecies = Buffer::make<Triangle>(context, CL_MEM_READ_WRITE, primitiveCount, err);
 		if (error::isFailure(err)) return VertexBuffer();
-		auto reducedSimplices = Buffer::make<Triangle>(context, CL_MEM_READ_WRITE, detail::triangleCount(3, primitiveCount), err);
-		if (error::isFailure(err)) return VertexBuffer();
 
-		return VertexBuffer(vertecies, reducedVertecies, reducedSimplices);
+		return VertexBuffer(vertecies, reducedVertecies);
 	}
 
 	VertexBuffer() {}
@@ -84,8 +80,8 @@ public:
 	operator Buffer() const { return vertecies; }
 
 private:
-	VertexBuffer(const Buffer vertecies, const Buffer reducedVertecies, const Buffer reducedSimplices)
-		: vertecies(vertecies), reducedSimplices(reducedSimplices), reducedVertecies(reducedVertecies)
+	VertexBuffer(const Buffer vertecies, const Buffer reducedVertecies)
+		: vertecies(vertecies), reducedVertecies(reducedVertecies)
 	{
 	}
 
@@ -93,7 +89,6 @@ private:
 
 	Buffer vertecies;
 	Buffer reducedVertecies;
-	Buffer reducedSimplices;
 };	
 
 }

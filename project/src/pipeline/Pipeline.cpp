@@ -68,9 +68,6 @@ cl_status Pipeline::setRenderDimension(const nr_uint dim)
 	m_fineRaster = s.fineRasterizer(ret);
 	if (error::isFailure(ret)) return ret;
 
-	m_simplexReduce = s.simplexReducer(ret);
-	if (error::isFailure(ret)) return ret;
-
 	m_vertexReduce = s.vertexReducer(ret);
 	if (error::isFailure(ret)) return ret;
 
@@ -188,34 +185,23 @@ cl_status Pipeline::render(const VertexBuffer& primitives, const Primitive& prim
 
 	m_binRaster.setExecutionRange(m_screenDimension, m_binQueueConfig, m_binRasterWorkGroupCount);
 	m_fineRaster.setExecutionRange(m_screenDimension, m_binQueueConfig, m_binRasterWorkGroupCount);
-	m_simplexReduce.setExecutionRange(primitiveCount);
 	m_vertexReduce.setExecutionRange(primitiveCount * m_renderDimension);
 
 	m_vertexReduce.setSimplexInputBuffer(primitives);
 	if (error::isFailure(err)) return err;
 	m_vertexReduce.setSimplexOutputBuffer(primitives.reducedVertecies);
 	if (error::isFailure(err)) return err;
-	m_simplexReduce.setSimplexInputBuffer(primitives.reducedVertecies);
-	if (error::isFailure(err)) return err;
-	m_simplexReduce.setTriangleOutputBuffer(primitives.reducedSimplices);
-	if (error::isFailure(err)) return err;
-	m_binRaster.setTriangleInputBuffer(primitives.reducedSimplices);
+	m_binRaster.setTriangleInputBuffer(primitives.reducedVertecies);
 	if (error::isFailure(err)) return err;
 	m_binRaster.setTriangleCount(detail::triangleCount(m_renderDimension, primitiveCount));
 	if (error::isFailure(err)) return err;
-	m_fineRaster.setTriangleInputBuffer(primitives.reducedSimplices);
+	m_fineRaster.setTriangleInputBuffer(primitives.reducedVertecies);
 	if (error::isFailure(err)) return err;
 
 	err = m_commandQueue.enqueueDispatchCommand(m_vertexReduce);
 	if (error::isFailure(err))
 	{
 		std::cerr << "Could not enqueue vertex reduce! " << utils::stringFromCLError(err) << std::endl;
-		return err;
-	}
-	err = m_commandQueue.enqueueDispatchCommand(m_simplexReduce);
-	if (error::isFailure(err))
-	{
-		std::cerr << "Could not enqueue simplex reduce! " << utils::stringFromCLError(err) << std::endl;
 		return err;
 	}
 	err = m_commandQueue.enqueueDispatchCommand(m_binRaster);

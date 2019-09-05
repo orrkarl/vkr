@@ -17,7 +17,6 @@
 
 #include "BinRasterizer.h"
 #include "FineRasterizer.h"
-#include "SimplexReducer.h"
 #include "VertexReducer.h"
 
 #include "../rendering/Render.h"
@@ -169,7 +168,6 @@ private:
 	Buffer							m_nearPlane;
 	Buffer							m_overflowNotifier;
 	ScreenDimension					m_screenDimension;
-	detail::SimplexReducer			m_simplexReduce;
 	detail::VertexReducer			m_vertexReduce;
 };
 

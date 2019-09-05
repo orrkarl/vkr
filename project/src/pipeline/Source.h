@@ -19,7 +19,6 @@
 
 #include "BinRasterizer.h"
 #include "FineRasterizer.h"
-#include "SimplexReducer.h"
 #include "VertexReducer.h"
 
 namespace nr
@@ -70,14 +69,6 @@ public:
 	 * @return FineRasterizer fine rasterizer kernel
 	 */
 	FineRasterizer fineRasterizer(cl_status& status) const;
-
-	/**
-	 * @brief Aquires a SimplexReducer kernel
-	 * 
-	 * @param[out] status 
-	 * @return SimplexReducer simplex reducer kernel
-	 */
-	SimplexReducer simplexReducer(cl_status& status) const;
 
 	/**
 	 * @brief Aquires a VertexReducer kernel
