@@ -44,10 +44,22 @@ public:
 	Source(const Context& context, cl_status& status);
 
 	/**
+	 * @brief Creates an NR source object and builds it
+	 * 
+	 * @see Source::build
+	 * 
+	 * @param context parent context
+	 * @param dev target device
+	 * @param binBatchSize bin rasterizer batch size (refer to BinRasterizer for detailed explenation)
+	 * @param debug should compile in debug mode
+	 * @param[out] status
+	 */
+	Source(const Context& context, const Device& dev, const nr_uint binBatchSize, const nr_bool debug, cl_status& err);
+
+	/**
 	 * @brief builds the source module
 	 * 
 	 * @param dev target device
-	 * @param renderDimension rendering dimension
 	 * @param binBatchSize bin rasterizer batch size (refer to BinRasterizer for detailed explenation)
 	 * @param debug should compile in debug mode
 	 * @return cl_status internal OpenCL call status

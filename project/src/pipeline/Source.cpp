@@ -16,6 +16,12 @@ Source::Source(const Context& context, cl_status& status)
 {
 }
 
+Source::Source(const Context& context, const Device& dev, const nr_uint binBatchSize, const nr_bool debug, cl_status& err)
+	: Source(context, err)
+{
+	err = build(dev, binBatchSize, debug);
+}
+
 cl_status Source::build(const Device& dev, const nr_uint binBatchSize, const nr_bool debug)
 {
 	Module::Options opts;
