@@ -40,13 +40,12 @@ public:
 	 * @param context parent context
 	 * @param device parent device
 	 * @param queue parent command queue
-	 * @param dim rasterization dimension
 	 * @param config bin queue config (refer to BinRasterizer for detailed explenation)
 	 * @param binRasterWorkGroupCount bin rasterizer expected work group count
 	 * @param batchSize bin rasterizer batch size
 	 * @param[out] err internal OpenCL call status
 	 */
-	Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const nr_uint dim, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, const nr_uint batchSize, cl_status& err);
+	Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, const nr_uint batchSize, cl_status& err);
 
 	/**
 	 * @brief Construct and initializes a pipeline
@@ -55,12 +54,11 @@ public:
 	 * @param context parent context
 	 * @param device parent device
 	 * @param queue parent command queue
-	 * @param dim rasterization dimension
 	 * @param config bin queue config (refer to BinRasterizer for detailed explenation)
 	 * @param binRasterWorkGroupCount bin rasterizer expected work group count
 	 * @param[out] err internal OpenCL call status
 	 */
-	Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const nr_uint dim, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, cl_status& err);
+	Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, cl_status& err);
 
 	Pipeline(const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, const nr_uint batchSize = DEFAULT_BATCH_SIZE);
 
@@ -82,7 +80,7 @@ public:
 	 */
 	void setClearDepth(const Depth& depth);
 
-	void init(const Context& context, const Device& device, const CommandQueue& queue, const nr_uint dim, cl_status& err);
+	void init(const Context& context, const Device& device, const CommandQueue& queue, cl_status& err);
 
 	/**
 	 * @brief Set the viewport size
@@ -145,8 +143,6 @@ private:
 
 	cl_status preallocate(const ScreenDimension& screenDim, const detail::BinQueueConfig& config, const nr_uint binRasterWorkGroupCounts);
 
-	cl_status setRenderDimension(const nr_uint dim);
-
 	static const nr_uint		 DEFAULT_BATCH_SIZE;
 	static const ScreenDimension MAX_SCREEN_DIM;
 
@@ -162,7 +158,6 @@ private:
 	Device							m_device;
 	Buffer							m_farPlane;
 	Buffer							m_globalBatchIndex;
-	nr_uint							m_renderDimension;
 	detail::FineRasterizer			m_fineRaster;
 	FrameBuffer						m_frame;
 	Buffer							m_nearPlane;

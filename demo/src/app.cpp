@@ -28,7 +28,7 @@ bool App::init()
 }
 
 App::App(const nr::string& name, const nr::ScreenDimension& screenDim)
-	: m_bitmap(new nr::RawColorRGBA[screenDim.width * screenDim.height]), m_name(name), m_renderDimension(3), m_screenDim(screenDim), m_pipeline({ 64, 64, 256 }, 8)
+	: m_bitmap(new nr::RawColorRGBA[screenDim.width * screenDim.height]), m_name(name), m_screenDim(screenDim), m_pipeline({ 64, 64, 256 }, 8)
 {
 }
 
@@ -143,7 +143,7 @@ bool App::initRenderingPipeline()
 		return false;
 	}
 
-	m_pipeline.init(m_context, device, m_commandQueue, m_renderDimension, ret);
+	m_pipeline.init(m_context, device, m_commandQueue, ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not initialize rendering pipeline: " << nr::utils::stringFromCLError(ret) << '\n';

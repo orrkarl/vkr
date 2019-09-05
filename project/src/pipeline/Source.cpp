@@ -16,7 +16,7 @@ Source::Source(const Context& context, cl_status& status)
 {
 }
 
-cl_status Source::build(const Device& dev, const nr_uint renderDimension, const nr_uint binBatchSize, const nr_bool debug)
+cl_status Source::build(const Device& dev, const nr_uint binBatchSize, const nr_bool debug)
 {
 	Module::Options opts;
 	opts.push_back(Module::CL_VERSION_12);

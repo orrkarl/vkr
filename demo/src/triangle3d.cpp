@@ -151,7 +151,7 @@ int main(const int argc, const char* argv[])
 		return ret;
 	}
 
-	auto p = nr::Pipeline(ctx, dev, q, 3, { 64, 64, 255 }, 1, ret);
+	auto p = nr::Pipeline(ctx, dev, q, { 64, 64, 255 }, 1, ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Coult not create pipeline! " << nr::utils::stringFromCLError(ret) << std::endl;

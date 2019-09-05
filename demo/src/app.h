@@ -38,7 +38,6 @@ private:
 	nr::CommandQueue					m_commandQueue;
 	nr::Context							m_context;
 	const nr::string					m_name;
-	const nr_uint						m_renderDimension;
 	nr::ScreenDimension					m_screenDim;
 	nr::Pipeline						m_pipeline;
 	GLFWwindow*							m_window;

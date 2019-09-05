@@ -39,7 +39,7 @@ TEST(Pipeline, Sanity)
 	auto vb = nr::VertexBuffer::make(defaultContext, count, triangles.get(), ret);
 	ASSERT_SUCCESS(ret);
 
-	auto p = nr::Pipeline(defaultContext, defaultDevice, defaultCommandQueue, 3, config, workGroupCount, batchSize, ret);
+	auto p = nr::Pipeline(defaultContext, defaultDevice, defaultCommandQueue, config, workGroupCount, batchSize, ret);
 	ASSERT_SUCCESS(ret);
 
 	ret = p.viewport(screenDim);

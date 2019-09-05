@@ -14,18 +14,18 @@ const nr_uint Pipeline::DEFAULT_BATCH_SIZE = 256;
 const ScreenDimension Pipeline::MAX_SCREEN_DIM = { 2048, 2048 };
 
 Pipeline::Pipeline(const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, const nr_uint batchSize)
-	: m_binQueueConfig(config), m_binRasterWorkGroupCount(binRasterWorkGroupCount),  m_batchSize(batchSize), m_clearColor{ 0, 0, 0, 0 }, m_clearDepth(1.0f), m_renderDimension(0), m_screenDimension{ 0, 0 }
+	: m_binQueueConfig(config), m_binRasterWorkGroupCount(binRasterWorkGroupCount),  m_batchSize(batchSize), m_clearColor{ 0, 0, 0, 0 }, m_clearDepth(1.0f), m_screenDimension{ 0, 0 }
 {
 }
 
-Pipeline::Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const nr_uint dim, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, const nr_uint batchSize, cl_status& err)
+Pipeline::Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, const nr_uint batchSize, cl_status& err)
 	: Pipeline(config, binRasterWorkGroupCount, batchSize)
 {
-	init(context, device, queue, dim, err);
+	init(context, device, queue, err);
 }
 
-Pipeline::Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const nr_uint dim, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, cl_status& err)
-	:  Pipeline(context, device, queue, dim, config, binRasterWorkGroupCount, DEFAULT_BATCH_SIZE, err)
+Pipeline::Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, cl_status& err)
+	:  Pipeline(context, device, queue, config, binRasterWorkGroupCount, DEFAULT_BATCH_SIZE, err)
 {	
 }
 
@@ -34,7 +34,7 @@ Pipeline::Pipeline()
 {
 }
 
-void Pipeline::init(const Context& context, const Device& device, const CommandQueue& queue, const nr_uint dim, cl_status& err)
+void Pipeline::init(const Context& context, const Device& device, const CommandQueue& queue, cl_status& err)
 {
 	m_context = context;
 	m_device = device;
@@ -46,51 +46,42 @@ void Pipeline::init(const Context& context, const Device& device, const CommandQ
 	m_globalBatchIndex = Buffer::make<nr_uint>(context, CL_MEM_READ_WRITE, 1, err);
 	if (error::isFailure(err)) return;
 
-	err = setRenderDimension(dim);
+	detail::Source s(m_context, err);
+	err = s.build(m_device, m_batchSize, true);
+	if (error::isFailure(err)) return;
+
+	m_binRaster = s.binRasterizer(err);
+	if (error::isFailure(err)) return;
+
+	m_fineRaster = s.fineRasterizer(err);
+	if (error::isFailure(err)) return;
+
+	m_vertexReduce = s.vertexReducer(err);
+	if (error::isFailure(err)) return;
+
+	m_nearPlane = Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE, 3, err);
+	if (error::isFailure(err)) return;
+	m_farPlane = Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE, 3, err);
+	if (error::isFailure(err)) return;
+
+	err = m_vertexReduce.setNearPlaneBuffer(m_nearPlane);
+	if (error::isFailure(err)) return;
+	err = m_vertexReduce.setFarPlaneBuffer(m_farPlane);
+	if (error::isFailure(err)) return;
+
+	err = m_binRaster.setBinQueueConfig(m_binQueueConfig);
+	if (error::isFailure(err)) return;
+	err = m_binRaster.setGlobalBatchIndex(m_globalBatchIndex);
+	if (error::isFailure(err)) return;
+	err = m_binRaster.setOvereflowNotifier(m_overflowNotifier);
+	if (error::isFailure(err)) return;
+
+	err = m_fineRaster.setBinQueuesConfig(m_binQueueConfig);
+	if (error::isFailure(err)) return;
+	err = m_fineRaster.setBinningWorkGroupCount(m_binRasterWorkGroupCount);
 	if (error::isFailure(err)) return;
 
 	err = preallocate(MAX_SCREEN_DIM, m_binQueueConfig, m_binRasterWorkGroupCount);
-}
-
-cl_status Pipeline::setRenderDimension(const nr_uint dim)
-{
-	m_renderDimension = dim;
-
-	cl_status ret = CL_SUCCESS;
-
-	detail::Source s(m_context, ret);
-	ret = s.build(m_device, dim, m_batchSize, true);
-	if (error::isFailure(ret)) return ret;
-
-	m_binRaster = s.binRasterizer(ret);
-	if (error::isFailure(ret)) return ret;
-
-	m_fineRaster = s.fineRasterizer(ret);
-	if (error::isFailure(ret)) return ret;
-
-	m_vertexReduce = s.vertexReducer(ret);
-	if (error::isFailure(ret)) return ret;
-
-	m_nearPlane = Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE, dim, ret);
-	if (error::isFailure(ret)) return ret;
-	m_farPlane = Buffer::make<nr_float>(m_context, CL_MEM_READ_WRITE, dim, ret);
-	if (error::isFailure(ret)) return ret;
-
-	ret = m_vertexReduce.setNearPlaneBuffer(m_nearPlane);
-	if (error::isFailure(ret)) return ret;
-	ret = m_vertexReduce.setFarPlaneBuffer(m_farPlane);
-	if (error::isFailure(ret)) return ret;
-
-	ret = m_binRaster.setBinQueueConfig(m_binQueueConfig);
-	if (error::isFailure(ret)) return ret;
-	ret = m_binRaster.setGlobalBatchIndex(m_globalBatchIndex);
-	if (error::isFailure(ret)) return ret;
-	ret = m_binRaster.setOvereflowNotifier(m_overflowNotifier);
-	if (error::isFailure(ret)) return ret;
-	
-	ret = m_fineRaster.setBinQueuesConfig(m_binQueueConfig);
-	if (error::isFailure(ret)) return ret;
-	return m_fineRaster.setBinningWorkGroupCount(m_binRasterWorkGroupCount);
 }
 
 void Pipeline::setClearColor(const RawColorRGBA& color)
@@ -160,12 +151,12 @@ cl_status Pipeline::clearColorBuffer() const
 
 cl_status Pipeline::setNearPlane(const nr_float* near) const
 {
-	return m_commandQueue.enqueueBufferWriteCommand(m_nearPlane, false, m_renderDimension, near);
+	return m_commandQueue.enqueueBufferWriteCommand(m_nearPlane, false, 3, near);
 }
 
 cl_status Pipeline::setFarPlane(const nr_float* far) const
 {
-	return m_commandQueue.enqueueBufferWriteCommand(m_farPlane, false, m_renderDimension, far);
+	return m_commandQueue.enqueueBufferWriteCommand(m_farPlane, false, 3, far);
 }
 
 cl_status Pipeline::render(const VertexBuffer& primitives, const Primitive& primitiveType, const nr_uint primitiveCount)
@@ -178,14 +169,14 @@ cl_status Pipeline::render(const VertexBuffer& primitives, const Primitive& prim
 	auto elementCount = primitives.vertecies.count<nr_float>(err);
 	if (error::isFailure(err)) return err;
 
-	if (elementCount < nr_size(primitiveCount) * (nr_size(m_renderDimension) + 1) * nr_size(m_renderDimension))
+	if (elementCount < primitiveCount * sizeof(Triangle) / sizeof(nr_float))
 	{
 		return CL_INVALID_VALUE;
 	}
 
 	m_binRaster.setExecutionRange(m_screenDimension, m_binQueueConfig, m_binRasterWorkGroupCount);
 	m_fineRaster.setExecutionRange(m_screenDimension, m_binQueueConfig, m_binRasterWorkGroupCount);
-	m_vertexReduce.setExecutionRange(primitiveCount * m_renderDimension);
+	m_vertexReduce.setExecutionRange(primitiveCount * 3);
 
 	m_vertexReduce.setSimplexInputBuffer(primitives);
 	if (error::isFailure(err)) return err;
@@ -193,7 +184,7 @@ cl_status Pipeline::render(const VertexBuffer& primitives, const Primitive& prim
 	if (error::isFailure(err)) return err;
 	m_binRaster.setTriangleInputBuffer(primitives.reducedVertecies);
 	if (error::isFailure(err)) return err;
-	m_binRaster.setTriangleCount(detail::triangleCount(m_renderDimension, primitiveCount));
+	m_binRaster.setTriangleCount(primitiveCount);
 	if (error::isFailure(err)) return err;
 	m_fineRaster.setTriangleInputBuffer(primitives.reducedVertecies);
 	if (error::isFailure(err)) return err;
@@ -228,7 +219,6 @@ cl_status Pipeline::render(const VertexBuffer& primitives, const Primitive& prim
 	if (overflow)
 	{
 		return CL_OUT_OF_RESOURCES;
-		//std::cout << "Overflow detected!\n";
 	}
 
 	return err;

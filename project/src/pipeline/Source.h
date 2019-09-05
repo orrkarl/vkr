@@ -52,7 +52,7 @@ public:
 	 * @param debug should compile in debug mode
 	 * @return cl_status internal OpenCL call status
 	 */
-	cl_status build(const Device& dev, const nr_uint renderDimension, const nr_uint binBatchSize, const nr_bool debug = true);
+	cl_status build(const Device& dev, const nr_uint binBatchSize, const nr_bool debug = true);
 
 	/**
 	 * @brief Aquires a BinRasterizer kernel
