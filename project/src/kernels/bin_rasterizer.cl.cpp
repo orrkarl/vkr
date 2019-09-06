@@ -85,7 +85,7 @@ Bin make_bin(const ScreenDimension dim, const uint index_x, const uint index_y, 
 
 // Copies the contents of the global triangle buffer to local memory for a given batch
 event_t reduce_triangle_buffer(
-    const global Triangle* triangles, 
+    const global triangle_t* triangles, 
     const uint triangle_count, 
     const uint offset, 
     event_t event, 
@@ -100,8 +100,8 @@ event_t reduce_triangle_buffer(
 	{
 		for (uint i = 0; i < raw_copy_count; ++i)
 		{
-			result_x[i] = src_base[i * ELEMENTS_PER_POINT];
-			result_y[i] = src_base[i * ELEMENTS_PER_POINT + 1];
+			result_x[i] = src_base[i * 4];
+			result_y[i] = src_base[i * 4 + 1];
 		}
 	}
 
@@ -111,7 +111,7 @@ event_t reduce_triangle_buffer(
 // ----------------------------------------------------------------------------
 
 kernel void bin_rasterize(
-    const global Triangle* triangle_data,
+    const global triangle_t* triangle_data,
     const uint triangle_count,
     const ScreenDimension dim,
     const BinQueueConfig config,
@@ -119,8 +119,8 @@ kernel void bin_rasterize(
     global Index* bin_queues,
     global uint* g_batch_index)
 {
-    local float reduced_triangles_x[BATCH_COUNT * RENDER_DIMENSION];
-    local float reduced_triangles_y[BATCH_COUNT * RENDER_DIMENSION];
+    local float reduced_triangles_x[BATCH_COUNT * 3];
+    local float reduced_triangles_y[BATCH_COUNT * 3];
     local uint current_batch_index;
 
     // Workaround for that weird compiler bug
@@ -262,7 +262,7 @@ kernel void is_triangle_in_bin_test(
 }
 
 kernel void reduce_triangle_buffer_test(
-    const global Triangle triangle_data[TOTAL_TRIANGLE_COUNT],
+    const global triangle_t triangle_data[TOTAL_TRIANGLE_COUNT],
     const uint offset,
     global NDCPosition result[TOTAL_TRIANGLE_COUNT * 3])
 {

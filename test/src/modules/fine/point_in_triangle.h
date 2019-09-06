@@ -16,16 +16,16 @@ using namespace nr;
 using namespace nr::detail;
 using namespace testing;
 
-struct PointInTriangle : StandardDispatch<1, Buffer, ScreenPosition, ScreenDimension, Buffer>
+struct PointInTriangle : StandardDispatch<1, Triangle, ScreenPosition, ScreenDimension, Buffer>
 {    
     PointInTriangle(const Module& code, cl_status& err)
         : StandardDispatch(code, "is_point_in_triangle_test", err)
     {
     }
 
-	cl_status setTriangleInputBuffer(const Buffer& buffer)
+	cl_status setTriangleInputBuffer(const Triangle& tri)
 	{
-		return setArg<0>(buffer);
+		return setArg<0>(tri);
 	}
 
 	cl_status setPosition(const ScreenPosition& pos)
@@ -75,15 +75,12 @@ TEST(Fine, PointInTriangle)
     auto testee = PointInTriangle(code, err);
     ASSERT_SUCCESS(err);
 
-    auto d_triangle = Buffer::make<Triangle>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, &triangle, err);
-    ASSERT_SUCCESS(err);
-
     auto d_result = Buffer::make<nr_bool>(defaultContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 1, &h_result, err);
     ASSERT_SUCCESS(err);
 
 	testee.setExecutionRange(1);
 
-	ASSERT_SUCCESS(testee.setTriangleInputBuffer(d_triangle));
+	ASSERT_SUCCESS(testee.setTriangleInputBuffer(triangle));
 	ASSERT_SUCCESS(testee.setDimension(screenDim));
 	ASSERT_SUCCESS(testee.setResultBuffer(d_result));
 

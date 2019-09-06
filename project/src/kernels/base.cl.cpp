@@ -14,19 +14,9 @@ extern const char* base = R"__CODE__(
 
 // -------------------------------------- Types -------------------------------------- 
 
-#ifndef RENDER_DIMENSION 
-    #error "RENDER_DIMENSION has to be defined!"
-#endif
-
-#if RENDER_DIMENSION < 3
-    #error "RENDER_DIMENSION has to be at least 3!"
-#endif
-
 #ifndef MAX_WORK_GROUP_COUNT
     #define MAX_WORK_GROUP_COUNT (16)
 #endif
-
-#define ELEMENTS_PER_POINT (RENDER_DIMENSION + 1)
 
 typedef struct _ScreenDimension
 {
@@ -88,9 +78,13 @@ typedef struct _Bin
     uint y;
 } Bin;
 
-typedef float Point[ELEMENTS_PER_POINT]; // point in n-dimensional space 
-typedef Point Triangle[3];               // Nth dimensional triangle
-typedef Point Simplex[RENDER_DIMENSION]; // N-1 simplex (rendering is done on an object's surface)
+typedef float4 point_t;
+typedef struct _triangle
+{
+	point_t p0;
+	point_t p1;
+	point_t p2;
+} triangle_t;
 
 typedef struct _BinQueueConfig
 {
