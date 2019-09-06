@@ -11,31 +11,33 @@
 
 #pragma once
 
-#include <stdexcept>
 #include <string>
 
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <CL/cl.h>
 
-using nr_double = double;
-using nr_float = float;
+typedef double nr_double;
+typedef float nr_float;
 
-using nr_long  = int64_t;
-using nr_ulong = uint64_t;
+typedef int64_t nr_long;
+typedef uint64_t nr_ulong;
 
-using nr_int = int32_t;
-using nr_uint = uint32_t;
+typedef int32_t nr_int;
+typedef uint32_t nr_uint;
 
-using nr_short = int16_t;
-using nr_ushort = uint16_t;
+typedef int16_t nr_short;
+typedef uint16_t nr_ushort;
 
-using nr_byte = int8_t;
-using nr_ubyte = uint8_t;
+typedef int8_t nr_byte;
+typedef uint8_t nr_ubyte;
 
-using nr_char = char;
-using nr_bool = bool;
+typedef char nr_char;
+typedef bool nr_bool;
 
-using nr_size = size_t;
+typedef cl_int cl_status;
+typedef cl_status nr_status;
+
+typedef size_t nr_size;
 
 #ifdef NR_EXPORT
 
@@ -59,16 +61,15 @@ using nr_size = size_t;
 namespace nr
 {
 
-using string = std::basic_string<nr_char>;
+typedef std::basic_string<nr_char> string;
 
-class Error : public std::exception
+#define NR_OK(status) ((status) == CL_SUCCESS)
+
+namespace error
 {
-public:
-	Error(const char* desc)
-		: std::exception(desc)
-	{
-	}
-};
+	inline nr_bool isSuccess(const cl_status& err) { return NR_OK(err); }
+	inline nr_bool isFailure(const cl_status& err) { return !NR_OK(err); }
+}
 
 }
 
