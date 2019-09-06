@@ -14,14 +14,13 @@
 
 #include "../base/Context.h"
 #include "../base/CommandQueue.h"
+#include "../rendering/Render.h"
 
 #include "BinRasterizer.h"
 #include "FineRasterizer.h"
-#include "VertexReducer.h"
-
-#include "../rendering/Render.h"
-
+#include "Source.h"
 #include "VertexBuffer.h"
+#include "VertexReducer.h"
 
 namespace nr
 {
@@ -60,8 +59,6 @@ public:
 	 */
 	Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, cl_status& err);
 
-	Pipeline(const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, const nr_uint batchSize = DEFAULT_BATCH_SIZE);
-
 	Pipeline();
 
 	/**
@@ -79,8 +76,6 @@ public:
 	 * @param depth depthbuffer default depth
 	 */
 	void setClearDepth(const Depth& depth);
-
-	void init(const Context& context, const Device& device, const CommandQueue& queue, cl_status& err);
 
 	/**
 	 * @brief Set the viewport size
@@ -137,33 +132,33 @@ public:
 	cl_status copyFrameBuffer(RawColorRGBA* bitmap) const;
 	
 private:
+	Pipeline(const Context& context, const detail::Source& src, const CommandQueue& queue, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, const nr_uint batchSize, cl_status& err);
+
 	cl_status clearDepthBuffer() const;
 								 
 	cl_status clearColorBuffer() const;
 
-	cl_status preallocate(const ScreenDimension& screenDim, const detail::BinQueueConfig& config, const nr_uint binRasterWorkGroupCounts);
+	cl_status preallocate(const Context& context, const ScreenDimension& screenDim, const detail::BinQueueConfig& config, const nr_uint binRasterWorkGroupCounts);
 
 	static const nr_uint		 DEFAULT_BATCH_SIZE;
 	static const ScreenDimension MAX_SCREEN_DIM;
 
-	const nr_uint					m_batchSize;
-	const detail::BinQueueConfig	m_binQueueConfig;
-	Buffer							m_binQueues;
-	detail::BinRasterizer			m_binRaster;
-	const nr_uint					m_binRasterWorkGroupCount;
-	RawColorRGBA					m_clearColor;
-	Depth							m_clearDepth;
-	CommandQueue					m_commandQueue;
-	Context							m_context;
-	Device							m_device;
-	Buffer							m_farPlane;
-	Buffer							m_globalBatchIndex;
-	detail::FineRasterizer			m_fineRaster;
-	FrameBuffer						m_frame;
-	Buffer							m_nearPlane;
-	Buffer							m_overflowNotifier;
-	ScreenDimension					m_screenDimension;
-	detail::VertexReducer			m_vertexReduce;
+	nr_uint					m_batchSize;
+	detail::BinQueueConfig	m_binQueueConfig;
+	Buffer					m_binQueues;
+	detail::BinRasterizer	m_binRaster;
+	nr_uint					m_binRasterWorkGroupCount;
+	RawColorRGBA			m_clearColor;
+	Depth					m_clearDepth;
+	CommandQueue			m_commandQueue;
+	Buffer					m_farPlane;
+	Buffer					m_globalBatchIndex;
+	detail::FineRasterizer	m_fineRaster;
+	FrameBuffer				m_frame;
+	Buffer					m_nearPlane;
+	Buffer					m_overflowNotifier;
+	ScreenDimension			m_screenDimension;
+	detail::VertexReducer	m_vertexReduce;
 };
 
 }

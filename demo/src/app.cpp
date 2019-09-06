@@ -28,7 +28,7 @@ bool App::init()
 }
 
 App::App(const nr::string& name, const nr::ScreenDimension& screenDim)
-	: m_bitmap(new nr::RawColorRGBA[screenDim.width * screenDim.height]), m_name(name), m_screenDim(screenDim), m_pipeline({ 64, 64, 256 }, 8)
+	: m_bitmap(new nr::RawColorRGBA[screenDim.width * screenDim.height]), m_name(name), m_screenDim(screenDim)
 {
 }
 
@@ -84,7 +84,6 @@ nr_status App::draw(const nr::VertexBuffer& vb, const nr::Primitive& type, const
 bool App::initRenderingPipeline()
 {
 	cl_status ret = CL_SUCCESS;
-	
 
 	auto platforms = nr::Platform::getAvailablePlatforms(ret);
 	if (nr::error::isFailure(ret))
@@ -143,7 +142,7 @@ bool App::initRenderingPipeline()
 		return false;
 	}
 
-	m_pipeline.init(m_context, device, m_commandQueue, ret);
+	m_pipeline = nr::Pipeline(m_context, device, m_commandQueue, {64, 64, 255}, 8, ret);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not initialize rendering pipeline: " << nr::utils::stringFromCLError(ret) << '\n';
