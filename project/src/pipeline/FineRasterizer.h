@@ -36,28 +36,22 @@ namespace detail
  * 
  * @note The order of triangles is preserved: if a triangle is earlier in the user input, it will be rendered earlier on the bins it affects
  */
-class FineRasterizer : public StandardDispatch<2, Buffer, Buffer, ScreenDimension, BinQueueConfig, nr_uint, Buffer, Buffer>
+class NRAPI FineRasterizer : public StandardDispatch<2, Buffer, Buffer, ScreenDimension, BinQueueConfig, nr_uint, Buffer, Buffer>
 {
 public:
-/**
+	/**
 	 * @brief Find fine raster kernel in a module and creates accessor to it
 	 * 
 	 * @param module kernel containing module
 	 * @param[out] err internal OpenCL call status
 	 */
-	FineRasterizer(const Module& module, cl_status& err)
-		: StandardDispatch(module, FINE_RASTER_KERNEL_NAME, err)
-	{
-	}
+	FineRasterizer(const Module& module, cl_status& err);
 
 	/**
 	 * @brief Constructs a null fine rasterizer
 	 * 
 	 */
-	FineRasterizer()
-		: StandardDispatch()
-	{
-	}
+	FineRasterizer();
 
 	/**
 	 * @brief set the kernel input buffer
@@ -65,10 +59,7 @@ public:
 	 * @param buffer triangle buffer
 	 * @return internal OpenCL call status
 	 */
-	cl_status setTriangleInputBuffer(const Buffer& in)
-	{
-		return setArg<TRIANGLE_BUFFER>(in);
-	}
+	cl_status setTriangleInputBuffer(const Buffer& in);
 
 	/**
 	 * @brief sets the actual bin queues buffer
@@ -76,10 +67,7 @@ public:
 	 * @param binQueues bin raster queues buffer
 	 * @return internal OpenCL call status
 	 */
-	cl_status setBinQueuesBuffer(const Buffer& queues)
-	{
-		return setArg<BIN_QUEUES_BUFFER>(queues);
-	}
+	cl_status setBinQueuesBuffer(const Buffer& queues);
 
 	/**
 	 * @brief set the target screen dimensions
@@ -87,10 +75,7 @@ public:
 	 * @param screenDim screen dimensions (in pixels)
 	 * @return internal OpenCL call status
 	 */
-	cl_status setScreenDimensions(const ScreenDimension& screenDim)
-	{
-		return setArg<SCREEN_DIMENSION>(screenDim);
-	}
+	cl_status setScreenDimensions(const ScreenDimension& screenDim);
 
 	/**
 	 * @brief set the kernel bin queue config
@@ -99,10 +84,7 @@ public:
 	 * @param config bin queue configuration
 	 * @return internal OpenCL call status
 	 */
-	cl_status setBinQueuesConfig(const BinQueueConfig& config)
-	{
-		return setArg<BIN_QUEUE_CONFIG>(config);
-	}
+	cl_status setBinQueuesConfig(const BinQueueConfig& config);
 
 	/**
 	 * @brief Sets the expected work group amount used at bin rasterization
@@ -111,10 +93,7 @@ public:
 	 * @param workGroupCount bin rasterizer work group count
 	 * @return internal OpenCL call status
 	 */
-	cl_status setBinningWorkGroupCount(const nr_uint workGroupCount)
-	{
-		return setArg<WORK_GROUP_COUNT>(workGroupCount);
-	}
+	cl_status setBinningWorkGroupCount(const nr_uint workGroupCount);
 
 	/**
 	 * @brief sets the colorbuffer target
@@ -122,10 +101,7 @@ public:
 	 * @param color target colorbuffer
 	 * @return internal OpenCL call status
 	 */
-	cl_status setColorBuffer(const Buffer& color)
-	{
-		return setArg<COLOR_BUFFER>(color);
-	}
+	cl_status setColorBuffer(const Buffer& color);
 
 	/**
 	 * @brief sets the depthbuffer target
@@ -133,10 +109,7 @@ public:
 	 * @param depth target colorbuffer
 	 * @return internal OpenCL call status
 	 */
-	cl_status setDepthBuffer(const Buffer& depth)
-	{
-		return setArg<DEPTH_BUFFER>(depth);
-	}
+	cl_status setDepthBuffer(const Buffer& depth);
 
 	/**
 	 * @brief sets the framebuffer (both color and depth buffers)
@@ -146,13 +119,7 @@ public:
 	 * @param frame framebuffer
 	 * @return internal OpenCL call status
 	 */
-	cl_status setFrameBuffer(const FrameBuffer& frame)
-	{
-		cl_status ret = setColorBuffer(frame.color);
-		if (error::isFailure(ret)) return ret;
-
-		return setDepthBuffer(frame.depth);
-	}
+	cl_status setFrameBuffer(const FrameBuffer& frame);
 
 	/**
 	 * @brief calculates the execution range for this stage
@@ -164,12 +131,7 @@ public:
 	 * @param config bin queue configuration
 	 * @param workGroupCount bin rasterizer work group count
 	 */
-	void setExecutionRange(const ScreenDimension& screenDim, const BinQueueConfig& config, const nr_uint workGroupCount)
-	{
-		nr_uint binCountX = static_cast<nr_uint>(std::ceil(static_cast<nr_float>(screenDim.width) / config.binWidth));
-		nr_uint binCountY = static_cast<nr_uint>(std::ceil(static_cast<nr_float>(screenDim.height) / config.binHeight));
-		return setExecutionRange(binCountX, binCountY, workGroupCount);
-	}
+	void setExecutionRange(const ScreenDimension& screenDim, const BinQueueConfig& config, const nr_uint workGroupCount);
 
 	/**
 	 * @brief set the execution range for this stage
@@ -180,23 +142,7 @@ public:
 	 * @param binCountY amount of bins on the Y axis
 	 * @param workGroupCount bin rasterizer work group count
 	 */
-	void setExecutionRange(const nr_uint binCountX, const nr_uint binCountY, const nr_uint workGroupCount)
-	{
-		range.global.x = binCountX;
-		range.global.y = binCountY;
-
-		range.local.x = binCountX;
-		range.local.y = binCountY / workGroupCount;
-	}
-
-private:
-	static constexpr const nr_uint TRIANGLE_BUFFER = 0;
-	static constexpr const nr_uint BIN_QUEUES_BUFFER = 1;
-	static constexpr const nr_uint SCREEN_DIMENSION = 2;
-	static constexpr const nr_uint BIN_QUEUE_CONFIG = 3;
-	static constexpr const nr_uint WORK_GROUP_COUNT = 4;
-	static constexpr const nr_uint COLOR_BUFFER = 5;
-	static constexpr const nr_uint DEPTH_BUFFER = 6;
+	void setExecutionRange(const nr_uint binCountX, const nr_uint binCountY, const nr_uint workGroupCount);
 };
 
 }

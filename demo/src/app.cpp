@@ -28,7 +28,7 @@ bool App::init()
 }
 
 App::App(const nr::string& name, const nr::ScreenDimension& screenDim)
-	: m_bitmap(new nr::RawColorRGBA[screenDim.width * screenDim.height]), m_name(name), m_screenDim(screenDim)
+	: m_bitmap(new nr::RawColorRGBA[screenDim.width * screenDim.height]), m_name(name), m_screenDim(screenDim), m_window(nullptr)
 {
 }
 

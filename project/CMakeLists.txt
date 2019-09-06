@@ -14,7 +14,10 @@ ADD_LIBRARY(Nraster SHARED
 	src/kernels/bin_rasterizer.cl.cpp
 	src/kernels/fine_rasterizer.cl.cpp
 	src/kernels/vertex_reducer.cl.cpp
-
+	
+	src/pipeline/BinRasterizer.cpp
+	src/pipeline/FineRasterizer.cpp
+	src/pipeline/VertexReducer.cpp
 	src/pipeline/Pipeline.cpp
 	src/pipeline/Source.cpp
 

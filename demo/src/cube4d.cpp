@@ -84,7 +84,7 @@ public:
 protected:
 	nr_status update(const nr::CommandQueue& queue) override
 	{
-		const nr_float angle = tick * (2 * M_PI) / divisions;
+		const nr_float angle = static_cast<nr_float>(tick * (2 * M_PI) / divisions);
 
 		transform(angle, m_hostVertecies.get());
 		nr_status ret = queue.enqueueBufferWriteCommand(m_vertecies, false, 12, m_hostVertecies.get());
@@ -140,6 +140,7 @@ public:
 
 	StaticCubeApp(const nr_uint tick, const nr_uint divisions)
 		: StaticCubeApp(tick * 2 * M_PI / divisions)
+
 	{
 	}
 
@@ -159,7 +160,7 @@ protected:
 
 		if (isKeyPressed(GLFW_KEY_D))
 		{
-			std::cout << "Angle: " << 180 * angle / nr_float(M_PI) << " (deg)" << std::endl;
+			std::cout << "Angle: " << 180 * angle / M_PI << " (deg)" << std::endl;
 		}
 
 		return CL_SUCCESS;
@@ -244,9 +245,9 @@ protected:
 	}
 private:
 	static constexpr nr_float DELTA_ANGLE = 2 * M_PI / 40;
-	static constexpr nr_float DELTA_X = 0.3;
-	static constexpr nr_float DELTA_Y = 0.3;
-	static constexpr nr_float DELTA_Z = 0.3;
+	static constexpr nr_float DELTA_X = 0.3f;
+	static constexpr nr_float DELTA_Y = 0.3f;
+	static constexpr nr_float DELTA_Z = 0.3f;
 
 	nr_status draw(const nr::CommandQueue& queue)
 	{

@@ -15,6 +15,11 @@
 #include "../base/Kernel.h"
 #include "../base/Module.h"
 
+#ifdef _DEBUG
+#include <functional>
+#include <iostream>
+#endif
+
 namespace nr
 {
 

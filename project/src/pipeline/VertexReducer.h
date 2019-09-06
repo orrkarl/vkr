@@ -38,7 +38,7 @@ namespace detail
  * 
  * @note As of right now, no clipping is done at all - but this will change soon
  */
-class VertexReducer : public StandardDispatch<1, Buffer, Buffer, Buffer, Buffer>
+class NRAPI VertexReducer : public StandardDispatch<1, Buffer, Buffer, Buffer, Buffer>
 {
 public:
 	/**
@@ -47,15 +47,9 @@ public:
 	 * @param module kernel containing module
 	 * @param[out] err internal OpenCL call status
 	 */
-	VertexReducer(const Module& module, cl_status& err)
-		: StandardDispatch(module, VERTEX_REDUCE_KERNEL_NAME, err)
-	{
-	}
+	VertexReducer(const Module& module, cl_status& err);
 
-	VertexReducer()
-		: StandardDispatch()
-	{
-	}
+	VertexReducer();
 
 	/**
 	 * @brief Set the kernel expected input buffer
@@ -64,10 +58,7 @@ public:
 	 * @param in data buffer
 	 * @return cl_status internal OpenCL call status
 	 */
-	cl_status setSimplexInputBuffer(const Buffer& in)
-	{
-		return setArg<INPUT_BUFFER>(in);
-	}
+	cl_status setSimplexInputBuffer(const Buffer& in);
 
 	/**
 	 * @brief Set the perspective near plane
@@ -77,10 +68,7 @@ public:
 	 * @param near perspective near plane
 	 * @return cl_status internal OpenCL call status
 	 */
-	cl_status setNearPlaneBuffer(const Buffer& near)
-	{
-		return setArg<NEAR_PLANE_BUFFER>(near);
-	}
+	cl_status setNearPlaneBuffer(const Buffer& near);
 
 	/**
 	 * @brief Set the perspective far plane
@@ -90,10 +78,7 @@ public:
 	 * @param far perspective far plane
 	 * @return cl_status internal OpenCL call status
 	 */
-	cl_status setFarPlaneBuffer(const Buffer& far)
-	{
-		return setArg<FAR_PLANE_BUFFER>(far);
-	}
+	cl_status setFarPlaneBuffer(const Buffer& far);
 
 	/**
 	 * @brief Set the simplex output buffer
@@ -102,10 +87,7 @@ public:
 	 * @param out simplex target buffer
 	 * @return cl_status internal OpenCL call status
 	 */
-	cl_status setSimplexOutputBuffer(const Buffer& out)
-	{
-		return setArg<OUTPUT_BUFFER>(out);
-	}
+	cl_status setSimplexOutputBuffer(const Buffer& out);
 
 	/**
 	 * @brief Set the execution range
@@ -114,19 +96,9 @@ public:
 	 * , with length the same as the vertex count
 	 * @param vertexCount vertex count in batch
 	 */
-	void setExecutionRange(const nr_uint vertexCount)
-	{
-		range.global.x = vertexCount;
-		range.local.x = 1;
-	}
+	void setExecutionRange(const nr_uint vertexCount);
 
 	using TypesafeKernel::operator cl_kernel;
-
-private:
-	static constexpr const nr_uint INPUT_BUFFER = 0;
-	static constexpr const nr_uint NEAR_PLANE_BUFFER = 1;
-	static constexpr const nr_uint FAR_PLANE_BUFFER = 2;
-	static constexpr const nr_uint OUTPUT_BUFFER = 3;
 };
 
 }

@@ -128,8 +128,7 @@ string Module::finalizeOptions(const Options& options)
     {
         ret += " " + it->getOption();
     }
-	ret += " -D RENDER_DIMENSION=3";
-	
+
 	return ret;    
 }
 

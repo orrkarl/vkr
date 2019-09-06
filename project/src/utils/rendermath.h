@@ -23,16 +23,6 @@ namespace detail
 {
 
 /**
- * @brief Counts how many triangles are there for K simplices in N dimensional space
- * 
- * Returns K * (N choose 3)
- * @param dim space dimension
- * @param simplexCount simplices count
- * @return triangle count 
- */
-NRAPI nr_uint triangleCount(const nr_uint dim, const nr_uint simplexCount);
-
-/**
  * @brief Finds amount of raster bins of given size in given viewport
  * 
  * @param screenDim viewport size

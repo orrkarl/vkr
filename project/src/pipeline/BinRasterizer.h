@@ -44,7 +44,7 @@ namespace detail
  * 
  * @note The order of triangles in every bin queue is preserved (triangles earlier in the user input will come earlier in the queue)
  */
-class BinRasterizer : public StandardDispatch<2, Buffer, nr_uint, ScreenDimension, BinQueueConfig, Buffer, Buffer, Buffer>
+class NRAPI BinRasterizer : public StandardDispatch<2, Buffer, nr_uint, ScreenDimension, BinQueueConfig, Buffer, Buffer, Buffer>
 {
 public:
 	/**
@@ -53,19 +53,13 @@ public:
 	 * @param module kernel containing module
 	 * @param[out] err internal OpenCL call status
 	 */
-	BinRasterizer(const Module& module, cl_status& err)
-		: StandardDispatch(module, BIN_RASTER_KERNEL_NAME, err)
-	{
-	}
+	BinRasterizer(const Module& module, cl_status& err);
 
 	/**
 	 * @brief Constructs a null bin rasterizer
 	 * 
 	 */
-	BinRasterizer()
-		: StandardDispatch()
-	{
-	}
+	BinRasterizer();
 
 	/**
 	 * @brief set the kernel input buffer
@@ -73,10 +67,7 @@ public:
 	 * @param buffer triangle buffer
 	 * @return internal OpenCL call status
 	 */
-	cl_status setTriangleInputBuffer(const Buffer& buffer)
-	{
-		return setArg<TRIANGLE_BUFFER>(buffer);
-	}
+	cl_status setTriangleInputBuffer(const Buffer& buffer);
 
 	/**
 	 * @brief set the triangle count
@@ -85,10 +76,7 @@ public:
 	 * @param count rendered triangle count
 	 * @return internal OpenCL call status
 	 */
-	cl_status setTriangleCount(const nr_uint count)
-	{
-		return setArg<TRIANGLE_COUNT>(count);
-	}
+	cl_status setTriangleCount(const nr_uint count);
 
 	/**
 	 * @brief set the target screen dimensions
@@ -96,10 +84,7 @@ public:
 	 * @param screenDim screen dimensions (in pixels)
 	 * @return internal OpenCL call status
 	 */
-	cl_status setScreenDimension(const ScreenDimension& screenDim)
-	{
-		return setArg<SCREEN_DIMENSION>(screenDim);
-	}
+	cl_status setScreenDimension(const ScreenDimension& screenDim);
 
 	/**
 	 * @brief set the kernel bin queue config
@@ -108,10 +93,7 @@ public:
 	 * @param config bin queue configuration
 	 * @return internal OpenCL call status
 	 */
-	cl_status setBinQueueConfig(const BinQueueConfig& config)
-	{
-		return setArg<BIN_QUEUE_CONFIG>(config);
-	}
+	cl_status setBinQueueConfig(const BinQueueConfig& config);
 
 	/**
 	 * @brief set the overflow notifier
@@ -120,10 +102,7 @@ public:
 	 * @param overflow overflow detection buffer
 	 * @return internal OpenCL call status
 	 */
-	cl_status setOvereflowNotifier(const Buffer& overflow)
-	{
-		return setArg<OVERFLOW_BUFFER>(overflow);
-	}
+	cl_status setOvereflowNotifier(const Buffer& overflow);
 
 	/**
 	 * @brief sets the actual bin queues buffer
@@ -131,10 +110,7 @@ public:
 	 * @param binQueues bin raster queues buffer
 	 * @return internal OpenCL call status
 	 */
-	cl_status setBinQueuesBuffer(const Buffer& binQueues)
-	{
-		return setArg<BIN_QUEUES_BUFFER>(binQueues);
-	}
+	cl_status setBinQueuesBuffer(const Buffer& binQueues);
 
 	/**
 	 * @brief sets the batch index buffer
@@ -144,56 +120,31 @@ public:
 	 * @param batchIndex batch index buffer
 	 * @return internal OpenCL call status
 	 */
-	cl_status setGlobalBatchIndex(const Buffer& batchIndex)
-	{
-		return setArg<BATCH_INDEX>(batchIndex);
-	}
+	cl_status setGlobalBatchIndex(const Buffer& batchIndex);
 
 	/**
 	 * @brief calculates the execution range for this stage
-	 * 
+	 *
 	 * @note this function will raise no erros; an invalid dimension will only raise errors when enqueueing to the command queue
 	 * @see setExecutionRange(const nr_uint, const nr_uint, const nr_uint)
-	 * 
+	 *
 	 * @param screenDim target screen size
 	 * @param config bin queue configuration
 	 * @param workGroupCount count of parallel work groups
 	 */
-	void setExecutionRange(const ScreenDimension& screenDim, const BinQueueConfig& config, const nr_uint workGroupCount)
-	{
-		nr_uint binCountX = static_cast<nr_uint>(std::ceil(static_cast<nr_float>(screenDim.width) / config.binWidth));
-		nr_uint binCountY = static_cast<nr_uint>(std::ceil(static_cast<nr_float>(screenDim.height) / config.binHeight));
-		return setExecutionRange(binCountX, binCountY, workGroupCount);
-	}
+	void setExecutionRange(const ScreenDimension& screenDim, const BinQueueConfig& config, const nr_uint workGroupCount);
 
 	/**
 	 * @brief set the execution range for this stage
-	 * 
+	 *
 	 * @note this function will raise no erros; an invalid dimension will only raise errors when enqueueing to the command queue
-	 * 
+	 *
 	 * @param binCountX amount of bins on the X axis
 	 * @param binCountY amount of bins on the Y axis
 	 * @param workGroupCount count of parallel work groups
 	 */
-	void setExecutionRange(const nr_uint binCountX, const nr_uint binCountY, const nr_uint workGroupCount)
-	{
-		range.global.x = workGroupCount * binCountX;
-		range.global.y = binCountY;
-
-		range.local.x = binCountX;
-		range.local.y = binCountY;
-	}
-
-private:
-	static constexpr const nr_uint TRIANGLE_BUFFER = 0;
-	static constexpr const nr_uint TRIANGLE_COUNT = 1;
-	static constexpr const nr_uint SCREEN_DIMENSION = 2;
-	static constexpr const nr_uint BIN_QUEUE_CONFIG = 3;
-	static constexpr const nr_uint OVERFLOW_BUFFER = 4;
-	static constexpr const nr_uint BIN_QUEUES_BUFFER = 5;
-	static constexpr const nr_uint BATCH_INDEX = 6;
+	void setExecutionRange(const nr_uint binCountX, const nr_uint binCountY, const nr_uint workGroupCount);
 };
-
 
 }
 

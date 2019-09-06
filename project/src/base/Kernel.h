@@ -174,15 +174,28 @@ protected:
 #endif
 
 public:
-    /**
-     * @brief Construct a Typesafe kernel
-     * 
-     * @note delegates to Kernel::Kernel(const Module& module, const char* name, cl_status& err)
-     * @param module OpenCL module containing the kernel
-     * @param name kernel name in the module
-     * @param err internal OpenCL call status
-     */
+	/**
+	 * @brief Construct a Typesafe kernel
+	 *
+	 * @note delegates to Kernel::Kernel(const Module& module, const char* name, cl_status& err)
+	 * @param module OpenCL module containing the kernel
+	 * @param name kernel name in the module
+	 * @param err internal OpenCL call status
+	 */
 	TypesafeKernel(const Module& module, const char* name, cl_status& err)
+		: Kernel(module, name, err)
+	{
+	}
+
+	/**
+	 * @brief Construct a Typesafe kernel
+	 *
+	 * @note delegates to Kernel::Kernel(const Module& module, const char* name, cl_status& err)
+	 * @param module OpenCL module containing the kernel
+	 * @param name kernel name in the module
+	 * @param err internal OpenCL call status
+	 */
+	TypesafeKernel(const Module& module, const string& name, cl_status& err)
 		: Kernel(module, name, err)
 	{
 	}
