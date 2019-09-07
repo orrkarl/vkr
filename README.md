@@ -1,1 +1,1 @@
-Just your friendly neighborhood N-dimensional rasterizer
+An implementation of the rasterization process, based on OpenCL
