@@ -161,8 +161,9 @@ kernel void bin_rasterize(
     if (is_init_manager)
     {
         current_batch_index = get_group_id(0) * BATCH_COUNT;
-		bin_queues[bin_queue_base] = 1;
     }
+
+	bin_queues[bin_queue_base] = 1;
 
     // wait for LOCAL batch index initialization
     barrier(CLK_LOCAL_MEM_FENCE);
@@ -218,6 +219,10 @@ kernel void bin_rasterize(
 
         if (current_queue_index != bin_queue_base + 1 + config.queue_size)
         {
+			if (current_queue_index > bin_queue_base + 1)
+			{
+				REPORT_GLOBAL1("queue finished: %d\n", current_queue_index - bin_queue_base - 1);
+			}
             // Queue is finished
             bin_queues[current_queue_index] = 0;
         }

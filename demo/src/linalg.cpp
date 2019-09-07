@@ -93,6 +93,11 @@ Vector Matrix::operator*(const Vector& other) const
     return ret;
 }
 
+Vector Matrix::operator[](const Axis& axis) const
+{
+	return Vector(data[axis][0], data[axis][1], data[axis][2], data[axis][3]);
+}
+
 Matrix Matrix::rotation(const Axis source, const Axis dest, const nr_float radians)
 {
     Matrix ret = Matrix::identity();

@@ -15,7 +15,7 @@ struct Vector
 
 	Vector(nr_float x, nr_float y, nr_float z, nr_float w);
 	Vector(nr_float x, nr_float y, nr_float z);
-    explicit Vector();
+    Vector();
 
     nr_float& operator[](const Axis axis);
     const nr_float& operator[](const Axis axis) const;
@@ -52,6 +52,8 @@ struct Matrix
     Matrix& operator+=(const Matrix& other);
 
     Vector operator*(const Vector& vec) const;
+
+	Vector operator[](const Axis& axis) const;
 
     static Matrix rotation(const Axis source, const Axis dest, const nr_float radians);
     static Matrix scale(const nr_float s);

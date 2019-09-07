@@ -40,6 +40,8 @@ kernel void shade_vertex(
 	result[index].z = normalize_range(points[index].z, near.z, far.z);
     result[index].y = perspective_bounded_axis(points[index].y, points[index].z, near.y, far.y);
     result[index].x = perspective_bounded_axis(aspect_ratio * points[index].x, points[index].z, near.x, far.x);
+
+	REPORT_GLOBAL1("%v3f\n", result[index]);
 }
 
 )__CODE__";

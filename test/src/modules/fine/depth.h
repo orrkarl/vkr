@@ -89,5 +89,6 @@ TEST(Fine, Depth)
     ASSERT_SUCCESS(q.enqueueDispatchCommand(testee));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.color, false, 1, cBuffer.get()));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(frame.depth, false, 1, dBuffer.get()));
+	ASSERT_SUCCESS(q.finish());
     ASSERT_TRUE((validateDepth<screenDim.width, screenDim.height>(h_depthBuffer, defaultDepth, expectedDepth)));
 }

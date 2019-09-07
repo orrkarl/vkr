@@ -73,7 +73,7 @@ bool is_point_in_triangle(const NDCPosition p0, const NDCPosition p1, const NDCP
 
 bool is_queue_ended(global const Index* triangle_queue, uint queue_head_idx, uint queue_size)
 {
-    return queue_head_idx < queue_size && (triangle_queue[queue_head_idx] || !queue_head_idx);
+    return queue_head_idx >= queue_size || (!triangle_queue[queue_head_idx] && queue_head_idx);
 }
 
 // Pick the next non-empty bin queue
@@ -83,7 +83,7 @@ uint pick_queue(global const Index** triangle_queues, uint* current_queue_heads,
 
     for (uint i = 0; i < work_group_count; ++i)
     {
-        if (is_queue_ended(triangle_queues[i], current_queue_heads[i], queue_size))
+        if (!is_queue_ended(triangle_queues[i], current_queue_heads[i], queue_size))
         {
             if (current_queue == work_group_count)
             {
@@ -160,7 +160,7 @@ kernel void fine_rasterize(
         }
         
         current_queue_element = current_queue_bases[current_queue][current_queue_elements[current_queue]];
-		
+
 		p0.x = triangle_data[current_queue_element].p0.x;
 		p0.y = triangle_data[current_queue_element].p0.y;
 
@@ -180,7 +180,6 @@ kernel void fine_rasterize(
                 pixel_mid_point_from_screen(current_frag.position, screen_dim, &current_position_ndc); 
 				
                 barycentric2d(p0, p1, p2, current_position_ndc, &barycentric);
-
                 if (is_point_in_triangle(p0, p1, p2, barycentric))
                 {
                     current_frag.depth = depth_at_point(triangle_data[current_queue_element], barycentric);
