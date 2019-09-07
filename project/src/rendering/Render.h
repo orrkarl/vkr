@@ -84,6 +84,16 @@ struct Vertex
 {
     nr_float values[4];
 
+	Vertex()
+		: values{ 0 }
+	{
+	}
+
+	Vertex(const nr_float x, const nr_float y, const nr_float z)
+		: values{x, y, z, 1}
+	{
+	}
+
 	bool operator==(const Vertex& other) const
 	{
 		for (auto i = 0; i < 4; ++i)

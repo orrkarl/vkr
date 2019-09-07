@@ -6,7 +6,7 @@
 nr::Triangle h_triangle
 {
 	nr::Vertex{ -5, -2.5,   3 },
-	nr::Vertex{  0,	  5, 2.5 },
+	nr::Vertex{  0,	  5,  2.5 },
 	nr::Vertex{  5, -2.5,   2 }
 };
 
@@ -166,13 +166,13 @@ int main(const int argc, const char* argv[])
 	p.setClearColor({ 0, 0, 0, 0 });
 	p.setClearDepth(1.0f);
 
-	ret = p.setNearPlane(h_near);
+	ret = p.setNearPlane(h_near[0], h_near[1], h_near[2]);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not set near plane! " << nr::utils::stringFromCLError(ret) << std::endl;
 		return ret;
 	}
-	ret = p.setFarPlane(h_far);
+	ret = p.setFarPlane(h_far[0], h_far[1], h_far[2]);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not set far plane! " << nr::utils::stringFromCLError(ret) << std::endl;

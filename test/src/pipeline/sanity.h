@@ -48,10 +48,10 @@ TEST(Pipeline, Sanity)
 	p.setClearColor({ 0, 0, 0, 0 });
 	p.setClearDepth(1.0f);
 
-	ret = p.setNearPlane(h_near);
+	ret = p.setNearPlane(h_near[0], h_near[1], h_near[2]);
 	ASSERT_SUCCESS(ret);
 
-	ret = p.setFarPlane(h_far);
+	ret = p.setFarPlane(h_far[0], h_far[1], h_far[2]);
 	ASSERT_SUCCESS(ret);
 
 	ret = p.clear();

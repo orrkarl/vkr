@@ -31,15 +31,15 @@ float perspective_bounded_axis(
 // vertex shader "main" function. Applies all of the perspective steps to a vector.
 kernel void shade_vertex(
     const global point_t* points, 
-    const global float near[3], const global float far[3],
+    const float3 near, const float3 far, const float aspect_ratio,
     global point_t* result)
 {
     const uint index = get_global_id(0);
      
 	result[index].w = points[index].w;
-	result[index].z = normalize_range(points[index].z, near[2], far[2]);
-    result[index].y = perspective_bounded_axis(points[index].y, points[index].z, near[1], far[1]);
-    result[index].x = perspective_bounded_axis(points[index].x, points[index].z, near[0], far[0]);
+	result[index].z = normalize_range(points[index].z, near.z, far.z);
+    result[index].y = perspective_bounded_axis(points[index].y, points[index].z, near.y, far.y);
+    result[index].x = perspective_bounded_axis(aspect_ratio * points[index].x, points[index].z, near.x, far.x);
 }
 
 )__CODE__";

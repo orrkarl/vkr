@@ -100,7 +100,7 @@ public:
 	 * @param near perspective near buffer
 	 * @return cl_status internal OpenCL call status
 	 */
-	cl_status setNearPlane(const nr_float* near) const;
+	cl_status setNearPlane(const nr_float x, const nr_float y, const nr_float z);
 
 	/**
 	 * @brief Sets the perspective far plane
@@ -109,7 +109,7 @@ public:
 	 * @param far perspective far buffer
 	 * @return cl_status internal OpenCL call status
 	 */
-	cl_status setFarPlane(const nr_float* far) const;
+	cl_status setFarPlane(const nr_float x, const nr_float y, const nr_float z);
 
 	/**
 	 * @brief Enqueues a render command
@@ -151,11 +151,9 @@ private:
 	RawColorRGBA			m_clearColor;
 	Depth					m_clearDepth;
 	CommandQueue			m_commandQueue;
-	Buffer					m_farPlane;
 	Buffer					m_globalBatchIndex;
 	detail::FineRasterizer	m_fineRaster;
 	FrameBuffer				m_frame;
-	Buffer					m_nearPlane;
 	Buffer					m_overflowNotifier;
 	ScreenDimension			m_screenDimension;
 	detail::VertexReducer	m_vertexReduce;

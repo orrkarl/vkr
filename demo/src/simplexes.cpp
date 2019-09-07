@@ -83,10 +83,10 @@ protected:
 		m_d_simplices = nr::VertexBuffer::make(renderContext, 48, ret);
 		if (nr::error::isFailure(ret)) return ret;
 
-		ret = pipeline.setFarPlane(h_far);
+		ret = pipeline.setFarPlane(h_far[0], h_far[1], h_far[2]);
 		if (nr::error::isFailure(ret)) return ret;
 
-		ret = pipeline.setNearPlane(h_near);
+		ret = pipeline.setNearPlane(h_near[0], h_near[1], h_near[2]);
 		if (nr::error::isFailure(ret)) return ret;
 
 		pipeline.setClearColor({ 0, 0, 0, 0 });

@@ -14,6 +14,7 @@
 
 #include "../kernels/vertex_reducer.cl.h"
 #include "../utils/StandardDispatch.h"
+#include "../rendering/Render.h"
 
 namespace nr
 {
@@ -30,7 +31,7 @@ namespace detail
  * @par
  * As of right now, this stage runs repeating perspective projections on each dimension.
  * @par
- * This stage takes 4 inputs: the vertex input buffer, the perspective near and far planes and an output target buffer.
+ * This stage takes 5 inputs: the vertex input buffer, the perspective near and far planes, an aspect ratio and an output target buffer.
  * It executes naively - each vertex gets it's own work item to process.
  * Each simplex will be copied to the target buffer and it's vertecies will be reduced; simplex order in the input buffer is preserved.
  * @par
@@ -38,7 +39,7 @@ namespace detail
  * 
  * @note As of right now, no clipping is done at all - but this will change soon
  */
-class NRAPI VertexReducer : public StandardDispatch<1, Buffer, Buffer, Buffer, Buffer>
+class NRAPI VertexReducer : public StandardDispatch<1, Buffer, cl_float3, cl_float3, nr_float, Buffer>
 {
 public:
 	/**
@@ -56,7 +57,7 @@ public:
 	 * 
 	 * The buffer is expected to contain plain simplexes: N points of homogenous N dimension (N + 1 coordinates)
 	 * @param in data buffer
-	 * @return cl_status internal OpenCL call status
+	 * @return internal OpenCL call status
 	 */
 	cl_status setSimplexInputBuffer(const Buffer& in);
 
@@ -66,9 +67,9 @@ public:
 	 * The buffer is expected to contain N elements (N floats each).
 	 * Each element specifices the lower bound of the repeating perspective projections at it's coordinate
 	 * @param near perspective near plane
-	 * @return cl_status internal OpenCL call status
+	 * @return internal OpenCL call status
 	 */
-	cl_status setNearPlaneBuffer(const Buffer& near);
+	cl_status setNearPlane(const cl_float3& near);
 
 	/**
 	 * @brief Set the perspective far plane
@@ -76,16 +77,24 @@ public:
 	 * The buffer is expected to contain N elements (N floats each).
 	 * Each element specifices the upper bound of the repeating perspective projections at it's coordinate
 	 * @param far perspective far plane
-	 * @return cl_status internal OpenCL call status
+	 * @return internal OpenCL call status
 	 */
-	cl_status setFarPlaneBuffer(const Buffer& far);
+	cl_status setFarPlane(const cl_float3& far);
+
+	/**
+	 * @brief sets the perspective aspect ratio
+	 * 
+	 * @param screenDim the current viewport dimensions
+	 * @return internal OpenCL call status
+	 */
+	cl_status setAspectRatio(const ScreenDimension& screenDim);
 
 	/**
 	 * @brief Set the simplex output buffer
 	 * 
 	 * Sets the target buffer for this stage
 	 * @param out simplex target buffer
-	 * @return cl_status internal OpenCL call status
+	 * @return internal OpenCL call status
 	 */
 	cl_status setSimplexOutputBuffer(const Buffer& out);
 

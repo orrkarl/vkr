@@ -42,17 +42,7 @@ Pipeline::Pipeline(const Context& context, const Device& device, const CommandQu
 
 	m_vertexReduce = src.vertexReducer(err);
 	if (error::isFailure(err)) return;
-
-	m_nearPlane = Buffer::make<nr_float>(context, CL_MEM_READ_WRITE, 3, err);
-	if (error::isFailure(err)) return;
-	m_farPlane = Buffer::make<nr_float>(context, CL_MEM_READ_WRITE, 3, err);
-	if (error::isFailure(err)) return;
-
-	err = m_vertexReduce.setNearPlaneBuffer(m_nearPlane);
-	if (error::isFailure(err)) return;
-	err = m_vertexReduce.setFarPlaneBuffer(m_farPlane);
-	if (error::isFailure(err)) return;
-
+	
 	err = m_binRaster.setBinQueueConfig(m_binQueueConfig);
 	if (error::isFailure(err)) return;
 	err = m_binRaster.setGlobalBatchIndex(m_globalBatchIndex);
@@ -101,7 +91,9 @@ cl_status Pipeline::viewport(const ScreenDimension& screenDim)
 
 	m_screenDimension = screenDim;
 
-	auto ret = m_binRaster.setScreenDimension(screenDim);
+	auto ret = m_vertexReduce.setAspectRatio(screenDim);
+	if (error::isFailure(ret)) return ret;
+	ret = m_binRaster.setScreenDimension(screenDim);
 	if (error::isFailure(ret)) return ret;
 	return m_fineRaster.setScreenDimensions(screenDim);
 }
@@ -147,14 +139,14 @@ cl_status Pipeline::clearColorBuffer() const
 	return m_commandQueue.enqueueBufferFillCommand<RawColorRGBA>(m_frame.color, m_clearColor, m_screenDimension.getTotalSize());
 }
 
-cl_status Pipeline::setNearPlane(const nr_float* near) const
+cl_status Pipeline::setNearPlane(const nr_float x, const nr_float y, const nr_float z)
 {
-	return m_commandQueue.enqueueBufferWriteCommand(m_nearPlane, false, 3, near);
+	return m_vertexReduce.setNearPlane({x, y, z});
 }
 
-cl_status Pipeline::setFarPlane(const nr_float* far) const
+cl_status Pipeline::setFarPlane(const nr_float x, const nr_float y, const nr_float z)
 {
-	return m_commandQueue.enqueueBufferWriteCommand(m_farPlane, false, 3, far);
+	return m_vertexReduce.setFarPlane({ x, y, z });
 }
 
 cl_status Pipeline::render(const VertexBuffer& primitives, const Primitive& primitiveType, const nr_uint primitiveCount)
