@@ -23,11 +23,6 @@ extern const char* bin_rasterizer = R"__CODE__(
 
 // -------------------------------------- Utilities --------------------------------------
 
-// Deprecated
-bool is_point_in_bin(const uint x, const uint y, const Bin bin)
-{
-    return bin.x <= x && x < bin.x + bin.width && bin.y <= y && y < bin.y + bin.height; 
-}
 
 // Finds the minimum of 3 values
 float min3(const float a, const float b, const float c)

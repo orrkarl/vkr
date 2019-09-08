@@ -27,6 +27,8 @@ protected:
 
 	bool isKeyPressed(int key);
 
+	const nr::ScreenDimension& getScreenDimension() const;
+
 private:
 	void destroy();
 	bool initRenderingPipeline();

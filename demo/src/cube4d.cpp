@@ -68,8 +68,10 @@ protected:
 
 		nr_float h_far[]
 		{
-			5, 5, 10
+			5, 5, 5
 		};
+
+		auto ar = static_cast<nr_float>(getScreenDimension().height) / getScreenDimension().width;
 
 		m_vertecies = nr::VertexBuffer::make(renderContext, 12, ret);
 		if (nr::error::isFailure(ret)) return ret;
@@ -82,7 +84,7 @@ protected:
 
 		pipeline.setClearColor({ 0, 0, 0, 0 });
 		pipeline.setClearDepth(1.0f);
-
+		
 		return ret;
 	}
 

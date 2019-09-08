@@ -203,6 +203,11 @@ bool App::isKeyPressed(int key)
 	return glfwGetKey(m_window, key) == GLFW_PRESS;
 }
 
+const nr::ScreenDimension& App::getScreenDimension() const
+{
+	return m_screenDim;
+}
+
 void App::loop(cl_status& err)
 {
 	while (!glfwWindowShouldClose(m_window))
