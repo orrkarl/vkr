@@ -178,8 +178,9 @@ kernel void fine_rasterize(
                 current_frag.position.y = frag_y;
                 
                 pixel_mid_point_from_screen(current_frag.position, screen_dim, &current_position_ndc); 
-				
+
                 barycentric2d(p0, p1, p2, current_position_ndc, &barycentric);
+
                 if (is_point_in_triangle(p0, p1, p2, barycentric))
                 {
                     current_frag.depth = depth_at_point(triangle_data[current_queue_element], barycentric);

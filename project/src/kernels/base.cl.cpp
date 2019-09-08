@@ -228,6 +228,7 @@ void screen_from_signed(const SignedScreenPosition pos, const ScreenDimension di
 #define REPORT_GLOBAL4(msg, arg1, arg2, arg3, arg4)                     DEBUG_MESSAGE6("[%d, %d] -> " msg, get_global_id(0), get_global_id(1), arg1, arg2, arg3, arg4)
 #define REPORT_GLOBAL5(msg, arg1, arg2, arg3, arg4, arg5)               DEBUG_MESSAGE7("[%d, %d] -> " msg, get_global_id(0), get_global_id(1), arg1, arg2, arg3, arg4, arg5)
 #define REPORT_GLOBAL6(msg, arg1, arg2, arg3, arg4, arg5, arg6)         DEBUG_MESSAGE8("[%d, %d] -> " msg, get_global_id(0), get_global_id(1), arg1, arg2, arg3, arg4, arg5, arg6)
+#define REPORT_GLOBAL7(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7)   DEBUG_MESSAGE9("[%d, %d] -> " msg, get_global_id(0), get_global_id(1), arg1, arg2, arg3, arg4, arg5, arg6, arg7)
 
 #define DEBUG_ITEM_SPECIFIC(i, j, k, msg) DEBUG(if (IS_WORK_ITEM_GLOBAL(i, j, k)) { printf(msg); } else {})
 #define DEBUG_ITEM_SPECIFIC1(i, j, k, msg, arg1) DEBUG(if (IS_WORK_ITEM_GLOBAL(i, j, k)) { printf(msg, arg1); } else {})

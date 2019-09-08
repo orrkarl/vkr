@@ -47,20 +47,6 @@ float4 mk_triangle_bounding_rect(const local float x[3], const local float y[3])
     return (float4)(min3(x[0], x[1], x[2]), min3(y[0], y[1], y[2]), max3(x[0], x[1], x[2]), max3(y[0], y[1], y[2]));
 }
 
-bool is_point_in_bounds(const float2 p, const float4 bounds)
-{
-    const float2 b_min = bounds.xy;
-    const float2 b_max = bounds.zw;
-    return b_min.x <= p.x && p.x <= b_max.x && b_min.y <= p.y && p.y <= b_max.y;
-}
-
-bool is_rect_intersecting_bounds(const float4 rect, const float4 bounds)
-{
-    return is_point_in_bounds(rect.xy, bounds) ||
-           is_point_in_bounds(rect.xw, bounds) ||
-           is_point_in_bounds(rect.zy, bounds) ||
-           is_point_in_bounds(rect.zw, bounds);
-}
 
 // Calculates triangle bounding box, than checkes it it has any intersection with the bin
 bool is_triangle_in_bin(const local float x[3], const local float y[3], const Bin bin, const ScreenDimension dim)
@@ -69,8 +55,7 @@ bool is_triangle_in_bin(const local float x[3], const local float y[3], const Bi
     float4 bin_bounds = (float4)(
         axis_ndc_from_screen(bin.x, dim.width), axis_ndc_from_screen(bin.y, dim.height),
         axis_ndc_from_screen(bin.x + bin.width, dim.width), axis_ndc_from_screen(bin.y + bin.height, dim.height));   
-    
-    return is_rect_intersecting_bounds(triangle_bounds, bin_bounds) || is_rect_intersecting_bounds(bin_bounds, triangle_bounds);
+    return bin_bounds.x <= triangle_bounds.z && triangle_bounds.x <= bin_bounds.z && bin_bounds.y <= triangle_bounds.w && triangle_bounds.y <= bin_bounds.w;
 }
 
 Bin make_bin(const ScreenDimension dim, const uint index_x, const uint index_y, const uint bin_width, const uint bin_height)
@@ -219,10 +204,6 @@ kernel void bin_rasterize(
 
         if (current_queue_index != bin_queue_base + 1 + config.queue_size)
         {
-			if (current_queue_index > bin_queue_base + 1)
-			{
-				REPORT_GLOBAL1("queue finished: %d\n", current_queue_index - bin_queue_base - 1);
-			}
             // Queue is finished
             bin_queues[current_queue_index] = 0;
         }
