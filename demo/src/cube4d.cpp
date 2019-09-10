@@ -68,7 +68,7 @@ protected:
 
 		nr_float h_far[]
 		{
-			5, 5, 5
+			5, 5, 100
 		};
 
 		auto ar = static_cast<nr_float>(getScreenDimension().height) / getScreenDimension().width;
@@ -103,17 +103,12 @@ protected:
 			m_hostVertecies[i].points[1] = mat * h_cube[3 * i + 1];
 			m_hostVertecies[i].points[2] = mat * h_cube[3 * i + 2];
 		}
-
-		if (isKeyPressed(GLFW_KEY_ENTER))
-		{
-			std::cout << mat[X][W] << ", " << mat[Y][W] << ", " << mat[Z][W] << '\n';
-		}
 	}
 
 	void transform(const nr_float angle)
 	{
 		Matrix r = Matrix::rotation(Y, Z, angle);
-		Matrix t = Matrix::translation(8.1, 3.6, 3);
+		Matrix t = Matrix::translation(25, 3.6, 7);
 		transform(t * r);
 	}
 
@@ -244,7 +239,7 @@ int main(const int argc, const char* argv[])
 {
 	if (!App::init()) return EXIT_FAILURE;
 
-	auto app = DynamicCubeApp();
+	auto app = StaticCubeApp();
 	auto ret = app.run();
 
 	App::deinit();

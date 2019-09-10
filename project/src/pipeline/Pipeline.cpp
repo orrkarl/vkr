@@ -91,9 +91,7 @@ cl_status Pipeline::viewport(const ScreenDimension& screenDim)
 
 	m_screenDimension = screenDim;
 
-	auto ret = m_vertexReduce.setAspectRatio(screenDim);
-	if (error::isFailure(ret)) return ret;
-	ret = m_binRaster.setScreenDimension(screenDim);
+	auto ret = m_binRaster.setScreenDimension(screenDim);
 	if (error::isFailure(ret)) return ret;
 	return m_fineRaster.setScreenDimensions(screenDim);
 }

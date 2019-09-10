@@ -32,7 +32,6 @@ float perspective_bounded_axis(
 kernel void shade_vertex(
     const global point_t* points, 
     const float3 near, const float3 far,
-    const float aspect_ratio,
     global point_t* result)
 {
     const uint index = get_global_id(0);
@@ -41,6 +40,7 @@ kernel void shade_vertex(
 	result[index].z = normalize_range(points[index].z, near.z, far.z);
     result[index].y = 2 * (near.z * points[index].y / points[index].z - near.y) / (far.y - near.y) - 1;
     result[index].x = 2 * (near.z * points[index].x / points[index].z - near.x) / (far.x - near.x) - 1;
+	REPORT_GLOBAL2("[%v4f] -> [%v4f]\n", points[index], result[index]);
 }
 
 )__CODE__";
