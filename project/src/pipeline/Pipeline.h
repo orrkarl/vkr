@@ -94,22 +94,28 @@ public:
 	cl_status clear() const;
 
 	/**
-	 * @brief Sets the perspective near plane
-	 * 
-	 * Refer to VertexReducer for detailed explenation
-	 * @param near perspective near buffer
-	 * @return cl_status internal OpenCL call status
+	 * @brief Set the perspective projection horizontal field of view
+	 *
+	 * @param angle fov angle (in radians)
+	 * @return internal OpenCL call status
 	 */
-	cl_status setNearPlane(const nr_float x, const nr_float y, const nr_float z);
+	cl_status setFieldOfView(const nr_float angle);
 
 	/**
-	 * @brief Sets the perspective far plane
-	 * 
-	 * Refer to VertexReducer for detailed explenation
-	 * @param far perspective far buffer
-	 * @return cl_status internal OpenCL call status
+	 * @brief Set the perspective projection near z plane
+	 *
+	 * @param zNear near Z plane
+	 * @return internal OpenCL call status
 	 */
-	cl_status setFarPlane(const nr_float x, const nr_float y, const nr_float z);
+	cl_status setZNearPlane(const nr_float zNear);
+
+	/**
+	 * @brief Set the perspective projection far z plane
+	 *
+	 * @param zFar far Z plane
+	 * @return internal OpenCL call status
+	 */
+	cl_status setZFarPlane(const nr_float zFar);
 
 	/**
 	 * @brief Enqueues a render command

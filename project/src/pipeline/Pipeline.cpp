@@ -93,6 +93,8 @@ cl_status Pipeline::viewport(const ScreenDimension& screenDim)
 
 	auto ret = m_binRaster.setScreenDimension(screenDim);
 	if (error::isFailure(ret)) return ret;
+	ret = m_vertexReduce.setAspectRatio(screenDim);
+	if (error::isFailure(ret)) return ret;
 	return m_fineRaster.setScreenDimensions(screenDim);
 }
 
@@ -127,6 +129,21 @@ cl_status Pipeline::clear() const
 	return clearDepthBuffer();
 }
 
+cl_status Pipeline::setFieldOfView(const nr_float angle)
+{
+	return m_vertexReduce.setFieldOfView(angle);
+}
+
+cl_status Pipeline::setZNearPlane(const nr_float zNear)
+{
+	return m_vertexReduce.setZNearPlane(zNear);
+}
+
+cl_status Pipeline::setZFarPlane(const nr_float zFar)
+{
+	return m_vertexReduce.setZFarPlane(zFar);
+}
+
 cl_status Pipeline::clearDepthBuffer() const
 {
 	return m_commandQueue.enqueueBufferFillCommand<Depth>(m_frame.depth, m_clearDepth, m_screenDimension.getTotalSize());
@@ -137,15 +154,6 @@ cl_status Pipeline::clearColorBuffer() const
 	return m_commandQueue.enqueueBufferFillCommand<RawColorRGBA>(m_frame.color, m_clearColor, m_screenDimension.getTotalSize());
 }
 
-cl_status Pipeline::setNearPlane(const nr_float x, const nr_float y, const nr_float z)
-{
-	return m_vertexReduce.setNearPlane({x, y, z});
-}
-
-cl_status Pipeline::setFarPlane(const nr_float x, const nr_float y, const nr_float z)
-{
-	return m_vertexReduce.setFarPlane({ x, y, z });
-}
 
 cl_status Pipeline::render(const VertexBuffer& primitives, const Primitive& primitiveType, const nr_uint primitiveCount)
 {

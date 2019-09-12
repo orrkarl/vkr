@@ -10,15 +10,8 @@ nr::Triangle h_triangle
 	nr::Vertex{  5, -2.5,   2 }
 };
 
-nr_float h_near[3]
-{
-    -3, -3, 0.5
-};
-
-nr_float h_far[3]
-{
-    3, 3, 10
-};
+const nr_float zNear = 0.5;
+const nr_float zFar = 10;
 
 bool initCL(nr::Context& context, nr::Device& device, nr::CommandQueue& queue)
 {
@@ -166,13 +159,13 @@ int main(const int argc, const char* argv[])
 	p.setClearColor({ 0, 0, 0, 0 });
 	p.setClearDepth(1.0f);
 
-	ret = p.setNearPlane(h_near[0], h_near[1], h_near[2]);
+	ret = p.setZNearPlane(zNear);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not set near plane! " << nr::utils::stringFromCLError(ret) << std::endl;
 		return ret;
 	}
-	ret = p.setFarPlane(h_far[0], h_far[1], h_far[2]);
+	ret = p.setZFarPlane(zFar);
 	if (nr::error::isFailure(ret))
 	{
 		std::cerr << "Could not set far plane! " << nr::utils::stringFromCLError(ret) << std::endl;

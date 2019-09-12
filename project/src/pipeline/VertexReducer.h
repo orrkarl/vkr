@@ -26,20 +26,18 @@ namespace detail
  * @brief Accessing the first stage in the raster pipeline
  * 
  * The vertex reducer is the first stage in the raster pipeline. It's job is to reduce each vertex dimensions - 
- * take the homogenous N dimensional input and transform it into a 2D position with some extra data (such as 'depth'), to be used in 
+ * take the homogenous 3 dimensional input and transform it into a 2D position with some extra data (such as 'depth'), to be used in 
  * the next pipeline operations.
  * @par
- * As of right now, this stage runs repeating perspective projections on each dimension.
- * @par
- * This stage takes 4 inputs: the vertex input buffer, the perspective near and far planes and an output target buffer.
+ * This stage takes 6 inputs: the vertex input buffer, aspect ratio, fov angle, the perspective z near and z far planes and an output target buffer.
  * It executes naively - each vertex gets it's own work item to process.
- * Each simplex will be copied to the target buffer and it's vertecies will be reduced; simplex order in the input buffer is preserved.
+ * Each simplex will be copied to the target buffer and it's vertecies will be reduced; vertex order in the input buffer is preserved.
  * @par
  * The vertecies are reduced to a D3D style 'NDC' form - the X,Y coordinates are between -1 and 1, while every other coordinate is between 0 and 1.
  * 
  * @note As of right now, no clipping is done at all - but this will change soon
  */
-class NRAPI VertexReducer : public StandardDispatch<1, Buffer, cl_float3, cl_float3, Buffer>
+class NRAPI VertexReducer : public StandardDispatch<1, Buffer, nr_float, nr_float, nr_float, nr_float, Buffer>
 {
 public:
 	/**
@@ -55,31 +53,44 @@ public:
 	/**
 	 * @brief Set the kernel expected input buffer
 	 * 
-	 * The buffer is expected to contain plain simplexes: N points of homogenous N dimension (N + 1 coordinates)
+	 * The buffer is expected to contain plain triangles: 3 points of homogenous 3 dimensional space (4 coordinates total)
 	 * @param in data buffer
 	 * @return internal OpenCL call status
 	 */
 	cl_status setSimplexInputBuffer(const Buffer& in);
 
 	/**
-	 * @brief Set the perspective near plane
-	 * 
-	 * The buffer is expected to contain N elements (N floats each).
-	 * Each element specifices the lower bound of the repeating perspective projections at it's coordinate
-	 * @param near perspective near plane
+	 * @brief Set the perspective projection aspect ratio
+	 *
+	 * @param screenDimension current viewport size
 	 * @return internal OpenCL call status
 	 */
-	cl_status setNearPlane(const cl_float3& near);
+	cl_status setAspectRatio(const ScreenDimension& screenDimension);
 
 	/**
-	 * @brief Set the perspective far plane
-	 * 
-	 * The buffer is expected to contain N elements (N floats each).
-	 * Each element specifices the upper bound of the repeating perspective projections at it's coordinate
-	 * @param far perspective far plane
+	 * @brief Set the perspective projection horizontal field of view
+	 *
+	 * @param angle fov angle (in radians)
 	 * @return internal OpenCL call status
 	 */
-	cl_status setFarPlane(const cl_float3& far);
+	cl_status setFieldOfView(const nr_float angle);
+
+	/**
+	 * @brief Set the perspective projection near z plane
+	 *
+	 * @param zNear near Z plane
+	 * @return internal OpenCL call status
+	 */
+	cl_status setZNearPlane(const nr_float zNear);
+
+	/**
+	 * @brief Set the perspective projection far z plane
+	 *
+	 * @param zFar far Z plane
+	 * @return internal OpenCL call status
+	 */
+	cl_status setZFarPlane(const nr_float zFar);
+
 
 	/**
 	 * @brief Set the simplex output buffer

@@ -15,8 +15,8 @@ TARGET_LINK_LIBRARIES(NrasterDemoUtils
 ADD_EXECUTABLE(Triangle3d src/triangle3d.cpp)
 TARGET_LINK_LIBRARIES(Triangle3d NrasterDemoUtils)
 
-ADD_EXECUTABLE(Cube4d src/cube4d.cpp)
-TARGET_LINK_LIBRARIES(Cube4d NrasterDemoUtils)
+ADD_EXECUTABLE(Cube3d src/cube3d.cpp)
+TARGET_LINK_LIBRARIES(Cube3d NrasterDemoUtils)
 
 ADD_EXECUTABLE(Simpelxes src/simplexes.cpp)
 TARGET_LINK_LIBRARIES(Simpelxes NrasterDemoUtils)
@@ -33,7 +33,7 @@ IF(WIN32)
 	)
 	
 	ADD_CUSTOM_COMMAND(
-		TARGET Cube4d
+		TARGET Cube3d
 		PRE_LINK
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		"${PROJECT_BINARY_DIR}/project/Nraster.dll"         
@@ -50,7 +50,7 @@ IF(WIN32)
 
 	IF(CMAKE_BUILD_TYPE STREQUAL Debug)
 		ADD_CUSTOM_COMMAND(
-			TARGET Triangle3d Cube4d Simpelxes
+			TARGET Triangle3d Cube3d Simpelxes
 			PRE_LINK
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			"${PROJECT_BINARY_DIR}/bin/glewd.dll"         
@@ -58,7 +58,7 @@ IF(WIN32)
 		)	
 	ELSE()
 		ADD_CUSTOM_COMMAND(
-			TARGET Triangle3d Cube4d Simpelxes
+			TARGET Triangle3d Cube3d Simpelxes
 			PRE_LINK
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			"${PROJECT_BINARY_DIR}/bin/glew.dll"         

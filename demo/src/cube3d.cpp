@@ -61,25 +61,19 @@ protected:
 	{
 		nr_status ret = CL_SUCCESS;
 
-		nr_float h_near[]
-		{
-			-5, -5, 0.5
-		};
-
-		nr_float h_far[]
-		{
-			5, 5, 100
-		};
-
-		auto ar = static_cast<nr_float>(getScreenDimension().height) / getScreenDimension().width;
+		const nr_float zNear = 0.5;
+		const nr_float zFar = 20;
 
 		m_vertecies = nr::VertexBuffer::make(renderContext, 12, ret);
 		if (nr::error::isFailure(ret)) return ret;
 
-		ret = pipeline.setFarPlane(h_far[0], h_far[1], h_far[2]);
+		ret = pipeline.setFieldOfView(2 * M_PI / 4);
 		if (nr::error::isFailure(ret)) return ret;
 
-		ret = pipeline.setNearPlane(h_near[0], h_near[1], h_near[2]);
+		ret = pipeline.setZNearPlane(zNear);
+		if (nr::error::isFailure(ret)) return ret;
+
+		ret = pipeline.setZFarPlane(zFar);
 		if (nr::error::isFailure(ret)) return ret;
 
 		pipeline.setClearColor({ 0, 0, 0, 0 });
@@ -108,7 +102,7 @@ protected:
 	void transform(const nr_float angle)
 	{
 		Matrix r = Matrix::rotation(Y, Z, angle);
-		Matrix t = Matrix::translation(25, 3.6, 7);
+		Matrix t = Matrix::translation(6, 3.6, 7);
 		transform(t * r);
 	}
 
@@ -239,7 +233,7 @@ int main(const int argc, const char* argv[])
 {
 	if (!App::init()) return EXIT_FAILURE;
 
-	auto app = StaticCubeApp();
+	auto app = DynamicCubeApp();
 	auto ret = app.run();
 
 	App::deinit();

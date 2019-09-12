@@ -9,15 +9,8 @@
 #include <utility>
 #include <random>
 
-nr_float h_near[]
-{
-	-5, -5, 0.5
-};
-
-nr_float h_far[]
-{
-	5, 5, 10
-};
+const nr_float zNear = 0.5;
+const nr_float zFar = 10;
 
 class SimplexesApp : public App
 {
@@ -83,10 +76,13 @@ protected:
 		m_d_simplices = nr::VertexBuffer::make(renderContext, 48, ret);
 		if (nr::error::isFailure(ret)) return ret;
 
-		ret = pipeline.setFarPlane(h_far[0], h_far[1], h_far[2]);
+		ret = pipeline.setFieldOfView(2 * M_PI / 4);
 		if (nr::error::isFailure(ret)) return ret;
 
-		ret = pipeline.setNearPlane(h_near[0], h_near[1], h_near[2]);
+		ret = pipeline.setZNearPlane(zNear);
+		if (nr::error::isFailure(ret)) return ret;
+
+		ret = pipeline.setZFarPlane(zFar);
 		if (nr::error::isFailure(ret)) return ret;
 
 		pipeline.setClearColor({ 0, 0, 0, 0 });
