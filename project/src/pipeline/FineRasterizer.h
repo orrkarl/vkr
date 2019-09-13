@@ -24,9 +24,9 @@ namespace detail
 {
 
 /**
- * @brief Accessing the fourth stage in the raster pipeline
+ * @brief Accessing the third stage in the raster pipeline
  * 
- * The fine rasterizer is the fourth stage of the raster pipeline. It's job is to take the bin queues, process them and draw
+ * The fine rasterizer is the third stage of the raster pipeline. It's job is to take the bin queues, process them and draw
  * the results to the framebuffer. As of right now, this can only paint triangles in red (255, 0, 0), although that's an easily changable
  * hardcoded value.
  * 

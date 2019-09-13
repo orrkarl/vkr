@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.13)
 
-project(Nraster CXX)
+project(Nraster VERSION 0.6.0 LANGUAGES CXX)
 
 IF(NOT CMAKE_BUILD_TYPE)
 	SET(CMAKE_BUILD_TYPE Debug)
@@ -14,9 +14,6 @@ OPTION(BUILD_DOCS  "builds the Nraster documentation (requires Doxygen)" ON)
 # General settings
 SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
-SET(VERSION_MAJOR 0 CACHE STRING "Nraster major version")
-SET(VERSION_MINOR 6 CACHE STRING "Nraster minor version")
-SET(VERSION_PATCH 0 CACHE STRING "Nraster patch version")
 
 
 # Platform specific settings:

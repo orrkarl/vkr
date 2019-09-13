@@ -27,9 +27,9 @@ namespace detail
 {
 
 /**
- * @brief Accessing the third stage in the raster pipeline
+ * @brief Accessing the second stage in the raster pipeline
  * 
- * The bin rasterizer is the third stage in the raster pipeline. It's job is to divide the triangles to bins. A bin is just a rectangle
+ * The bin rasterizer is the second stage in the raster pipeline. It's job is to divide the triangles to bins. A bin is just a rectangle
  * of pixels of the screen of known width and height. By dividing the triangles to queues we can run a later fine rasterizer on a per bin basis.
  * 
  * @par
