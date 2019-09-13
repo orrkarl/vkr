@@ -1,3 +1,9 @@
-[submodule "dependencies/gtest/googletest"]
-	path = dependencies/gtest/googletest
-	url = https://github.com/google/googletest.git
+[submodule "dependencies/googletest"]
+	path = dependencies/googletest
+	url = https://github.com/google/googletest
+[submodule "dependencies/glfw"]
+	path = dependencies/glfw
+	url = https://github.com/glfw/glfw
+[submodule "dependencies/glew"]
+	path = dependencies/glew
+	url = https://github.com/Perlmint/glew-cmake

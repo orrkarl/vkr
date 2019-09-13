@@ -7,3 +7,8 @@ build/
 
 # Visual Studio
 .vs/
+out/
+CMakeSettings.json
+
+# Scripts (which are mostly platform dependent)
+scripts/

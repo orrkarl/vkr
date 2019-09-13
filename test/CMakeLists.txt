@@ -1,26 +1,23 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
-
 ADD_EXECUTABLE(NrasterTest 
-	tests.cpp
-	src/includes.cpp)
+	src/tests.cpp
+	src/includes.cpp
+	
+	src/pipeline/utils.cpp)
 
 TARGET_LINK_LIBRARIES(NrasterTest 
 	PRIVATE Nraster
 	PRIVATE gtest 
-	PRIVATE gmock
-	PRIVATE OpenCL::OpenCL)
+	PRIVATE gmock)
 
 TARGET_INCLUDE_DIRECTORIES(NrasterTest 
-	PRIVATE .
 	PRIVATE ${NRASTER_ALL_INCLUDES}
-	PRIVATE ${gtest_SOURCE_DIR}/include
-	PRIVATE ${gmock_SOURCE_DIR}/include
+	PRIVATE ${gtest_INCLUDE_DIRS}
 	PRIVATE ${OpenCL_INCLUDE_DIRS})
 
 if(WIN32)
     # Copy DLL files to output directory
-    add_custom_command(TARGET NrasterTest POST_BUILD
+    ADD_CUSTOM_COMMAND(TARGET NrasterTest PRE_LINK
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${PROJECT_BINARY_DIR}/lib/Nraster.dll"             
+    "${PROJECT_BINARY_DIR}/project/Nraster.dll"             
     $<TARGET_FILE_DIR:NrasterTest>)
 endif()
