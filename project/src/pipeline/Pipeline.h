@@ -81,7 +81,7 @@ public:
 	 * @brief Set the viewport size
 	 * 
 	 * @param screenDim new viewport size
-	 * @return cl_status internal OpenCL call status
+	 * @return internal OpenCL call status
 	 */
 	cl_status viewport(const ScreenDimension& screenDim);
 
@@ -89,7 +89,7 @@ public:
 	 * @brief clear the framebuffer 
 	 * 
 	 * This function will enqueue fill commands to the framebuffer with given defaults
-	 * @return cl_status internal OpenCL call status
+	 * @return internal OpenCL call status
 	 */
 	cl_status clear() const;
 
@@ -124,7 +124,7 @@ public:
 	 * @param primitives render data source
 	 * @param primitiveType render data type
 	 * @param primitiveCount render data type
-	 * @return cl_status internal OpenCL call status
+	 * @return internal OpenCL call status
 	 */
 	cl_status render(const VertexBuffer& primitives, const Primitive& primitiveType, const nr_uint primitiveCount);
 
@@ -133,7 +133,7 @@ public:
 	 * 
 	 * @note This function blocks execution until the entire buffer is copied
 	 * @param bitmap host buffer containing enough place for the framebuffer
-	 * @return cl_status internal OpenCL call status
+	 * @return internal OpenCL call status
 	 */
 	cl_status copyFrameBuffer(RawColorRGBA* bitmap) const;
 	

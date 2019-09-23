@@ -23,14 +23,14 @@ TEST(VertexShader, Perspective)
 	p.values[1] = 1;
 	p.values[2] = 2;
 	p.values[3] = nanf("");
-	nr_float near[3] = { 0, 0, 0 };
-	nr_float far[3] = { 2, 2, 3 };
+	nr_float near = 0.2;
+	nr_float far = 3;
 	Vertex result;
 
 	Vertex expected;
-	expected.values[0] = -0.5;
-	expected.values[1] = -0.5;
-	expected.values[2] = 2.0f / 3;
+	expected.values[0] = near;
+	expected.values[1] = near;
+	expected.values[2] = (2.0f - near) / (far - near);
 	expected.values[3] = nanf("");
 
 	Module::Options options =
@@ -58,9 +58,10 @@ TEST(VertexShader, Perspective)
 	testee.setExecutionRange(1);
 
 	ASSERT_SUCCESS(testee.setSimplexInputBuffer(d_point));
-	ASSERT_SUCCESS(testee.setNearPlane({ near[0], near[1], near[2] }));
-	ASSERT_SUCCESS(testee.setFarPlane({ far[0], far[1], far[2] }));
+	ASSERT_SUCCESS(testee.setZNearPlane(near));
+	ASSERT_SUCCESS(testee.setZFarPlane(far));
 	ASSERT_SUCCESS(testee.setAspectRatio({1, 1}));
+	ASSERT_SUCCESS(testee.setFieldOfView(2 * 3.141592 / 4));
 	ASSERT_SUCCESS(testee.setSimplexOutputBuffer(d_result));
     ASSERT_SUCCESS(q.enqueueDispatchCommand(testee));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, 4, result.values));

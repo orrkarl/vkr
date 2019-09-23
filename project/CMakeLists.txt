@@ -13,6 +13,7 @@ ADD_LIBRARY(Nraster SHARED
 	src/kernels/base.cl.cpp
 	src/kernels/bin_rasterizer.cl.cpp
 	src/kernels/fine_rasterizer.cl.cpp
+	src/kernels/triangle_setup.cl.cpp
 	src/kernels/vertex_reducer.cl.cpp
 	
 	src/pipeline/BinRasterizer.cpp
