@@ -13,6 +13,8 @@ namespace clcode
 
 extern const char* triangle_setup = R"__CODE__(
 
+#define TRIANGLE_EPSILON (1e-5)
+
 typedef struct _triangle_record
 {
 	triangle_t	main_triangle;
@@ -32,9 +34,26 @@ index_t malloc(triangle_allocation_buffer_t allocator, const index_t count)
 	return select(res, INVALID_INDEX, res >= allocator.max_triangle_count);
 }
 
-bool is_ccw(const triangle_t triangle)
+float area(const triangle_t triangle)
 {
-	return true;
+	float2 vec0 = triangle.s1.xy - triangle.s0.xy;
+	float2 vec1 = triangle.s2.xy - triangle.s1.xy;
+	return vec0.x * vec1.y - vec1.x * vec0.y;
+}
+
+bool ccw(const float area)
+{
+	return area > TRIANGLE_EPSILON;
+}
+
+bool degenerate(const float area)
+{
+	return abs(area) <= TRIANGLE_EPSILON;
+}
+
+bool cw(const float area)
+{
+	return area < TRIANGLE_EPSILON;
 }
 
 index_t count_clipping_subtris(const triangle_t base)
@@ -42,7 +61,7 @@ index_t count_clipping_subtris(const triangle_t base)
 	return 0;
 }
 
-void clip(const triangle_t base, triangle_t* main, triangle_t* subtris)
+void clip(const triangle_t base, global triangle_t* main, global triangle_t* subtris)
 {
 
 }
@@ -59,7 +78,9 @@ kernel void triangle_setup(
 	
 	private triangle_record_t* dest = records + index;
 
-	if (is_ccw(triangle))
+	float triangle_area = area(triangle);
+
+	if (ccw(triangle_area) || degenerate(triangle_area))
 	{
 		dest->triangle_count = 0;
 		return;
