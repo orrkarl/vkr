@@ -4,7 +4,7 @@
 #include <kernels/bin_rasterizer.cl.h>
 #include <rendering/Render.h>
 
-#include "../../includes.h"
+#include "../../../includes.h"
 
 using namespace nr;
 using namespace testing;

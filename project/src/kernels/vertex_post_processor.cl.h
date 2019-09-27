@@ -29,7 +29,7 @@ namespace clcode
 {
 
 // fine rasterizer module
-NRAPI extern const char* triangle_setup;
+NRAPI extern const char* vertex_post_processor;
 
 }
 

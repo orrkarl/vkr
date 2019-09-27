@@ -2,7 +2,7 @@
 
 #include <kernels/vertex_reducer.cl.h>
 
-#include "../../includes.h"
+#include "../../../includes.h"
 
 
 using namespace nr;
