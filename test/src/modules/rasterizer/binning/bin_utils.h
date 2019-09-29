@@ -60,19 +60,19 @@ std::ostream& operator<<(std::ostream& os, const BinQueues<BinCountX, BinCountY,
 
 const Module::Macro TEST_BINNING("_TEST_BINNING");
 
-void mkTriangleInCoords(const nr_uint x, const nr_uint y, const ScreenDimension& screenDim, Triangle* result)
+void mkTriangleInCoords(const nr_uint x, const nr_uint y, const ScreenDimension& screenDim, Triangle& result)
 {
-    result->points[0].values[0] = 2 * (x + 0.5f) / (screenDim.width - 1) - 1;
-    result->points[0].values[1] = 2 * (y + 0.5f) / (screenDim.height - 1) - 1;
-	result->points[0].values[2] = -1.0f;
+    result.points[0].values[0] = 2 * (x + 0.5f) / (screenDim.width - 1) - 1;
+    result.points[0].values[1] = 2 * (y + 0.5f) / (screenDim.height - 1) - 1;
+	result.points[0].values[2] = -1.0f;
 
-	result->points[1].values[0] = -1.0f;
-	result->points[1].values[1] = -1.0f;
-	result->points[1].values[2] = -1.0f;
+	result.points[1].values[0] = -1.0f;
+	result.points[1].values[1] = -1.0f;
+	result.points[1].values[2] = -1.0f;
 
-	result->points[2].values[0] = -1.0f;
-	result->points[2].values[1] = -1.0f;
-	result->points[2].values[2] = -1.0f;
+	result.points[2].values[0] = -1.0f;
+	result.points[2].values[1] = -1.0f;
+	result.points[2].values[2] = -1.0f;
 }
 
 void mkTriangleInCoords(const nr_uint x, const nr_uint y, const ScreenDimension& dim, float* triangle_x, float* triangle_y)

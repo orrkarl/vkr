@@ -44,9 +44,9 @@ TEST(Binning, Rasterizer)
 
     const nr_uint x = destinationBinX * config.binWidth + config.binWidth / 2;
     const nr_uint y = destinationBinY * config.binHeight + config.binHeight / 2;
-    Triangle h_triangles[triangleCount];
-    mkTriangleInCoords(x, y, screenDim, h_triangles);
-    mkTriangleInCoords(x, y, screenDim, h_triangles + 1);
+	TriangleRecord h_records[triangleCount];
+    mkTriangleInCoords(x, y, screenDim, h_records[0].triangle);
+    mkTriangleInCoords(x, y, screenDim, h_records[1].triangle);
     
     CommandQueue q = defaultCommandQueue;
 
@@ -56,7 +56,7 @@ TEST(Binning, Rasterizer)
     auto testee = BinRasterizer(code, err);
     ASSERT_SUCCESS(err);
 
-    auto d_triangles = Buffer::make<Triangle>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_triangles, err);
+    auto d_triangles = Buffer::make<TriangleRecord>(defaultContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, triangleCount, h_records, err);
     ASSERT_SUCCESS(err);
 
     auto d_overflow = Buffer::make<nr_uint>(defaultContext, CL_MEM_READ_WRITE, 1, err);

@@ -60,7 +60,7 @@ void fillTriangles(
     const nr_uint totalWorkGroupCount,
     const nr_float expectedDepth,
     const nr_uint batchSize, 
-    Triangle* triangles,
+	TriangleRecord* records,
     BinQueues<BinCountX, BinCountY, QueueSize>* binQueues)
 {
     const nr_uint binCountX = ceil(((nr_float) screenDim.width) / config.binWidth);
@@ -98,9 +98,9 @@ void fillTriangles(
             bin.x = x * config.binWidth;
             bin.y = y * config.binHeight;
 
-            mkTriangleFullyInBin(screenDim, bin, pow(expectedDepth, 0.5), triangles[i]);
-            mkTriangleFullyInBin(screenDim, bin, expectedDepth, triangles[i + 1]);
-            mkTriangleFullyInBin(screenDim, bin, pow(expectedDepth, 0.3), triangles[i + 2]);
+            mkTriangleFullyInBin(screenDim, bin, pow(expectedDepth, 0.5), records[i].triangle);
+            mkTriangleFullyInBin(screenDim, bin, expectedDepth, records[i + 1].triangle);
+            mkTriangleFullyInBin(screenDim, bin, pow(expectedDepth, 0.3), records[i + 2].triangle);
 
             if (g == i / batchSize)
             {

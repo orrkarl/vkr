@@ -49,9 +49,9 @@ void barycentric2d(const ndc_position_t p0, const ndc_position_t p1, const ndc_p
 }
 
 // Calculate (according to Perspective Correct Interpolation) the inverse of the depth at point
-depth_t depth_at_point(const triangle_record_t record, float3 barycentric)
+depth_t depth_at_point(const triangle_t triangle, float3 barycentric)
 {
-    return barycentric.x / record.triangle.p0.z + barycentric.y / record.triangle.p1.z + barycentric.z / record.triangle.p2.z;
+    return barycentric.x / triangle.p0.z + barycentric.y / triangle.p1.z + barycentric.z / triangle.p2.z;
 }
 
 
@@ -183,7 +183,7 @@ kernel void fine_rasterize(
 
                 if (is_point_in_triangle(p0, p1, p2, barycentric))
                 {
-                    current_frag.depth = depth_at_point(triangle_data[current_queue_element], barycentric);
+                    current_frag.depth = depth_at_point(triangle_data[current_queue_element].triangle, barycentric);
                     shade(current_frag, screen_dim, color, depth);
                 }
             }
@@ -205,20 +205,20 @@ kernel void shade_test(
     shade(fragment, dim, color, depth);
 }
 
-kernel void is_point_in_triangle_test(const triangle_record_t record, const screen_position_t position, const screen_dimension_t dim, global bool* result)
+kernel void is_point_in_triangle_test(const triangle_t triangle, const screen_position_t position, const screen_dimension_t dim, global bool* result)
 {
     ndc_position_t pos;
     
     ndc_position_t p0, p1, p2;
     
-	p0.x = record.triangle.p0.x;
-	p0.y = record.triangle.p0.y;
+	p0.x = triangle.p0.x;
+	p0.y = triangle.p0.y;
 
-    p1.x = record.triangle.p1.x;
-	p1.y = record.triangle.p1.y;
+    p1.x = triangle.p1.x;
+	p1.y = triangle.p1.y;
 
-    p2.x = record.triangle.p2.x;
-	p2.y = record.triangle.p2.y;
+    p2.x = triangle.p2.x;
+	p2.y = triangle.p2.y;
     
     ndc_from_screen_p(position, dim, &pos);
 
