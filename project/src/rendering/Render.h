@@ -182,6 +182,16 @@ struct BinQueueConfig
 	nr_uint queueSize;
 };
 
+struct TriangleRecord
+{
+	Triangle triangle;
+
+	friend std::ostream& operator<<(std::ostream& os, const TriangleRecord& self)
+	{
+		return os << "TriangleRecord{" << self.triangle << "}";
+	}
+};
+
 }
 
 #pragma pack(pop)

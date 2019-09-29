@@ -18,6 +18,7 @@ ADD_LIBRARY(Nraster SHARED
 	
 	src/pipeline/BinRasterizer.cpp
 	src/pipeline/FineRasterizer.cpp
+	src/pipeline/VertexPostProcessor.cpp
 	src/pipeline/VertexReducer.cpp
 	src/pipeline/Pipeline.cpp
 	src/pipeline/Source.cpp

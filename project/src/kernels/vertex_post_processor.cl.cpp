@@ -6,7 +6,7 @@ namespace nr
 namespace detail
 {
 
-extern const char* TRIANGLE_SETUP_KERNEL_NAME = "triangle_setup";
+extern const char* TRIANGLE_SETUP_KERNEL_NAME = "vertex_post_processing";
 
 namespace clcode
 {
@@ -15,10 +15,10 @@ extern const char* vertex_post_processor = R"__CODE__(
 
 #define TRIANGLE_EPSILON (1e-7)
 
-typedef struct _triangle_record
+bool valid(const triangle_t triangle)
 {
-	triangle_t triangle;
-} triangle_record_t;
+	return all(isfinite(triangle.p0)) && all(isfinite(triangle.p1)) && all(isfinite(triangle.p2));
+}
 
 float parallelogram_area(const triangle_t triangle)
 {
@@ -49,14 +49,20 @@ kernel void vertex_post_processing(
 	private const index_t index = get_global_id(0);
 	private const triangle_t triangle = triangles[index];
 
-	float triangle_area = parallelogram_area(triangle);
-
-	if (ccw(triangle_area) || degenerate(triangle_area))
+	if (!valid(triangle))
 	{
 		records[index].triangle.p0.x = NAN;
 		return;
 	}
 
+	float area = parallelogram_area(triangle);
+
+	if (ccw(area) || degenerate(area))
+	{
+		records[index].triangle.p0.x = NAN;
+		return;
+	}
+	
 	records[index].triangle = triangle;
 }
 

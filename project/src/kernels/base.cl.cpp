@@ -79,6 +79,11 @@ typedef struct _bin_queue_config
     uint queue_size;
 } bin_queue_config_t;
 
+typedef struct _triangle_record
+{
+	triangle_t triangle;
+} triangle_record_t;
+
 // ----------------------------------------------------------------------------
 
 // -------------------------------------- Globals -------------------------------------- 
