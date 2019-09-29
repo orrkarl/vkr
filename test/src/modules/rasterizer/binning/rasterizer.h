@@ -72,7 +72,7 @@ TEST(Binning, Rasterizer)
 
 	ASSERT_SUCCESS(testee.setBinQueueConfig(config));
 	ASSERT_SUCCESS(testee.setScreenDimension(screenDim));
-	ASSERT_SUCCESS(testee.setTriangleRecordInputBuffer(d_triangles));
+	ASSERT_SUCCESS(testee.setTriangleInputBuffer(d_triangles));
 	ASSERT_SUCCESS(testee.setTriangleCount(triangleCount));
 	ASSERT_SUCCESS(testee.setOvereflowNotifier(d_overflow));
 	ASSERT_SUCCESS(testee.setBinQueuesBuffer(d_binQueues));

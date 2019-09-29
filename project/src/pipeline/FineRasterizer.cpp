@@ -24,7 +24,7 @@ FineRasterizer::FineRasterizer()
 {
 }
 
-cl_status FineRasterizer::setTriangleRecordInputBuffer(const Buffer& in)
+cl_status FineRasterizer::setTriangleInputBuffer(const Buffer& in)
 {
 	return setArg<TRIANGLE_BUFFER>(in);
 }

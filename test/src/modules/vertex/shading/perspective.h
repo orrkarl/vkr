@@ -57,12 +57,12 @@ TEST(VertexShader, Perspective)
 
 	testee.setExecutionRange(1);
 
-	ASSERT_SUCCESS(testee.setSimplexInputBuffer(d_point));
+	ASSERT_SUCCESS(testee.setVertexInputBuffer(d_point));
 	ASSERT_SUCCESS(testee.setZNearPlane(near));
 	ASSERT_SUCCESS(testee.setZFarPlane(far));
 	ASSERT_SUCCESS(testee.setAspectRatio({1, 1}));
 	ASSERT_SUCCESS(testee.setFieldOfView(2 * 3.141592 / 4));
-	ASSERT_SUCCESS(testee.setSimplexOutputBuffer(d_result));
+	ASSERT_SUCCESS(testee.setVertexOutputBuffer(d_result));
     ASSERT_SUCCESS(q.enqueueDispatchCommand(testee));
     ASSERT_SUCCESS(q.enqueueBufferReadCommand(d_result, false, 4, result.values));
     ASSERT_SUCCESS(q.await());

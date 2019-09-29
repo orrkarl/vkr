@@ -20,6 +20,7 @@
 #include "BinRasterizer.h"
 #include "FineRasterizer.h"
 #include "VertexReducer.h"
+#include "VertexPostProcessor.h"
 
 namespace nr
 {
@@ -89,6 +90,8 @@ public:
 	 * @return VertexReducer vertex reducer kernel
 	 */
 	VertexReducer vertexReducer(cl_status& status) const;
+
+	VertexPostProcessor vertexPostProcessor(cl_status& status) const;
 
 	operator cl_program() const;
 };

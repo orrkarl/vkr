@@ -21,6 +21,7 @@
 #include "Source.h"
 #include "VertexBuffer.h"
 #include "VertexReducer.h"
+#include "VertexPostProcessor.h"
 
 namespace nr
 {
@@ -149,20 +150,21 @@ private:
 	static const nr_uint		 DEFAULT_BATCH_SIZE;
 	static const ScreenDimension MAX_SCREEN_DIM;
 
-	nr_uint					m_batchSize;
-	detail::BinQueueConfig	m_binQueueConfig;
-	Buffer					m_binQueues;
-	detail::BinRasterizer	m_binRaster;
-	nr_uint					m_binRasterWorkGroupCount;
-	RawColorRGBA			m_clearColor;
-	Depth					m_clearDepth;
-	CommandQueue			m_commandQueue;
-	Buffer					m_globalBatchIndex;
-	detail::FineRasterizer	m_fineRaster;
-	FrameBuffer				m_frame;
-	Buffer					m_overflowNotifier;
-	ScreenDimension			m_screenDimension;
-	detail::VertexReducer	m_vertexReduce;
+	nr_uint						m_batchSize;
+	detail::BinQueueConfig		m_binQueueConfig;
+	Buffer						m_binQueues;
+	detail::BinRasterizer		m_binRaster;
+	nr_uint						m_binRasterWorkGroupCount;
+	RawColorRGBA				m_clearColor;
+	Depth						m_clearDepth;
+	CommandQueue				m_commandQueue;
+	Buffer						m_globalBatchIndex;
+	detail::FineRasterizer		m_fineRaster;
+	FrameBuffer					m_frame;
+	Buffer						m_overflowNotifier;
+	ScreenDimension				m_screenDimension;
+	detail::VertexPostProcessor	m_vertexPostProcessor;
+	detail::VertexReducer		m_vertexReduce;
 };
 
 }

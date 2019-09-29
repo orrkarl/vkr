@@ -52,7 +52,7 @@ class CubeApp : public App
 {
 public:
 	CubeApp(const nr::string& name)
-		: App("Rotating Cube", nr::ScreenDimension{ 640, 480 }), m_hostVertecies(new Triangle[12])
+		: App(name, nr::ScreenDimension{ 640, 480 }), m_hostVertecies(new Triangle[12])
 	{
 	}
 

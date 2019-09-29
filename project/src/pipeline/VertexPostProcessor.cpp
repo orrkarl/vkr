@@ -15,7 +15,7 @@ VertexPostProcessor::VertexPostProcessor()
 {
 }
 
-cl_status VertexPostProcessor::setTriangleRecordInputBuffer(const Buffer& triangleBuffer)
+cl_status VertexPostProcessor::setTriangleInputBuffer(const Buffer& triangleBuffer)
 {
 	return setArg<0>(triangleBuffer);
 }

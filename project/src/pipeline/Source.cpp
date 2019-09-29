@@ -3,6 +3,7 @@
 #include "../kernels/base.cl.h"
 #include "../kernels/bin_rasterizer.cl.h"
 #include "../kernels/fine_rasterizer.cl.h"
+#include "../kernels/vertex_post_processor.cl.h"
 #include "../kernels/vertex_reducer.cl.h"
 
 namespace nr 
@@ -12,7 +13,7 @@ namespace detail
 {
 
 Source::Source(const Context& context, cl_status& status)
-	: Module(context, Module::Sources{ clcode::base, clcode::bin_rasterizer, clcode::fine_rasterizer, clcode::vertex_reduce }, status)
+	: Module(context, Module::Sources{ clcode::base, clcode::bin_rasterizer, clcode::fine_rasterizer, clcode::vertex_post_processor, clcode::vertex_reduce }, status)
 {
 }
 
@@ -45,6 +46,11 @@ FineRasterizer Source::fineRasterizer(cl_status& status) const
 VertexReducer Source::vertexReducer(cl_status& status) const
 {
 	return VertexReducer(*this, status);
+}
+
+VertexPostProcessor Source::vertexPostProcessor(cl_status& status) const
+{
+	return VertexPostProcessor(*this, status);
 }
 
 Source::operator cl_program() const

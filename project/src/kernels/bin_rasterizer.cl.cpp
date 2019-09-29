@@ -170,8 +170,9 @@ kernel void bin_rasterize(
 
         for (private uint i = 0; i < batch_actual_size; ++i)
         {
-            if (
-                is_triangle_in_bin(
+			if (isnan(reduced_triangles_x[i * 3])) continue;
+		
+            if (is_triangle_in_bin(
                     reduced_triangles_x + i * 3, 
                     reduced_triangles_y + i * 3, 
                     current_bin, 

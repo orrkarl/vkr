@@ -23,7 +23,7 @@ struct PointInTriangle : StandardDispatch<1, Triangle, ScreenPosition, ScreenDim
     {
     }
 
-	cl_status setTriangleRecordInputBuffer(const Triangle& tri)
+	cl_status setTriangleInputBuffer(const Triangle& tri)
 	{
 		return setArg<0>(tri);
 	}
@@ -80,7 +80,7 @@ TEST(Fine, PointInTriangle)
 
 	testee.setExecutionRange(1);
 
-	ASSERT_SUCCESS(testee.setTriangleRecordInputBuffer(triangle));
+	ASSERT_SUCCESS(testee.setTriangleInputBuffer(triangle));
 	ASSERT_SUCCESS(testee.setDimension(screenDim));
 	ASSERT_SUCCESS(testee.setResultBuffer(d_result));
 

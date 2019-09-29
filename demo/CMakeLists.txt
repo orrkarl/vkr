@@ -23,7 +23,7 @@ IF(WIN32)
 	ADD_CUSTOM_COMMAND(
 		TARGET Cube3d
 		PRE_LINK
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		COMMAND ${CMAKE_COMMAND} -E copy
 		"${PROJECT_BINARY_DIR}/project/Nraster.dll"         
 		${CMAKE_CURRENT_BINARY_DIR}
 	)
@@ -31,7 +31,7 @@ IF(WIN32)
 	ADD_CUSTOM_COMMAND(
 		TARGET Simpelxes
 		PRE_LINK
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		COMMAND ${CMAKE_COMMAND} -E copy
 		"${PROJECT_BINARY_DIR}/project/Nraster.dll"         
 		${CMAKE_CURRENT_BINARY_DIR}
 	)
@@ -40,7 +40,7 @@ IF(WIN32)
 		ADD_CUSTOM_COMMAND(
 			TARGET Cube3d
 			PRE_LINK
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			COMMAND ${CMAKE_COMMAND} -E copy
 			"${PROJECT_BINARY_DIR}/bin/glewd.dll"         
 			${CMAKE_CURRENT_BINARY_DIR}
 		)	
@@ -48,7 +48,7 @@ IF(WIN32)
 		ADD_CUSTOM_COMMAND(
 			TARGET Simpelxes
 			PRE_LINK
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			COMMAND ${CMAKE_COMMAND} -E copy
 			"${PROJECT_BINARY_DIR}/bin/glewd.dll"         
 			${CMAKE_CURRENT_BINARY_DIR}
 		)	
@@ -56,7 +56,7 @@ IF(WIN32)
 		ADD_CUSTOM_COMMAND(
 			TARGET Cube3d
 			PRE_LINK
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			COMMAND ${CMAKE_COMMAND} -E copy
 			"${PROJECT_BINARY_DIR}/bin/glew.dll"         
 			${CMAKE_CURRENT_BINARY_DIR}
 		)	
@@ -64,7 +64,7 @@ IF(WIN32)
 		ADD_CUSTOM_COMMAND(
 			TARGET Simpelxes
 			PRE_LINK
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			COMMAND ${CMAKE_COMMAND} -E copy
 			"${PROJECT_BINARY_DIR}/bin/glew.dll"         
 			${CMAKE_CURRENT_BINARY_DIR}
 		)

@@ -23,7 +23,7 @@ VertexReducer::VertexReducer()
 {
 }
 
-cl_status VertexReducer::setSimplexInputBuffer(const Buffer& in)
+cl_status VertexReducer::setVertexInputBuffer(const Buffer& in)
 {
 	return setArg<INPUT_BUFFER>(in);
 }
@@ -48,7 +48,7 @@ cl_status VertexReducer::setZFarPlane(const nr_float zFar)
 	return setArg<Z_FAR>(zFar);
 }
 
-cl_status VertexReducer::setSimplexOutputBuffer(const Buffer& out)
+cl_status VertexReducer::setVertexOutputBuffer(const Buffer& out)
 {
 	return setArg<OUTPUT_BUFFER>(out);
 }

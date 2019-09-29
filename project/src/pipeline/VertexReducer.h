@@ -57,7 +57,7 @@ public:
 	 * @param in data buffer
 	 * @return internal OpenCL call status
 	 */
-	cl_status setSimplexInputBuffer(const Buffer& in);
+	cl_status setVertexInputBuffer(const Buffer& in);
 
 	/**
 	 * @brief Set the perspective projection aspect ratio
@@ -99,7 +99,7 @@ public:
 	 * @param out simplex target buffer
 	 * @return internal OpenCL call status
 	 */
-	cl_status setSimplexOutputBuffer(const Buffer& out);
+	cl_status setVertexOutputBuffer(const Buffer& out);
 
 	/**
 	 * @brief Set the execution range

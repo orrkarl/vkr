@@ -59,7 +59,7 @@ public:
 	 * @param buffer triangle buffer
 	 * @return internal OpenCL call status
 	 */
-	cl_status setTriangleRecordInputBuffer(const Buffer& in);
+	cl_status setTriangleInputBuffer(const Buffer& in);
 
 	/**
 	 * @brief sets the actual bin queues buffer
