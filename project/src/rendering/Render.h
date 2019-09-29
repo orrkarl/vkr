@@ -94,6 +94,11 @@ struct Vertex
 	{
 	}
 
+	Vertex(const nr_float x, const nr_float y, const nr_float z, const nr_float w)
+		: values{ x, y, z, w }
+	{
+	}
+
 	bool operator==(const Vertex& other) const
 	{
 		for (auto i = 0; i < 4; ++i)

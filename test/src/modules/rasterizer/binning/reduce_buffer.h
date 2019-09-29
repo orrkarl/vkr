@@ -95,7 +95,6 @@ void extractNDCPosition(const nr_uint triangleCount, const Triangle* buffer, Red
 
 TEST(Binning, ReduceTriangleBuffer)
 {
-    constexpr const nr_uint dim = 5;
     const nr_uint triangleCount = 3;
     const nr_uint offset = 2;
 	const nr_uint workGroupSize = 30;

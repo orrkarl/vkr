@@ -13,14 +13,14 @@ namespace clcode
 
 extern const char* vertex_post_processor = R"__CODE__(
 
-#define TRIANGLE_EPSILON (1e-5)
+#define TRIANGLE_EPSILON (1e-7)
 
 typedef struct _triangle_record
 {
 	triangle_t triangle;
 } triangle_record_t;
 
-float area(const triangle_t triangle)
+float parallelogram_area(const triangle_t triangle)
 {
 	float2 vec0 = triangle.p1.xy - triangle.p0.xy;
 	float2 vec1 = triangle.p2.xy - triangle.p1.xy;
@@ -49,7 +49,7 @@ kernel void vertex_post_processing(
 	private const index_t index = get_global_id(0);
 	private const triangle_t triangle = triangles[index];
 
-	float triangle_area = area(triangle);
+	float triangle_area = parallelogram_area(triangle);
 
 	if (ccw(triangle_area) || degenerate(triangle_area))
 	{
@@ -63,25 +63,14 @@ kernel void vertex_post_processing(
 
 // -------------------------------------- Testing --------------------------------------
 
-kernel void test_ccw(const triangle_t triangle, global uint* is_ccw)
-{
-	*is_ccw = ccw(area(triangle));
-}
-
-kernel void test_cw(const triangle_t triangle, global uint* is_cw)
-{
-	*is_cw = cw(area(triangle));
-}
-
-kernel void test_degenerate(const triangle_t triangle, global uint* is_degenerate)
-{
-	*is_degenerate = degenerate(area(triangle));
-}
+#ifdef _DEBUG
 
 kernel void test_area(const triangle_t triangle, global float* res_area)
 {
-	*res_area = area(triangle);
+	*res_area = 0.5 * parallelogram_area(triangle);
 }
+
+#endif
 
 )__CODE__";
 

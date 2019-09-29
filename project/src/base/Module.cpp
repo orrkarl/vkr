@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
+#include <sstream>
+#include <string>
 
 namespace nr
 {
@@ -141,12 +143,24 @@ string Module::getBuildLog(Device device, cl_status& err) const
 	return string(str.get());
 }
 
-Context Module::getContext(cl_status& err) const
+string Module::getKernelNames(cl_status& err) const
 {
-	cl_context ret;
-	err = clGetProgramInfo(object, CL_PROGRAM_CONTEXT, sizeof(ret), &ret, nullptr);
-	if (error::isFailure(err)) return Context();
-	return Context(ret, true, err);
+	nr_char* rawNames;
+	nr_uint count;
+
+	err = clGetProgramInfo(object, CL_PROGRAM_KERNEL_NAMES, sizeof(nr_char*), &rawNames, nullptr);
+	if (error::isFailure(err))
+	{
+		return "";
+	}
+
+	err = clGetProgramInfo(object, CL_PROGRAM_NUM_KERNELS, sizeof(nr_uint), &count, nullptr);
+	if (error::isFailure(err))
+	{
+		return "";
+	}
+
+	return string(rawNames);
 }
 
 const Module::Macro           Module::DEBUG               = Module::Macro("_DEBUG");

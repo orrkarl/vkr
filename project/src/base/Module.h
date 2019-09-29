@@ -166,7 +166,7 @@ public:
 	 * @note refer to OpenCL clBuildProgram documentation for detailed explenation of compiler options and status codes
 	 * @param device module build target
 	 * @param options compilation options
-	 * @return cl_status internal OpenCL call status
+	 * @return internal OpenCL call status
 	 */
 	cl_status build(const Device& device, const Options& options);
 
@@ -179,7 +179,7 @@ public:
 	 * @note refer to OpenCL clBuildProgram documentation for detailed explenation of compiler options and status codes
 	 * @param devices module build targets
 	 * @param options compilation options
-	 * @return cl_status internal OpenCL call status
+	 * @return internal OpenCL call status
 	 */
 	cl_status build(const Devices& devices, const Options& options);
 
@@ -195,7 +195,7 @@ public:
 	 * @param options compilation options 
      * @param callback context message callback
      * @param userData data to be passed to the context each time it's called
-	 * @return cl_status internal OpenCL call status
+	 * @return internal OpenCL call status
 	 */
 	template<typename T>
 	cl_status build(const Device& device, const Options& options, std::function<void(Module, T*)> callback, T* userData)
@@ -220,7 +220,7 @@ public:
 	 * @param options compilation options 
      * @param callback context message callback
      * @param userData data to be passed to the context each time it's called
-	 * @return cl_status internal OpenCL call status
+	 * @return internal OpenCL call status
 	 */
 	template<typename T>
 	cl_status build(const Devices& devices, const Options& options, void(*callback)(Module, T*), T* userData)
@@ -262,7 +262,7 @@ public:
 	 */
 	string getBuildLog(Device device, cl_status& err) const;
 
-	Context getContext(cl_status& err) const;
+	string getKernelNames(cl_status& err) const;
 
 private:
 	/**
