@@ -178,11 +178,11 @@ cl_status Pipeline::render(const VertexBuffer& primitives, const Primitive& prim
 	if (error::isFailure(err)) return err;
 	m_vertexReduce.setSimplexOutputBuffer(primitives.reducedVertecies);
 	if (error::isFailure(err)) return err;
-	m_binRaster.setTriangleInputBuffer(primitives.reducedVertecies);
+	m_binRaster.setTriangleRecordInputBuffer(primitives.reducedVertecies);
 	if (error::isFailure(err)) return err;
 	m_binRaster.setTriangleCount(primitiveCount);
 	if (error::isFailure(err)) return err;
-	m_fineRaster.setTriangleInputBuffer(primitives.reducedVertecies);
+	m_fineRaster.setTriangleRecordInputBuffer(primitives.reducedVertecies);
 	if (error::isFailure(err)) return err;
 
 	err = m_commandQueue.enqueueDispatchCommand(m_vertexReduce);

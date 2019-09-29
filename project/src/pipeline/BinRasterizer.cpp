@@ -24,7 +24,7 @@ BinRasterizer::BinRasterizer()
 {
 }
 
-cl_status BinRasterizer::setTriangleInputBuffer(const Buffer& buffer)
+cl_status BinRasterizer::setTriangleRecordInputBuffer(const Buffer& buffer)
 {
 	return setArg<TRIANGLE_BUFFER>(buffer);
 }

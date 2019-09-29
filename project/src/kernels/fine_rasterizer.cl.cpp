@@ -49,9 +49,9 @@ void barycentric2d(const ndc_position_t p0, const ndc_position_t p1, const ndc_p
 }
 
 // Calculate (according to Perspective Correct Interpolation) the inverse of the depth at point
-depth_t depth_at_point(const triangle_t triangle, float3 barycentric)
+depth_t depth_at_point(const triangle_record_t record, float3 barycentric)
 {
-    return barycentric.x / triangle.p0.z + barycentric.y / triangle.p1.z + barycentric.z / triangle.p2.z;
+    return barycentric.x / record.triangle.p0.z + barycentric.y / record.triangle.p1.z + barycentric.z / record.triangle.p2.z;
 }
 
 
@@ -100,7 +100,7 @@ uint pick_queue(global const index_t** triangle_queues, uint* current_queue_head
 }
 
 kernel void fine_rasterize(
-    const global triangle_t* triangle_data,
+    const global triangle_record_t* triangle_data,
     const global index_t* bin_queues,
     const screen_dimension_t screen_dim,
     const bin_queue_config_t config,
@@ -161,14 +161,14 @@ kernel void fine_rasterize(
         
         current_queue_element = current_queue_bases[current_queue][current_queue_elements[current_queue]];
 
-		p0.x = triangle_data[current_queue_element].p0.x;
-		p0.y = triangle_data[current_queue_element].p0.y;
+		p0.x = triangle_data[current_queue_element].triangle.p0.x;
+		p0.y = triangle_data[current_queue_element].triangle.p0.y;
 
-		p1.x = triangle_data[current_queue_element].p1.x;
-		p1.y = triangle_data[current_queue_element].p1.y;
+		p1.x = triangle_data[current_queue_element].triangle.p1.x;
+		p1.y = triangle_data[current_queue_element].triangle.p1.y;
 
-		p2.x = triangle_data[current_queue_element].p2.x;
-		p2.y = triangle_data[current_queue_element].p2.y;
+		p2.x = triangle_data[current_queue_element].triangle.p2.x;
+		p2.y = triangle_data[current_queue_element].triangle.p2.y;
 
         for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, x * config.bin_width + config.bin_width); ++frag_x)
         {
@@ -205,20 +205,20 @@ kernel void shade_test(
     shade(fragment, dim, color, depth);
 }
 
-kernel void is_point_in_triangle_test(const triangle_t triangle, const screen_position_t position, const screen_dimension_t dim, global bool* result)
+kernel void is_point_in_triangle_test(const triangle_record_t record, const screen_position_t position, const screen_dimension_t dim, global bool* result)
 {
     ndc_position_t pos;
     
     ndc_position_t p0, p1, p2;
     
-	p0.x = triangle.p0.x;
-	p0.y = triangle.p0.y;
+	p0.x = record.triangle.p0.x;
+	p0.y = record.triangle.p0.y;
 
-    p1.x = triangle.p1.x;
-	p1.y = triangle.p1.y;
+    p1.x = record.triangle.p1.x;
+	p1.y = record.triangle.p1.y;
 
-    p2.x = triangle.p2.x;
-	p2.y = triangle.p2.y;
+    p2.x = record.triangle.p2.x;
+	p2.y = record.triangle.p2.y;
     
     ndc_from_screen_p(position, dim, &pos);
 

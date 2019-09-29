@@ -78,7 +78,7 @@ TEST(Fine, Rasterizer)
 
 	testee.setExecutionRange(binCountX, binCountY, totalWorkGroupCount);
 	
-	ASSERT_SUCCESS(testee.setTriangleInputBuffer(d_triangles));
+	ASSERT_SUCCESS(testee.setTriangleRecordInputBuffer(d_triangles));
 	ASSERT_SUCCESS(testee.setScreenDimensions(screenDim));
 	ASSERT_SUCCESS(testee.setBinQueuesConfig(config));
 	ASSERT_SUCCESS(testee.setBinQueuesBuffer(d_binQueues));

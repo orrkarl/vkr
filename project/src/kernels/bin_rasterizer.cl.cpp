@@ -64,11 +64,10 @@ bin_t make_bin(const screen_dimension_t dim, const uint index_x, const uint inde
 }
 
 // Copies the contents of the global triangle buffer to local memory for a given batch
-event_t reduce_triangle_buffer(
-    const global triangle_t* triangles, 
+void reduce_triangle_buffer(
+    const global triangle_record_t* triangles, 
     const uint triangle_count, 
     const uint offset, 
-    event_t event, 
     local float* result_x, 
     local float* result_y)
 {
@@ -84,14 +83,12 @@ event_t reduce_triangle_buffer(
 			result_y[i] = src_base[i * 4 + 1];
 		}
 	}
-
-	return 0;
 }
 
 // ----------------------------------------------------------------------------
 
 kernel void bin_rasterize(
-    const global triangle_t* triangle_data,
+    const global triangle_record_t* triangle_data,
     const uint triangle_count,
     const screen_dimension_t dim,
     const bin_queue_config_t config,
@@ -110,8 +107,6 @@ kernel void bin_rasterize(
     private uint index_y = get_local_id(1);
 
     private bool is_init_manager = !index_x && !index_y;
-
-    private event_t batch_acquisition = 0;
     
     private const uint bins_count_x = ceil(((float) screen_dim.width) / config.bin_width);
     private const uint bins_count_y = ceil(((float) screen_dim.height) / config.bin_height);
@@ -163,14 +158,13 @@ kernel void bin_rasterize(
         
         batch_actual_size = min((uint) BATCH_COUNT, triangle_count - current_batch_index);
 
-        batch_acquisition = reduce_triangle_buffer(
+        reduce_triangle_buffer(
             triangle_data, 
             batch_actual_size, 
             current_batch_index, 
-            0, 
             reduced_triangles_x, 
-            reduced_triangles_y);
-        //wait_group_events(1, &batch_acquisition);
+            reduced_triangles_y
+		);
 
 		barrier(CLK_LOCAL_MEM_FENCE);
 
@@ -243,7 +237,7 @@ kernel void is_triangle_in_bin_test(
 }
 
 kernel void reduce_triangle_buffer_test(
-    const global triangle_t triangle_data[TOTAL_TRIANGLE_COUNT],
+    const global triangle_record_t triangle_data[TOTAL_TRIANGLE_COUNT],
     const uint offset,
     global ndc_position_t result[TOTAL_TRIANGLE_COUNT * 3])
 {
@@ -251,8 +245,7 @@ kernel void reduce_triangle_buffer_test(
     local float res_y[TOTAL_TRIANGLE_COUNT * 3];
 	const uint copiedTriangleCount = TOTAL_TRIANGLE_COUNT - offset;
 
-    event_t wait = reduce_triangle_buffer(triangle_data, copiedTriangleCount, offset, 0, res_x, res_y);
-    wait_group_events(1, &wait);
+    reduce_triangle_buffer(triangle_data, copiedTriangleCount, offset, res_x, res_y);
 
     if (get_global_id(0) == 0)
     {

@@ -67,7 +67,7 @@ public:
 	 * @param buffer triangle buffer
 	 * @return internal OpenCL call status
 	 */
-	cl_status setTriangleInputBuffer(const Buffer& buffer);
+	cl_status setTriangleRecordInputBuffer(const Buffer& buffer);
 
 	/**
 	 * @brief set the triangle count

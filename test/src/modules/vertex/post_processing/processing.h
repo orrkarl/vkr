@@ -61,7 +61,7 @@ TEST(VertexPostProcessing, Processing)
 	auto out = Buffer::make<detail::TriangleRecord>(defaultContext, CL_MEM_READ_WRITE, count, err);
 	ASSERT_SUCCESS(err);
 
-	ASSERT_SUCCESS(testee.setTriangleInputBuffer(in));
+	ASSERT_SUCCESS(testee.setTriangleRecordInputBuffer(in));
 	ASSERT_SUCCESS(testee.setTriangleRecordOutputBuffer(out));
 	testee.setExecutionRange(count);
 	

@@ -30,7 +30,7 @@ public:
 
 	VertexPostProcessor();
 
-	cl_status setTriangleInputBuffer(const Buffer& triangleBuffer);
+	cl_status setTriangleRecordInputBuffer(const Buffer& triangleBuffer);
 
 	cl_status setTriangleRecordOutputBuffer(const Buffer& recordBuffer);
 
