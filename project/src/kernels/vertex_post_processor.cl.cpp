@@ -56,12 +56,10 @@ kernel void vertex_post_processing(
 	}
 
 	float area = parallelogram_area(triangle);
-	//REPORT_GLOBAL1("area: %f", 0.5 * area);
 
 	if (ccw(area) || degenerate(area))
 	{
 		records[index].triangle.p0.x = NAN;
-		//REPORT_GLOBAL("culluing triangle!");
 		return;
 	}
 	
