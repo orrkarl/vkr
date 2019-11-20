@@ -102,7 +102,7 @@ protected:
 	void transform(const nr_float angle)
 	{
 		Matrix r = Matrix::rotation(Y, Z, angle);
-		Matrix t = Matrix::translation(6, 3.6, 7);
+		Matrix t = Matrix::translation(1.5, 1.5, 4.5);
 		transform(t * r);
 	}
 
@@ -176,16 +176,6 @@ protected:
 			std::this_thread::sleep_for(std::chrono::microseconds(16));
 		}
 
-		if (isKeyPressed(GLFW_KEY_R))
-		{
-			std::cout << "Angle: " << angle << " (rad)" << std::endl;
-		}
-
-		if (isKeyPressed(GLFW_KEY_D))
-		{
-			std::cout << "Angle: " << 180 * angle / M_PI << " (deg)" << std::endl;
-		}
-
 		return CL_SUCCESS;
 	}
 
@@ -215,6 +205,17 @@ protected:
 		m_offsetZ -= DELTA_Z * isKeyPressed(GLFW_KEY_UP);
 
 		m_offsetAngle += DELTA_ANGLE * isKeyPressed(GLFW_KEY_SPACE);
+
+		auto log = isKeyPressed(GLFW_KEY_I);
+		if (log)
+		{
+			std::cout << "Triangles:";
+			for (auto i = 0u; i < 12; ++i)
+			{
+				std::cout << "\n\t" << m_hostVertecies[i];
+			}
+			std::cout << "\n------------------------------------------------------------------------------------------------\n\n\n";
+		}
 		
 		transform(Matrix::translation(m_offsetX, m_offsetY, m_offsetZ) * Matrix::rotation(X, Y, m_offsetAngle));
 		return draw(queue);
@@ -233,7 +234,7 @@ int main(const int argc, const char* argv[])
 {
 	if (!App::init()) return EXIT_FAILURE;
 
-	auto app = DynamicCubeApp();
+	auto app = StaticCubeApp();
 	auto ret = app.run();
 
 	App::deinit();

@@ -20,6 +20,11 @@ bool valid(const triangle_t triangle)
 	return all(isfinite(triangle.p0)) && all(isfinite(triangle.p1)) && all(isfinite(triangle.p2));
 }
 
+bool depth_positive(const triangle_t triangle)
+{
+	return triangle.p0.z > 0 && triangle.p1.z > 0 && triangle.p2.z > 0;
+}
+
 float parallelogram_area(const triangle_t triangle)
 {
 	float2 vec0 = triangle.p1.xy - triangle.p0.xy;
@@ -51,6 +56,14 @@ kernel void vertex_post_processing(
 
 	if (!valid(triangle))
 	{
+		DEBUG_MESSAGE4("[%d] -> depth isn't valid! [<%v3f>, <%v3f>, <%v3f>]\n", index, triangle.p0, triangle.p1, triangle.p2);
+		records[index].triangle.p0.x = NAN;
+		return;
+	}
+
+	if (!depth_positive(triangle))
+	{
+		DEBUG_MESSAGE4("[%d] -> depth isn't positive! (%f, %f, %f)\n", index, triangle.p0.z, triangle.p1.z, triangle.p2.z);
 		records[index].triangle.p0.x = NAN;
 		return;
 	}
@@ -64,6 +77,7 @@ kernel void vertex_post_processing(
 	}
 	
 	records[index].triangle = triangle;
+	DEBUG_MESSAGE4("[%d] -> Result: [<%v3f>, <%v3f>, <%v3f>]\n", index, triangle.p0, triangle.p1, triangle.p2);
 }
 
 
