@@ -42,8 +42,8 @@ TEST(VertexPostProcessing, Processing)
 		},
 		{	// OK triangle (CW)
 			Vertex(1.2f, 4.6f, 343.0f),
-			Vertex(20000.0f, 4.5f, 0.0f),
-			Vertex(-50.3f, -200.0f, -443635.0f)
+			Vertex(20000.0f, 4.5f, 0.5f),
+			Vertex(-50.3f, -200.0f, 443635.0f)
 		}
 	};
 
