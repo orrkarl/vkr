@@ -14,69 +14,55 @@ extern const char* base = R"__CODE__(
 
 // -------------------------------------- Types -------------------------------------- 
 
-#ifndef MAX_WORK_GROUP_COUNT
-    #define MAX_WORK_GROUP_COUNT (16)
-#endif
-
-typedef struct _ScreenDimension
+typedef struct _screen_dimension
 {
     uint width;
     uint height;
-} ScreenDimension;
+} screen_dimension_t;
 
-typedef struct _ScreenPosition
+typedef struct _screen_position
 {
 	uint x, y;
-} ScreenPosition;
+} screen_position_t;
 
-typedef struct _SignedScreenPosition
-{
-	int x, y;
-} SignedScreenPosition;
-
-typedef struct _NDCPosition
+typedef struct _ndc_position
 {
 	float x, y;
-} NDCPosition;
+} ndc_position_t;
 
-typedef struct _ColorRGB
-{
-	float r, g, b;
-} ColorRGB;
-
-typedef struct _ColorRGBA
+typedef struct _color_rgba
 {
 	float r, g, b, a;
-} ColorRGBA;
+} color_rgba_t;
 
-typedef uint  Index;
-typedef float Depth;
+typedef uint  index_t;
+typedef float depth_t;
 
-typedef struct _RawColorRGBA
+typedef struct _raw_color_rgba
 {
     uchar r, g, b, a;
-} RawColorRGBA;
+} raw_color_rgba_t;
 
-typedef struct _FrameBuffer
+typedef struct _frame_buffer
 {
-    RawColorRGBA*    color;
-    Depth*          depth;
-} FrameBuffer;
+    raw_color_rgba_t*	color;
+    depth_t*			depth;
+} frame_buffer_t;
 
-typedef struct _Fragment
+typedef struct _fragment
 {
-    ScreenPosition position;
-    RawColorRGBA color;
-    Depth depth;
-} Fragment;
+    screen_position_t position;
+    raw_color_rgba_t color;
+    depth_t depth;
+} fragment_t;
 
-typedef struct _Bin
+typedef struct _bin
 {
     uint width;
     uint height;
     uint x;
     uint y;
-} Bin;
+} bin_t;
 
 typedef float4 point_t;
 typedef struct _triangle
@@ -86,22 +72,33 @@ typedef struct _triangle
 	point_t p2;
 } triangle_t;
 
-typedef struct _BinQueueConfig
+typedef struct _bin_queue_config
 {
     uint bin_width;
     uint bin_height;
     uint queue_size;
-} BinQueueConfig;
+} bin_queue_config_t;
+
+typedef struct _triangle_record
+{
+	triangle_t triangle;
+} triangle_record_t;
 
 // ----------------------------------------------------------------------------
 
 // -------------------------------------- Globals -------------------------------------- 
 
-#define RAW_RED ((RawColorRGBA) {255, 0, 0})
+#define RAW_RED ((raw_color_rgba_t) {255, 0, 0})
 
 #define r(vec) (vec.x)
 #define g(vec) (vec.y)
 #define b(vec) (vec.z)
+
+#ifndef MAX_WORK_GROUP_COUNT
+    #define MAX_WORK_GROUP_COUNT (16)
+#endif
+
+#define INVALID_INDEX (UINT_MAX)
 
 // ----------------------------------------------------------------------------
 
@@ -109,7 +106,7 @@ typedef struct _BinQueueConfig
 // -------------------------------------- Utilities -------------------------------------- 
 
 // Returns the 1d index of pos in a 2d array with width and height as in dim
-uint index_from_screen(const ScreenPosition pos, const ScreenDimension dim)
+uint index_from_screen(const screen_position_t pos, const screen_dimension_t dim)
 {
     return pos.y * dim.width + pos.x;
 }
@@ -152,20 +149,20 @@ int axis_signed_from_ndc(const float pos, const uint length)
 }
 
 // Convertes NDC to Screen Coordinates
-void screen_from_ndc(const NDCPosition ndc, const ScreenDimension dim, global ScreenPosition* screen)
+void screen_from_ndc(const ndc_position_t ndc, const screen_dimension_t dim, global screen_position_t* screen)
 {
     screen->x = axis_screen_from_ndc(ndc.x, dim.width);
     screen->y = axis_screen_from_ndc(ndc.y, dim.height);
 }
 
 // Convertes Screen Coordinates to NDC
-void ndc_from_screen(const ScreenPosition screen, const ScreenDimension dim, global NDCPosition* result)
+void ndc_from_screen(const screen_position_t screen, const screen_dimension_t dim, global ndc_position_t* result)
 {
     result->x = axis_ndc_from_screen(screen.x, dim.width);
     result->y = axis_ndc_from_screen(screen.y, dim.height);
 }
 
-void ndc_from_screen_p(const ScreenPosition screen, const ScreenDimension dim, NDCPosition* result)
+void ndc_from_screen_p(const screen_position_t screen, const screen_dimension_t dim, ndc_position_t* result)
 {
     result->x = axis_ndc_from_screen(screen.x, dim.width);
     result->y = axis_ndc_from_screen(screen.y, dim.height);
@@ -173,25 +170,12 @@ void ndc_from_screen_p(const ScreenPosition screen, const ScreenDimension dim, N
 
 
 // Convertes the middle of a pixel to NDC
-void pixel_mid_point_from_screen(const ScreenPosition screen, const ScreenDimension dim, NDCPosition* result)
+void pixel_mid_point_from_screen(const screen_position_t screen, const screen_dimension_t dim, ndc_position_t* result)
 {
     result->x = axis_pixel_mid_point(screen.x, dim.width);
     result->y = axis_pixel_mid_point(screen.y, dim.height);
 }
 
-// Deprecated
-void signed_from_ndc(const NDCPosition ndc, const ScreenDimension dim, SignedScreenPosition* screen)
-{
-    screen->x = axis_signed_from_ndc(ndc.x, dim.width);
-    screen->y = axis_signed_from_ndc(ndc.y, dim.height);
-}
-
-// Deprecated
-void screen_from_signed(const SignedScreenPosition pos, const ScreenDimension dim, global ScreenPosition* screen)
-{
-    screen->x = pos.x + dim.width / 2;
-    screen->y = pos.y + dim.height / 2;
-}
 
 
 // ----------------------------------------------------------------------------
@@ -221,14 +205,14 @@ void screen_from_signed(const SignedScreenPosition pos, const ScreenDimension di
 #define DEBUG_MESSAGE8(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)         DEBUG(printf(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8))
 #define DEBUG_MESSAGE9(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)   DEBUG(printf(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9))
 
-#define REPORT_GLOBAL(msg)												DEBUG_MESSAGE2("[%d, %d] -> " msg, get_global_id(0), get_global_id(1))
-#define REPORT_GLOBAL1(msg, arg1)                                       DEBUG_MESSAGE3("[%d, %d] -> " msg, get_global_id(0), get_global_id(1), arg1)
-#define REPORT_GLOBAL2(msg, arg1, arg2)                                 DEBUG_MESSAGE4("[%d, %d] -> " msg, get_global_id(0), get_global_id(1), arg1, arg2)
-#define REPORT_GLOBAL3(msg, arg1, arg2, arg3)                           DEBUG_MESSAGE5("[%d, %d] -> " msg, get_global_id(0), get_global_id(1), arg1, arg2, arg3)
-#define REPORT_GLOBAL4(msg, arg1, arg2, arg3, arg4)                     DEBUG_MESSAGE6("[%d, %d] -> " msg, get_global_id(0), get_global_id(1), arg1, arg2, arg3, arg4)
-#define REPORT_GLOBAL5(msg, arg1, arg2, arg3, arg4, arg5)               DEBUG_MESSAGE7("[%d, %d] -> " msg, get_global_id(0), get_global_id(1), arg1, arg2, arg3, arg4, arg5)
-#define REPORT_GLOBAL6(msg, arg1, arg2, arg3, arg4, arg5, arg6)         DEBUG_MESSAGE8("[%d, %d] -> " msg, get_global_id(0), get_global_id(1), arg1, arg2, arg3, arg4, arg5, arg6)
-#define REPORT_GLOBAL7(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7)   DEBUG_MESSAGE9("[%d, %d] -> " msg, get_global_id(0), get_global_id(1), arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+#define REPORT_GLOBAL(msg)												DEBUG_MESSAGE2("[%d, %d] -> " msg "\n", get_global_id(0), get_global_id(1))
+#define REPORT_GLOBAL1(msg, arg1)                                       DEBUG_MESSAGE3("[%d, %d] -> " msg "\n", get_global_id(0), get_global_id(1), arg1)
+#define REPORT_GLOBAL2(msg, arg1, arg2)                                 DEBUG_MESSAGE4("[%d, %d] -> " msg "\n", get_global_id(0), get_global_id(1), arg1, arg2)
+#define REPORT_GLOBAL3(msg, arg1, arg2, arg3)                           DEBUG_MESSAGE5("[%d, %d] -> " msg "\n", get_global_id(0), get_global_id(1), arg1, arg2, arg3)
+#define REPORT_GLOBAL4(msg, arg1, arg2, arg3, arg4)                     DEBUG_MESSAGE6("[%d, %d] -> " msg "\n", get_global_id(0), get_global_id(1), arg1, arg2, arg3, arg4)
+#define REPORT_GLOBAL5(msg, arg1, arg2, arg3, arg4, arg5)               DEBUG_MESSAGE7("[%d, %d] -> " msg "\n", get_global_id(0), get_global_id(1), arg1, arg2, arg3, arg4, arg5)
+#define REPORT_GLOBAL6(msg, arg1, arg2, arg3, arg4, arg5, arg6)         DEBUG_MESSAGE8("[%d, %d] -> " msg "\n", get_global_id(0), get_global_id(1), arg1, arg2, arg3, arg4, arg5, arg6)
+#define REPORT_GLOBAL7(msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7)   DEBUG_MESSAGE9("[%d, %d] -> " msg "\n", get_global_id(0), get_global_id(1), arg1, arg2, arg3, arg4, arg5, arg6, arg7)
 
 #define DEBUG_ITEM_SPECIFIC(i, j, k, msg) DEBUG(if (IS_WORK_ITEM_GLOBAL(i, j, k)) { printf(msg); } else {})
 #define DEBUG_ITEM_SPECIFIC1(i, j, k, msg, arg1) DEBUG(if (IS_WORK_ITEM_GLOBAL(i, j, k)) { printf(msg, arg1); } else {})
@@ -266,13 +250,13 @@ void screen_from_signed(const SignedScreenPosition pos, const ScreenDimension di
 // -------------------------------------- Testing -------------------------------------- 
 
 // Unit testing screen_from_ndc
-kernel void screen_from_ndc_test(NDCPosition pos, ScreenDimension dim, global ScreenPosition* res)
+kernel void screen_from_ndc_test(ndc_position_t pos, screen_dimension_t dim, global screen_position_t* res)
 {
     screen_from_ndc(pos, dim, res);
 }
 
 // Unit testing ndc_from_screen
-kernel void ndc_from_screen_test(ScreenPosition pos, ScreenDimension dim, global NDCPosition* res)
+kernel void ndc_from_screen_test(screen_position_t pos, screen_dimension_t dim, global ndc_position_t* res)
 {
     ndc_from_screen(pos, dim, res);
 }

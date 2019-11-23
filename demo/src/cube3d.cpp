@@ -52,7 +52,7 @@ class CubeApp : public App
 {
 public:
 	CubeApp(const nr::string& name)
-		: App("Rotating Cube", nr::ScreenDimension{ 640, 480 }), m_hostVertecies(new Triangle[12])
+		: App(name, nr::ScreenDimension{ 640, 480 }), m_hostVertecies(new Triangle[12])
 	{
 	}
 
@@ -63,11 +63,12 @@ protected:
 
 		const nr_float zNear = 0.5;
 		const nr_float zFar = 20;
+		const nr_float fov = 2 * M_PI / 4;
 
 		m_vertecies = nr::VertexBuffer::make(renderContext, 12, ret);
 		if (nr::error::isFailure(ret)) return ret;
 
-		ret = pipeline.setFieldOfView(2 * M_PI / 4);
+		ret = pipeline.setFieldOfView(fov);
 		if (nr::error::isFailure(ret)) return ret;
 
 		ret = pipeline.setZNearPlane(zNear);
@@ -78,6 +79,8 @@ protected:
 
 		pipeline.setClearColor({ 0, 0, 0, 0 });
 		pipeline.setClearDepth(1.0f);
+
+		std::printf("Rendering state data: zNear=%f, zFar=%f, fov=%f\n", zNear, zFar, 180 * M_1_PI * fov);
 		
 		return ret;
 	}
@@ -102,7 +105,7 @@ protected:
 	void transform(const nr_float angle)
 	{
 		Matrix r = Matrix::rotation(Y, Z, angle);
-		Matrix t = Matrix::translation(6, 3.6, 7);
+		Matrix t = Matrix::translation(1.5, 1.5, 4.5);
 		transform(t * r);
 	}
 
@@ -176,16 +179,6 @@ protected:
 			std::this_thread::sleep_for(std::chrono::microseconds(16));
 		}
 
-		if (isKeyPressed(GLFW_KEY_R))
-		{
-			std::cout << "Angle: " << angle << " (rad)" << std::endl;
-		}
-
-		if (isKeyPressed(GLFW_KEY_D))
-		{
-			std::cout << "Angle: " << 180 * angle / M_PI << " (deg)" << std::endl;
-		}
-
 		return CL_SUCCESS;
 	}
 
@@ -215,6 +208,12 @@ protected:
 		m_offsetZ -= DELTA_Z * isKeyPressed(GLFW_KEY_UP);
 
 		m_offsetAngle += DELTA_ANGLE * isKeyPressed(GLFW_KEY_SPACE);
+
+		auto log = isKeyPressed(GLFW_KEY_I);
+		if (log)
+		{
+			std::printf("Cube orientation: <%f, %f, %f, %f>\n", m_offsetX, m_offsetY, m_offsetZ, M_1_PI * 180 * m_offsetAngle);
+		}
 		
 		transform(Matrix::translation(m_offsetX, m_offsetY, m_offsetZ) * Matrix::rotation(X, Y, m_offsetAngle));
 		return draw(queue);

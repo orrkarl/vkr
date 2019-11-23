@@ -1,4 +1,4 @@
 #pragma once
 
-#include "compilation.h"
-#include "perspective.h"
+#include "post_processing/all.h"
+#include "shading/all.h"

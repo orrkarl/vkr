@@ -42,6 +42,9 @@ Pipeline::Pipeline(const Context& context, const Device& device, const CommandQu
 
 	m_vertexReduce = src.vertexReducer(err);
 	if (error::isFailure(err)) return;
+
+	m_vertexPostProcessor = src.vertexPostProcessor(err);
+	if (error::isFailure(err)) return;
 	
 	err = m_binRaster.setBinQueueConfig(m_binQueueConfig);
 	if (error::isFailure(err)) return;
@@ -56,7 +59,6 @@ Pipeline::Pipeline(const Context& context, const Device& device, const CommandQu
 	if (error::isFailure(err)) return;
 
 	err = preallocate(context, MAX_SCREEN_DIM, m_binQueueConfig, m_binRasterWorkGroupCount);
-
 }
 
 Pipeline::Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, cl_status& err)
@@ -170,13 +172,18 @@ cl_status Pipeline::render(const VertexBuffer& primitives, const Primitive& prim
 		return CL_INVALID_VALUE;
 	}
 
+	m_vertexReduce.setExecutionRange(primitiveCount * 3);
+	m_vertexPostProcessor.setExecutionRange(primitiveCount);
 	m_binRaster.setExecutionRange(m_screenDimension, m_binQueueConfig, m_binRasterWorkGroupCount);
 	m_fineRaster.setExecutionRange(m_screenDimension, m_binQueueConfig, m_binRasterWorkGroupCount);
-	m_vertexReduce.setExecutionRange(primitiveCount * 3);
 
-	m_vertexReduce.setSimplexInputBuffer(primitives);
+	m_vertexReduce.setVertexInputBuffer(primitives);
 	if (error::isFailure(err)) return err;
-	m_vertexReduce.setSimplexOutputBuffer(primitives.reducedVertecies);
+	m_vertexReduce.setVertexOutputBuffer(primitives.reducedVertecies);
+	if (error::isFailure(err)) return err;
+	m_vertexPostProcessor.setTriangleInputBuffer(primitives.reducedVertecies);
+	if (error::isFailure(err)) return err;
+	m_vertexPostProcessor.setTriangleRecordOutputBuffer(primitives.reducedVertecies);
 	if (error::isFailure(err)) return err;
 	m_binRaster.setTriangleInputBuffer(primitives.reducedVertecies);
 	if (error::isFailure(err)) return err;
@@ -189,6 +196,12 @@ cl_status Pipeline::render(const VertexBuffer& primitives, const Primitive& prim
 	if (error::isFailure(err))
 	{
 		std::cerr << "Could not enqueue vertex reduce! " << utils::stringFromCLError(err) << std::endl;
+		return err;
+	}
+	err = m_commandQueue.enqueueDispatchCommand(m_vertexPostProcessor);
+	if (error::isFailure(err))
+	{
+		std::cerr << "Could not enqueue vertex post processor! " << utils::stringFromCLError(err) << std::endl;
 		return err;
 	}
 	err = m_commandQueue.enqueueDispatchCommand(m_binRaster);

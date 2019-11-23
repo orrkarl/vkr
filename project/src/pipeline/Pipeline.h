@@ -21,6 +21,7 @@
 #include "Source.h"
 #include "VertexBuffer.h"
 #include "VertexReducer.h"
+#include "VertexPostProcessor.h"
 
 namespace nr
 {
@@ -81,7 +82,7 @@ public:
 	 * @brief Set the viewport size
 	 * 
 	 * @param screenDim new viewport size
-	 * @return cl_status internal OpenCL call status
+	 * @return internal OpenCL call status
 	 */
 	cl_status viewport(const ScreenDimension& screenDim);
 
@@ -89,7 +90,7 @@ public:
 	 * @brief clear the framebuffer 
 	 * 
 	 * This function will enqueue fill commands to the framebuffer with given defaults
-	 * @return cl_status internal OpenCL call status
+	 * @return internal OpenCL call status
 	 */
 	cl_status clear() const;
 
@@ -124,7 +125,7 @@ public:
 	 * @param primitives render data source
 	 * @param primitiveType render data type
 	 * @param primitiveCount render data type
-	 * @return cl_status internal OpenCL call status
+	 * @return internal OpenCL call status
 	 */
 	cl_status render(const VertexBuffer& primitives, const Primitive& primitiveType, const nr_uint primitiveCount);
 
@@ -133,7 +134,7 @@ public:
 	 * 
 	 * @note This function blocks execution until the entire buffer is copied
 	 * @param bitmap host buffer containing enough place for the framebuffer
-	 * @return cl_status internal OpenCL call status
+	 * @return internal OpenCL call status
 	 */
 	cl_status copyFrameBuffer(RawColorRGBA* bitmap) const;
 	
@@ -149,20 +150,21 @@ private:
 	static const nr_uint		 DEFAULT_BATCH_SIZE;
 	static const ScreenDimension MAX_SCREEN_DIM;
 
-	nr_uint					m_batchSize;
-	detail::BinQueueConfig	m_binQueueConfig;
-	Buffer					m_binQueues;
-	detail::BinRasterizer	m_binRaster;
-	nr_uint					m_binRasterWorkGroupCount;
-	RawColorRGBA			m_clearColor;
-	Depth					m_clearDepth;
-	CommandQueue			m_commandQueue;
-	Buffer					m_globalBatchIndex;
-	detail::FineRasterizer	m_fineRaster;
-	FrameBuffer				m_frame;
-	Buffer					m_overflowNotifier;
-	ScreenDimension			m_screenDimension;
-	detail::VertexReducer	m_vertexReduce;
+	nr_uint						m_batchSize;
+	detail::BinQueueConfig		m_binQueueConfig;
+	Buffer						m_binQueues;
+	detail::BinRasterizer		m_binRaster;
+	nr_uint						m_binRasterWorkGroupCount;
+	RawColorRGBA				m_clearColor;
+	Depth						m_clearDepth;
+	CommandQueue				m_commandQueue;
+	Buffer						m_globalBatchIndex;
+	detail::FineRasterizer		m_fineRaster;
+	FrameBuffer					m_frame;
+	Buffer						m_overflowNotifier;
+	ScreenDimension				m_screenDimension;
+	detail::VertexPostProcessor	m_vertexPostProcessor;
+	detail::VertexReducer		m_vertexReduce;
 };
 
 }

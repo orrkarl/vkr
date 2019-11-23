@@ -44,7 +44,7 @@ float4 mk_triangle_bounding_rect(const local float x[3], const local float y[3])
 
 
 // Calculates triangle bounding box, than checkes it it has any intersection with the bin
-bool is_triangle_in_bin(const local float x[3], const local float y[3], const Bin bin, const ScreenDimension dim)
+bool is_triangle_in_bin(const local float x[3], const local float y[3], const bin_t bin, const screen_dimension_t dim)
 {
     float4 triangle_bounds = mk_triangle_bounding_rect(x, y);
     float4 bin_bounds = (float4)(
@@ -53,9 +53,9 @@ bool is_triangle_in_bin(const local float x[3], const local float y[3], const Bi
     return bin_bounds.x <= triangle_bounds.z && triangle_bounds.x <= bin_bounds.z && bin_bounds.y <= triangle_bounds.w && triangle_bounds.y <= bin_bounds.w;
 }
 
-Bin make_bin(const ScreenDimension dim, const uint index_x, const uint index_y, const uint bin_width, const uint bin_height)
+bin_t make_bin(const screen_dimension_t dim, const uint index_x, const uint index_y, const uint bin_width, const uint bin_height)
 {
-    Bin ret;
+    bin_t ret;
     ret.x = index_x * bin_width;
     ret.y = index_y * bin_height;
     ret.width = min(dim.width - ret.x, bin_width);
@@ -64,11 +64,10 @@ Bin make_bin(const ScreenDimension dim, const uint index_x, const uint index_y, 
 }
 
 // Copies the contents of the global triangle buffer to local memory for a given batch
-event_t reduce_triangle_buffer(
-    const global triangle_t* triangles, 
+void reduce_triangle_buffer(
+    const global triangle_record_t* triangles, 
     const uint triangle_count, 
     const uint offset, 
-    event_t event, 
     local float* result_x, 
     local float* result_y)
 {
@@ -84,19 +83,17 @@ event_t reduce_triangle_buffer(
 			result_y[i] = src_base[i * 4 + 1];
 		}
 	}
-
-	return 0;
 }
 
 // ----------------------------------------------------------------------------
 
 kernel void bin_rasterize(
-    const global triangle_t* triangle_data,
+    const global triangle_record_t* triangle_data,
     const uint triangle_count,
-    const ScreenDimension dim,
-    const BinQueueConfig config,
+    const screen_dimension_t dim,
+    const bin_queue_config_t config,
     global bool* has_overflow,
-    global Index* bin_queues,
+    global index_t* bin_queues,
     global uint* g_batch_index)
 {
     local float reduced_triangles_x[BATCH_COUNT * 3];
@@ -104,14 +101,12 @@ kernel void bin_rasterize(
     local uint current_batch_index;
 
     // Workaround for that weird compiler bug
-    private const ScreenDimension screen_dim = dim;
+    private const screen_dimension_t screen_dim = dim;
     
     private uint index_x = get_local_id(0);
     private uint index_y = get_local_id(1);
 
     private bool is_init_manager = !index_x && !index_y;
-
-    private event_t batch_acquisition = 0;
     
     private const uint bins_count_x = ceil(((float) screen_dim.width) / config.bin_width);
     private const uint bins_count_y = ceil(((float) screen_dim.height) / config.bin_height);
@@ -122,7 +117,7 @@ kernel void bin_rasterize(
 
     private uint batch_actual_size;
 
-    private const Bin current_bin = make_bin(
+    private const bin_t current_bin = make_bin(
         screen_dim, 
         index_x, 
         index_y, 
@@ -163,21 +158,21 @@ kernel void bin_rasterize(
         
         batch_actual_size = min((uint) BATCH_COUNT, triangle_count - current_batch_index);
 
-        batch_acquisition = reduce_triangle_buffer(
+        reduce_triangle_buffer(
             triangle_data, 
             batch_actual_size, 
             current_batch_index, 
-            0, 
             reduced_triangles_x, 
-            reduced_triangles_y);
-        //wait_group_events(1, &batch_acquisition);
+            reduced_triangles_y
+		);
 
 		barrier(CLK_LOCAL_MEM_FENCE);
 
         for (private uint i = 0; i < batch_actual_size; ++i)
         {
-            if (
-                is_triangle_in_bin(
+			if (isnan(reduced_triangles_x[i * 3])) continue;
+		
+            if (is_triangle_in_bin(
                     reduced_triangles_x + i * 3, 
                     reduced_triangles_y + i * 3, 
                     current_bin, 
@@ -224,8 +219,8 @@ kernel void bin_rasterize(
 kernel void is_triangle_in_bin_test(
     const global float triangle_x[3],
     const global float triangle_y[3], 
-    const Bin bin,
-    const ScreenDimension dim,
+    const bin_t bin,
+    const screen_dimension_t dim,
     global bool* result)
 {
     local float x[3];
@@ -243,16 +238,15 @@ kernel void is_triangle_in_bin_test(
 }
 
 kernel void reduce_triangle_buffer_test(
-    const global triangle_t triangle_data[TOTAL_TRIANGLE_COUNT],
+    const global triangle_record_t triangle_data[TOTAL_TRIANGLE_COUNT],
     const uint offset,
-    global NDCPosition result[TOTAL_TRIANGLE_COUNT * 3])
+    global ndc_position_t result[TOTAL_TRIANGLE_COUNT * 3])
 {
     local float res_x[TOTAL_TRIANGLE_COUNT * 3];
     local float res_y[TOTAL_TRIANGLE_COUNT * 3];
 	const uint copiedTriangleCount = TOTAL_TRIANGLE_COUNT - offset;
 
-    event_t wait = reduce_triangle_buffer(triangle_data, copiedTriangleCount, offset, 0, res_x, res_y);
-    wait_group_events(1, &wait);
+    reduce_triangle_buffer(triangle_data, copiedTriangleCount, offset, res_x, res_y);
 
     if (get_global_id(0) == 0)
     {

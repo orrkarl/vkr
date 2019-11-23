@@ -12,9 +12,6 @@ TARGET_LINK_LIBRARIES(NrasterDemoUtils
 	PUBLIC glfw
 	PUBLIC glew)
 
-ADD_EXECUTABLE(Triangle3d src/triangle3d.cpp)
-TARGET_LINK_LIBRARIES(Triangle3d NrasterDemoUtils)
-
 ADD_EXECUTABLE(Cube3d src/cube3d.cpp)
 TARGET_LINK_LIBRARIES(Cube3d NrasterDemoUtils)
 
@@ -22,20 +19,11 @@ ADD_EXECUTABLE(Simpelxes src/simplexes.cpp)
 TARGET_LINK_LIBRARIES(Simpelxes NrasterDemoUtils)
 
 IF(WIN32)
-    # Copy DLL files to output directory. Yes, this is digusting, but nothing else worked :(
-	
-	ADD_CUSTOM_COMMAND(
-		TARGET Triangle3d
-		PRE_LINK
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		"${PROJECT_BINARY_DIR}/project/Nraster.dll"         
-		${CMAKE_CURRENT_BINARY_DIR}
-	)
-	
+    # Copy DLL files to output directory. Yes, this is digusting, but nothing else worked :(	
 	ADD_CUSTOM_COMMAND(
 		TARGET Cube3d
 		PRE_LINK
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		COMMAND ${CMAKE_COMMAND} -E copy
 		"${PROJECT_BINARY_DIR}/project/Nraster.dll"         
 		${CMAKE_CURRENT_BINARY_DIR}
 	)
@@ -43,24 +31,40 @@ IF(WIN32)
 	ADD_CUSTOM_COMMAND(
 		TARGET Simpelxes
 		PRE_LINK
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		COMMAND ${CMAKE_COMMAND} -E copy
 		"${PROJECT_BINARY_DIR}/project/Nraster.dll"         
 		${CMAKE_CURRENT_BINARY_DIR}
 	)
 
 	IF(CMAKE_BUILD_TYPE STREQUAL Debug)
 		ADD_CUSTOM_COMMAND(
-			TARGET Triangle3d Cube3d Simpelxes
+			TARGET Cube3d
 			PRE_LINK
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			COMMAND ${CMAKE_COMMAND} -E copy
+			"${PROJECT_BINARY_DIR}/bin/glewd.dll"         
+			${CMAKE_CURRENT_BINARY_DIR}
+		)	
+
+		ADD_CUSTOM_COMMAND(
+			TARGET Simpelxes
+			PRE_LINK
+			COMMAND ${CMAKE_COMMAND} -E copy
 			"${PROJECT_BINARY_DIR}/bin/glewd.dll"         
 			${CMAKE_CURRENT_BINARY_DIR}
 		)	
 	ELSE()
 		ADD_CUSTOM_COMMAND(
-			TARGET Triangle3d Cube3d Simpelxes
+			TARGET Cube3d
 			PRE_LINK
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			COMMAND ${CMAKE_COMMAND} -E copy
+			"${PROJECT_BINARY_DIR}/bin/glew.dll"         
+			${CMAKE_CURRENT_BINARY_DIR}
+		)	
+
+		ADD_CUSTOM_COMMAND(
+			TARGET Simpelxes
+			PRE_LINK
+			COMMAND ${CMAKE_COMMAND} -E copy
 			"${PROJECT_BINARY_DIR}/bin/glew.dll"         
 			${CMAKE_CURRENT_BINARY_DIR}
 		)

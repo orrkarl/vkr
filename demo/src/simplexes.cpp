@@ -73,10 +73,10 @@ protected:
 	{
 		nr_status ret = CL_SUCCESS;
 
-		m_d_simplices = nr::VertexBuffer::make(renderContext, 48, ret);
+		m_d_simplices = nr::VertexBuffer::make(renderContext, COUNT, ret);
 		if (nr::error::isFailure(ret)) return ret;
 
-		ret = pipeline.setFieldOfView(2 * M_PI / 4);
+		ret = pipeline.setFieldOfView(2 * M_PI / 2.5);
 		if (nr::error::isFailure(ret)) return ret;
 
 		ret = pipeline.setZNearPlane(zNear);

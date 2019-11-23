@@ -15,9 +15,9 @@ extern const char* fine_rasterizer = R"__CODE__(
 
 // Apply a fragment to the framebuffer (if it passes the depth test)
 void shade(
-    Fragment fragment,
-    const ScreenDimension dim,
-    global RawColorRGBA* color, global Depth* depth)
+    fragment_t fragment,
+    const screen_dimension_t dim,
+    global raw_color_rgba_t* color, global depth_t* depth)
 {
     uint buffer_index;
     buffer_index = index_from_screen(fragment.position, dim);
@@ -32,7 +32,7 @@ void shade(
 }
 
 // Calculate the signed area of a parallelogram
-float area(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2)
+float area(const ndc_position_t p0, const ndc_position_t p1, const ndc_position_t p2)
 {
     float2 a = (float2)(p1.x - p0.x, p1.y - p0.y);
     float2 b = (float2)(p0.x - p2.x, p0.y - p2.y);
@@ -41,7 +41,7 @@ float area(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2)
 }
 
 // Calculate 2d barycentric coordinates
-void barycentric2d(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, NDCPosition position, float3* result)
+void barycentric2d(const ndc_position_t p0, const ndc_position_t p1, const ndc_position_t p2, ndc_position_t position, float3* result)
 {
     float area_total = area(p0, p1, p2);
 
@@ -49,7 +49,7 @@ void barycentric2d(const NDCPosition p0, const NDCPosition p1, const NDCPosition
 }
 
 // Calculate (according to Perspective Correct Interpolation) the inverse of the depth at point
-Depth depth_at_point(const triangle_t triangle, float3 barycentric)
+depth_t depth_at_point(const triangle_t triangle, float3 barycentric)
 {
     return barycentric.x / triangle.p0.z + barycentric.y / triangle.p1.z + barycentric.z / triangle.p2.z;
 }
@@ -62,7 +62,7 @@ bool is_contained_top_left(const float2 vec, float weight)
 }
 
 // Check if a point is "in" a triangle, according to the top\left rule
-bool is_point_in_triangle(const NDCPosition p0, const NDCPosition p1, const NDCPosition p2, float3 barycentric)
+bool is_point_in_triangle(const ndc_position_t p0, const ndc_position_t p1, const ndc_position_t p2, float3 barycentric)
 {		
 	float2 v0 = (float2)(p2.x - p1.x, p2.y - p1.y);
     float2 v1 = (float2)(p0.x - p2.x, p0.y - p2.y);
@@ -71,13 +71,13 @@ bool is_point_in_triangle(const NDCPosition p0, const NDCPosition p1, const NDCP
     return is_contained_top_left(v0, barycentric.x) && is_contained_top_left(v1, barycentric.y) && is_contained_top_left(v2, barycentric.z);
 }
 
-bool is_queue_ended(global const Index* triangle_queue, uint queue_head_idx, uint queue_size)
+bool is_queue_ended(global const index_t* triangle_queue, uint queue_head_idx, uint queue_size)
 {
     return queue_head_idx >= queue_size || (!triangle_queue[queue_head_idx] && queue_head_idx);
 }
 
 // Pick the next non-empty bin queue
-uint pick_queue(global const Index** triangle_queues, uint* current_queue_heads, const uint work_group_count, const uint queue_size)
+uint pick_queue(global const index_t** triangle_queues, uint* current_queue_heads, const uint work_group_count, const uint queue_size)
 {
     uint current_queue = work_group_count;
 
@@ -100,20 +100,20 @@ uint pick_queue(global const Index** triangle_queues, uint* current_queue_heads,
 }
 
 kernel void fine_rasterize(
-    const global triangle_t* triangle_data,
-    const global Index* bin_queues,
-    const ScreenDimension screen_dim,
-    const BinQueueConfig config,
+    const global triangle_record_t* triangle_data,
+    const global index_t* bin_queues,
+    const screen_dimension_t screen_dim,
+    const bin_queue_config_t config,
     const uint work_group_count,
-    global RawColorRGBA* color,
-    global Depth* depth)
+    global raw_color_rgba_t* color,
+    global depth_t* depth)
 {
-    Fragment current_frag;
+    fragment_t current_frag;
     float3 barycentric;
     uint current_queue_elements[MAX_WORK_GROUP_COUNT];
-    global const Index* current_queue_bases[MAX_WORK_GROUP_COUNT];
+    global const index_t* current_queue_bases[MAX_WORK_GROUP_COUNT];
 
-    private NDCPosition current_position_ndc;
+    private ndc_position_t current_position_ndc;
     
     const uint x = get_global_id(0);
     const uint y = get_global_id(1);
@@ -125,9 +125,9 @@ kernel void fine_rasterize(
     const uint elements_per_group = (config.queue_size + 1) * bin_count_x * bin_count_y; 
 
     uint current_queue;
-    Index current_queue_element;
+    index_t current_queue_element;
     
-    NDCPosition p0, p1, p2;
+    ndc_position_t p0, p1, p2;
 
     if (work_group_count >= MAX_WORK_GROUP_COUNT)
     {
@@ -161,14 +161,14 @@ kernel void fine_rasterize(
         
         current_queue_element = current_queue_bases[current_queue][current_queue_elements[current_queue]];
 
-		p0.x = triangle_data[current_queue_element].p0.x;
-		p0.y = triangle_data[current_queue_element].p0.y;
+		p0.x = triangle_data[current_queue_element].triangle.p0.x;
+		p0.y = triangle_data[current_queue_element].triangle.p0.y;
 
-		p1.x = triangle_data[current_queue_element].p1.x;
-		p1.y = triangle_data[current_queue_element].p1.y;
+		p1.x = triangle_data[current_queue_element].triangle.p1.x;
+		p1.y = triangle_data[current_queue_element].triangle.p1.y;
 
-		p2.x = triangle_data[current_queue_element].p2.x;
-		p2.y = triangle_data[current_queue_element].p2.y;
+		p2.x = triangle_data[current_queue_element].triangle.p2.x;
+		p2.y = triangle_data[current_queue_element].triangle.p2.y;
 
         for (uint frag_x = x * config.bin_width; frag_x < min(screen_dim.width, x * config.bin_width + config.bin_width); ++frag_x)
         {
@@ -183,7 +183,7 @@ kernel void fine_rasterize(
 
                 if (is_point_in_triangle(p0, p1, p2, barycentric))
                 {
-                    current_frag.depth = depth_at_point(triangle_data[current_queue_element], barycentric);
+                    current_frag.depth = depth_at_point(triangle_data[current_queue_element].triangle, barycentric);
                     shade(current_frag, screen_dim, color, depth);
                 }
             }
@@ -198,18 +198,18 @@ kernel void fine_rasterize(
 #ifdef _TEST_FINE
 
 kernel void shade_test(
-    const Fragment fragment,
-    const ScreenDimension dim,
-    global RawColorRGBA* color, global Depth* depth)
+    const fragment_t fragment,
+    const screen_dimension_t dim,
+    global raw_color_rgba_t* color, global depth_t* depth)
 {
     shade(fragment, dim, color, depth);
 }
 
-kernel void is_point_in_triangle_test(const triangle_t triangle, const ScreenPosition position, const ScreenDimension dim, global bool* result)
+kernel void is_point_in_triangle_test(const triangle_t triangle, const screen_position_t position, const screen_dimension_t dim, global bool* result)
 {
-    NDCPosition pos;
+    ndc_position_t pos;
     
-    NDCPosition p0, p1, p2;
+    ndc_position_t p0, p1, p2;
     
 	p0.x = triangle.p0.x;
 	p0.y = triangle.p0.y;

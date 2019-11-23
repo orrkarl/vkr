@@ -11,8 +11,10 @@
 #include <utils/converters.h>
 
 #include <array>
+#include <cmath>
 #include <fstream>
 #include <functional>
+#include <limits>
 
 #pragma once
 
