@@ -63,11 +63,12 @@ protected:
 
 		const nr_float zNear = 0.5;
 		const nr_float zFar = 20;
+		const nr_float fov = 2 * M_PI / 4;
 
 		m_vertecies = nr::VertexBuffer::make(renderContext, 12, ret);
 		if (nr::error::isFailure(ret)) return ret;
 
-		ret = pipeline.setFieldOfView(2 * M_PI / 4);
+		ret = pipeline.setFieldOfView(fov);
 		if (nr::error::isFailure(ret)) return ret;
 
 		ret = pipeline.setZNearPlane(zNear);
@@ -78,6 +79,8 @@ protected:
 
 		pipeline.setClearColor({ 0, 0, 0, 0 });
 		pipeline.setClearDepth(1.0f);
+
+		std::printf("Rendering state data: zNear=%f, zFar=%f, fov=%f\n", zNear, zFar, 180 * M_1_PI * fov);
 		
 		return ret;
 	}
@@ -209,12 +212,7 @@ protected:
 		auto log = isKeyPressed(GLFW_KEY_I);
 		if (log)
 		{
-			std::cout << "Triangles:";
-			for (auto i = 0u; i < 12; ++i)
-			{
-				std::cout << "\n\t" << m_hostVertecies[i];
-			}
-			std::cout << "\n------------------------------------------------------------------------------------------------\n\n\n";
+			std::printf("Cube orientation: <%f, %f, %f, %f>\n", m_offsetX, m_offsetY, m_offsetZ, M_1_PI * 180 * m_offsetAngle);
 		}
 		
 		transform(Matrix::translation(m_offsetX, m_offsetY, m_offsetZ) * Matrix::rotation(X, Y, m_offsetAngle));
@@ -234,7 +232,7 @@ int main(const int argc, const char* argv[])
 {
 	if (!App::init()) return EXIT_FAILURE;
 
-	auto app = StaticCubeApp();
+	auto app = DynamicCubeApp();
 	auto ret = app.run();
 
 	App::deinit();

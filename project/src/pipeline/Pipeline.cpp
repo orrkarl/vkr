@@ -59,7 +59,6 @@ Pipeline::Pipeline(const Context& context, const Device& device, const CommandQu
 	if (error::isFailure(err)) return;
 
 	err = preallocate(context, MAX_SCREEN_DIM, m_binQueueConfig, m_binRasterWorkGroupCount);
-
 }
 
 Pipeline::Pipeline(const Context& context, const Device& device, const CommandQueue& queue, const detail::BinQueueConfig config, const nr_uint binRasterWorkGroupCount, cl_status& err)

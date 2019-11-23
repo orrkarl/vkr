@@ -47,6 +47,11 @@ bool cw(const float area)
 	return area < -TRIANGLE_EPSILON;
 }
 
+void discard(global triangle_record_t* record)
+{
+	record->triangle.p0.x = NAN;
+}
+
 kernel void vertex_post_processing(
 	const global triangle_t* triangles,
 	global triangle_record_t* records)
@@ -54,30 +59,21 @@ kernel void vertex_post_processing(
 	private const index_t index = get_global_id(0);
 	private const triangle_t triangle = triangles[index];
 
-	if (!valid(triangle))
+	if (!valid(triangle) || !depth_positive(triangle))
 	{
-		DEBUG_MESSAGE4("[%d] -> depth isn't valid! [<%v3f>, <%v3f>, <%v3f>]\n", index, triangle.p0, triangle.p1, triangle.p2);
-		records[index].triangle.p0.x = NAN;
-		return;
-	}
-
-	if (!depth_positive(triangle))
-	{
-		DEBUG_MESSAGE4("[%d] -> depth isn't positive! (%f, %f, %f)\n", index, triangle.p0.z, triangle.p1.z, triangle.p2.z);
-		records[index].triangle.p0.x = NAN;
+		discard(&records[index]);
 		return;
 	}
 
 	float area = parallelogram_area(triangle);
 
-	if (ccw(area) || degenerate(area))
+	if (!cw(area))
 	{
-		records[index].triangle.p0.x = NAN;
+		discard(&records[index]);
 		return;
 	}
 	
 	records[index].triangle = triangle;
-	DEBUG_MESSAGE4("[%d] -> Result: [<%v3f>, <%v3f>, <%v3f>]\n", index, triangle.p0, triangle.p1, triangle.p2);
 }
 
 
