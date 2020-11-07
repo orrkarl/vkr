@@ -12,14 +12,14 @@
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <CL/cl.h>
 
-using f32 = float;
-using f64 = double;
+using f32 = cl_float;
+using f64 = cl_double;
 
-using i8 = int8_t;
-using u8 = uint8_t;
-using i16 = int16_t;
-using u16 = uint16_t;
-using i32 = int32_t;
-using u32 = uint32_t;
-using i64 = int64_t;
-using u64 = uint64_t;
+using i8 = cl_int8;
+using u8 = cl_uint8;
+using i16 = cl_int16;
+using u16 = cl_uint16;
+using i32 = cl_int;
+using u32 = cl_uint;
+using i64 = cl_long;
+using u64 = cl_long;
