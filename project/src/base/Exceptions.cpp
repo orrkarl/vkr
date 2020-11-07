@@ -8,7 +8,7 @@ CLApiException::CLApiException(Status errorCode, const char* description)
 {
 }
 
-const char* nr::base::CLApiException::what() const
+const char* nr::base::CLApiException::what() const noexcept
 {
     return m_description;
 }
