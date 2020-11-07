@@ -25,3 +25,4 @@ using I64 = cl_long;
 using U64 = cl_long;
 
 using Bool = cl_bool;
+using Status = cl_int;
