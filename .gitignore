@@ -10,5 +10,12 @@ build/
 out/
 CMakeSettings.json
 
+# CLion
+.idea/
+cmake-build-*/
+
+# Vim
+**/.*.un~
+
 # Scripts (which are mostly platform dependent)
 scripts/
