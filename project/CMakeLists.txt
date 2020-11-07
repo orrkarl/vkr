@@ -10,8 +10,6 @@ ADD_LIBRARY(Nraster SHARED
 	src/base/Module.cpp
 	src/base/Platform.cpp)
 
-TARGET_COMPILE_DEFINITIONS(Nraster PRIVATE NR_EXPORT)
-
 TARGET_LINK_LIBRARIES(Nraster
 	PUBLIC ${OpenCL_LIBRARIES})
 
