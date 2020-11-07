@@ -1,66 +1,44 @@
 #include "Buffer.h"
 
-namespace nr
-{
+namespace nr::base {
 
-Buffer::Buffer(const Context& context, const cl_mem_flags& flags, const nr_size& size, cl_status& err)
-	: Buffer(context, flags, size, nullptr, err)
-{
-}
-
-Buffer::Buffer(const Context& context, const cl_mem_flags& flags, const nr_size& size, void* data, cl_status& error)
-	: Wrapped(clCreateBuffer(context, flags, size, data, &error))
+BufferCreateException::BufferCreateException(Status errorCode)
+    : CLApiException(errorCode, "could not create buffer")
 {
 }
 
-Buffer::Buffer()
-	: Wrapped()
+Buffer::BufferTraits::Type Buffer::BufferTraits::create(cl_context context, Buffer::MemoryAccessBitField access, Buffer::MemoryAllocateFlag allocate, size_t size, void* hostPtr)
+{
+    Status status = CL_SUCCESS;
+
+    auto ret = clCreateBuffer(context, static_cast<cl_mem_flags>(access) & static_cast<cl_mem_flags>(allocate), size, hostPtr, &status);
+    if (ret == nullptr) {
+        throw BufferCreateException(status);
+    }
+
+    return ret;
+}
+
+size_t Buffer::size() const
+{
+    size_t ret;
+
+    auto status = clGetMemObjectInfo(m_buffer, CL_MEM_SIZE, sizeof(ret), &ret, nullptr);
+    if (status != CL_SUCCESS) {
+        throw CLApiException(status, "could not acquire buffer size");
+    }
+
+    return ret;
+}
+
+Buffer::Buffer(cl_context context, Buffer::MemoryAccessBitField access, Bool hostAccessible, size_t size)
+    : m_buffer(context, access, hostAccessible ? Buffer::MemoryAllocateFlag::AllocateHostAccessible : Buffer::MemoryAllocateFlag::None, size, nullptr)
 {
 }
 
-Buffer::Buffer(const cl_mem& buffer, const nr_bool retain, cl_status& status)
-	: Wrapped(buffer, retain, status)
+Buffer::Buffer(cl_context context, Buffer::MemoryAccessBitField access, Buffer::MemoryAllocateFlag allocate, size_t size, void* hostPtr)
+    : m_buffer(context, access, allocate, size, hostPtr)
 {
 }
-
-Buffer::Buffer(const Buffer& other)
-	: Wrapped(other)
-{
-}
-
-Buffer::Buffer(Buffer&& other)
-	: Wrapped(other)
-{
-}
-
-Buffer& Buffer::operator=(const Buffer& other)
-{
-	Wrapped::operator=(other);
-	return *this;
-}
-
-Buffer& Buffer::operator=(Buffer&& other)
-{
-	Wrapped::operator=(other);
-	return *this;
-}
-
-Buffer::operator cl_mem() const
-{
-	return object;
-}
-
-const cl_mem& Buffer::get() const
-{
-	return object;
-}
-
-nr_size Buffer::size(cl_status& err) const
-{
-	nr_size ret = 0;
-	err = clGetMemObjectInfo(object, CL_MEM_SIZE, sizeof(nr_size), &ret, nullptr);
-	return ret;
-}
-
 
 }
