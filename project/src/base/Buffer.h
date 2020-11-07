@@ -49,16 +49,17 @@ public:
 private:
     friend Context;
 
-    Buffer(cl_context context, MemoryAccessBitField access, Bool hostAccessible, size_t size);
-
-    Buffer(cl_context context, MemoryAccessBitField access, MemoryAllocateFlag allocate, size_t size, void* hostPtr);
-
     struct BufferTraits {
         using Type = cl_mem;
 
         static constexpr auto release = clReleaseMemObject;
-        static Type create(cl_context context, MemoryAccessBitField access, MemoryAllocateFlag allocate, size_t size, void* hostPtr);
     };
+
+    static typename BufferTraits::Type create(cl_context context, Buffer::MemoryAccessBitField access, Buffer::MemoryAllocateFlag allocate, size_t size, void* hostPtr);
+
+    Buffer(cl_context context, MemoryAccessBitField access, Bool hostAccessible, size_t size);
+
+    Buffer(cl_context context, MemoryAccessBitField access, MemoryAllocateFlag allocate, size_t size, void* hostPtr);
 
     UniqueWrapper<BufferTraits> m_buffer;
 };

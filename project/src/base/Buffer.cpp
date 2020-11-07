@@ -7,7 +7,7 @@ BufferCreateException::BufferCreateException(Status errorCode)
 {
 }
 
-Buffer::BufferTraits::Type Buffer::BufferTraits::create(cl_context context, Buffer::MemoryAccessBitField access, Buffer::MemoryAllocateFlag allocate, size_t size, void* hostPtr)
+Buffer::BufferTraits::Type Buffer::create(cl_context context, Buffer::MemoryAccessBitField access, Buffer::MemoryAllocateFlag allocate, size_t size, void* hostPtr)
 {
     Status status = CL_SUCCESS;
 
@@ -32,12 +32,12 @@ size_t Buffer::size() const
 }
 
 Buffer::Buffer(cl_context context, Buffer::MemoryAccessBitField access, Bool hostAccessible, size_t size)
-    : m_buffer(context, access, hostAccessible ? Buffer::MemoryAllocateFlag::AllocateHostAccessible : Buffer::MemoryAllocateFlag::None, size, nullptr)
+    : m_buffer(create(context, access, hostAccessible ? Buffer::MemoryAllocateFlag::AllocateHostAccessible : Buffer::MemoryAllocateFlag::None, size, nullptr))
 {
 }
 
 Buffer::Buffer(cl_context context, Buffer::MemoryAccessBitField access, Buffer::MemoryAllocateFlag allocate, size_t size, void* hostPtr)
-    : m_buffer(context, access, allocate, size, hostPtr)
+    : m_buffer(create(context, access, allocate, size, hostPtr))
 {
 }
 

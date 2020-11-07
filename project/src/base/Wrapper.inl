@@ -43,9 +43,8 @@ UniqueWrapper<WrappedTraits>::UniqueWrapper(UniqueWrapper&& other) noexcept
 }
 
 template <class WrappedTraits>
-template <typename... Args>
-UniqueWrapper<WrappedTraits>::UniqueWrapper(Args&&... args)
-    : m_object(WrappedTraits::create(std::forward<Args&&>(args)...))
+UniqueWrapper<WrappedTraits>::UniqueWrapper(Type object)
+    : m_object(object)
 {
 }
 

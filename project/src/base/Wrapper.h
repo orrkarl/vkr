@@ -9,8 +9,7 @@ class UniqueWrapper {
 public:
     using Type = typename WrappedTraits::Type;
 
-    template <typename... Args>
-    explicit UniqueWrapper(Args&&... args);
+    explicit UniqueWrapper(Type object = Type());
 
     UniqueWrapper(const UniqueWrapper&) = delete;
     UniqueWrapper& operator=(const UniqueWrapper&) = delete;
