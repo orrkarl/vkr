@@ -20,7 +20,7 @@ public:
 
     ~UniqueWrapper();
 
-    explicit operator Type() const;
+    operator Type() const;
 
     [[nodiscard]] bool isValid() const;
 
