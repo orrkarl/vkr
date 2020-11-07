@@ -1,18 +1,11 @@
-ADD_EXECUTABLE(NrasterTest 
-	src/tests.cpp
-	src/includes.cpp
-	
-	src/pipeline/utils.cpp)
+ADD_EXECUTABLE(NrasterTest src/tests.cpp)
 
-TARGET_LINK_LIBRARIES(NrasterTest 
-	PRIVATE Nraster
-	PRIVATE gtest 
+TARGET_LINK_LIBRARIES(NrasterTest
+	PRIVATE gtest
 	PRIVATE gmock)
 
 TARGET_INCLUDE_DIRECTORIES(NrasterTest 
-	PRIVATE ${NRASTER_ALL_INCLUDES}
-	PRIVATE ${gtest_INCLUDE_DIRS}
-	PRIVATE ${OpenCL_INCLUDE_DIRS})
+	PRIVATE ${gtest_INCLUDE_DIRS})
 
 if(WIN32)
     # Copy DLL files to output directory
