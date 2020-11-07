@@ -7,7 +7,7 @@ namespace nr::base {
 template <class WrappedTraits>
 class UniqueWrapper {
 public:
-    using typename WrappedTraits::Type;
+    using Type = typename WrappedTraits::Type;
 
     template <typename... Args>
     explicit UniqueWrapper(Args&&... args);
