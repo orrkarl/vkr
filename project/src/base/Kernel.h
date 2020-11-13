@@ -113,8 +113,9 @@ private:
     friend class CommandQueue;
 
     struct KernelTraits {
-        static constexpr auto release = clReleaseKernel;
         using Type = cl_kernel;
+
+        static constexpr auto release = clReleaseKernel;
     };
 
     cl_kernel rawHandle() const;
