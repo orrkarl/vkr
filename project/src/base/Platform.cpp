@@ -31,7 +31,7 @@ Platform::Platform(cl_platform_id platform)
 {
 }
 
-std::vector<Device> Platform::getDevicesByType(cl_device_type type)
+std::vector<RootDevice> Platform::getDevicesByType(cl_device_type type)
 {
     cl_uint deviceCount;
     auto status = clGetDeviceIDs(m_object, type, 0, nullptr, &deviceCount);
@@ -45,14 +45,9 @@ std::vector<Device> Platform::getDevicesByType(cl_device_type type)
         throw CLApiException(status, "could not enumerate devices");
     }
 
-    std::vector<Device> ret(deviceCount);
+    std::vector<RootDevice> ret(deviceCount);
     for (auto i = 0u; i < deviceCount; ++i) {
-        status = clRetainDevice(deviceIDs[i]);
-        if (status != CL_SUCCESS) {
-            throw CLApiException(status, "could not retain device ID");
-        }
-
-        ret[i] = Device(deviceIDs[i]);
+        ret[i] = RootDevice(deviceIDs[i]);
     }
 
     return ret;

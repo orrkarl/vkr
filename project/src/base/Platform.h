@@ -4,9 +4,9 @@
 
 #include <vector>
 
-#include "Device.h"
 #include "DeviceType.h"
 #include "Exceptions.h"
+#include "RootDevice.h"
 #include "Wrapper.h"
 
 namespace nr::base {
@@ -37,7 +37,7 @@ public:
      * @param[out] err internal OpenCL call status
      * @return std::vector<Device>
      */
-    [[nodiscard]] std::vector<Device> getDevicesByType(cl_device_type type);
+    [[nodiscard]] std::vector<RootDevice> getDevicesByType(cl_device_type type);
 
 private:
     explicit Platform(cl_platform_id platform);

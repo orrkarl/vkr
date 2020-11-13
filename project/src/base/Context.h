@@ -11,7 +11,7 @@
 
 namespace nr::base {
 
-class Device;
+class RootDevice;
 
 CL_TYPE_CREATE_EXCEPTION(Context);
 
@@ -32,7 +32,7 @@ public:
      * @param properties context properties
      * @param devices devices bound to the context
      */
-    Context(const cl_context_properties* properties, std::vector<Device>& devices);
+    Context(const cl_context_properties* properties, std::vector<RootDevice>& devices);
 
     /**
      * @brief an 'easy to use' constructor for a Context. Using the given properties and collects all of the

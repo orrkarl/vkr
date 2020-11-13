@@ -1,6 +1,6 @@
 #include "Context.h"
 
-#include "Device.h"
+#include "RootDevice.h"
 
 namespace nr::base {
 
@@ -16,7 +16,7 @@ cl_context createFromType(const cl_context_properties* properties, Context::Devi
     return ret;
 }
 
-cl_context createFromDeviceList(const cl_context_properties* properties, std::vector<Device>& devices)
+cl_context createFromDeviceList(const cl_context_properties* properties, std::vector<RootDevice>& devices)
 {
     Status status = CL_SUCCESS;
 
@@ -26,7 +26,7 @@ cl_context createFromDeviceList(const cl_context_properties* properties, std::ve
 
     std::vector<cl_device_id> rawIDs(devices.size());
     std::transform(
-        devices.cbegin(), devices.cend(), rawIDs.begin(), [](Device& dev) { return dev.rawHandle(); });
+        devices.cbegin(), devices.cend(), rawIDs.begin(), [](RootDevice& dev) { return dev.rawHandle(); });
 
     auto ret = clCreateContext(
         properties, static_cast<U32>(rawIDs.size()), rawIDs.data(), nullptr, nullptr, &status);
@@ -37,7 +37,7 @@ cl_context createFromDeviceList(const cl_context_properties* properties, std::ve
     return ret;
 }
 
-Context::Context(const cl_context_properties* properties, std::vector<Device>& devices)
+Context::Context(const cl_context_properties* properties, std::vector<RootDevice>& devices)
     : m_context(createFromDeviceList(properties, devices))
 {
 }

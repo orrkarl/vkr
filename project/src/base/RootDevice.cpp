@@ -1,18 +1,18 @@
-#include "Device.h"
+#include "RootDevice.h"
 #include "Exceptions.h"
 
 #include <memory>
 
 namespace nr::base {
 
-Device::Device(cl_device_id device)
+RootDevice::RootDevice(cl_device_id device)
     : m_object(device)
 {
 }
 
-cl_device_id Device::rawHandle() { return m_object; }
+cl_device_id RootDevice::rawHandle() { return m_object; }
 
-std::string Device::name() const
+std::string RootDevice::name() const
 {
     size_t len = 0;
 
