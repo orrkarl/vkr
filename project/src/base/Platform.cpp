@@ -1,80 +1,63 @@
 #include "Platform.h"
+#include "Exceptions.h"
 
 #include <algorithm>
 
-namespace nr
-{
+namespace nr::base {
 
-std::vector<Platform> Platform::getAvailablePlatforms(cl_status& err)
+std::vector<Platform> Platform::getAvailablePlatforms()
 {
-    cl_uint platformCount;
-    clGetPlatformIDs(0, nullptr, &platformCount);
+    U32 platformCount = 0;
+    auto status = clGetPlatformIDs(0, nullptr, &platformCount);
+    if (status != CL_SUCCESS) {
+        throw PlatformCreateException(status, "could not query total platform count");
+    }
 
     std::vector<cl_platform_id> platformIDs(platformCount);
-    clGetPlatformIDs(platformCount, &platformIDs.front(), nullptr);
+    status = clGetPlatformIDs(platformCount, &platformIDs.front(), nullptr);
+    if (status != CL_SUCCESS) {
+        throw PlatformCreateException(status, "could not enumerate platforms");
+    }
 
     std::vector<Platform> ret(platformCount);
-    std::transform(platformIDs.cbegin(), platformIDs.cend(), ret.begin(), [&](const cl_platform_id& plat){ return Platform(plat); });
+    std::transform(platformIDs.cbegin(), platformIDs.cend(), ret.begin(),
+        [&](const cl_platform_id& plat) { return Platform(plat); });
 
     return ret;
 }
 
-Platform::Platform()
-    : Wrapped()
+Platform::Platform(cl_platform_id platform)
+    : m_object(platform)
 {
 }
 
-Platform::Platform(const cl_platform_id& platform)
-    : Wrapped(platform)
-{
-}
-
-Platform::Platform(const Platform& other)
-    : Wrapped(other)
-{
-}
-
-Platform::Platform(Platform&& other)
-    : Wrapped(other)
-{
-}
-
-Platform& Platform::operator=(const Platform& other)
-{
-    Wrapped::operator=(other);
-    return *this;
-}
-
-Platform& Platform::operator=(Platform&& other)
-{
-    Wrapped::operator=(other);
-    return *this;
-}
-
-Platform::operator cl_platform_id() const 
-{
-    return object;
-}
-
-std::vector<Device> Platform::getDevicesByType(cl_device_type type, cl_status& err)
+std::vector<Device> Platform::getDevicesByType(cl_device_type type)
 {
     cl_uint deviceCount;
-    clGetDeviceIDs(object, type, 0, nullptr, &deviceCount);
+    auto status = clGetDeviceIDs(m_object, type, 0, nullptr, &deviceCount);
+    if (status != CL_SUCCESS) {
+        throw CLApiException(status, "could not query total device count");
+    }
 
     std::vector<cl_device_id> deviceIDs(deviceCount);
-    clGetDeviceIDs(object, type, deviceCount, &deviceIDs.front(), nullptr);
+    status = clGetDeviceIDs(m_object, type, deviceCount, &deviceIDs.front(), nullptr);
+    if (status != CL_SUCCESS) {
+        throw CLApiException(status, "could not enumerate devices");
+    }
 
     std::vector<Device> ret(deviceCount);
-	for (auto i = 0u; i < deviceCount; ++i)
-	{
-		ret[i] = Device(deviceIDs[i], true, err);
-		if (error::isFailure(err))
-		{
-			return std::vector<Device>();
-		}
-	}
+    for (auto i = 0u; i < deviceCount; ++i) {
+        status = clRetainDevice(deviceIDs[i]);
+        if (status != CL_SUCCESS) {
+            throw CLApiException(status, "could not retain device ID");
+        }
+
+        ret[i] = Device(deviceIDs[i]);
+    }
 
     return ret;
 }
+
+cl_platform_id Platform::rawHandle() { return m_object; }
 
 }

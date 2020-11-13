@@ -26,6 +26,11 @@ private:
             : CLApiException(status, "could not create" PrettyTypeName)                                      \
         {                                                                                                    \
         }                                                                                                    \
+                                                                                                             \
+        ExceptionClassName(Status status, const char* description)                                           \
+            : CLApiException(status, description)                                                            \
+        {                                                                                                    \
+        }                                                                                                    \
     };
 
 }

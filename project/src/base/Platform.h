@@ -6,14 +6,18 @@
 
 #include "Device.h"
 #include "DeviceType.h"
+#include "Exceptions.h"
 #include "Wrapper.h"
 
 namespace nr::base {
 
+CL_TYPE_CREATE_EXCEPTION(PlatformCreateException, "platform");
+
 /**
  * @brief Representation of a OpenCL platform - a collection of devices managed by a single vendor
  *
- * This is the entry point for OpenCL initialziation and information (such as availabe extensions) query
+ * This is the entry point for OpenCL initialization and information (such as available extensions) query
+ * @note platform objects don't do any lifetime management, so they're movable and copyable
  */
 class Platform {
 public:
@@ -22,18 +26,23 @@ public:
      *
      * @return std::vector<Platform> all host available platforms
      */
-    static std::vector<Platform> getAvailablePlatforms();
+    [[nodiscard]] static std::vector<Platform> getAvailablePlatforms();
 
-    cl_platform_id rawHandle();
+    [[nodiscard]] cl_platform_id rawHandle();
 
     /**
-     * @brief Aquires all available devices of a certain type
+     * @brief Acquires all available devices of a certain type
      *
      * @param type device type
      * @param[out] err internal OpenCL call status
      * @return std::vector<Device>
      */
-    std::vector<Device> getDevicesByType(cl_device_type type);
+    [[nodiscard]] std::vector<Device> getDevicesByType(cl_device_type type);
+
+private:
+    explicit Platform(cl_platform_id platform);
+
+    cl_platform_id m_object;
 };
 
 }
