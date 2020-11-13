@@ -30,7 +30,7 @@ size_t Buffer::size() const
     return ret;
 }
 
-Buffer::Buffer(const Context& context, Buffer::MemoryAccessBitField access, Bool hostAccessible, size_t size)
+Buffer::Buffer(Context& context, Buffer::MemoryAccessBitField access, Bool hostAccessible, size_t size)
     : m_buffer(create(context.rawHandle(), access,
         hostAccessible ? Buffer::MemoryAllocateFlag::AllocateHostAccessible
                        : Buffer::MemoryAllocateFlag::None,
@@ -38,8 +38,8 @@ Buffer::Buffer(const Context& context, Buffer::MemoryAccessBitField access, Bool
 {
 }
 
-Buffer::Buffer(const Context& context, Buffer::MemoryAccessBitField access,
-    Buffer::MemoryAllocateFlag allocate, size_t size, void* hostPtr)
+Buffer::Buffer(Context& context, Buffer::MemoryAccessBitField access, Buffer::MemoryAllocateFlag allocate,
+    size_t size, void* hostPtr)
     : m_buffer(create(context.rawHandle(), access, allocate, size, hostPtr))
 {
 }

@@ -19,8 +19,8 @@ std::vector<Platform> Platform::getAvailablePlatforms()
         throw PlatformCreateException(status, "could not enumerate platforms");
     }
 
-    std::vector<Platform> ret(platformCount);
-    std::transform(platformIDs.cbegin(), platformIDs.cend(), ret.begin(),
+    std::vector<Platform> ret;
+    std::transform(platformIDs.cbegin(), platformIDs.cend(), std::back_inserter(ret),
         [&](const cl_platform_id& plat) { return Platform(plat); });
 
     return ret;
@@ -45,10 +45,9 @@ std::vector<RootDevice> Platform::getDevicesByType(cl_device_type type)
         throw CLApiException(status, "could not enumerate devices");
     }
 
-    std::vector<RootDevice> ret(deviceCount);
-    for (auto i = 0u; i < deviceCount; ++i) {
-        ret[i] = RootDevice(deviceIDs[i]);
-    }
+    std::vector<RootDevice> ret;
+    std::transform(deviceIDs.cbegin(), deviceIDs.cend(), std::back_inserter(ret),
+        [](cl_device_id dev) { return RootDevice(dev); });
 
     return ret;
 }

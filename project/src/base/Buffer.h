@@ -41,9 +41,9 @@ public:
 
     using MemoryAccessBitField = EnumBitField<MemoryAccessFlag>;
 
-    Buffer(const Context& context, MemoryAccessBitField access, Bool hostAccessible, size_t size);
+    Buffer(Context& context, MemoryAccessBitField access, Bool hostAccessible, size_t size);
 
-    Buffer(const Context& context, MemoryAccessBitField access, MemoryAllocateFlag allocate, size_t size,
+    Buffer(Context& context, MemoryAccessBitField access, MemoryAllocateFlag allocate, size_t size,
         void* hostPtr);
 
     size_t size() const;

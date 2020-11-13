@@ -4,7 +4,7 @@
 
 namespace nr::base {
 
-cl_context createFromType(const cl_context_properties* properties, Context::DeviceTypeBitField deviceType)
+cl_context createFromType(const cl_context_properties* properties, DeviceTypeBitField deviceType)
 {
     Status status = CL_SUCCESS;
 
@@ -26,7 +26,7 @@ cl_context createFromDeviceList(const cl_context_properties* properties, std::ve
 
     std::vector<cl_device_id> rawIDs(devices.size());
     std::transform(
-        devices.cbegin(), devices.cend(), rawIDs.begin(), [](RootDevice& dev) { return dev.rawHandle(); });
+        devices.begin(), devices.end(), rawIDs.begin(), [](RootDevice& dev) { return dev.rawHandle(); });
 
     auto ret = clCreateContext(
         properties, static_cast<U32>(rawIDs.size()), rawIDs.data(), nullptr, nullptr, &status);

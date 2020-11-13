@@ -2,6 +2,8 @@
 
 #include <utility>
 
+#include "Exceptions.h"
+
 namespace nr::base {
 
 template <class WrappedTraits> UniqueWrapper<WrappedTraits>::operator Type() const { return m_object; }
