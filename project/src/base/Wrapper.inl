@@ -7,14 +7,20 @@
 
 namespace nr::base {
 
-template <class WrappedTraits> UniqueWrapper<WrappedTraits>::operator Type() const { return m_object; }
+template <class WrappedTraits>
+UniqueWrapper<WrappedTraits>::operator Type() const
+{
+    return m_object;
+}
 
-template <class WrappedTraits> bool UniqueWrapper<WrappedTraits>::isValid() const
+template <class WrappedTraits>
+bool UniqueWrapper<WrappedTraits>::isValid() const
 {
     return m_object != Type();
 }
 
-template <class WrappedTraits> UniqueWrapper<WrappedTraits>::~UniqueWrapper()
+template <class WrappedTraits>
+UniqueWrapper<WrappedTraits>::~UniqueWrapper()
 {
     WrappedTraits::release(m_object);
 }
@@ -48,6 +54,10 @@ ObjectView<T>::ObjectView(T object)
     : m_rawObject(object)
 {
 }
-template <typename T> T ObjectView<T>::rawHandle() { return m_rawObject; }
+template <typename T>
+T ObjectView<T>::rawHandle()
+{
+    return m_rawObject;
+}
 
 }

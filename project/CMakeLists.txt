@@ -8,7 +8,8 @@ ADD_LIBRARY(Nraster SHARED
 		src/base/Kernel.cpp
 		src/base/Module.cpp
 		src/base/Platform.cpp
-		src/base/RootDevice.cpp)
+		src/base/RootDevice.cpp
+		src/base/Views.cpp)
 
 TARGET_LINK_LIBRARIES(Nraster
 	PUBLIC ${OpenCL_LIBRARIES})

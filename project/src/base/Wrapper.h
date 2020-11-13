@@ -4,7 +4,8 @@
 
 namespace nr::base {
 
-template <class WrappedTraits> class UniqueWrapper {
+template <class WrappedTraits>
+class UniqueWrapper {
 public:
     using Type = typename WrappedTraits::Type;
 
@@ -26,13 +27,14 @@ private:
     Type m_object;
 };
 
-template <typename T> class ObjectView {
+template <typename T>
+class ObjectView {
 public:
     explicit ObjectView(T object);
 
     T rawHandle();
 
-private:
+protected:
     T m_rawObject;
 };
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../predefs.h"
+
 #include "BitField.h"
 #include "Exceptions.h"
 #include "Views.h"
@@ -45,8 +46,6 @@ public:
 
     Buffer(Context& context, MemoryAccessBitField access, MemoryAllocateFlag allocate, size_t size,
         void* hostPtr);
-
-    size_t size() const;
 
     MemoryView view();
 

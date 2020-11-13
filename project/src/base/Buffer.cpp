@@ -18,18 +18,6 @@ cl_mem create(cl_context context, Buffer::MemoryAccessBitField access, Buffer::M
     return ret;
 }
 
-size_t Buffer::size() const
-{
-    size_t ret;
-
-    auto status = clGetMemObjectInfo(m_buffer, CL_MEM_SIZE, sizeof(ret), &ret, nullptr);
-    if (status != CL_SUCCESS) {
-        throw CLApiException(status, "could not acquire buffer size");
-    }
-
-    return ret;
-}
-
 Buffer::Buffer(Context& context, Buffer::MemoryAccessBitField access, Bool hostAccessible, size_t size)
     : m_buffer(create(context.rawHandle(), access,
         hostAccessible ? Buffer::MemoryAllocateFlag::AllocateHostAccessible
@@ -43,6 +31,7 @@ Buffer::Buffer(Context& context, Buffer::MemoryAccessBitField access, Buffer::Me
     : m_buffer(create(context.rawHandle(), access, allocate, size, hostPtr))
 {
 }
+
 MemoryView Buffer::view() { return MemoryView(m_buffer); }
 
 }
