@@ -1,60 +1,34 @@
 #include "Device.h"
+#include "Exceptions.h"
 
 #include <memory>
 
-namespace nr
-{
-Device::Device()
-    : Wrapped()
-{
-}
+namespace nr::base {
 
-Device::Device(const cl_device_id& device, const nr_bool retain, cl_status& status)
-    : Wrapped(device, retain, status)
+Device::Device(cl_device_id device)
+    : m_object(device)
 {
 }
 
-Device::Device(const Device& other)
-    : Wrapped(other)
+cl_device_id Device::rawHandle() { return m_object; }
+
+std::string Device::name() const
 {
-}
+    size_t len = 0;
 
-Device::Device(Device&& other)
-    : Wrapped(other)
-{
-}
+    auto status = clGetDeviceInfo(m_object, CL_DEVICE_NAME, 0, nullptr, &len);
+    if (status != CL_SUCCESS) {
+        throw CLApiException(status, "could not query device name size");
+    }
 
-Device& Device::operator=(const Device& other)
-{
-    Wrapped::operator=(other);
-    return *this;
-}
+    auto ret = std::make_unique<char[]>(len);
 
-Device& Device::operator=(Device&& other)
-{
-    Wrapped::operator=(other);
-    return *this;
-}
+    status = clGetDeviceInfo(m_object, CL_DEVICE_NAME, len, ret.get(), nullptr);
+    if (status != CL_SUCCESS) {
+        throw CLApiException(status, "could not query device name");
+    }
 
-Device::operator cl_device_id() const 
-{
-    return object;
-}
-
-const cl_device_id& Device::get() const
-{
-    return object;
-}
-
-string Device::name() const
-{
-	nr_size len;
-	clGetDeviceInfo(object, CL_DEVICE_NAME, 0, nullptr, &len);
-
-	auto ret = std::make_unique<nr_char[]>(len);
-
-	clGetDeviceInfo(object, CL_DEVICE_NAME, len, ret.get(), nullptr);
-	return string(ret.get(), len);
+    return std::string(ret.get(), len);
 }
 
 }

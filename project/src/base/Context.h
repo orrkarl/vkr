@@ -43,7 +43,7 @@ public:
      * @param properties context properties
      * @param devices devices bound to the context
      */
-    Context(const cl_context_properties* properties, const std::vector<Device>& devices);
+    Context(const cl_context_properties* properties, std::vector<Device>& devices);
 
     /**
      * @brief an 'easy to use' constructor for a Context. Using the given properties and collects all of the
@@ -62,7 +62,7 @@ public:
      *
      * @return cl_context underlying context
      */
-    [[nodiscard]] cl_context rawHandle() const;
+    [[nodiscard]] cl_context rawHandle();
 
 private:
     struct ContextTraits {

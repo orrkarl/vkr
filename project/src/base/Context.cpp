@@ -1,5 +1,7 @@
 #include "Context.h"
 
+#include "Device.h"
+
 namespace nr::base {
 
 cl_context createFromType(const cl_context_properties* properties, Context::DeviceTypeBitField deviceType)
@@ -14,7 +16,7 @@ cl_context createFromType(const cl_context_properties* properties, Context::Devi
     return ret;
 }
 
-cl_context createFromDeviceList(const cl_context_properties* properties, const std::vector<Device>& devices)
+cl_context createFromDeviceList(const cl_context_properties* properties, std::vector<Device>& devices)
 {
     Status status = CL_SUCCESS;
 
@@ -23,8 +25,8 @@ cl_context createFromDeviceList(const cl_context_properties* properties, const s
     }
 
     std::vector<cl_device_id> rawIDs(devices.size());
-    std::transform(devices.cbegin(), devices.cend(), rawIDs.begin(),
-        [](const Device& dev) { return dev.rawDeviceID(); });
+    std::transform(
+        devices.cbegin(), devices.cend(), rawIDs.begin(), [](Device& dev) { return dev.rawHandle(); });
 
     auto ret = clCreateContext(
         properties, static_cast<U32>(rawIDs.size()), rawIDs.data(), nullptr, nullptr, &status);
@@ -35,7 +37,7 @@ cl_context createFromDeviceList(const cl_context_properties* properties, const s
     return ret;
 }
 
-Context::Context(const cl_context_properties* properties, const std::vector<Device>& devices)
+Context::Context(const cl_context_properties* properties, std::vector<Device>& devices)
     : m_context(createFromDeviceList(properties, devices))
 {
 }
@@ -45,6 +47,6 @@ Context::Context(const cl_context_properties* properties, DeviceTypeBitField dev
 {
 }
 
-cl_context Context::rawHandle() const { return m_context; }
+cl_context Context::rawHandle() { return m_context; }
 
 }
