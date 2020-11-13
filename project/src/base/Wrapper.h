@@ -4,12 +4,11 @@
 
 namespace nr::base {
 
-template <class WrappedTraits>
-class UniqueWrapper {
+template <class WrappedTraits> class UniqueWrapper {
 public:
     using Type = typename WrappedTraits::Type;
 
-    explicit UniqueWrapper(Type object = Type());
+    explicit UniqueWrapper(Type object);
 
     UniqueWrapper(const UniqueWrapper&) = delete;
     UniqueWrapper& operator=(const UniqueWrapper&) = delete;
