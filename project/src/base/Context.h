@@ -5,7 +5,7 @@
 #include <functional>
 #include <vector>
 
-#include "BitField.h"
+#include "DeviceType.h"
 #include "Exceptions.h"
 #include "Wrapper.h"
 
@@ -23,17 +23,6 @@ CL_TYPE_CREATE_EXCEPTION(ContextCreateException, "context")
  */
 class Context {
 public:
-    enum class DeviceTypeFlag : cl_device_type {
-        GPU = CL_DEVICE_TYPE_GPU,
-        CPU = CL_DEVICE_TYPE_CPU,
-        Accelerator = CL_DEVICE_TYPE_ACCELERATOR,
-        Default = CL_DEVICE_TYPE_DEFAULT,
-        Custom = CL_DEVICE_TYPE_DEFAULT,
-        ALL = CL_DEVICE_TYPE_ALL
-    };
-
-    using DeviceTypeBitField = EnumBitField<DeviceTypeFlag>;
-
     /**
      * @brief Construct a context object, bound to some devices with certain properties
      *
