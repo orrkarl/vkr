@@ -11,7 +11,7 @@
 
 namespace nr::base {
 
-CL_TYPE_CREATE_EXCEPTION(PlatformCreateException, "platform");
+CL_TYPE_CREATE_EXCEPTION(Platform);
 
 /**
  * @brief Representation of a OpenCL platform - a collection of devices managed by a single vendor

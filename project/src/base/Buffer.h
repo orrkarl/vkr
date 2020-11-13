@@ -9,7 +9,7 @@ namespace nr::base {
 
 class Context;
 
-CL_TYPE_CREATE_EXCEPTION(BufferCreateException, "buffer")
+CL_TYPE_CREATE_EXCEPTION(Buffer);
 
 /**
  * @brief Host representation of a plain OpenCL memory pointer

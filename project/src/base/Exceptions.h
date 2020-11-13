@@ -19,18 +19,18 @@ private:
     const char* m_description;
 };
 
-#define CL_TYPE_CREATE_EXCEPTION(ExceptionClassName, PrettyTypeName)                                         \
-    class ExceptionClassName : public CLApiException {                                                       \
+#define CL_TYPE_CREATE_EXCEPTION(TypeName)                                                                   \
+    class TypeName##CreateException : public CLApiException {                                                \
     public:                                                                                                  \
-        explicit ExceptionClassName(Status status)                                                           \
-            : CLApiException(status, "could not create" PrettyTypeName)                                      \
+        explicit TypeName##CreateException(Status status)                                                    \
+            : CLApiException(status, "could not create" #TypeName)                                           \
         {                                                                                                    \
         }                                                                                                    \
                                                                                                              \
-        ExceptionClassName(Status status, const char* description)                                           \
+        TypeName##CreateException(Status status, const char* description)                                    \
             : CLApiException(status, description)                                                            \
         {                                                                                                    \
         }                                                                                                    \
-    };
+    }
 
 }

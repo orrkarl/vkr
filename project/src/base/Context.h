@@ -13,7 +13,7 @@ namespace nr::base {
 
 class Device;
 
-CL_TYPE_CREATE_EXCEPTION(ContextCreateException, "context")
+CL_TYPE_CREATE_EXCEPTION(Context);
 
 /**
  * @brief bare wrapper for cl_context, for a more comfortable interface.
