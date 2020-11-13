@@ -20,7 +20,7 @@ public:
 
     operator Type() const;
 
-    [[nodiscard]] bool isValid() const;
+    bool isValid() const;
 
 private:
     Type m_object;

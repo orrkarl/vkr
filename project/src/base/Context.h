@@ -51,7 +51,7 @@ public:
      *
      * @return cl_context underlying context
      */
-    [[nodiscard]] cl_context rawHandle();
+    cl_context rawHandle();
 
 private:
     struct ContextTraits {

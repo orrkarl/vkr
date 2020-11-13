@@ -15,6 +15,11 @@ public:
     explicit EventWaitException(Status status);
 };
 
+class BadEventExecutionStatus : public CLApiException {
+public:
+    explicit BadEventExecutionStatus(Status status);
+};
+
 CL_TYPE_CREATE_EXCEPTION(Event);
 
 /**
@@ -23,6 +28,13 @@ CL_TYPE_CREATE_EXCEPTION(Event);
  */
 class EventView {
 public:
+    enum class ExecutionStatus : cl_int {
+        Queued = CL_QUEUED,
+        Submitted = CL_SUBMITTED,
+        Running = CL_RUNNING,
+        Completed = CL_COMPLETE
+    };
+
     /**
      * @brief Blocks until all events in list reached CL_COMPLETE
      *
@@ -41,6 +53,8 @@ public:
      * @return cl_status internal OpenCL call status
      */
     void await() const;
+
+    ExecutionStatus status() const;
 
 private:
     cl_event m_event;

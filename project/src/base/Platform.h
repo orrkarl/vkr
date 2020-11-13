@@ -26,9 +26,9 @@ public:
      *
      * @return std::vector<Platform> all host available platforms
      */
-    [[nodiscard]] static std::vector<Platform> getAvailablePlatforms();
+    static std::vector<Platform> getAvailablePlatforms();
 
-    [[nodiscard]] cl_platform_id rawHandle();
+    cl_platform_id rawHandle();
 
     /**
      * @brief Acquires all available devices of a certain type
@@ -37,7 +37,7 @@ public:
      * @param[out] err internal OpenCL call status
      * @return std::vector<Device>
      */
-    [[nodiscard]] std::vector<RootDevice> getDevicesByType(cl_device_type type);
+    std::vector<RootDevice> getDevicesByType(cl_device_type type);
 
 private:
     explicit Platform(cl_platform_id platform);

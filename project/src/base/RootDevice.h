@@ -15,9 +15,9 @@ namespace nr::base {
  */
 class RootDevice {
 public:
-    [[nodiscard]] cl_device_id rawHandle();
+    cl_device_id rawHandle();
 
-    [[nodiscard]] std::string name() const;
+    std::string name() const;
 
 private:
     friend class Platform;

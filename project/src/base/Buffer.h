@@ -45,7 +45,7 @@ public:
     Buffer(const Context& context, MemoryAccessBitField access, MemoryAllocateFlag allocate, size_t size,
         void* hostPtr);
 
-    [[nodiscard]] size_t size() const;
+     size_t size() const;
 
 private:
     struct BufferTraits {

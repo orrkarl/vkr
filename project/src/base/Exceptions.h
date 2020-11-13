@@ -10,9 +10,9 @@ class CLApiException : public std::exception {
 public:
     CLApiException(Status errorCode, const char* description);
 
-    [[nodiscard]] const char* what() const noexcept override;
+     const char* what() const noexcept override;
 
-    [[nodiscard]] Status errorCode() const;
+     Status errorCode() const;
 
 private:
     Status m_errorCode;
