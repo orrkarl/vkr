@@ -1,74 +1,50 @@
 #include "Context.h"
 
-namespace nr
-{
+namespace nr::base {
 
-Context::Context()
-    : Wrapped()
+cl_context createFromType(const cl_context_properties* properties, Context::DeviceTypeBitField deviceType)
+{
+    Status status = CL_SUCCESS;
+
+    auto ret = clCreateContextFromType(properties, deviceType, nullptr, nullptr, &status);
+    if (ret == nullptr) {
+        throw ContextCreateException(status);
+    }
+
+    return ret;
+}
+
+cl_context createFromDeviceList(const cl_context_properties* properties, const std::vector<Device>& devices)
+{
+    Status status = CL_SUCCESS;
+
+    if (devices.size() > std::numeric_limits<U32>::max()) {
+        throw ContextCreateException(CL_INVALID_VALUE);
+    }
+
+    std::vector<cl_device_id> rawIDs(devices.size());
+    std::transform(devices.cbegin(), devices.cend(), rawIDs.begin(),
+        [](const Device& dev) { return dev.rawDeviceID(); });
+
+    auto ret = clCreateContext(
+        properties, static_cast<U32>(rawIDs.size()), rawIDs.data(), nullptr, nullptr, &status);
+    if (ret == nullptr) {
+        throw ContextCreateException(status);
+    }
+
+    return ret;
+}
+
+Context::Context(const cl_context_properties* properties, const std::vector<Device>& devices)
+    : m_context(createFromDeviceList(properties, devices))
 {
 }
 
-Context::Context(const cl_context& context, const nr_bool retain, cl_status& status)
-	: Wrapped(context, retain, status)
+Context::Context(const cl_context_properties* properties, DeviceTypeBitField deviceType)
+    : m_context(createFromType(properties, deviceType))
 {
 }
 
-Context::Context(const Context& other)
-    : Wrapped(other)
-{
-}
-
-Context::Context(Context&& other)
-    : Wrapped(other)
-{
-}
-
-Context::Context(
-    const cl_context_properties* properties, 
-    std::vector<Device>& devices, 
-    cl_status& err)
-    : Wrapped(
-        clCreateContext(
-            properties, 
-            cl_uint(devices.size()), &devices.front().get(), 
-            nullptr, nullptr, 
-            &err))
-{
-}
-
-Context::Context(
-    const cl_context_properties* properties, 
-    cl_device_type deviceType,          
-    cl_status& err)
-    : Wrapped(
-        clCreateContextFromType(
-            properties, 
-            deviceType,
-            nullptr, nullptr, 
-            &err))
-{
-}
-
-Context::Context(const cl_context_properties* properties, cl_status& err)
-	: Context(properties, CL_DEVICE_TYPE_GPU, err)
-{
-}
-
-Context& Context::operator=(const Context& other)
-{
-    Wrapped::operator=(other);
-    return *this;
-}
-
-Context& Context::operator=(Context&& other)
-{
-    Wrapped::operator=(other);
-    return *this;
-}
-
-Context::operator cl_context() const 
-{
-    return object;
-}
+cl_context Context::rawHandle() const { return m_context; }
 
 }

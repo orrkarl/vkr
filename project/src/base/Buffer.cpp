@@ -1,17 +1,16 @@
 #include "Buffer.h"
 
+#include "Context.h"
+
 namespace nr::base {
 
-BufferCreateException::BufferCreateException(Status errorCode)
-    : CLApiException(errorCode, "could not create buffer")
-{
-}
-
-Buffer::BufferTraits::Type Buffer::create(cl_context context, Buffer::MemoryAccessBitField access, Buffer::MemoryAllocateFlag allocate, size_t size, void* hostPtr)
+cl_mem create(cl_context context, Buffer::MemoryAccessBitField access, Buffer::MemoryAllocateFlag allocate,
+    size_t size, void* hostPtr)
 {
     Status status = CL_SUCCESS;
 
-    auto ret = clCreateBuffer(context, static_cast<cl_mem_flags>(access) & static_cast<cl_mem_flags>(allocate), size, hostPtr, &status);
+    auto ret = clCreateBuffer(context,
+        static_cast<cl_mem_flags>(access) & static_cast<cl_mem_flags>(allocate), size, hostPtr, &status);
     if (ret == nullptr) {
         throw BufferCreateException(status);
     }
@@ -31,13 +30,17 @@ size_t Buffer::size() const
     return ret;
 }
 
-Buffer::Buffer(cl_context context, Buffer::MemoryAccessBitField access, Bool hostAccessible, size_t size)
-    : m_buffer(create(context, access, hostAccessible ? Buffer::MemoryAllocateFlag::AllocateHostAccessible : Buffer::MemoryAllocateFlag::None, size, nullptr))
+Buffer::Buffer(const Context& context, Buffer::MemoryAccessBitField access, Bool hostAccessible, size_t size)
+    : m_buffer(create(context.rawHandle(), access,
+        hostAccessible ? Buffer::MemoryAllocateFlag::AllocateHostAccessible
+                       : Buffer::MemoryAllocateFlag::None,
+        size, nullptr))
 {
 }
 
-Buffer::Buffer(cl_context context, Buffer::MemoryAccessBitField access, Buffer::MemoryAllocateFlag allocate, size_t size, void* hostPtr)
-    : m_buffer(create(context, access, allocate, size, hostPtr))
+Buffer::Buffer(const Context& context, Buffer::MemoryAccessBitField access,
+    Buffer::MemoryAllocateFlag allocate, size_t size, void* hostPtr)
+    : m_buffer(create(context.rawHandle(), access, allocate, size, hostPtr))
 {
 }
 

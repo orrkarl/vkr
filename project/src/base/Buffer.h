@@ -9,15 +9,12 @@ namespace nr::base {
 
 class Context;
 
-class BufferCreateException : public CLApiException {
-public:
-    explicit BufferCreateException(Status errorCode);
-};
+CL_TYPE_CREATE_EXCEPTION(BufferCreateException, "buffer")
 
 /**
  * @brief Host representation of a plain OpenCL memory pointer
- * 
- * This class represents the most simple memory scheme available. Think of this class as a "Device pointer". 
+ *
+ * This class represents the most simple memory scheme available. Think of this class as a "Device pointer".
  * Internally, this class wraps cl_mem and buffer clCreateBuffer
  * @note Host access (read/write) to the underlying data within the buffer is done with a CommandQueue
  *
@@ -25,7 +22,7 @@ public:
  * @see Context
  */
 class Buffer {
-private:
+public:
     enum class MemoryAccessFlag : cl_mem_flags {
         ReadWrite = CL_MEM_READ_WRITE,
         WriteOnly = CL_MEM_WRITE_ONLY,
@@ -41,25 +38,21 @@ private:
         CopyHostPtr = CL_MEM_COPY_HOST_PTR
     };
 
-public:
     using MemoryAccessBitField = EnumBitField<MemoryAccessFlag>;
+
+    Buffer(const Context& context, MemoryAccessBitField access, Bool hostAccessible, size_t size);
+
+    Buffer(const Context& context, MemoryAccessBitField access, MemoryAllocateFlag allocate, size_t size,
+        void* hostPtr);
 
     [[nodiscard]] size_t size() const;
 
 private:
-    friend Context;
-
     struct BufferTraits {
         using Type = cl_mem;
 
         static constexpr auto release = clReleaseMemObject;
     };
-
-    static typename BufferTraits::Type create(cl_context context, Buffer::MemoryAccessBitField access, Buffer::MemoryAllocateFlag allocate, size_t size, void* hostPtr);
-
-    Buffer(cl_context context, MemoryAccessBitField access, Bool hostAccessible, size_t size);
-
-    Buffer(cl_context context, MemoryAccessBitField access, MemoryAllocateFlag allocate, size_t size, void* hostPtr);
 
     UniqueWrapper<BufferTraits> m_buffer;
 };
