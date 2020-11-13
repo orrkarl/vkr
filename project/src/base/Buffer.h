@@ -3,6 +3,7 @@
 #include "../predefs.h"
 #include "BitField.h"
 #include "Exceptions.h"
+#include "MemoryView.h"
 #include "Wrapper.h"
 
 namespace nr::base {
@@ -45,7 +46,9 @@ public:
     Buffer(const Context& context, MemoryAccessBitField access, MemoryAllocateFlag allocate, size_t size,
         void* hostPtr);
 
-     size_t size() const;
+    size_t size() const;
+
+    MemoryView view();
 
 private:
     struct BufferTraits {

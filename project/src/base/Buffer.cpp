@@ -43,5 +43,6 @@ Buffer::Buffer(const Context& context, Buffer::MemoryAccessBitField access,
     : m_buffer(create(context.rawHandle(), access, allocate, size, hostPtr))
 {
 }
+MemoryView Buffer::view() { return MemoryView(m_buffer); }
 
 }
