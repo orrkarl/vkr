@@ -3,7 +3,7 @@
 #include "../predefs.h"
 #include "BitField.h"
 #include "Exceptions.h"
-#include "MemoryView.h"
+#include "Views.h"
 #include "Wrapper.h"
 
 namespace nr::base {

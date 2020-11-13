@@ -6,8 +6,7 @@ ADD_LIBRARY(Nraster SHARED
 		src/base/Event.cpp
 		src/base/Exceptions.cpp
 		src/base/Kernel.cpp
-		src/base/MemoryView.cpp
-        src/base/Platform.cpp
+		src/base/Platform.cpp
 		src/base/RootDevice.cpp)
 
 TARGET_LINK_LIBRARIES(Nraster

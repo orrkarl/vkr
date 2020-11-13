@@ -6,7 +6,7 @@
 #include <tuple>
 #include <utility>
 
-#include "MemoryView.h"
+#include "Views.h"
 #include "Wrapper.h"
 
 namespace nr::base {

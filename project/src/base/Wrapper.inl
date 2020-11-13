@@ -3,6 +3,7 @@
 #include <utility>
 
 #include "Exceptions.h"
+#include "Wrapper.h"
 
 namespace nr::base {
 
@@ -41,5 +42,12 @@ UniqueWrapper<WrappedTraits>::UniqueWrapper(Type object)
         throw CLApiException(CL_INVALID_VALUE, "could not create CL handle");
     }
 }
+
+template <typename T>
+ObjectView<T>::ObjectView(T object)
+    : m_rawObject(object)
+{
+}
+template <typename T> T ObjectView<T>::rawHandle() { return m_rawObject; }
 
 }

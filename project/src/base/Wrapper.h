@@ -26,6 +26,16 @@ private:
     Type m_object;
 };
 
+template <typename T> class ObjectView {
+public:
+    explicit ObjectView(T object);
+
+    T rawHandle();
+
+private:
+    T m_rawObject;
+};
+
 }
 
 #include "Wrapper.inl"
