@@ -38,6 +38,8 @@ public:
         Completed = CL_COMPLETE
     };
 
+    static std::vector<cl_event> extractEventsSizeLimited(std::vector<EventView>& events);
+
     /**
      * @brief Blocks until all events in list reached CL_COMPLETE
      *
@@ -57,6 +59,13 @@ public:
      */
     void await() const;
 
+    /**
+     * @brief Queries the status of the operation this event waits on, throws if the event-related operation
+     * failed
+     *
+     * @throws BadEventExecutionStatus if the operation this event notifies failed
+     * @return event execution status
+     */
     ExecutionStatus status() const;
 
     cl_event rawHandle();
@@ -66,5 +75,7 @@ private:
 };
 
 using DeviceView = ObjectView<cl_device_id>;
+
+using KernelView = ObjectView<cl_kernel>;
 
 }

@@ -1,6 +1,7 @@
 #include "Views.h"
 
 #include <algorithm>
+#include <functional>
 #include <limits>
 
 namespace nr::base {
@@ -30,6 +31,18 @@ size_t MemoryView::sizeOnDevice() const
     }
 
     return ret;
+}
+
+std::vector<cl_event> EventView::extractEventsSizeLimited(std::vector<EventView>& events)
+{
+    if (events.size() > std::numeric_limits<U32>::max()) {
+        throw CLApiException(CL_INVALID_VALUE, "too many events");
+    }
+
+    std::vector<cl_event> rawEvents(events.size());
+    std::transform(events.begin(), events.end(), rawEvents.begin(), std::mem_fn(&EventView::rawHandle));
+
+    return rawEvents;
 }
 
 void EventView::await(const std::vector<EventView>& events)
