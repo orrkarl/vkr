@@ -109,16 +109,14 @@ public:
         }
     }
 
-private:
-    friend class CommandQueue;
+    KernelView view();
 
+private:
     struct KernelTraits {
         using Type = cl_kernel;
 
         static constexpr auto release = clReleaseKernel;
     };
-
-    cl_kernel rawHandle() const;
 
     UniqueWrapper<KernelTraits> m_object;
 };

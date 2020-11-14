@@ -26,6 +26,6 @@ Kernel::Kernel(Module& module, const std::string& name)
 {
 }
 
-cl_kernel base::Kernel::rawHandle() const { return m_object; }
+KernelView Kernel::view() { return KernelView(m_object); }
 
 }
