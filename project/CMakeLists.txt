@@ -2,6 +2,7 @@
 
 ADD_LIBRARY(Nraster SHARED
 		src/base/Buffer.cpp
+		src/base/CommandQueue.cpp
 		src/base/Context.cpp
 		src/base/Event.cpp
 		src/base/Exceptions.cpp

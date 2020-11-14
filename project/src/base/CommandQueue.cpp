@@ -1,62 +1,75 @@
 #include "CommandQueue.h"
 
-namespace nr
-{
-CommandQueue::CommandQueue()
-    : Wrapped()
+namespace nr::base {
+
+CommandEnqueueException::CommandEnqueueException(Status status, const char* description)
+    : CLApiException(status, description)
 {
 }
 
-CommandQueue::CommandQueue(const cl_command_queue& commandQueue, const nr_bool retain, cl_status& status)
-    : Wrapped(commandQueue, retain, status)
+cl_command_queue createCommandQueue(Context& context, DeviceView device, CommandQueue::Properties properties)
+{
+    Status status = CL_SUCCESS;
+
+    auto ret = clCreateCommandQueue(context.rawHandle(), device.rawHandle(), properties, &status);
+    if (status != CL_SUCCESS) {
+        throw CommandQueueCreateException(status);
+    }
+
+    return ret;
+}
+
+CommandQueue::CommandQueue(Context& context, DeviceView device, Properties createProperties)
+    : m_object(createCommandQueue(context, device, createProperties))
 {
 }
 
-CommandQueue::CommandQueue(const CommandQueue& other)
-    : Wrapped(other)
+void CommandQueue::flush() const
 {
+    auto status = clFlush(m_object);
+    if (status != CL_SUCCESS) {
+        throw CLApiException(status, "could not flush command queue");
+    }
 }
 
-CommandQueue::CommandQueue(CommandQueue&& other)
-    : Wrapped(other)
+void CommandQueue::await() const
 {
+    auto status = clFinish(m_object);
+    if (status != CL_SUCCESS) {
+        throw CLApiException(status, "could not flush command queue");
+    }
 }
 
-CommandQueue::CommandQueue(const Context& context, const Device& device, cl_command_queue_properties properties, cl_status& err)
-    : Wrapped(clCreateCommandQueue(context, device, properties, &err))
+void CommandQueue::finish() const { await(); }
+
+EventView CommandQueue::enqueueBufferReadCommand(
+    Buffer& buffer, size_t count, void* dest, std::vector<EventView>& waits, size_t offset /* = 0*/)
 {
+    cl_event ret = cl_event();
+
+    auto rawWaits = EventView::extractEventsSizeLimited(waits);
+    auto status = clEnqueueReadBuffer(m_object, buffer.view().rawHandle(), CL_FALSE, offset, count, dest,
+        rawWaits.size(), rawWaits.data(), &ret);
+    if (status != CL_SUCCESS) {
+        throw CommandEnqueueException(status, "cannot enqueue read command");
+    }
+
+    return EventView(ret);
 }
 
-CommandQueue& CommandQueue::operator=(const CommandQueue& other)
+EventView CommandQueue::enqueueBufferWriteCommand(
+    Buffer& buffer, size_t count, const void* src, std::vector<EventView>& waits, size_t offset /* = 0 */)
 {
-    Wrapped::operator=(other);
-    return *this;
-}
+    cl_event ret = cl_event();
 
-CommandQueue& CommandQueue::operator=(CommandQueue&& other)
-{
-    Wrapped::operator=(other);
-    return *this;
-}
+    auto rawWaits = EventView::extractEventsSizeLimited(waits);
+    auto status = clEnqueueWriteBuffer(m_object, buffer.view().rawHandle(), CL_FALSE, offset, count, src,
+        static_cast<U32>(rawWaits.size()), rawWaits.data(), &ret);
+    if (status != CL_SUCCESS) {
+        throw CommandEnqueueException(status, "cannot enqueue write command");
+    }
 
-CommandQueue::operator cl_command_queue() const 
-{
-    return object;
-}    
-
-cl_status CommandQueue::flush() const
-{
-    return clFlush(object);
-}
-
-cl_status CommandQueue::await() const
-{
-    return clFinish(object);
-}
-
-cl_status CommandQueue::finish() const
-{
-    return clFinish(object);
+    return EventView(ret);
 }
 
 }
