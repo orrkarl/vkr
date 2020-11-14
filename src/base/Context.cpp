@@ -4,8 +4,7 @@
 
 namespace nr::base {
 
-cl_context createFromType(const cl_context_properties* properties, DeviceTypeBitField deviceType)
-{
+cl_context createFromType(const cl_context_properties* properties, DeviceTypeBitField deviceType) {
     Status status = CL_SUCCESS;
 
     auto ret = clCreateContextFromType(properties, deviceType, nullptr, nullptr, &status);
@@ -16,8 +15,7 @@ cl_context createFromType(const cl_context_properties* properties, DeviceTypeBit
     return ret;
 }
 
-cl_context createFromDeviceList(const cl_context_properties* properties, std::vector<RootDevice>& devices)
-{
+cl_context createFromDeviceList(const cl_context_properties* properties, std::vector<RootDevice>& devices) {
     Status status = CL_SUCCESS;
 
     if (devices.size() > std::numeric_limits<U32>::max()) {
@@ -25,11 +23,11 @@ cl_context createFromDeviceList(const cl_context_properties* properties, std::ve
     }
 
     std::vector<cl_device_id> rawIDs(devices.size());
-    std::transform(
-        devices.begin(), devices.end(), rawIDs.begin(), [](RootDevice& dev) { return dev.rawHandle(); });
+    std::transform(devices.begin(), devices.end(), rawIDs.begin(),
+                   [](RootDevice& dev) { return dev.rawHandle(); });
 
-    auto ret = clCreateContext(
-        properties, static_cast<U32>(rawIDs.size()), rawIDs.data(), nullptr, nullptr, &status);
+    auto ret = clCreateContext(properties, static_cast<U32>(rawIDs.size()), rawIDs.data(), nullptr, nullptr,
+                               &status);
     if (ret == nullptr) {
         throw ContextCreateException(status);
     }
@@ -38,15 +36,15 @@ cl_context createFromDeviceList(const cl_context_properties* properties, std::ve
 }
 
 Context::Context(const cl_context_properties* properties, std::vector<RootDevice>& devices)
-    : m_context(createFromDeviceList(properties, devices))
-{
+    : m_context(createFromDeviceList(properties, devices)) {
 }
 
 Context::Context(const cl_context_properties* properties, DeviceTypeBitField deviceType)
-    : m_context(createFromType(properties, deviceType))
-{
+    : m_context(createFromType(properties, deviceType)) {
 }
 
-cl_context Context::rawHandle() { return m_context; }
+cl_context Context::rawHandle() {
+    return m_context;
+}
 
 }

@@ -45,7 +45,7 @@ public:
     Buffer(Context& context, MemoryAccessBitField access, Bool hostAccessible, size_t size);
 
     Buffer(Context& context, MemoryAccessBitField access, MemoryAllocateFlag allocate, size_t size,
-        void* hostPtr);
+           void* hostPtr);
 
     MemoryView view();
 

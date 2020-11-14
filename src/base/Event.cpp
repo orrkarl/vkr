@@ -2,8 +2,7 @@
 
 namespace nr::base {
 
-cl_event createUserEvent(Context& context)
-{
+cl_event createUserEvent(Context& context) {
     Status status = CL_SUCCESS;
 
     auto ret = clCreateUserEvent(context.rawHandle(), &status);
@@ -15,10 +14,11 @@ cl_event createUserEvent(Context& context)
 }
 
 Event::Event(Context& context)
-    : m_object(createUserEvent(context))
-{
+    : m_object(createUserEvent(context)) {
 }
 
-EventView Event::view() { return EventView(m_object); }
+EventView Event::view() {
+    return EventView(m_object);
+}
 
 }

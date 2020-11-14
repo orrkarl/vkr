@@ -65,8 +65,7 @@ public:
      * @return  cl_status internal OpenCL call error status
      */
     template <typename T>
-    typename std::enable_if<!std::is_pointer<T>::value, void>::type setArg(U32 index, const T& value)
-    {
+    typename std::enable_if<!std::is_pointer<T>::value, void>::type setArg(U32 index, const T& value) {
         return setArg(index, sizeof(T), &value);
     }
 
@@ -82,8 +81,7 @@ public:
      * @param   value   argument to be passed to the kernel
      * @return  cl_status internal OpenCL call error status
      */
-    void setArg(const U32 index, MemoryView& value)
-    {
+    void setArg(const U32 index, MemoryView& value) {
         cl_mem memoryObj = value.rawHandle();
         return setArg(index, sizeof(memoryObj), &memoryObj);
     }
@@ -101,8 +99,7 @@ public:
      * @param   value   argument to be passed to the kernel
      * @return  internal OpenCL call error status
      */
-    void setArg(U32 index, size_t size, const void* value)
-    {
+    void setArg(U32 index, size_t size, const void* value) {
         auto status = clSetKernelArg(m_object, index, size, value);
         if (status != CL_SUCCESS) {
             throw CLApiException(status, "could not set kernel argument");

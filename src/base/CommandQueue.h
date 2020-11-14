@@ -168,8 +168,8 @@ public:
      *
      * @return event notifying this command's status
      */
-    [[nodiscard]] EventView enqueueBufferReadCommand(
-        Buffer& buffer, size_t count, void* dest, std::vector<EventView>& waits, size_t offset = 0);
+    [[nodiscard]] EventView enqueueBufferReadCommand(Buffer& buffer, size_t count, void* dest,
+                                                     std::vector<EventView>& waits, size_t offset = 0);
 
     /**
      * @brief enqueues a buffer write command - moving data from host memory to a device buffer
@@ -186,8 +186,8 @@ public:
      *
      * @return event notifying this command's status
      */
-    [[nodiscard]] EventView enqueueBufferWriteCommand(
-        Buffer& buffer, size_t count, const void* src, std::vector<EventView>& waits, size_t offset = 0);
+    [[nodiscard]] EventView enqueueBufferWriteCommand(Buffer& buffer, size_t count, const void* src,
+                                                      std::vector<EventView>& waits, size_t offset = 0);
 
     /**
      * @brief enqueues a buffer fill command - fills a device buffer with a single value
@@ -206,8 +206,8 @@ public:
      * @return event notifying this command's status
      */
     template <typename T>
-    [[nodiscard]] EventView enqueueBufferFillCommand(
-        Buffer& buffer, const T& value, size_t count, std::vector<EventView>& waits, size_t offset = 0);
+    [[nodiscard]] EventView enqueueBufferFillCommand(Buffer& buffer, const T& value, size_t count,
+                                                     std::vector<EventView>& waits, size_t offset = 0);
 
     /**
      * @brief enqueues a kernel command - submits a kernel to the device
@@ -226,7 +226,7 @@ public:
      */
     template <U32 Dim>
     [[nodiscard]] EventView enqueueKernelCommand(KernelView kernel, const NDExecutionRange<Dim>& range,
-        std::vector<EventView>& waits, const NDRange<Dim>& offset);
+                                                 std::vector<EventView>& waits, const NDRange<Dim>& offset);
 
 private:
     struct CommandQueueTraits {

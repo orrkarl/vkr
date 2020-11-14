@@ -1,4 +1,5 @@
 #include "RootDevice.h"
+
 #include "Exceptions.h"
 
 #include <memory>
@@ -6,14 +7,14 @@
 namespace nr::base {
 
 RootDevice::RootDevice(cl_device_id device)
-    : m_object(device)
-{
+    : m_object(device) {
 }
 
-cl_device_id RootDevice::rawHandle() { return m_object; }
+cl_device_id RootDevice::rawHandle() {
+    return m_object;
+}
 
-std::string RootDevice::name() const
-{
+std::string RootDevice::name() const {
     size_t len = 0;
 
     auto status = clGetDeviceInfo(m_object, CL_DEVICE_NAME, 0, nullptr, &len);

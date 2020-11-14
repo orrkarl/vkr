@@ -43,8 +43,8 @@ public:
      * @param       properties  context properties
      * @param       deviceType  type of collected devices. Will default to GPU.
      */
-    explicit Context(
-        const cl_context_properties* properties, DeviceTypeBitField deviceType = DeviceTypeFlag::GPU);
+    explicit Context(const cl_context_properties* properties,
+                     DeviceTypeBitField deviceType = DeviceTypeFlag::GPU);
 
     /**
      * @brief provides access to the underlying OpenCL context

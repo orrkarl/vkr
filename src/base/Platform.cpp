@@ -1,12 +1,12 @@
 #include "Platform.h"
+
 #include "Exceptions.h"
 
 #include <algorithm>
 
 namespace nr::base {
 
-std::vector<Platform> Platform::getAvailablePlatforms()
-{
+std::vector<Platform> Platform::getAvailablePlatforms() {
     U32 platformCount = 0;
     auto status = clGetPlatformIDs(0, nullptr, &platformCount);
     if (status != CL_SUCCESS) {
@@ -21,18 +21,16 @@ std::vector<Platform> Platform::getAvailablePlatforms()
 
     std::vector<Platform> ret;
     std::transform(platformIDs.cbegin(), platformIDs.cend(), std::back_inserter(ret),
-        [&](const cl_platform_id& plat) { return Platform(plat); });
+                   [&](const cl_platform_id& plat) { return Platform(plat); });
 
     return ret;
 }
 
 Platform::Platform(cl_platform_id platform)
-    : m_object(platform)
-{
+    : m_object(platform) {
 }
 
-std::vector<RootDevice> Platform::getDevicesByType(cl_device_type type)
-{
+std::vector<RootDevice> Platform::getDevicesByType(cl_device_type type) {
     cl_uint deviceCount;
     auto status = clGetDeviceIDs(m_object, type, 0, nullptr, &deviceCount);
     if (status != CL_SUCCESS) {
@@ -47,11 +45,13 @@ std::vector<RootDevice> Platform::getDevicesByType(cl_device_type type)
 
     std::vector<RootDevice> ret;
     std::transform(deviceIDs.cbegin(), deviceIDs.cend(), std::back_inserter(ret),
-        [](cl_device_id dev) { return RootDevice(dev); });
+                   [](cl_device_id dev) { return RootDevice(dev); });
 
     return ret;
 }
 
-cl_platform_id Platform::rawHandle() { return m_object; }
+cl_platform_id Platform::rawHandle() {
+    return m_object;
+}
 
 }
