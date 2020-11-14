@@ -207,7 +207,7 @@ public:
      */
     template <typename T>
     [[nodiscard]] EventView enqueueBufferFillCommand(
-        Buffer& buffer, const T& value, size_t count, std::vector<EventView>& waits, size_t offset = 0) const;
+        Buffer& buffer, const T& value, size_t count, std::vector<EventView>& waits, size_t offset = 0);
 
     /**
      * @brief enqueues a kernel command - submits a kernel to the device

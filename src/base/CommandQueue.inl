@@ -6,7 +6,7 @@ namespace nr::base {
 
 template <typename T>
 EventView CommandQueue::enqueueBufferFillCommand(
-    Buffer& buffer, const T& value, size_t count, std::vector<EventView>& waits, size_t offset) const
+    Buffer& buffer, const T& value, size_t count, std::vector<EventView>& waits, size_t offset)
 {
     static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8 || sizeof(T) == 16
             || sizeof(T) == 32 || sizeof(T) == 64 || sizeof(T) == 128,
