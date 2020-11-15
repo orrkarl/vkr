@@ -35,10 +35,19 @@ SET(NRASTER_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/project/include)
 IF(BUILD_TESTS)	
 	ADD_SUBDIRECTORY(dependencies/googletest EXCLUDE_FROM_ALL)
 	SET(gtest_INCLUDE_DIRS "${gtest_SOURCE_DIR}/include ${gmock_SOURCE_DIR}/include")
+	mark_as_advanced(
+			BUILD_GMOCK BUILD_GTEST BUILD_SHARED_LIBS
+			gmock_build_tests gtest_build_samples gtest_build_tests
+			gtest_disable_pthreads gtest_force_shared_crt gtest_hide_internal_symbols
+	)
+	set_target_properties(gtest PROPERTIES FOLDER extern)
+	set_target_properties(gtest_main PROPERTIES FOLDER extern)
+	set_target_properties(gmock PROPERTIES FOLDER extern)
+	set_target_properties(gmock_main PROPERTIES FOLDER extern)
+
+	ENABLE_TESTING()
 
 	ADD_SUBDIRECTORY(test)
-	ENABLE_TESTING()
-	ADD_TEST(NAME AllTests COMMAND NrasterTest) # run the executable itself for a better log as it uses GTest
 ENDIF()
 
 IF(BUILD_DOCS)
