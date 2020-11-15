@@ -12,7 +12,7 @@ enum class DeviceTypeFlag : cl_device_type {
     Accelerator = CL_DEVICE_TYPE_ACCELERATOR,
     Default = CL_DEVICE_TYPE_DEFAULT,
     Custom = CL_DEVICE_TYPE_DEFAULT,
-    ALL = CL_DEVICE_TYPE_ALL
+    All = CL_DEVICE_TYPE_ALL
 };
 
 using DeviceTypeBitField = EnumBitField<DeviceTypeFlag>;

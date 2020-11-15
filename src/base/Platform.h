@@ -37,7 +37,7 @@ public:
      * @param[out] err internal OpenCL call status
      * @return std::vector<Device>
      */
-    std::vector<RootDevice> getDevicesByType(cl_device_type type);
+    std::vector<RootDevice> getDevicesByType(DeviceTypeBitField type);
 
 private:
     explicit Platform(cl_platform_id platform);

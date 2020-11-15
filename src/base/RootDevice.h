@@ -4,6 +4,7 @@
 
 #include "../predefs.h"
 
+#include "Views.h"
 #include "Wrapper.h"
 
 namespace nr::base {
@@ -17,7 +18,7 @@ class RootDevice {
 public:
     cl_device_id rawHandle();
 
-    std::string name() const;
+    DeviceView view();
 
 private:
     friend class Platform;

@@ -2,6 +2,7 @@
 
 #include "../predefs.h"
 
+#include <string>
 #include <vector>
 
 #include "Wrapper.h"
@@ -74,7 +75,12 @@ private:
     cl_event m_event;
 };
 
-using DeviceView = ObjectView<cl_device_id>;
+class DeviceView : public ObjectView<cl_device_id> {
+public:
+    explicit DeviceView(cl_device_id device);
+
+    std::string name() const;
+};
 
 using KernelView = ObjectView<cl_kernel>;
 

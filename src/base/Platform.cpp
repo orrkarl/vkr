@@ -30,7 +30,7 @@ Platform::Platform(cl_platform_id platform)
     : m_object(platform) {
 }
 
-std::vector<RootDevice> Platform::getDevicesByType(cl_device_type type) {
+std::vector<RootDevice> Platform::getDevicesByType(DeviceTypeBitField type) {
     cl_uint deviceCount;
     auto status = clGetDeviceIDs(m_object, type, 0, nullptr, &deviceCount);
     if (status != CL_SUCCESS) {
