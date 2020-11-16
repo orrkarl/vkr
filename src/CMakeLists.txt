@@ -13,3 +13,4 @@ ADD_LIBRARY(NrasterBackend STATIC
 		base/Views.cpp)
 
 TARGET_LINK_LIBRARIES(NrasterBackend PUBLIC OpenCL::OpenCL)
+TARGET_INCLUDE_DIRECTORIES(NrasterBackend INTERFACE ".")

@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.13)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.14)
 
 project(Nraster VERSION 0.7.0 LANGUAGES CXX)
 
@@ -32,18 +32,16 @@ FIND_PACKAGE(OpenCL REQUIRED)
 ADD_SUBDIRECTORY(src)
 SET(NRASTER_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/project/include)
 
-IF(BUILD_TESTS)	
-	ADD_SUBDIRECTORY(dependencies/googletest EXCLUDE_FROM_ALL)
-	SET(gtest_INCLUDE_DIRS "${gtest_SOURCE_DIR}/include ${gmock_SOURCE_DIR}/include")
-	mark_as_advanced(
-			BUILD_GMOCK BUILD_GTEST BUILD_SHARED_LIBS
-			gmock_build_tests gtest_build_samples gtest_build_tests
-			gtest_disable_pthreads gtest_force_shared_crt gtest_hide_internal_symbols
-	)
-	set_target_properties(gtest PROPERTIES FOLDER extern)
-	set_target_properties(gtest_main PROPERTIES FOLDER extern)
-	set_target_properties(gmock PROPERTIES FOLDER extern)
-	set_target_properties(gmock_main PROPERTIES FOLDER extern)
+IF(BUILD_TESTS)
+	INCLUDE(FetchContent)
+
+	FetchContent_Declare(
+			catch2
+			GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+			GIT_TAG v2.13.3)
+    FetchContent_MakeAvailable(catch2)
+
+	INCLUDE(${catch2_SOURCE_DIR}/contrib/Catch.cmake)
 
 	ENABLE_TESTING()
 

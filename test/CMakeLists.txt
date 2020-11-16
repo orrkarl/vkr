@@ -1,7 +1,5 @@
-INCLUDE(GoogleTest)
+ADD_EXECUTABLE(NrasterTests src/Main.cpp src/base/TestSimpleUsage.cpp)
 
-ADD_EXECUTABLE(NrasterTests src/base/TestSimpleUsage.cpp)
-TARGET_LINK_LIBRARIES(NrasterTests gtest gmock gtest_main NrasterBackend)
-TARGET_INCLUDE_DIRECTORIES(NrasterTests PRIVATE "../src")
+TARGET_LINK_LIBRARIES(NrasterTests Catch2::Catch2 NrasterBackend)
 
-gtest_discover_tests(NrasterTests)
+catch_discover_tests(NrasterTests)
