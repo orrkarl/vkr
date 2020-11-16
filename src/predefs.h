@@ -12,6 +12,8 @@
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <CL/cl.h>
 
+namespace nr {
+
 using F32 = cl_float;
 using F64 = cl_double;
 
@@ -26,3 +28,5 @@ using U64 = cl_long;
 
 using Bool = cl_bool;
 using Status = cl_int;
+
+}

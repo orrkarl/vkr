@@ -1,4 +1,4 @@
-ADD_EXECUTABLE(NrasterTests src/Main.cpp src/base/TestSimpleUsage.cpp)
+ADD_EXECUTABLE(NrasterTests src/Main.cpp src/util/Prettify.cpp src/base/TestSimpleUsage.cpp)
 
 TARGET_LINK_LIBRARIES(NrasterTests Catch2::Catch2 NrasterBackend)
 
