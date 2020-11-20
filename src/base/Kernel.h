@@ -6,12 +6,12 @@
 #include <tuple>
 #include <utility>
 
-#include "Views.h"
+#include "Memory.h"
 #include "Wrapper.h"
 
 namespace nr::base {
 
-CL_TYPE_CREATE_EXCEPTION(Kernel);
+CL_TYPE_CREATE_EXCEPTION(Kernel, CLApiException);
 
 class Module;
 
@@ -75,13 +75,13 @@ public:
      * This method takes OpenCL memory wrapper types, and will pass the internal memory object they contain to
      * the kernel
      * @note wraps clSetKernelArg
-     * @note Refer to OpenCL clSetKernelArg documentation for detailed explenation of return status
+     * @note Refer to OpenCL clSetKernelArg documentation for detailed explanation of return status
      * @tparam  T       type of kernel parameter (has to be of the same size as device side type)
      * @param   index   kernel parameter index
      * @param   value   argument to be passed to the kernel
      * @return  cl_status internal OpenCL call error status
      */
-    void setArg(U32 index, MemoryView& value);
+    void setArg(U32 index, Memory& value);
 
     /**
      * @brief sets one of the internal kernels arguments

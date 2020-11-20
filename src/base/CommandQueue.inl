@@ -13,9 +13,9 @@ ApiEvent CommandQueue::enqueueBufferFillCommand(Buffer& buffer, const T& value, 
     cl_event ret = cl_event();
 
     auto rawWaits = EventView::extractEventsSizeLimited(waits);
-    auto status = clEnqueueFillBuffer(m_object, buffer.view().rawHandle(), &value, sizeof(T),
-                                      sizeof(value) * offset, sizeof(value) * count,
-                                      static_cast<U32>(rawWaits.size()), rawWaits.data(), &ret);
+    auto status = clEnqueueFillBuffer(m_object, buffer.rawHandle(), &value, sizeof(T), sizeof(value) * offset,
+                                      sizeof(value) * count, static_cast<U32>(rawWaits.size()),
+                                      rawWaits.data(), &ret);
     if (status != CL_SUCCESS) {
         throw CommandEnqueueException(status, "could not enqueue buffer fill command");
     }

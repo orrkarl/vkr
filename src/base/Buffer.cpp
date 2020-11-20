@@ -4,8 +4,8 @@
 
 namespace nr::base {
 
-cl_mem create(cl_context context, Buffer::MemoryAccessBitField access, Buffer::MemoryAllocateFlag allocate,
-              size_t size, void* hostPtr) {
+cl_mem create(cl_context context, Memory::AccessBitField access, Memory::AllocateFlag allocate, size_t size,
+              void* hostPtr) {
     Status status = CL_SUCCESS;
 
     auto ret = clCreateBuffer(context,
@@ -18,20 +18,16 @@ cl_mem create(cl_context context, Buffer::MemoryAccessBitField access, Buffer::M
     return ret;
 }
 
-Buffer::Buffer(Context& context, Buffer::MemoryAccessBitField access, Bool hostAccessible, size_t size)
-    : m_buffer(create(context.rawHandle(), access,
-                      hostAccessible ? Buffer::MemoryAllocateFlag::AllocateHostAccessible
-                                     : Buffer::MemoryAllocateFlag::None,
-                      size, nullptr)) {
+Buffer::Buffer(Context& context, Memory::AccessBitField access, Bool hostAccessible, size_t size)
+    : Memory(
+        create(context.rawHandle(), access,
+               hostAccessible ? Buffer::AllocateFlag::AllocateHostAccessible : Buffer::AllocateFlag::None,
+               size, nullptr)) {
 }
 
-Buffer::Buffer(Context& context, Buffer::MemoryAccessBitField access, Buffer::MemoryAllocateFlag allocate,
-               size_t size, void* hostPtr)
-    : m_buffer(create(context.rawHandle(), access, allocate, size, hostPtr)) {
-}
-
-MemoryView Buffer::view() {
-    return MemoryView(m_buffer);
+Buffer::Buffer(Context& context, Memory::AccessBitField access, Buffer::AllocateFlag allocate, size_t size,
+               void* hostPtr)
+    : Memory(create(context.rawHandle(), access, allocate, size, hostPtr)) {
 }
 
 }

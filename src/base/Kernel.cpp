@@ -30,7 +30,7 @@ void Kernel::setArg(U32 index, size_t size, const void* value) {
     }
 }
 
-void Kernel::setArg(U32 index, MemoryView& value) {
+void Kernel::setArg(U32 index, Memory& value) {
     cl_mem memoryObj = value.rawHandle();
     return setArg(index, sizeof(memoryObj), &memoryObj);
 }

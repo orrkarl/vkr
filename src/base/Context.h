@@ -12,9 +12,7 @@
 
 namespace nr::base {
 
-class RootDevice;
-
-CL_TYPE_CREATE_EXCEPTION(Context);
+CL_TYPE_CREATE_EXCEPTION(Context, CLApiException);
 
 /**
  * @brief bare wrapper for cl_context, for a more comfortable interface.

@@ -7,12 +7,11 @@
 #include "Context.h"
 #include "Device.h"
 #include "Kernel.h"
-#include "Views.h"
 #include "Wrapper.h"
 
 namespace nr::base {
 
-CL_TYPE_CREATE_EXCEPTION(Module);
+CL_TYPE_CREATE_EXCEPTION(Module, CLApiException);
 
 class BuildFailedException : public CLApiException {
 public:

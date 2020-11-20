@@ -28,12 +28,12 @@ void CommandQueue::finish() const {
     await();
 }
 
-ApiEvent CommandQueue::enqueueBufferReadCommand(Buffer& buffer, size_t count, void* dest,
+ApiEvent CommandQueue::enqueueBufferReadCommand(const Buffer& buffer, size_t count, void* dest,
                                                 const std::vector<EventView>& waits, size_t offset /* = 0*/) {
     cl_event ret = cl_event();
 
     auto rawWaits = EventView::extractEventsSizeLimited(waits);
-    auto status = clEnqueueReadBuffer(m_object, buffer.view().rawHandle(), CL_FALSE, offset, count, dest,
+    auto status = clEnqueueReadBuffer(m_object, buffer.rawHandle(), CL_FALSE, offset, count, dest,
                                       rawWaits.size(), rawWaits.data(), &ret);
     if (status != CL_SUCCESS) {
         throw CommandEnqueueException(status, "cannot enqueue read command");
@@ -48,7 +48,7 @@ ApiEvent CommandQueue::enqueueBufferWriteCommand(Buffer& buffer, size_t count, c
     cl_event ret = cl_event();
 
     auto rawWaits = EventView::extractEventsSizeLimited(waits);
-    auto status = clEnqueueWriteBuffer(m_object, buffer.view().rawHandle(), CL_FALSE, offset, count, src,
+    auto status = clEnqueueWriteBuffer(m_object, buffer.rawHandle(), CL_FALSE, offset, count, src,
                                        static_cast<U32>(rawWaits.size()), rawWaits.data(), &ret);
     if (status != CL_SUCCESS) {
         throw CommandEnqueueException(status, "cannot enqueue write command");

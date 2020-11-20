@@ -19,15 +19,15 @@ private:
     const char* m_description;
 };
 
-#define CL_TYPE_CREATE_EXCEPTION(TypeName)                                                                   \
-    class TypeName##CreateException : public CLApiException {                                                \
+#define CL_TYPE_CREATE_EXCEPTION(TypeName, ParentType)                                                       \
+    class TypeName##CreateException : public ParentType {                                                    \
     public:                                                                                                  \
         explicit TypeName##CreateException(Status status)                                                    \
-            : CLApiException(status, "could not create" #TypeName) {                                         \
+            : ParentType(status, "could not create" #TypeName) {                                             \
         }                                                                                                    \
                                                                                                              \
         TypeName##CreateException(Status status, const char* description)                                    \
-            : CLApiException(status, description) {                                                          \
+            : ParentType(status, description) {                                                              \
         }                                                                                                    \
     }
 

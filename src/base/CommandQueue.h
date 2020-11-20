@@ -12,7 +12,7 @@
 
 namespace nr::base {
 
-CL_TYPE_CREATE_EXCEPTION(CommandQueue);
+CL_TYPE_CREATE_EXCEPTION(CommandQueue, CLApiException);
 
 class CommandEnqueueException : public CLApiException {
 public:
@@ -169,7 +169,7 @@ public:
      *
      * @return event notifying this command's status
      */
-    [[nodiscard]] ApiEvent enqueueBufferReadCommand(Buffer& buffer, size_t count, void* dest,
+    [[nodiscard]] ApiEvent enqueueBufferReadCommand(const Buffer& buffer, size_t count, void* dest,
                                                     const std::vector<EventView>& waits, size_t offset = 0);
 
     /**

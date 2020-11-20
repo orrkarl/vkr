@@ -11,7 +11,7 @@
 
 namespace nr::base {
 
-CL_TYPE_CREATE_EXCEPTION(Event);
+CL_TYPE_CREATE_EXCEPTION(Event, CLApiException);
 
 class EventWaitException : public CLApiException {
 public:
