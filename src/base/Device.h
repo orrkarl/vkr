@@ -18,7 +18,7 @@ class RootDevice {
 public:
     cl_device_id rawHandle();
 
-    DeviceView view();
+    std::string name() const;
 
 private:
     friend class Platform;

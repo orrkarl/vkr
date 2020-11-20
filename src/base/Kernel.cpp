@@ -23,8 +23,20 @@ Kernel::Kernel(Module& module, const std::string& name)
     : Kernel(module, name.c_str()) {
 }
 
-KernelView Kernel::view() {
-    return KernelView(m_object);
+void Kernel::setArg(U32 index, size_t size, const void* value) {
+    auto status = clSetKernelArg(m_object, index, size, value);
+    if (status != CL_SUCCESS) {
+        throw CLApiException(status, "could not set kernel argument");
+    }
+}
+
+void Kernel::setArg(U32 index, MemoryView& value) {
+    cl_mem memoryObj = value.rawHandle();
+    return setArg(index, sizeof(memoryObj), &memoryObj);
+}
+
+cl_kernel Kernel::rawHandle() const {
+    return m_object.underlying();
 }
 
 }

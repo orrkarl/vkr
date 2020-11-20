@@ -23,6 +23,4 @@ public:
     std::string name() const;
 };
 
-using KernelView = ObjectView<cl_kernel>;
-
 }

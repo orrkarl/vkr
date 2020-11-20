@@ -225,7 +225,7 @@ public:
      * @return event notifying this command's status
      */
     template <U32 Dim>
-    [[nodiscard]] ApiEvent enqueueKernelCommand(KernelView kernel, const NDExecutionRange<Dim>& range,
+    [[nodiscard]] ApiEvent enqueueKernelCommand(const Kernel& kernel, const NDExecutionRange<Dim>& range,
                                                 const std::vector<EventView>& waits,
                                                 const NDRange<Dim>& offset);
 
@@ -238,6 +238,10 @@ private:
 
     UniqueWrapper<CommandQueueTraits> m_object;
 };
+
+cl_kernel Kernel::rawHandle() const {
+    return m_object.underlying();
+}
 
 }
 

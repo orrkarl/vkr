@@ -81,10 +81,7 @@ public:
      * @param   value   argument to be passed to the kernel
      * @return  cl_status internal OpenCL call error status
      */
-    void setArg(const U32 index, MemoryView& value) {
-        cl_mem memoryObj = value.rawHandle();
-        return setArg(index, sizeof(memoryObj), &memoryObj);
-    }
+    void setArg(U32 index, MemoryView& value);
 
     /**
      * @brief sets one of the internal kernels arguments
@@ -99,16 +96,13 @@ public:
      * @param   value   argument to be passed to the kernel
      * @return  internal OpenCL call error status
      */
-    void setArg(U32 index, size_t size, const void* value) {
-        auto status = clSetKernelArg(m_object, index, size, value);
-        if (status != CL_SUCCESS) {
-            throw CLApiException(status, "could not set kernel argument");
-        }
-    }
-
-    KernelView view();
+    void setArg(U32 index, size_t size, const void* value);
 
 private:
+    friend class CommandQueue;
+
+    cl_kernel rawHandle() const;
+
     struct KernelTraits {
         using Type = cl_kernel;
 

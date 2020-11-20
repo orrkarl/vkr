@@ -24,7 +24,7 @@ ApiEvent CommandQueue::enqueueBufferFillCommand(Buffer& buffer, const T& value, 
 }
 
 template <U32 Dim>
-ApiEvent CommandQueue::enqueueKernelCommand(KernelView kernel, const NDExecutionRange<Dim>& range,
+ApiEvent CommandQueue::enqueueKernelCommand(const Kernel& kernel, const NDExecutionRange<Dim>& range,
                                             const std::vector<EventView>& waits, const NDRange<Dim>& offset) {
     cl_event ret = cl_event();
 
