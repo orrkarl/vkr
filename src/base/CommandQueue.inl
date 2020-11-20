@@ -5,8 +5,8 @@
 namespace nr::base {
 
 template <typename T>
-EventView CommandQueue::enqueueBufferFillCommand(Buffer& buffer, const T& value, size_t count,
-                                                 std::vector<EventView>& waits, size_t offset) {
+ApiEvent CommandQueue::enqueueBufferFillCommand(Buffer& buffer, const T& value, size_t count,
+                                                const std::vector<EventView>& waits, size_t offset) {
     static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8 || sizeof(T) == 16
                       || sizeof(T) == 32 || sizeof(T) == 64 || sizeof(T) == 128,
                   "enqueueBufferFillCommand: value size has to be one of {1, 2, 4, 8, 16, 32, 64, 128}");
@@ -20,12 +20,12 @@ EventView CommandQueue::enqueueBufferFillCommand(Buffer& buffer, const T& value,
         throw CommandEnqueueException(status, "could not enqueue buffer fill command");
     }
 
-    return EventView(ret);
+    return ApiEvent(ret);
 }
 
 template <U32 Dim>
-EventView CommandQueue::enqueueKernelCommand(KernelView kernel, const NDExecutionRange<Dim>& range,
-                                             std::vector<EventView>& waits, const NDRange<Dim>& offset) {
+ApiEvent CommandQueue::enqueueKernelCommand(KernelView kernel, const NDExecutionRange<Dim>& range,
+                                            const std::vector<EventView>& waits, const NDRange<Dim>& offset) {
     cl_event ret = cl_event();
 
     auto rawWaits = EventView::extractEventsSizeLimited(waits);
@@ -36,7 +36,7 @@ EventView CommandQueue::enqueueKernelCommand(KernelView kernel, const NDExecutio
         throw CommandEnqueueException(status, "could not enqueue kernel");
     }
 
-    return EventView(ret);
+    return ApiEvent(ret);
 }
 
 }

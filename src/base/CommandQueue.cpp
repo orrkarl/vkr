@@ -40,8 +40,8 @@ void CommandQueue::finish() const {
     await();
 }
 
-EventView CommandQueue::enqueueBufferReadCommand(Buffer& buffer, size_t count, void* dest,
-                                                 std::vector<EventView>& waits, size_t offset /* = 0*/) {
+ApiEvent CommandQueue::enqueueBufferReadCommand(Buffer& buffer, size_t count, void* dest,
+                                                const std::vector<EventView>& waits, size_t offset /* = 0*/) {
     cl_event ret = cl_event();
 
     auto rawWaits = EventView::extractEventsSizeLimited(waits);
@@ -51,11 +51,12 @@ EventView CommandQueue::enqueueBufferReadCommand(Buffer& buffer, size_t count, v
         throw CommandEnqueueException(status, "cannot enqueue read command");
     }
 
-    return EventView(ret);
+    return ApiEvent(ret);
 }
 
-EventView CommandQueue::enqueueBufferWriteCommand(Buffer& buffer, size_t count, const void* src,
-                                                  std::vector<EventView>& waits, size_t offset /* = 0 */) {
+ApiEvent CommandQueue::enqueueBufferWriteCommand(Buffer& buffer, size_t count, const void* src,
+                                                 const std::vector<EventView>& waits,
+                                                 size_t offset /* = 0 */) {
     cl_event ret = cl_event();
 
     auto rawWaits = EventView::extractEventsSizeLimited(waits);
@@ -65,7 +66,7 @@ EventView CommandQueue::enqueueBufferWriteCommand(Buffer& buffer, size_t count, 
         throw CommandEnqueueException(status, "cannot enqueue write command");
     }
 
-    return EventView(ret);
+    return ApiEvent(ret);
 }
 
 }

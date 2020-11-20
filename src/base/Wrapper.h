@@ -20,6 +20,7 @@ public:
     ~UniqueWrapper();
 
     operator Type() const;
+    Type underlying() const;
 
     bool isValid() const;
 

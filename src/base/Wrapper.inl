@@ -9,7 +9,7 @@ namespace nr::base {
 
 template <class WrappedTraits>
 UniqueWrapper<WrappedTraits>::operator Type() const {
-    return m_object;
+    return underlying();
 }
 
 template <class WrappedTraits>
@@ -43,10 +43,16 @@ UniqueWrapper<WrappedTraits>::UniqueWrapper(Type object)
     }
 }
 
+template <class WrappedTraits>
+typename UniqueWrapper<WrappedTraits>::Type UniqueWrapper<WrappedTraits>::underlying() const {
+    return m_object;
+}
+
 template <typename T>
 ObjectView<T>::ObjectView(T object)
     : m_rawObject(object) {
 }
+
 template <typename T>
 T ObjectView<T>::rawHandle() {
     return m_rawObject;
