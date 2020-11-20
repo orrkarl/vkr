@@ -11,7 +11,7 @@ TEST_CASE("Example", "[example]") {
     for (auto p : platforms) {
         auto devices = p.getDevicesByType(base::DeviceTypeFlag::All);
         for (auto d : devices) {
-            std::cout << d.view().name() << std::endl;
+            std::cout << d.name() << std::endl;
         }
     }
 

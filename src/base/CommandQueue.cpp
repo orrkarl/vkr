@@ -6,19 +6,7 @@ CommandEnqueueException::CommandEnqueueException(Status status, const char* desc
     : CLApiException(status, description) {
 }
 
-cl_command_queue createCommandQueue(Context& context, DeviceView device,
-                                    CommandQueue::Properties properties) {
-    Status status = CL_SUCCESS;
-
-    auto ret = clCreateCommandQueue(context.rawHandle(), device.rawHandle(), properties, &status);
-    if (status != CL_SUCCESS) {
-        throw CommandQueueCreateException(status);
-    }
-
-    return ret;
-}
-
-CommandQueue::CommandQueue(Context& context, DeviceView device, Properties createProperties)
+CommandQueue::CommandQueue(Context& context, Device& device, Properties createProperties)
     : m_object(createCommandQueue(context, device, createProperties)) {
 }
 
@@ -67,6 +55,18 @@ ApiEvent CommandQueue::enqueueBufferWriteCommand(Buffer& buffer, size_t count, c
     }
 
     return ApiEvent(ret);
+}
+
+cl_command_queue CommandQueue::createCommandQueue(Context& context, Device& device,
+                                                  CommandQueue::Properties properties) {
+    Status status = CL_SUCCESS;
+
+    auto ret = clCreateCommandQueue(context.rawHandle(), device.view().rawHandle(), properties, &status);
+    if (status != CL_SUCCESS) {
+        throw CommandQueueCreateException(status);
+    }
+
+    return ret;
 }
 
 }

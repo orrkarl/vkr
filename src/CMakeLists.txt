@@ -9,7 +9,7 @@ ADD_LIBRARY(NrasterBackend STATIC
 		base/Kernel.cpp
 		base/Module.cpp
 		base/Platform.cpp
-		base/RootDevice.cpp
+		base/Device.cpp
 		base/Views.cpp)
 
 TARGET_LINK_LIBRARIES(NrasterBackend PUBLIC OpenCL::OpenCL)

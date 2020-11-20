@@ -1,6 +1,6 @@
 #include "Context.h"
 
-#include "RootDevice.h"
+#include "Device.h"
 
 namespace nr::base {
 
@@ -15,7 +15,8 @@ cl_context createFromType(const cl_context_properties* properties, DeviceTypeBit
     return ret;
 }
 
-cl_context createFromDeviceList(const cl_context_properties* properties, std::vector<RootDevice>& devices) {
+cl_context Context::createFromDeviceList(const cl_context_properties* properties,
+                                         std::vector<DeviceView>& devices) {
     Status status = CL_SUCCESS;
 
     if (devices.size() > std::numeric_limits<U32>::max()) {
@@ -24,7 +25,7 @@ cl_context createFromDeviceList(const cl_context_properties* properties, std::ve
 
     std::vector<cl_device_id> rawIDs(devices.size());
     std::transform(devices.begin(), devices.end(), rawIDs.begin(),
-                   [](RootDevice& dev) { return dev.rawHandle(); });
+                   [](DeviceView dev) { return dev.rawHandle(); });
 
     auto ret = clCreateContext(properties, static_cast<U32>(rawIDs.size()), rawIDs.data(), nullptr, nullptr,
                                &status);
@@ -35,7 +36,7 @@ cl_context createFromDeviceList(const cl_context_properties* properties, std::ve
     return ret;
 }
 
-Context::Context(const cl_context_properties* properties, std::vector<RootDevice>& devices)
+Context::Context(const cl_context_properties* properties, std::vector<DeviceView>& devices)
     : m_context(createFromDeviceList(properties, devices)) {
 }
 

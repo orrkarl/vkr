@@ -16,11 +16,4 @@ public:
     size_t sizeOnDevice() const;
 };
 
-class DeviceView : public ObjectView<cl_device_id> {
-public:
-    explicit DeviceView(cl_device_id device);
-
-    std::string name() const;
-};
-
 }

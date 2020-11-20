@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Context.h"
+#include "Device.h"
 #include "Kernel.h"
 #include "Views.h"
 #include "Wrapper.h"
@@ -63,7 +64,7 @@ public:
      * @param options compilation options
      * @return internal OpenCL call status
      */
-    void build(DeviceView device, const char* options);
+    void build(Device& device, const char* options);
 
     /**
      * @brief Builds the module for a multiple devices
@@ -87,7 +88,7 @@ public:
      * @param device target build device
      * @return string
      */
-    std::string getBuildLog(DeviceView device) const;
+    std::string getBuildLog(Device& device) const;
 
     std::vector<std::string> getKernelNames() const;
 

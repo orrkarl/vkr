@@ -4,9 +4,9 @@
 
 #include <vector>
 
+#include "Device.h"
 #include "DeviceType.h"
 #include "Exceptions.h"
-#include "RootDevice.h"
 #include "Wrapper.h"
 
 namespace nr::base {

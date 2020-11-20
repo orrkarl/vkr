@@ -22,26 +22,4 @@ size_t MemoryView::sizeOnDevice() const {
     return ret;
 }
 
-DeviceView::DeviceView(cl_device_id device)
-    : ObjectView(device) {
-}
-
-std::string DeviceView::name() const {
-    size_t len = 0;
-
-    auto status = clGetDeviceInfo(m_rawObject, CL_DEVICE_NAME, 0, nullptr, &len);
-    if (status != CL_SUCCESS) {
-        throw CLApiException(status, "could not query device name size");
-    }
-
-    auto ret = std::make_unique<char[]>(len);
-
-    status = clGetDeviceInfo(m_rawObject, CL_DEVICE_NAME, len, ret.get(), nullptr);
-    if (status != CL_SUCCESS) {
-        throw CLApiException(status, "could not query device name");
-    }
-
-    return std::string(ret.get(), len);
-}
-
 }

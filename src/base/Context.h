@@ -5,6 +5,7 @@
 #include <functional>
 #include <vector>
 
+#include "Device.h"
 #include "DeviceType.h"
 #include "Exceptions.h"
 #include "Wrapper.h"
@@ -32,7 +33,7 @@ public:
      * @param properties context properties
      * @param devices devices bound to the context
      */
-    Context(const cl_context_properties* properties, std::vector<RootDevice>& devices);
+    Context(const cl_context_properties* properties, std::vector<DeviceView>& devices);
 
     /**
      * @brief an 'easy to use' constructor for a Context. Using the given properties and collects all of the
@@ -54,6 +55,9 @@ public:
     cl_context rawHandle();
 
 private:
+    static cl_context createFromDeviceList(const cl_context_properties* properties,
+                                           std::vector<DeviceView>& devices);
+
     struct ContextTraits {
         using Type = cl_context;
         static constexpr auto release = clReleaseContext;

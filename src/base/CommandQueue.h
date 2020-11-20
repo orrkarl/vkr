@@ -5,6 +5,7 @@
 #include "BitField.h"
 #include "Buffer.h"
 #include "Context.h"
+#include "Device.h"
 #include "Event.h"
 #include "Kernel.h"
 #include "Wrapper.h"
@@ -132,7 +133,7 @@ public:
      * @param device execution device for this queue
      * @param properties command queue properties
      */
-    CommandQueue(Context& context, DeviceView device, Properties createProperties);
+    CommandQueue(Context& context, Device& device, Properties createProperties);
 
     /**
      * @brief ensures that all of the waiting commands will be transferred to the device side queue
@@ -236,12 +237,11 @@ private:
         static constexpr auto release = clReleaseCommandQueue;
     };
 
+    static cl_command_queue createCommandQueue(Context& context, Device& device,
+                                               CommandQueue::Properties properties);
+
     UniqueWrapper<CommandQueueTraits> m_object;
 };
-
-cl_kernel Kernel::rawHandle() const {
-    return m_object.underlying();
-}
 
 }
 

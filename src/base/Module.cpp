@@ -38,8 +38,8 @@ cl_program Module::rawHandle() {
     return m_object;
 }
 
-void Module::build(DeviceView device, const char* options) {
-    Devices devices { device };
+void Module::build(Device& device, const char* options) {
+    Devices devices { device.view() };
     build(devices, options);
 }
 
@@ -58,16 +58,17 @@ void Module::build(Devices& devices, const char* options) {
     }
 }
 
-std::string Module::getBuildLog(DeviceView device) const {
+std::string Module::getBuildLog(Device& device) const {
     size_t len = 0;
 
-    auto status = clGetProgramBuildInfo(m_object, device.rawHandle(), CL_PROGRAM_BUILD_LOG, 0, nullptr, &len);
+    auto status = clGetProgramBuildInfo(m_object, device.view().rawHandle(), CL_PROGRAM_BUILD_LOG, 0, nullptr,
+                                        &len);
     if (status != CL_SUCCESS) {
         throw CLApiException(status, "could not query build log length");
     }
 
     auto str = std::make_unique<char[]>(len);
-    status = clGetProgramBuildInfo(m_object, device.rawHandle(), CL_PROGRAM_BUILD_LOG, len, str.get(),
+    status = clGetProgramBuildInfo(m_object, device.view().rawHandle(), CL_PROGRAM_BUILD_LOG, len, str.get(),
                                    nullptr);
     if (status != CL_SUCCESS) {
         throw CLApiException(status, "could not query build log");
