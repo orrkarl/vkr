@@ -8,6 +8,7 @@
 #include "Device.h"
 #include "DeviceType.h"
 #include "Exceptions.h"
+#include "Platform.h"
 #include "Wrapper.h"
 
 namespace nr::base {
@@ -26,12 +27,14 @@ public:
      * @brief Construct a context object, bound to some devices with certain properties
      *
      * Refer to the OpenCL clCreateContext documentation for detailed explanation of the context properties
+     *
      * @note wraps clCreateContext
      * @note if devices has more than MAX_UINT values, this function will throw with status CL_INVALID_VALUE
-     * @param properties context properties
-     * @param devices devices bound to the context
+     *
+     * @param       platform    platform targeted by this context
+     * @param       devices     devices bound to the context
      */
-    Context(const cl_context_properties* properties, std::vector<DeviceView>& devices);
+    Context(Platform& platform, std::vector<DeviceView>& devices);
 
     /**
      * @brief an 'easy to use' constructor for a Context. Using the given properties and collects all of the
@@ -39,11 +42,10 @@ public:
      *
      * Refer to the OpenCL clCreateContext documentation for detailed explanation of the context properties
      * @note wraps clCreateContextFromType
-     * @param       properties  context properties
+     * @param       platform    platform targeted by this context
      * @param       deviceType  type of collected devices. Will default to GPU.
      */
-    explicit Context(const cl_context_properties* properties,
-                     DeviceTypeBitField deviceType = DeviceTypeFlag::GPU);
+    explicit Context(Platform& platform, DeviceTypeBitField deviceType = DeviceTypeFlag::GPU);
 
     /**
      * @brief provides access to the underlying OpenCL context
@@ -53,8 +55,7 @@ public:
     cl_context rawHandle();
 
 private:
-    static cl_context createFromDeviceList(const cl_context_properties* properties,
-                                           std::vector<DeviceView>& devices);
+    static cl_context createFromDeviceList(Platform& platform, std::vector<DeviceView>& devices);
 
     struct ContextTraits {
         using Type = cl_context;
