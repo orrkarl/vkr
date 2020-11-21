@@ -15,6 +15,7 @@ enum class DeviceTypeFlag : cl_device_type {
     All = CL_DEVICE_TYPE_ALL
 };
 
-using DeviceTypeBitField = EnumBitField<DeviceTypeFlag>;
+using DeviceTypeBitField = BitField<DeviceTypeFlag>;
+CREATE_ENUM_FLAG_OPS(DeviceTypeBitField)
 
 }

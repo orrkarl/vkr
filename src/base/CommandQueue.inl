@@ -29,9 +29,9 @@ ApiEvent CommandQueue::enqueueKernelCommand(const Kernel& kernel, const NDExecut
     cl_event ret = cl_event();
 
     auto rawWaits = EventView::extractEventsSizeLimited(waits);
-    auto status = clEnqueueNDRangeKernel(m_object, kernel.rawHandle(), Dim, range.global.data,
-                                         range.local.data, offset.data, static_cast<U32>(rawWaits.size()),
-                                         rawWaits.data(), &ret);
+    auto status = clEnqueueNDRangeKernel(m_object, kernel.rawHandle(), Dim, offset.data, range.global.data,
+                                         range.local.data, static_cast<U32>(rawWaits.size()), rawWaits.data(),
+                                         &ret);
     if (status != CL_SUCCESS) {
         throw CommandEnqueueException(status, "could not enqueue kernel");
     }

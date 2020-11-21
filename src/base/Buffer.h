@@ -10,9 +10,7 @@ CL_TYPE_CREATE_EXCEPTION(Buffer, MemoryCreateException);
 
 class Buffer : public Memory {
 public:
-    Buffer(Context& context, AccessBitField access, Bool hostAccessible, size_t size);
-
-    Buffer(Context& context, AccessBitField access, AllocateFlag allocate, size_t size, void* hostPtr);
+    Buffer(Context& context, AccessBitField access, AllocateBitField allocate, size_t size, void* hostPtr);
 };
 
 }

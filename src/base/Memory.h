@@ -39,7 +39,8 @@ public:
         CopyHostPtr = CL_MEM_COPY_HOST_PTR
     };
 
-    using AccessBitField = EnumBitField<AccessFlag>;
+    using AccessBitField = BitField<AccessFlag>;
+    using AllocateBitField = BitField<AllocateFlag>;
 
     size_t sizeOnDevice() const;
 
@@ -60,5 +61,8 @@ private:
 
     UniqueWrapper<MemoryTraits> m_memory;
 };
+
+CREATE_ENUM_FLAG_OPS(Memory::AccessBitField)
+CREATE_ENUM_FLAG_OPS(Memory::AllocateBitField)
 
 }

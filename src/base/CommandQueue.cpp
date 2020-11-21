@@ -6,7 +6,7 @@ CommandEnqueueException::CommandEnqueueException(Status status, const char* desc
     : CLApiException(status, description) {
 }
 
-CommandQueue::CommandQueue(Context& context, Device& device, Properties createProperties)
+CommandQueue::CommandQueue(Context& context, Device& device, PropertyBitField createProperties)
     : m_object(createCommandQueue(context, device, createProperties)) {
 }
 
@@ -58,10 +58,11 @@ ApiEvent CommandQueue::enqueueBufferWriteCommand(Buffer& buffer, size_t count, c
 }
 
 cl_command_queue CommandQueue::createCommandQueue(Context& context, Device& device,
-                                                  CommandQueue::Properties properties) {
+                                                  CommandQueue::PropertyBitField properties) {
     Status status = CL_SUCCESS;
 
-    auto ret = clCreateCommandQueue(context.rawHandle(), device.view().rawHandle(), properties, &status);
+    auto ret = clCreateCommandQueue(context.rawHandle(), device.view().rawHandle(),
+                                    static_cast<cl_command_queue_properties>(properties), &status);
     if (status != CL_SUCCESS) {
         throw CommandQueueCreateException(status);
     }

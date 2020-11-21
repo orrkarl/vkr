@@ -39,6 +39,10 @@ DeviceView Device::view() {
 
 RootDevice::RootDevice(cl_device_id device)
     : Device(device) {
+    auto status = clRetainDevice(device);
+    if (status != CL_SUCCESS) {
+        throw CLApiException(status, "could not retain device object");
+    }
 }
 
 }

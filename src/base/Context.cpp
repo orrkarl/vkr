@@ -10,7 +10,8 @@ cl_context createFromType(Platform& platform, DeviceTypeBitField deviceType) {
     cl_context_properties properties[3] = { CL_CONTEXT_PLATFORM,
                                             reinterpret_cast<cl_context_properties>(platform.rawHandle()),
                                             0 };
-    auto ret = clCreateContextFromType(properties, deviceType, nullptr, nullptr, &status);
+    auto ret = clCreateContextFromType(properties, static_cast<cl_device_type>(deviceType), nullptr, nullptr,
+                                       &status);
     if (ret == nullptr) {
         throw ContextCreateException(status);
     }

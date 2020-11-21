@@ -29,14 +29,16 @@ private:
     FlagBaseType m_value;
 };
 
-template <class EnumType>
-BitField<EnumType> operator|(EnumType e1, EnumType e2);
-
-template <class EnumType>
-BitField<EnumType> operator&(EnumType e1, EnumType e2);
-
-template <class EnumType>
-BitField<EnumType> operator~(EnumType e);
+#define CREATE_ENUM_FLAG_OPS(BitFieldType)                                                                   \
+    inline BitFieldType operator|(BitFieldType::EnumType e1, BitFieldType::EnumType e2) {                    \
+        return BitFieldType(e1) | BitFieldType(e2);                                                          \
+    }                                                                                                        \
+    inline BitFieldType operator&(BitFieldType::EnumType e1, BitFieldType::EnumType e2) {                    \
+        return BitFieldType(e1) & BitFieldType(e2);                                                          \
+    }                                                                                                        \
+    inline BitFieldType operator~(BitFieldType::EnumType e) {                                                \
+        return ~BitFieldType(e);                                                                             \
+    }
 
 }
 

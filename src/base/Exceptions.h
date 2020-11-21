@@ -23,7 +23,7 @@ private:
     class TypeName##CreateException : public ParentType {                                                    \
     public:                                                                                                  \
         explicit TypeName##CreateException(Status status)                                                    \
-            : ParentType(status, "could not create" #TypeName) {                                             \
+            : ParentType(status, "could not create " #TypeName) {                                            \
         }                                                                                                    \
                                                                                                              \
         TypeName##CreateException(Status status, const char* description)                                    \

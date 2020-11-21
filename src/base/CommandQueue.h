@@ -124,7 +124,7 @@ public:
         ProfilingEnabled = CL_QUEUE_PROFILING_ENABLE
     };
 
-    using Properties = EnumBitField<PropertyFlag>;
+    using PropertyBitField = BitField<PropertyFlag>;
 
     /**
      * @brief Creates a bound and valid command queue; wraps clCreateCommandQueue
@@ -133,7 +133,7 @@ public:
      * @param device execution device for this queue
      * @param properties command queue properties
      */
-    CommandQueue(Context& context, Device& device, Properties createProperties);
+    CommandQueue(Context& context, Device& device, PropertyBitField createProperties);
 
     /**
      * @brief ensures that all of the waiting commands will be transferred to the device side queue
@@ -238,10 +238,12 @@ private:
     };
 
     static cl_command_queue createCommandQueue(Context& context, Device& device,
-                                               CommandQueue::Properties properties);
+                                               CommandQueue::PropertyBitField properties);
 
     UniqueWrapper<CommandQueueTraits> m_object;
 };
+
+CREATE_ENUM_FLAG_OPS(CommandQueue::PropertyBitField)
 
 }
 

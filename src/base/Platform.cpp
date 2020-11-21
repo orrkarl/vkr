@@ -31,14 +31,16 @@ Platform::Platform(cl_platform_id platform)
 }
 
 std::vector<RootDevice> Platform::getDevicesByType(DeviceTypeBitField type) {
+    auto rawType = static_cast<cl_device_type>(type);
+
     cl_uint deviceCount;
-    auto status = clGetDeviceIDs(m_object, type, 0, nullptr, &deviceCount);
+    auto status = clGetDeviceIDs(m_object, rawType, 0, nullptr, &deviceCount);
     if (status != CL_SUCCESS) {
         throw CLApiException(status, "could not query total device count");
     }
 
     std::vector<cl_device_id> deviceIDs(deviceCount);
-    status = clGetDeviceIDs(m_object, type, deviceCount, &deviceIDs.front(), nullptr);
+    status = clGetDeviceIDs(m_object, rawType, deviceCount, &deviceIDs.front(), nullptr);
     if (status != CL_SUCCESS) {
         throw CLApiException(status, "could not enumerate devices");
     }

@@ -74,19 +74,4 @@ BitField<FlagEnumType, FlagBaseType>::BitField(FlagBaseType rawBitValue)
     : m_value(rawBitValue) {
 }
 
-template <class EnumType>
-BitField<EnumType> operator|(EnumType e1, EnumType e2) {
-    return BitField<EnumType>(e1) | e2;
-}
-
-template <class EnumType>
-BitField<EnumType> operator&(EnumType e1, EnumType e2) {
-    return BitField<EnumType>(e1) & e2;
-}
-
-template <class EnumType>
-BitField<EnumType> operator~(EnumType e) {
-    return ~BitField<EnumType>(e);
-}
-
 }

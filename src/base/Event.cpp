@@ -99,10 +99,6 @@ UserEvent::UserEvent(Context& context)
 
 ApiEvent::ApiEvent(cl_event rawEvent)
     : Event(rawEvent) {
-    auto status = clRetainEvent(rawEvent);
-    if (status != CL_SUCCESS) {
-        throw ApiEventCreateException(status, "could not retain created API event");
-    }
 }
 
 }
