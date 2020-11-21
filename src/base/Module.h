@@ -13,9 +13,15 @@ namespace nr::base {
 
 CL_TYPE_CREATE_EXCEPTION(Module, CLApiException);
 
-class BuildFailedException : public CLApiException {
+class BuildFailedException : public std::exception {
 public:
-    explicit BuildFailedException(Status status);
+    explicit BuildFailedException(std::vector<std::string> buildLog);
+
+    const char* what() const noexcept override;
+    const std::vector<std::string>& allBuildLogs() const;
+
+private:
+    std::vector<std::string> m_buildLogs;
 };
 
 /**
@@ -49,8 +55,6 @@ public:
      */
     Module(Context& context, const Sources& codes);
 
-    cl_program rawHandle();
-
     /**
      * @brief Builds the module for a single device
      *
@@ -71,7 +75,7 @@ public:
      * Compiles and links the entire module for the given devices with given compiler options
      * The build action here is blocking, meaning that the function will block until build is completed.
      * @note wraps clBuildProgram
-     * @note refer to OpenCL clBuildProgram documentation for detailed explenation of compiler options and
+     * @note refer to OpenCL clBuildProgram documentation for detailed explanation of compiler options and
      * status codes
      * @param devices module build targets
      * @param options compilation options
@@ -92,10 +96,16 @@ public:
     std::vector<std::string> getKernelNames() const;
 
 private:
+    friend class Kernel;
+
     struct ProgramTraits {
         using Type = cl_program;
         static constexpr auto release = clReleaseProgram;
     };
+
+    cl_program rawHandle();
+
+    std::string getBuildLog(DeviceView device) const;
 
     UniqueWrapper<ProgramTraits> m_object;
 };
