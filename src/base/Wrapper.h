@@ -11,8 +11,8 @@ public:
 
     UniqueWrapper(Type object);
 
-    UniqueWrapper(const UniqueWrapper&) = delete;
-    UniqueWrapper& operator=(const UniqueWrapper&) = delete;
+    UniqueWrapper(const UniqueWrapper& other);
+    UniqueWrapper& operator=(const UniqueWrapper& other);
 
     UniqueWrapper(UniqueWrapper&& other) noexcept;
     UniqueWrapper& operator=(UniqueWrapper&& other) noexcept;
@@ -26,17 +26,6 @@ public:
 
 private:
     Type m_object;
-};
-
-template <typename T>
-class ObjectView {
-public:
-    explicit ObjectView(T object);
-
-    T rawHandle();
-
-protected:
-    T m_rawObject;
 };
 
 }

@@ -8,18 +8,30 @@
 namespace nr::base {
 
 template <class WrappedTraits>
-UniqueWrapper<WrappedTraits>::operator Type() const {
-    return underlying();
+UniqueWrapper<WrappedTraits>::UniqueWrapper(Type object)
+    : m_object(object) {
+    if (!isValid()) {
+        throw CLApiException(CL_INVALID_VALUE, "could not create CL handle");
+    }
 }
 
 template <class WrappedTraits>
-bool UniqueWrapper<WrappedTraits>::isValid() const {
-    return m_object != Type();
+UniqueWrapper<WrappedTraits>::UniqueWrapper(const UniqueWrapper& other)
+    : m_object(other.m_object) {
+    WrappedTraits::retain(m_object);
 }
 
 template <class WrappedTraits>
-UniqueWrapper<WrappedTraits>::~UniqueWrapper() {
+UniqueWrapper<WrappedTraits>& UniqueWrapper<WrappedTraits>::operator=(const UniqueWrapper& other) {
     WrappedTraits::release(m_object);
+    m_object = other.m_object;
+    WrappedTraits::retain(m_object);
+}
+
+template <class WrappedTraits>
+UniqueWrapper<WrappedTraits>::UniqueWrapper(UniqueWrapper&& other) noexcept
+    : m_object(other.m_object) {
+    other.m_object = Type();
 }
 
 template <class WrappedTraits>
@@ -30,17 +42,13 @@ UniqueWrapper<WrappedTraits>& UniqueWrapper<WrappedTraits>::operator=(UniqueWrap
 }
 
 template <class WrappedTraits>
-UniqueWrapper<WrappedTraits>::UniqueWrapper(UniqueWrapper&& other) noexcept
-    : m_object(other.m_object) {
-    other.m_object = Type();
+UniqueWrapper<WrappedTraits>::~UniqueWrapper() {
+    WrappedTraits::release(m_object);
 }
 
 template <class WrappedTraits>
-UniqueWrapper<WrappedTraits>::UniqueWrapper(Type object)
-    : m_object(object) {
-    if (!isValid()) {
-        throw CLApiException(CL_INVALID_VALUE, "could not create CL handle");
-    }
+UniqueWrapper<WrappedTraits>::operator Type() const {
+    return underlying();
 }
 
 template <class WrappedTraits>
@@ -48,14 +56,9 @@ typename UniqueWrapper<WrappedTraits>::Type UniqueWrapper<WrappedTraits>::underl
     return m_object;
 }
 
-template <typename T>
-ObjectView<T>::ObjectView(T object)
-    : m_rawObject(object) {
-}
-
-template <typename T>
-T ObjectView<T>::rawHandle() {
-    return m_rawObject;
+template <class WrappedTraits>
+bool UniqueWrapper<WrappedTraits>::isValid() const {
+    return m_object != Type();
 }
 
 }
