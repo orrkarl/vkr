@@ -75,7 +75,7 @@ TEST_CASE("Base", "[sanity]") {
     for (size_t i = 0; i < devices.size(); ++i) {
         devCBuffers.emplace_back(ctx, Memory::AccessFlag::HostReadOnly | Memory::AccessFlag::WriteOnly,
                                  Memory::AllocateFlag::None, BUFFER_SIZE * sizeof(I32), nullptr);
-        hostCBuffers.push_back(std::vector<I32>(BUFFER_SIZE));
+        hostCBuffers.emplace_back(BUFFER_SIZE);
     }
 
     auto waitBWrite = queues[0].enqueueBufferWriteCommand(devA, BUFFER_SIZE * sizeof(I32), hostA.data(), {});
