@@ -33,7 +33,7 @@ private:
 class Module {
 public:
     using Sources = std::vector<std::string>;
-    using Devices = std::vector<DeviceView>;
+    using Devices = std::vector<Device>;
 
     /**
      * @brief Constructs a module object a single source, bound to a given context
@@ -67,7 +67,7 @@ public:
      * @param options compilation options
      * @return internal OpenCL call status
      */
-    void build(Device& device, const char* options);
+    void build(const Device& device, const char* options);
 
     /**
      * @brief Builds the module for a multiple devices
@@ -80,7 +80,7 @@ public:
      * @param devices module build targets
      * @param options compilation options
      */
-    void build(Devices& devices, const char* options);
+    void build(const Devices& devices, const char* options);
 
     /**
      * @brief Get the Build Log object
@@ -91,7 +91,7 @@ public:
      * @param device target build device
      * @return string
      */
-    std::string getBuildLog(Device& device) const;
+    std::string getBuildLog(const Device& device) const;
 
     std::vector<std::string> getKernelNames() const;
 
@@ -106,8 +106,6 @@ private:
     };
 
     cl_program rawHandle();
-
-    std::string getBuildLog(DeviceView device) const;
 
     UniqueWrapper<ProgramTraits> m_object;
 };

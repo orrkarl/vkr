@@ -40,13 +40,7 @@ TEST_CASE("Base", "[sanity]") {
 
     // Creating test OpenCL module
     Module testModule(ctx, TEST_KERNEL);
-    {
-        std::vector<DeviceView> devViews;
-        for (auto& dev : devices) {
-            devViews.emplace_back(dev.view());
-        }
-        testModule.build(devViews, "-D DEBUG -w -Werror -cl-std=CL1.2");
-    }
+    testModule.build(devices, "-D DEBUG -w -Werror -cl-std=CL1.2");
 
     std::vector<I32> hostA(BUFFER_SIZE);
     std::vector<I32> hostB(BUFFER_SIZE);

@@ -34,7 +34,7 @@ public:
      * @param       platform    platform targeted by this context
      * @param       devices     devices bound to the context
      */
-    Context(Platform& platform, std::vector<DeviceView>& devices);
+    Context(Platform& platform, std::vector<Device>& devices);
 
     /**
      * @brief an 'easy to use' constructor for a Context. Using the given properties and collects all of the
@@ -55,7 +55,7 @@ public:
     cl_context rawHandle();
 
 private:
-    static cl_context createFromDeviceList(Platform& platform, std::vector<DeviceView>& devices);
+    static cl_context createFromDeviceList(Platform& platform, std::vector<Device>& devices);
 
     struct ContextTraits {
         using Type = cl_context;

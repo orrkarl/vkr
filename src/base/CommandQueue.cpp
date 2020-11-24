@@ -60,7 +60,7 @@ cl_command_queue CommandQueue::createCommandQueue(Context& context, Device& devi
                                                   CommandQueue::PropertyBitField properties) {
     Status status = CL_SUCCESS;
 
-    auto ret = clCreateCommandQueue(context.rawHandle(), device.view().rawHandle(),
+    auto ret = clCreateCommandQueue(context.rawHandle(), device.rawHandle(),
                                     static_cast<cl_command_queue_properties>(properties), &status);
     if (status != CL_SUCCESS) {
         throw CommandQueueCreateException(status);

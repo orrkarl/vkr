@@ -3,14 +3,6 @@
 
 namespace nr::base {
 
-DeviceView::DeviceView(cl_device_id device)
-    : m_rawObject(device) {
-}
-
-cl_device_id DeviceView::rawHandle() {
-    return m_rawObject;
-}
-
 std::string Device::name() const {
     size_t len = 0;
 
@@ -29,20 +21,18 @@ std::string Device::name() const {
     return std::string(ret.get(), len);
 }
 
-Device::Device(cl_device_id device)
+Device::Device(cl_device_id device, Bool retain)
     : m_object(device) {
-}
-
-DeviceView Device::view() {
-    return DeviceView(m_object);
-}
-
-RootDevice::RootDevice(cl_device_id device)
-    : Device(device) {
-    auto status = clRetainDevice(device);
-    if (status != CL_SUCCESS) {
-        throw CLApiException(status, "could not retain device object");
+    if (retain) {
+        auto status = clRetainDevice(device);
+        if (status != CL_SUCCESS) {
+            throw DeviceCreateException(status);
+        }
     }
+}
+
+cl_device_id Device::rawHandle() const {
+    return m_object;
 }
 
 }

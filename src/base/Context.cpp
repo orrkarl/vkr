@@ -1,5 +1,6 @@
 #include "Context.h"
 
+#include "../util/Containers.h"
 #include "Device.h"
 
 namespace nr::base {
@@ -19,16 +20,10 @@ cl_context createFromType(Platform& platform, DeviceTypeBitField deviceType) {
     return ret;
 }
 
-cl_context Context::createFromDeviceList(Platform& platform, std::vector<DeviceView>& devices) {
+cl_context Context::createFromDeviceList(Platform& platform, std::vector<Device>& devices) {
     Status status = CL_SUCCESS;
 
-    if (devices.size() > std::numeric_limits<U32>::max()) {
-        throw ContextCreateException(CL_INVALID_VALUE);
-    }
-
-    std::vector<cl_device_id> rawIDs(devices.size());
-    std::transform(devices.begin(), devices.end(), rawIDs.begin(),
-                   [](DeviceView dev) { return dev.rawHandle(); });
+    auto rawIDs = util::extractSizeLimited<Device, cl_device_id>(devices, std::mem_fn(&Device::rawHandle));
 
     cl_context_properties properties[3] = { CL_CONTEXT_PLATFORM,
                                             reinterpret_cast<cl_context_properties>(platform.rawHandle()),
@@ -42,7 +37,7 @@ cl_context Context::createFromDeviceList(Platform& platform, std::vector<DeviceV
     return ret;
 }
 
-Context::Context(Platform& platform, std::vector<DeviceView>& devices)
+Context::Context(Platform& platform, std::vector<Device>& devices)
     : m_context(createFromDeviceList(platform, devices)) {
 }
 
