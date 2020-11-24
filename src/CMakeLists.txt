@@ -13,5 +13,10 @@ ADD_LIBRARY(NrasterBackend STATIC
 		base/Device.cpp
 		)
 
+TARGET_COMPILE_OPTIONS(NrasterBackend PRIVATE
+		$<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+		$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Werror>
+		)
+
 TARGET_LINK_LIBRARIES(NrasterBackend PUBLIC OpenCL::OpenCL)
 TARGET_INCLUDE_DIRECTORIES(NrasterBackend INTERFACE "../src")
