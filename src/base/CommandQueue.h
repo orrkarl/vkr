@@ -170,7 +170,7 @@ public:
      * @return event notifying this command's status
      */
     [[nodiscard]] ApiEvent enqueueBufferReadCommand(const Buffer& buffer, size_t count, void* dest,
-                                                    const std::vector<EventView>& waits, size_t offset = 0);
+                                                    const std::vector<Event>& waits, size_t offset = 0);
 
     /**
      * @brief enqueues a buffer write command - moving data from host memory to a device buffer
@@ -188,7 +188,7 @@ public:
      * @return event notifying this command's status
      */
     [[nodiscard]] ApiEvent enqueueBufferWriteCommand(Buffer& buffer, size_t count, const void* src,
-                                                     const std::vector<EventView>& waits, size_t offset = 0);
+                                                     const std::vector<Event>& waits, size_t offset = 0);
 
     /**
      * @brief enqueues a buffer fill command - fills a device buffer with a single value
@@ -208,7 +208,7 @@ public:
      */
     template <typename T>
     [[nodiscard]] ApiEvent enqueueBufferFillCommand(Buffer& buffer, const T& value, size_t count,
-                                                    const std::vector<EventView>& waits, size_t offset = 0);
+                                                    const std::vector<Event>& waits, size_t offset = 0);
 
     /**
      * @brief enqueues a kernel command - submits a kernel to the device
@@ -227,8 +227,7 @@ public:
      */
     template <U32 Dim>
     [[nodiscard]] ApiEvent enqueueKernelCommand(const Kernel& kernel, const NDExecutionRange<Dim>& range,
-                                                const std::vector<EventView>& waits,
-                                                const NDRange<Dim>& offset);
+                                                const std::vector<Event>& waits, const NDRange<Dim>& offset);
 
 private:
     struct CommandQueueTraits {

@@ -29,10 +29,10 @@ void CommandQueue::finish() const {
 }
 
 ApiEvent CommandQueue::enqueueBufferReadCommand(const Buffer& buffer, size_t count, void* dest,
-                                                const std::vector<EventView>& waits, size_t offset /* = 0*/) {
+                                                const std::vector<Event>& waits, size_t offset /* = 0*/) {
     cl_event ret = cl_event();
 
-    auto rawWaits = EventView::extractEventsSizeLimited(waits);
+    auto rawWaits = util::extractSizeLimited<Event, cl_event>(waits, std::mem_fn(&Event::rawHandle));
     auto status = clEnqueueReadBuffer(m_object, buffer.rawHandle(), CL_FALSE, offset, count, dest,
                                       rawWaits.size(), rawWaits.data(), &ret);
     if (status != CL_SUCCESS) {
@@ -43,11 +43,10 @@ ApiEvent CommandQueue::enqueueBufferReadCommand(const Buffer& buffer, size_t cou
 }
 
 ApiEvent CommandQueue::enqueueBufferWriteCommand(Buffer& buffer, size_t count, const void* src,
-                                                 const std::vector<EventView>& waits,
-                                                 size_t offset /* = 0 */) {
+                                                 const std::vector<Event>& waits, size_t offset /* = 0 */) {
     cl_event ret = cl_event();
 
-    auto rawWaits = EventView::extractEventsSizeLimited(waits);
+    auto rawWaits = util::extractSizeLimited<Event, cl_event>(waits, std::mem_fn(&Event::rawHandle));
     auto status = clEnqueueWriteBuffer(m_object, buffer.rawHandle(), CL_FALSE, offset, count, src,
                                        static_cast<U32>(rawWaits.size()), rawWaits.data(), &ret);
     if (status != CL_SUCCESS) {

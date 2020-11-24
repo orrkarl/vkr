@@ -82,19 +82,17 @@ TEST_CASE("Base", "[sanity]") {
 
     std::vector<Kernel> kernels;
     std::vector<ApiEvent> kernelsDoneEvents;
-    std::vector<EventView> kernelsDoneViews;
+    std::vector<Event> kernelsDoneViews;
     NDExecutionRange<1> range { .global = NDRange<1> { BUFFER_SIZE }, .local = NDRange<1> { BUFFER_SIZE } };
     for (size_t i = 0; i < devices.size(); ++i) {
         Kernel test(testModule, testModule.getKernelNames()[0]);
         test.setArg(0, devA);
         test.setArg(1, devB);
         test.setArg(2, devCBuffers[i]);
-        kernelsDoneEvents.push_back(
-            queues[i].enqueueKernelCommand(test, range, { waitBWrite.view() }, { 0 }));
-        kernelsDoneEvents.push_back(
-            queues[i].enqueueBufferReadCommand(devCBuffers[i], BUFFER_SIZE * sizeof(I32),
-                                               hostCBuffers[i].data(), { kernelsDoneEvents.back().view() }));
-        kernelsDoneViews.push_back(kernelsDoneEvents.back().view());
+        kernelsDoneEvents.push_back(queues[i].enqueueKernelCommand(test, range, { waitBWrite }, { 0 }));
+        kernelsDoneEvents.push_back(queues[i].enqueueBufferReadCommand(
+            devCBuffers[i], BUFFER_SIZE * sizeof(I32), hostCBuffers[i].data(), { kernelsDoneEvents.back() }));
+        kernelsDoneViews.push_back(kernelsDoneEvents.back());
         kernels.push_back(std::move(test));
     }
 

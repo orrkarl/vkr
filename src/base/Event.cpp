@@ -1,4 +1,5 @@
 #include "Event.h"
+#include "../util/Containers.h"
 
 namespace nr::base {
 
@@ -10,35 +11,16 @@ BadEventExecutionStatus::BadEventExecutionStatus(Status status)
     : CLApiException(status, "the operation linked to this event failed") {
 }
 
-cl_event EventView::rawHandle() const {
-    return m_rawEvent;
-}
-
-std::vector<cl_event> EventView::extractEventsSizeLimited(const std::vector<EventView>& events) {
-    if (events.size() > std::numeric_limits<U32>::max()) {
-        throw CLApiException(CL_INVALID_VALUE, "too many events");
-    }
-
-    std::vector<cl_event> rawEvents(events.size());
-    std::transform(events.begin(), events.end(), rawEvents.begin(), std::mem_fn(&EventView::rawHandle));
-
-    return rawEvents;
-}
-
-EventView::EventView(cl_event rawEvent)
-    : m_rawEvent(rawEvent) {
-}
-
 Event::Event(cl_event rawEvent)
     : m_object(rawEvent) {
 }
 
-void Event::await(const std::vector<EventView>& events) {
+void Event::await(const std::vector<Event>& events) {
     if (events.size() > std::numeric_limits<U32>::max()) {
         throw EventWaitException(CL_INVALID_VALUE);
     }
 
-    auto rawEvents = EventView::extractEventsSizeLimited(events);
+    auto rawEvents = util::extractSizeLimited<Event, cl_event>(events, std::mem_fn(&Event::rawHandle));
     auto status = clWaitForEvents(static_cast<U32>(events.size()), rawEvents.data());
     if (status != CL_SUCCESS) {
         throw EventWaitException(status);
@@ -78,8 +60,8 @@ Event::ExecutionStatus Event::status() const {
     }
 }
 
-EventView Event::view() const {
-    return EventView(m_object.underlying());
+cl_event Event::rawHandle() const {
+    return m_object;
 }
 
 cl_event createUserEvent(Context& context) {

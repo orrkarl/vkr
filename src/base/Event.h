@@ -24,20 +24,6 @@ public:
     explicit BadEventExecutionStatus(Status status);
 };
 
-class EventView {
-private:
-    friend class Event;
-    friend class CommandQueue;
-
-    static std::vector<cl_event> extractEventsSizeLimited(const std::vector<EventView>& events);
-
-    explicit EventView(cl_event event);
-
-    cl_event rawHandle() const;
-
-    cl_event m_rawEvent;
-};
-
 class Event {
 public:
     enum class ExecutionStatus : cl_int {
@@ -55,7 +41,7 @@ public:
      * @param events event list to wait
      * @return cl_status internal OpenCL call status
      */
-    static void await(const std::vector<EventView>& events);
+    static void await(const std::vector<Event>& events);
 
     /**
      * @brief Blocks until this event reaches CL_COMPLETE
@@ -73,18 +59,20 @@ public:
      */
     ExecutionStatus status() const;
 
-    EventView view() const;
-
 protected:
     explicit Event(cl_event rawEvent);
 
 private:
+    friend class CommandQueue;
+
     struct EventTraits {
         using Type = cl_event;
 
         static constexpr auto release = clReleaseEvent;
         static constexpr auto retain = clRetainEvent;
     };
+
+    cl_event rawHandle() const;
 
     UniqueWrapper<EventTraits> m_object;
 };
