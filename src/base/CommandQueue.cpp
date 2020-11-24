@@ -28,7 +28,7 @@ void CommandQueue::finish() const {
     await();
 }
 
-ApiEvent CommandQueue::enqueueBufferReadCommand(const Buffer& buffer, size_t count, void* dest,
+Event CommandQueue::enqueueBufferReadCommand(const Buffer& buffer, size_t count, void* dest,
                                                 const std::vector<Event>& waits, size_t offset /* = 0*/) {
     cl_event ret = cl_event();
 
@@ -39,10 +39,10 @@ ApiEvent CommandQueue::enqueueBufferReadCommand(const Buffer& buffer, size_t cou
         throw CommandEnqueueException(status, "cannot enqueue read command");
     }
 
-    return ApiEvent(ret);
+    return Event(ret);
 }
 
-ApiEvent CommandQueue::enqueueBufferWriteCommand(Buffer& buffer, size_t count, const void* src,
+Event CommandQueue::enqueueBufferWriteCommand(Buffer& buffer, size_t count, const void* src,
                                                  const std::vector<Event>& waits, size_t offset /* = 0 */) {
     cl_event ret = cl_event();
 
@@ -53,7 +53,7 @@ ApiEvent CommandQueue::enqueueBufferWriteCommand(Buffer& buffer, size_t count, c
         throw CommandEnqueueException(status, "cannot enqueue write command");
     }
 
-    return ApiEvent(ret);
+    return Event(ret);
 }
 
 cl_command_queue CommandQueue::createCommandQueue(Context& context, Device& device,

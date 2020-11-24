@@ -161,7 +161,7 @@ public:
      *
      * @note wraps clEnqueueReadBuffer
      *
-     * @param       buffer view of memory object to read from
+     * @param       buffer memory object to read from
      * @param       count  count of bytes to read from memory object
      * @param[out]  dest   local buffer to write the results into
      * @param       waits  list of events which have to complete before this command starts
@@ -169,8 +169,8 @@ public:
      *
      * @return event notifying this command's status
      */
-    [[nodiscard]] ApiEvent enqueueBufferReadCommand(const Buffer& buffer, size_t count, void* dest,
-                                                    const std::vector<Event>& waits, size_t offset = 0);
+    [[nodiscard]] Event enqueueBufferReadCommand(const Buffer& buffer, size_t count, void* dest,
+                                                 const std::vector<Event>& waits, size_t offset = 0);
 
     /**
      * @brief enqueues a buffer write command - moving data from host memory to a device buffer
@@ -179,7 +179,7 @@ public:
      *
      * @note wraps clEnqueueWriteBuffer
      *
-     * @param  buffer view of memory object to read from
+     * @param  buffer memory object to read from
      * @param  count  count of bytes to read from memory object
      * @param  src    host source for memory copy operation
      * @param  waits  list of events that have to complete before this command will begin execution
@@ -187,8 +187,8 @@ public:
      *
      * @return event notifying this command's status
      */
-    [[nodiscard]] ApiEvent enqueueBufferWriteCommand(Buffer& buffer, size_t count, const void* src,
-                                                     const std::vector<Event>& waits, size_t offset = 0);
+    [[nodiscard]] Event enqueueBufferWriteCommand(Buffer& buffer, size_t count, const void* src,
+                                                  const std::vector<Event>& waits, size_t offset = 0);
 
     /**
      * @brief enqueues a buffer fill command - fills a device buffer with a single value
@@ -207,8 +207,8 @@ public:
      * @return event notifying this command's status
      */
     template <typename T>
-    [[nodiscard]] ApiEvent enqueueBufferFillCommand(Buffer& buffer, const T& value, size_t count,
-                                                    const std::vector<Event>& waits, size_t offset = 0);
+    [[nodiscard]] Event enqueueBufferFillCommand(Buffer& buffer, const T& value, size_t count,
+                                                 const std::vector<Event>& waits, size_t offset = 0);
 
     /**
      * @brief enqueues a kernel command - submits a kernel to the device
@@ -226,8 +226,8 @@ public:
      * @return event notifying this command's status
      */
     template <U32 Dim>
-    [[nodiscard]] ApiEvent enqueueKernelCommand(const Kernel& kernel, const NDExecutionRange<Dim>& range,
-                                                const std::vector<Event>& waits, const NDRange<Dim>& offset);
+    [[nodiscard]] Event enqueueKernelCommand(const Kernel& kernel, const NDExecutionRange<Dim>& range,
+                                             const std::vector<Event>& waits, const NDRange<Dim>& offset);
 
 private:
     struct CommandQueueTraits {

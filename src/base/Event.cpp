@@ -27,6 +27,21 @@ void Event::await(const std::vector<Event>& events) {
     }
 }
 
+cl_event createUserEvent(Context& context) {
+    Status status = CL_SUCCESS;
+
+    auto ret = clCreateUserEvent(context.rawHandle(), &status);
+    if (status != CL_SUCCESS) {
+        throw EventCreateException(status);
+    }
+
+    return ret;
+}
+
+Event::Event(Context& context)
+    : Event(createUserEvent(context)) {
+}
+
 void Event::await() const {
     auto rawObject = m_object.underlying();
     auto status = clWaitForEvents(1, &rawObject);
@@ -62,25 +77,6 @@ Event::ExecutionStatus Event::status() const {
 
 cl_event Event::rawHandle() const {
     return m_object;
-}
-
-cl_event createUserEvent(Context& context) {
-    Status status = CL_SUCCESS;
-
-    auto ret = clCreateUserEvent(context.rawHandle(), &status);
-    if (status != CL_SUCCESS) {
-        throw EventCreateException(status);
-    }
-
-    return ret;
-}
-
-UserEvent::UserEvent(Context& context)
-    : Event(createUserEvent(context)) {
-}
-
-ApiEvent::ApiEvent(cl_event rawEvent)
-    : Event(rawEvent) {
 }
 
 }

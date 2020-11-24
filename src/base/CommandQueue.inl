@@ -6,7 +6,7 @@
 namespace nr::base {
 
 template <typename T>
-ApiEvent CommandQueue::enqueueBufferFillCommand(Buffer& buffer, const T& value, size_t count,
+Event CommandQueue::enqueueBufferFillCommand(Buffer& buffer, const T& value, size_t count,
                                                 const std::vector<Event>& waits, size_t offset) {
     static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8 || sizeof(T) == 16
                       || sizeof(T) == 32 || sizeof(T) == 64 || sizeof(T) == 128,
@@ -21,11 +21,11 @@ ApiEvent CommandQueue::enqueueBufferFillCommand(Buffer& buffer, const T& value, 
         throw CommandEnqueueException(status, "could not enqueue buffer fill command");
     }
 
-    return ApiEvent(ret);
+    return Event(ret);
 }
 
 template <U32 Dim>
-ApiEvent CommandQueue::enqueueKernelCommand(const Kernel& kernel, const NDExecutionRange<Dim>& range,
+Event CommandQueue::enqueueKernelCommand(const Kernel& kernel, const NDExecutionRange<Dim>& range,
                                             const std::vector<Event>& waits, const NDRange<Dim>& offset) {
     cl_event ret = cl_event();
 
@@ -37,7 +37,7 @@ ApiEvent CommandQueue::enqueueKernelCommand(const Kernel& kernel, const NDExecut
         throw CommandEnqueueException(status, "could not enqueue kernel");
     }
 
-    return ApiEvent(ret);
+    return Event(ret);
 }
 
 }

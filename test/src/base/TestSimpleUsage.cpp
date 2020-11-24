@@ -75,22 +75,20 @@ TEST_CASE("Base", "[sanity]") {
     auto waitBWrite = queues[0].enqueueBufferWriteCommand(devA, BUFFER_SIZE * sizeof(I32), hostA.data(), {});
 
     std::vector<Kernel> kernels;
-    std::vector<ApiEvent> kernelsDoneEvents;
-    std::vector<Event> kernelsDoneViews;
+    std::vector<Event> kernelResultsWaits;
     NDExecutionRange<1> range { .global = NDRange<1> { BUFFER_SIZE }, .local = NDRange<1> { BUFFER_SIZE } };
     for (size_t i = 0; i < devices.size(); ++i) {
         Kernel test(testModule, testModule.getKernelNames()[0]);
         test.setArg(0, devA);
         test.setArg(1, devB);
         test.setArg(2, devCBuffers[i]);
-        kernelsDoneEvents.push_back(queues[i].enqueueKernelCommand(test, range, { waitBWrite }, { 0 }));
-        kernelsDoneEvents.push_back(queues[i].enqueueBufferReadCommand(
-            devCBuffers[i], BUFFER_SIZE * sizeof(I32), hostCBuffers[i].data(), { kernelsDoneEvents.back() }));
-        kernelsDoneViews.push_back(kernelsDoneEvents.back());
+        auto waitForKernel = queues[i].enqueueKernelCommand(test, range, { waitBWrite }, { 0 });
+        kernelResultsWaits.push_back(queues[i].enqueueBufferReadCommand(
+            devCBuffers[i], BUFFER_SIZE * sizeof(I32), hostCBuffers[i].data(), { waitForKernel }));
         kernels.push_back(std::move(test));
     }
 
-    Event::await(kernelsDoneViews);
+    Event::await(kernelResultsWaits);
 
     for (auto& hostC : hostCBuffers) {
         REQUIRE(hostC == expectedHostC);

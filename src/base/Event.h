@@ -12,7 +12,6 @@
 namespace nr::base {
 
 CL_TYPE_CREATE_EXCEPTION(Event, CLApiException);
-CL_TYPE_CREATE_EXCEPTION(ApiEvent, EventCreateException);
 
 class EventWaitException : public CLApiException {
 public:
@@ -43,6 +42,8 @@ public:
      */
     static void await(const std::vector<Event>& events);
 
+    explicit Event(Context& context);
+
     /**
      * @brief Blocks until this event reaches CL_COMPLETE
      * @note wraps clWaitForEvents
@@ -59,9 +60,6 @@ public:
      */
     ExecutionStatus status() const;
 
-protected:
-    explicit Event(cl_event rawEvent);
-
 private:
     friend class CommandQueue;
 
@@ -72,21 +70,11 @@ private:
         static constexpr auto retain = clRetainEvent;
     };
 
+    explicit Event(cl_event rawEvent);
+
     cl_event rawHandle() const;
 
     UniqueWrapper<EventTraits> m_object;
-};
-
-class UserEvent : public Event {
-public:
-    explicit UserEvent(Context& context);
-};
-
-class ApiEvent : public Event {
-private:
-    friend class CommandQueue;
-
-    explicit ApiEvent(cl_event rawEvent);
 };
 
 }
