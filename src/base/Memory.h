@@ -55,6 +55,7 @@ private:
         using Type = cl_mem;
 
         static constexpr auto release = clReleaseMemObject;
+        static constexpr auto retain = clRetainMemObject;
     };
 
     cl_mem rawHandle() const;

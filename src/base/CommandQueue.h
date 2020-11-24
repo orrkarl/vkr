@@ -235,6 +235,7 @@ private:
         using Type = cl_command_queue;
 
         static constexpr auto release = clReleaseCommandQueue;
+        static constexpr auto retain = clRetainCommandQueue;
     };
 
     static cl_command_queue createCommandQueue(Context& context, Device& device,

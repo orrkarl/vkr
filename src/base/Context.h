@@ -59,7 +59,9 @@ private:
 
     struct ContextTraits {
         using Type = cl_context;
+
         static constexpr auto release = clReleaseContext;
+        static constexpr auto retain = clRetainContext;
     };
 
     UniqueWrapper<ContextTraits> m_context;

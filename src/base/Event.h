@@ -80,8 +80,10 @@ protected:
 
 private:
     struct EventTraits {
-        static constexpr auto release = clReleaseEvent;
         using Type = cl_event;
+
+        static constexpr auto release = clReleaseEvent;
+        static constexpr auto retain = clRetainEvent;
     };
 
     UniqueWrapper<EventTraits> m_object;

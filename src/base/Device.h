@@ -32,13 +32,20 @@ protected:
     explicit Device(cl_device_id rawDevice);
 
 private:
-    cl_device_id m_object;
+    struct DeviceTraits {
+        using Type = cl_device_id;
+
+        static constexpr auto release = clReleaseDevice;
+        static constexpr auto retain = clRetainDevice;
+    };
+
+    UniqueWrapper<DeviceTraits> m_object;
 };
 
 /**
  * @brief Represents an OpenCL physical root device, such as a specific GPU existing in the computer.
  *
- * A root device can only be created with a platform, and doesn't do lifetime management
+ * A root device can only be created with a platform
  */
 class RootDevice : public Device {
 private:

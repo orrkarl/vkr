@@ -107,6 +107,7 @@ private:
         using Type = cl_kernel;
 
         static constexpr auto release = clReleaseKernel;
+        static constexpr auto retain = clRetainKernel;
     };
 
     UniqueWrapper<KernelTraits> m_object;

@@ -100,7 +100,9 @@ private:
 
     struct ProgramTraits {
         using Type = cl_program;
+
         static constexpr auto release = clReleaseProgram;
+        static constexpr auto retain = clRetainProgram;
     };
 
     cl_program rawHandle();
