@@ -27,6 +27,9 @@ ENDIF(WIN32)
 
 # Must-have packeges
 FIND_PACKAGE(OpenCL REQUIRED)
+FIND_PACKAGE(Python3 COMPONENTS Interpreter)
+
+include(cmake/embed.cmake)
 
 # Adding Nraster itself
 ADD_SUBDIRECTORY(src)
