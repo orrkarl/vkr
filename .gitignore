@@ -17,5 +17,7 @@ cmake-build-*/
 # Vim
 **/.*.un~
 
-# Scripts (which are mostly platform dependent)
-scripts/
+# KDevelop
+.kdev4/
+*.kdev4
+
