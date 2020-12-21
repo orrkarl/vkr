@@ -1,9 +1,10 @@
-ADD_EXECUTABLE(NrasterTests src/Main.cpp src/util/Prettify.cpp src/base/TestSimpleUsage.cpp)
-TARGET_COMPILE_OPTIONS(NrasterTests PRIVATE
+ADD_EXECUTABLE(vkr-tests src/Main.cpp src/example/TestFail.cpp)
+
+TARGET_COMPILE_OPTIONS(vkr-tests PRIVATE
         $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
         $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Werror>
         )
 
-TARGET_LINK_LIBRARIES(NrasterTests Catch2::Catch2 NrasterBackend)
+TARGET_LINK_LIBRARIES(vkr-tests Catch2::Catch2)
 
-catch_discover_tests(NrasterTests)
+catch_discover_tests(vkr-tests)

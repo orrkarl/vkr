@@ -1,29 +1,18 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.17)
 
-project(Nraster VERSION 0.7.0 LANGUAGES CXX)
+project(VulkanRasterizer VERSION 0.7.0 LANGUAGES CXX)
 
 IF(NOT CMAKE_BUILD_TYPE)
 	SET(CMAKE_BUILD_TYPE Debug)
 ENDIF()
 
 # Default options:
-OPTION(BUILD_TESTS "builds the test directory and gtest" ON)
-OPTION(BUILD_DEMOS "builds the demo directory" ON)
-OPTION(BUILD_DOCS  "builds the Nraster documentation (requires Doxygen)" ON)
+OPTION(BUILD_TESTS "build vkr tests" ON)
+OPTION(BUILD_DOCS  "generate vkr documentation (requires Doxygen)" ON)
 
 # General settings
 SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-
-# Platform specific settings:
-IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	ADD_COMPILE_OPTIONS(-Wno-ignored-attributes)
-ENDIF()
-
-IF(WIN32)
-	SET(gtest_force_shared_crt ON)
-ENDIF(WIN32)
 
 # Adding required packages for main project
 FIND_PACKAGE(Vulkan REQUIRED)
@@ -31,9 +20,8 @@ FIND_PACKAGE(Vulkan REQUIRED)
 # Including required cmake utilities
 include(cmake/glslc.cmake)
 
-# Adding Nraster itself
+# Adding vkr itself
 ADD_SUBDIRECTORY(src)
-SET(NRASTER_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/project/include)
 
 IF(BUILD_TESTS)
 	INCLUDE(FetchContent)
