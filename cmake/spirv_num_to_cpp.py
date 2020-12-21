@@ -49,7 +49,6 @@ def readfile(path):
 
 
 def make_var_name(path):
-    print(path)
     return os.path.basename(path).replace('.', '_')
 
 
