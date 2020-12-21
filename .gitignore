@@ -16,8 +16,10 @@ cmake-build-*/
 
 # Vim
 **/.*.un~
+**/*.swp
 
 # KDevelop
 .kdev4/
 *.kdev4
+**/*kate-swp
 
