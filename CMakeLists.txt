@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.14)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.17)
 
 project(Nraster VERSION 0.7.0 LANGUAGES CXX)
 
@@ -28,7 +28,7 @@ ENDIF(WIN32)
 # Must-have packeges
 FIND_PACKAGE(OpenCL REQUIRED)
 
-include(cmake/embed.cmake)
+include(cmake/glslc.cmake)
 
 # Adding Nraster itself
 ADD_SUBDIRECTORY(src)
