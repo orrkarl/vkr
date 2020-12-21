@@ -1,5 +1,7 @@
 # main Nraster library
 
+FIND_PACKAGE(Vulkan REQUIRED)
+
 ADD_LIBRARY(NrasterBackend STATIC
         base/Buffer.cpp
 		base/CommandQueue.cpp
@@ -18,5 +20,5 @@ TARGET_COMPILE_OPTIONS(NrasterBackend PRIVATE
 		$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Werror>
 		)
 
-TARGET_LINK_LIBRARIES(NrasterBackend PUBLIC OpenCL::OpenCL)
+TARGET_LINK_LIBRARIES(NrasterBackend PUBLIC OpenCL::OpenCL Vulkan::Vulkan)
 TARGET_INCLUDE_DIRECTORIES(NrasterBackend INTERFACE "../src")
