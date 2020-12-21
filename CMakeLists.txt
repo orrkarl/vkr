@@ -25,9 +25,10 @@ IF(WIN32)
 	SET(gtest_force_shared_crt ON)
 ENDIF(WIN32)
 
-# Must-have packeges
-FIND_PACKAGE(OpenCL REQUIRED)
+# Adding required packages for main project
+FIND_PACKAGE(Vulkan REQUIRED)
 
+# Including required cmake utilities
 include(cmake/glslc.cmake)
 
 # Adding Nraster itself
