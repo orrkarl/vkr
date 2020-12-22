@@ -5,6 +5,6 @@ TARGET_COMPILE_OPTIONS(vkr-tests PRIVATE
         $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Werror>
         )
 
-TARGET_LINK_LIBRARIES(vkr-tests Catch2::Catch2)
+TARGET_LINK_LIBRARIES(vkr-tests PRIVATE Catch2::Catch2 PRIVATE vkr-backend)
 
 catch_discover_tests(vkr-tests)
