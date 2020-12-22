@@ -1,7 +1,7 @@
 # Main VulkanRasterizer libraries 
 
 ADD_LIBRARY(vkr-backend STATIC
-        Example.cpp
+        gpu/AllKernels.cpp
 		)
 
 TARGET_COMPILE_OPTIONS(vkr-backend PRIVATE
@@ -9,5 +9,12 @@ TARGET_COMPILE_OPTIONS(vkr-backend PRIVATE
 		$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Werror>
 		)
 
-TARGET_LINK_LIBRARIES(vkr-backend PUBLIC Vulkan::Vulkan)
+ADD_SPIRV_LIBRARY(
+    TARGET AllKernels
+    NAMESPACE device_side
+    OUTPUT_PATH "gpu/generated"
+    HEADER_NAME "AllKernels.h"
+    SOURCES "gpu/Simple.comp")
+
+TARGET_LINK_LIBRARIES(vkr-backend PUBLIC Vulkan::Vulkan PRIVATE AllKernels)
 TARGET_INCLUDE_DIRECTORIES(vkr-backend INTERFACE "../src")
