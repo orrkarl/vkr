@@ -1,23 +1,10 @@
-ADD_EXECUTABLE(NrasterTest 
-	src/tests.cpp
-	src/includes.cpp
-	
-	src/pipeline/utils.cpp)
+ADD_EXECUTABLE(vkr-tests src/Main.cpp src/example/TestFail.cpp)
 
-TARGET_LINK_LIBRARIES(NrasterTest 
-	PRIVATE Nraster
-	PRIVATE gtest 
-	PRIVATE gmock)
+TARGET_COMPILE_OPTIONS(vkr-tests PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+        $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Werror>
+        )
 
-TARGET_INCLUDE_DIRECTORIES(NrasterTest 
-	PRIVATE ${NRASTER_ALL_INCLUDES}
-	PRIVATE ${gtest_INCLUDE_DIRS}
-	PRIVATE ${OpenCL_INCLUDE_DIRS})
+TARGET_LINK_LIBRARIES(vkr-tests PRIVATE Catch2::Catch2 PRIVATE vkr-backend)
 
-if(WIN32)
-    # Copy DLL files to output directory
-    ADD_CUSTOM_COMMAND(TARGET NrasterTest PRE_LINK
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${PROJECT_BINARY_DIR}/project/Nraster.dll"             
-    $<TARGET_FILE_DIR:NrasterTest>)
-endif()
+catch_discover_tests(vkr-tests)

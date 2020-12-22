@@ -2,8 +2,8 @@ PROJECT_NAME           	= "@CMAKE_PROJECT_NAME@"
 PROJECT_NUMBER         	= @VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@
 
 
-STRIP_FROM_PATH        	= @PROJECT_SOURCE_DIR@/project
-INPUT                  	= @PROJECT_SOURCE_DIR@/README.md @PROJECT_SOURCE_DIR@/project
+STRIP_FROM_PATH        	= @PROJECT_SOURCE_DIR@/src
+INPUT                  	= @PROJECT_SOURCE_DIR@/README.md @PROJECT_SOURCE_DIR@/src
 
 FILE_PATTERNS          	= *.h \
                           *.cpp
