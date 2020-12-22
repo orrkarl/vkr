@@ -23,6 +23,9 @@ cmake-build-*/
 *.kdev4
 **/*kate-swp
 
+# Qt-Creator
+CMakeLists.txt.user
+
 # Auto-generated files
 **/generated
 
