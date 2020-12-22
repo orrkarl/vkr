@@ -10,6 +10,9 @@ function(ADD_SPIRV_LIBRARY)
 
     SET(OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${RSRC_ARG_OUTPUT_PATH}")
     SET(SPIRV_OUTPUT_DIR "${OUTPUT_DIR}/spirv")
+    
+    ADD_CUSTOM_TARGET(create-generated-dir
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${SPIRV_OUTPUT_DIR}")
 
     FOREACH(FILE_NAME ${RSRC_ARG_SOURCES})
     
@@ -23,7 +26,7 @@ function(ADD_SPIRV_LIBRARY)
                 COMMAND ${GLSLC} -o "${SPIRV_OUTPUT}" --target-env=vulkan1.1 -mfmt=num -g -Werror -O -fshader-stage=compute "${FILE_NAME}"
                 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
                 MAIN_DEPENDENCY "${FILE_NAME}"
-                DEPENDS "${RSRC_ARG_HEADERS}"
+                DEPENDS "${RSRC_ARG_HEADERS}" "create-generated-dir"
                 VERBATIM)
                 
         ADD_CUSTOM_COMMAND(
@@ -31,6 +34,7 @@ function(ADD_SPIRV_LIBRARY)
                 COMMAND ${Python3_EXECUTABLE} "${SPIRV_EMBED_PATH}" source -s "${SPIRV_OUTPUT}" -d "${OUTPUT_DIR}" -ns ${RSRC_ARG_NAMESPACE}
                 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
                 MAIN_DEPENDENCY "${SPIRV_OUTPUT}"
+                DEPENDS "create-generated-dir"
                 VERBATIM)
                 
         LIST(APPEND OUTPUT_FILES "${EMBED_OUTPUT}")
@@ -42,7 +46,7 @@ function(ADD_SPIRV_LIBRARY)
             OUTPUT "${GENERATED_HEADER}"
             COMMAND ${Python3_EXECUTABLE} "${SPIRV_EMBED_PATH}" header -s "${RSRC_ARG_SOURCES}" -d "${GENERATED_HEADER}" -ns ${RSRC_ARG_NAMESPACE}
             WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-            DEPENDS "${RSRC_ARG_SOURCES}"
+            DEPENDS "${RSRC_ARG_SOURCES}" "create-generated-dir"
             VERBATIM)
 
     ADD_LIBRARY(${RSRC_ARG_TARGET} ${OUTPUT_FILES} "${GENERATED_HEADER}")
