@@ -1,0 +1,29 @@
+#version 450
+
+layout(local_size_x=64) in;
+
+layout(binding = 0, std430) readonly buffer A {
+    uint values[];
+} a;
+
+layout(binding = 1, std430) readonly buffer B {
+    uint values[];
+} b;
+
+layout(binding = 2, std430) writeonly buffer C {
+    uint values[];
+} c;
+
+layout(push_constant) uniform Config {
+    uint array_size;
+} u_config;
+
+void main() {
+    uint idx = gl_GlobalInvocationID.x;
+    
+    if (idx >= u_config.array_size) {
+        return;
+    }
+    
+    c.values[idx] = a.values[idx] + b.values[idx];
+}
