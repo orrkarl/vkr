@@ -10,11 +10,11 @@ TARGET_COMPILE_OPTIONS(vkr-backend PRIVATE
 		)
 
 ADD_SPIRV_LIBRARY(
-    TARGET AllKernels
+    TARGET vkr-kernel-resources
     NAMESPACE device_side
     OUTPUT_PATH "gpu/generated"
     HEADER_NAME "AllKernels.h"
     SOURCES "gpu/Simple.comp")
 
-TARGET_LINK_LIBRARIES(vkr-backend PUBLIC Vulkan::Vulkan PRIVATE AllKernels)
+TARGET_LINK_LIBRARIES(vkr-backend PUBLIC Vulkan::Vulkan PRIVATE vkr-kernel-resources)
 TARGET_INCLUDE_DIRECTORIES(vkr-backend INTERFACE "../src")
