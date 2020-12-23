@@ -3,5 +3,24 @@
 #include "shared/compatibility.h"
 #include "shared/triangle_setup_types.h"
 
+layout(local_size_x = 64) in;
+
+layout(push_constant) uniform ConfigBlock {
+    u32 vertexCount;
+    mat4 mvp;
+};
+
+layout(binding = 0, std430) readonly buffer VertexBufferBlock {
+    vec4 vertecies[];
+    vec4 colors[];
+};
+
+layout(binding = 1, std430) writeonly buffer SetupBlocks {
+    TriangleSetupBlock triangleBlocks[];
+};
+
 void main() {
+    if (gl_GlobalInvocationID.x > vertexCount / 3) {
+        return;
+    }
 }
