@@ -55,7 +55,7 @@ def make_var_name(path):
 
 
 def make_var_pairs(file_paths):
-    pairs = (HEADER_VARS_FMT.format(var_name=make_var_name(path)) for path in file_paths)
+    pairs = (HEADER_VARS_FMT.format(var_name=make_var_name(path)) for path in file_paths.split(';'))
     return '\n\n'.join(pairs)
 
 
@@ -85,7 +85,7 @@ def main():
     source_parser.add_argument('-ns', '--namespace', help='namespace of the generated arguments', required=True)
 
     header_parser = subparsers.add_parser('header', help='generating spirv-in-cpp header file')
-    header_parser.add_argument('-s', '--spirv-files', help='list of spirv files embedded in cpp', required=True, nargs='+')
+    header_parser.add_argument('-s', '--spirv-files', help='semicolon seperated list of spirv files embedded in cpp', required=True)
     header_parser.add_argument('-d', '--dest-path', help='full file path for the generated header', required=True)
     header_parser.add_argument('-ns', '--namespace', help='namespace of the generated arguments', required=True)
 
