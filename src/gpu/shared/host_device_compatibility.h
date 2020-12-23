@@ -73,8 +73,8 @@ using uvec4 = Vec<u32, 4>;
 
 #else // #ifndef VKR_COMPILE_DEVICE
 
-using i32 = int;
-using u32 = uint;
-using f32 = float;
+typedef   int i32;
+typedef  uint u32;
+typedef float f32;
 
 #endif // #ifndef VKR_COMPILE_DEVICE
