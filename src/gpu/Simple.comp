@@ -1,6 +1,6 @@
 #version 450
 
-#include "shared/device_compatibility.h"
+#include "shared/compatibility.h"
 
 layout(local_size_x=64) in;
 

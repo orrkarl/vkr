@@ -14,7 +14,8 @@ ADD_SPIRV_LIBRARY(
     NAMESPACE device_side
     OUTPUT_PATH "gpu/generated"
     HEADER_NAME "AllKernels.h"
-    HEADERS "gpu/shared/device_compatibility.h"
+    MACROS "VKR_DEVICE_SIDE"
+    HEADERS "gpu/shared/device_compatibility.h" "gpu/shared/compatibility.h"
     SOURCES "gpu/Simple.comp")
 
 TARGET_LINK_LIBRARIES(vkr-backend PUBLIC Vulkan::Vulkan PRIVATE vkr-kernel-resources)
