@@ -1,6 +1,7 @@
 #version 450
 
 #include "shared/compatibility.h"
+#include "shared/triangle_setup_types.h"
 
 layout(local_size_x=64) in;
 
