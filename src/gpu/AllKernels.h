@@ -10,6 +10,7 @@ namespace vkr {
 namespace gpu {
 
 vk::ShaderModuleCreateInfo describeSimple();
+vk::ShaderModuleCreateInfo describeTriangleSetup();
 
 } // gpu
 } // vkr
