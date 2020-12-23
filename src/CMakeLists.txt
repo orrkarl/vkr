@@ -1,22 +1,14 @@
 # Main VulkanRasterizer libraries 
 
 ADD_LIBRARY(vkr-backend STATIC
-        gpu/AllKernels.cpp
-        )
+        TriangleSetupContext.cpp)
 
 TARGET_COMPILE_OPTIONS(vkr-backend PRIVATE
 		$<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
 		$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Werror>
 		)
 
-ADD_SPIRV_LIBRARY(
-    TARGET vkr-kernel-resources
-    NAMESPACE device_side
-    OUTPUT_PATH "gpu/generated"
-    HEADER_NAME "AllKernels.h"
-    MACROS "VKR_DEVICE_SIDE"
-    HEADERS "gpu/shared/device_compatibility.h" "gpu/shared/compatibility.h" "gpu/shared/triangle_setup_types.h"
-    SOURCES "gpu/Simple.comp")
+ADD_SUBDIRECTORY(gpu)
 
-TARGET_LINK_LIBRARIES(vkr-backend PUBLIC Vulkan::Vulkan PRIVATE vkr-kernel-resources)
+TARGET_LINK_LIBRARIES(vkr-backend PUBLIC Vulkan::Vulkan PRIVATE vkr-gpu)
 TARGET_INCLUDE_DIRECTORIES(vkr-backend INTERFACE "../src")
