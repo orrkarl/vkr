@@ -2,7 +2,7 @@
 
 ADD_LIBRARY(vkr-backend STATIC
         gpu/AllKernels.cpp
-		)
+        )
 
 TARGET_COMPILE_OPTIONS(vkr-backend PRIVATE
 		$<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
