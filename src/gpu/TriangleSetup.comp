@@ -2,25 +2,171 @@
 
 #include "shared/compatibility.h"
 #include "shared/triangle_setup_types.h"
+#include "Config.comph"
 
 layout(local_size_x = 64) in;
 
 layout(push_constant) uniform ConfigBlock {
+    u16vec2 viewport;
     u32 vertexCount;
     mat4 mvp;
 };
 
-layout(binding = 0, std430) readonly buffer VertexBufferBlock {
+layout(binding = 0, std430) readonly buffer VertexBuffer {
     vec4 vertecies[];
+};
+
+layout(binding = 1, std430) readonly buffer VertexColorBuffer {
     vec4 colors[];
 };
 
-layout(binding = 1, std430) writeonly buffer SetupBlocks {
+layout(binding = 2, std430) writeonly buffer SetupBlocks {
     TriangleSetupBlock triangleBlocks[];
 };
 
+/**
+ * @brief clips the given vertecies against a clipping plane
+ *
+ * The clipping plane is not passed directly - only each vertex' distance from it
+ * The vertecies themselves aren't passed as well, only their barycentric coords
+ *	in the same triangle - which is enough to generate clipped vertecies
+ *
+ * Clipping is done with a naive implementation of sutherland-hodgman polygon clipping algo.
+ * This probably should be optimized to not access arrays dynamically
+ */
+u32 clipAgainst(u32 vertexCount, const f32 dists[6], const vec3 barysIn[6], out vec3 barysOut[6]) {
+    u32 dstIdx = 0;
+
+    for (u32 i = 0; i < vertexCount - 1; ++i) {
+        vec3 a = barysIn[i];
+        float da = dists[i];
+        vec3 b = barysIn[i + 1];
+        float db = dists[i + 1];
+
+        if (da >= 0.0) {
+            if (db >= 0.0) {
+                barysOut[dstIdx++] = b;
+            } else {
+                barysOut[dstIdx++] = mix(a, b, da / (da - db));
+            }
+        } else if (db >= 0.0) {
+            barysOut[dstIdx++] = mix(a, b, da / (db - da));
+            barysOut[dstIdx++] = b;
+        }
+    }
+
+    vec3 a = barysIn[vertexCount - 1];
+    float da = dists[vertexCount - 1];
+    vec3 b = barysIn[0];
+    float db = dists[0];
+
+    if (da >= 0.0) {
+        if (db >= 0.0) {
+            barysOut[dstIdx++] = b;
+        } else {
+            barysOut[dstIdx++] = mix(a, b, da / (da - db));
+        }
+    } else if (db >= 0.0) {
+        barysOut[dstIdx++] = mix(a, b, da / (db - da));
+        barysOut[dstIdx++] = b;
+    }
+
+    return dstIdx;
+}
+
+#define ACCESS_X(v) v.x
+#define ACCESS_Y(v) v.y
+#define ACCESS_Z(v) v.z
+
+#define DECL_CLIP_AGAINST_PLANE(coord)                                    \
+    void clipAgainst ## coord(const vec4 base[3], out u32 vertexCount,    \
+                              out vec3 barys[6]){                         \
+        vec3 tmpBarys[6];                                                 \
+        f32 dists[6];                                                     \
+                                                                          \
+        for (u32 i = 0; i < dists.length(); ++i) {                        \
+            vec3 baseCoords = vec3(                                       \
+                ACCESS_##coord(base[0]) + base[0].w,                      \
+                ACCESS_##coord(base[1]) + base[1].w,                      \
+                ACCESS_##coord(base[2]) + base[2].w                       \
+            );                                                            \
+            dists[i] = dot(baseCoords, barys[i]);                         \
+        }                                                                 \
+        vertexCount = clipAgainst(vertexCount, dists, barys, tmpBarys);   \
+                                                                          \
+        for (u32 i = 0; i < dists.length(); ++i) {                        \
+            vec3 baseCoords = vec3(                                       \
+                ACCESS_##coord(base[0]) + base[0].w,                      \
+                ACCESS_##coord(base[1]) + base[1].w,                      \
+                ACCESS_##coord(base[2]) + base[2].w                       \
+            );                                                            \
+            dists[i] = -dot(baseCoords, tmpBarys[i]);                     \
+        }                                                                 \
+        vertexCount = clipAgainst(vertexCount, dists, tmpBarys, barys);   \
+    }
+
+DECL_CLIP_AGAINST_PLANE(X)
+DECL_CLIP_AGAINST_PLANE(Y)
+DECL_CLIP_AGAINST_PLANE(Z)
+
+#undef DECL_CLIP_AGAINST_PLANE
+#undef ACCESS_Z
+#undef ACCESS_Y
+#undef ACCESS_X
+
+u32 clip(const vec4 base[3], out vec3 barys[6]) {
+    u32 vertexCount = 3;
+    barys[0] = vec3(1.0, 0.0, 0.0);
+    barys[1] = vec3(0.0, 1.0, 0.0);
+    barys[2] = vec3(0.0, 0.0, 1.0);
+
+    clipAgainstX(base, vertexCount, barys);
+    clipAgainstY(base, vertexCount, barys);
+    clipAgainstZ(base, vertexCount, barys);
+
+    return vertexCount;
+}
+
+ivec2 project(vec4 vertex) {
+    return ivec2(uvec2(viewport) * (1 << (SUBPIXEL_BITS - 1)) * (vertex.xy / vertex.w));
+}
+
 void main() {
     if (gl_GlobalInvocationID.x > vertexCount / 3) {
+        return;
+    }
+
+    vec4 transformedV[3] = {
+        mvp * vertecies[3 * gl_GlobalInvocationID.x + 0],
+        mvp * vertecies[3 * gl_GlobalInvocationID.x + 1],
+        mvp * vertecies[3 * gl_GlobalInvocationID.x + 2]
+    };
+
+    ivec2 v[3] = {
+        project(transformedV[0]),
+        project(transformedV[1]),
+        project(transformedV[2])
+    };
+
+    // it's assumed that although the type is "ivec2", v coordinates are i16
+    ivec2 d[2] = {
+        v[1] - v[0],
+        v[2] - v[1]
+    };
+    i32 area = d[0].x * d[1].y - d[0].y * d[1].x;
+
+    // degenrate or backfacing (CW) triangles are culled.
+    if (area <= 0) {
+        triangleBlocks[gl_GlobalInvocationID.x].totalTriangleCount = 0;
+        return;
+    }
+
+    vec3 barys[6];
+    u32 postClipVertexCount = clip(transformedV, barys);
+
+    // no edge is inside\intersects the clipping box, the triangle is culled
+    if (postClipVertexCount == 0) {
+        triangleBlocks[gl_GlobalInvocationID.x].totalTriangleCount = 0;
         return;
     }
 }
