@@ -1,0 +1,4 @@
+#include "shared/compatibility.h"
+
+#define SUBPIXEL_BITS 4
+#define SAMPLE_BITS 1
