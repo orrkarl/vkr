@@ -1,8 +1,7 @@
 #ifndef _DEVICE_COMPATIBILITY_H_
 #define _DEVICE_COMPATIBILITY_H_
 
-#extension GL_EXT_shader_16bit_storage : require
-#extension GL_EXT_shader_8bit_storage : require
+#extension GL_EXT_shader_explicit_arithmetic_types : require
 
 #define u8 uint8_t
 #define i8 int8_t
