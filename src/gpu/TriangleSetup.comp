@@ -24,6 +24,14 @@ layout(binding = 2, std430) writeonly buffer SetupBlocks {
     TriangleSetupBlock triangleBlocks[];
 };
 
+u16 min3(const u16vec3 vec) {
+    return min(vec.x, min(vec.y, vec.z));
+}
+
+u16 max3(const u16vec3 vec) {
+    return max(vec.x, max(vec.y, vec.z));
+}
+
 /**
  * @brief clips the given vertecies against a clipping plane
  *
@@ -127,9 +135,11 @@ u32 clip(const vec4 base[3], out vec3 barys[6]) {
     return vertexCount;
 }
 
-i16vec2 project(vec4 vertex) {
+u16vec2 project(vec4 vertex) {
     // multiplying by [1 << (SUBPIXEL_BITS - 1)] will overflow when abs(x) == w or abs(y) == w
-    return i16vec2(u16vec2(viewport) * ((1 << (SUBPIXEL_BITS - 1)) - 1) * (vertex.xy / vertex.w));
+    uvec2 shift = viewport * ((1 << (SUBPIXEL_BITS - 1)) - 1);
+
+    return u16vec2(shift + ivec2(shift * (vertex.xy / vertex.w)));
 }
 
 vec4 combine(const vec4 base[3], const vec3 barys) {
@@ -142,7 +152,7 @@ void mark_triangle_discard() {
 
 bool setupTriangle(const vec4 base[3], const vec3 barys[3], out TriangleSetupBlock result) {
     // it's assumed that although the type is "ivec2", v coordinates are i16
-    i16vec2 v[3] = {
+    u16vec2 v[3] = {
         project(combine(base, barys[0])),
         project(combine(base, barys[1])),
         project(combine(base, barys[2]))
@@ -159,6 +169,13 @@ bool setupTriangle(const vec4 base[3], const vec3 barys[3], out TriangleSetupBlo
         result.totalTriangleCount = 0;
         return false;
     }
+
+    u16vec3 xs = { v[0].x, v[1].x, v[2].x };
+    u16vec3 ys = { v[0].y, v[1].y, v[2].y };
+    result.triangleInfo.boundingBoxMin = pack32(
+        u16vec2(min3(xs), min3(ys)));
+    result.triangleInfo.boundingBoxMin = pack32(
+        u16vec2(max3(xs), max3(ys)));
 
     return true;
 }
@@ -199,4 +216,6 @@ void main() {
                        triangleBlocks[gl_GlobalInvocationID.x])) {
         return;
     }
+
+    triangleBlocks[gl_GlobalInvocationID.x].totalTriangleCount = postClipVertexCount - 2;
 }
