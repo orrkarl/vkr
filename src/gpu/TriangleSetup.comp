@@ -84,7 +84,6 @@ u32 clipAgainst(u32 vertexCount, const f32 dists[6], const vec3 barysIn[6], out 
         vec3 tmpBarys[6];                                                 \
         f32 dists[6];                                                     \
                                                                           \
-        // clip against coord < w plane                                   \
         for (u32 i = 0; i < dists.length(); ++i) {                        \
             vec3 baseCoords = vec3(                                       \
                 base[0].w - ACCESS_##coord(base[0]),                      \
@@ -95,7 +94,6 @@ u32 clipAgainst(u32 vertexCount, const f32 dists[6], const vec3 barysIn[6], out 
         }                                                                 \
         vertexCount = clipAgainst(vertexCount, dists, barys, tmpBarys);   \
                                                                           \
-        // clip against -w < coord plane                                  \
         for (u32 i = 0; i < dists.length(); ++i) {                        \
             vec3 baseCoords = vec3(                                       \
                 base[0].w + ACCESS_##coord(base[0]),                      \
@@ -137,6 +135,10 @@ vec4 combine(const vec4 base[3], const vec3 barys) {
     return barys[0] * base[0] + barys[1] * base[1] + barys[2] * base[2];
 }
 
+void mark_triangle_discard() {
+    triangleBlocks[gl_GlobalInvocationID.x].totalTriangleCount = 0;
+}
+
 bool setupTriangle(const vec4 base[3], const vec3 barys[3], out TriangleSetupBlock result) {
     // it's assumed that although the type is "ivec2", v coordinates are i16
     ivec2 v[3] = {
@@ -171,6 +173,15 @@ void main() {
         mvp * vertecies[3 * gl_GlobalInvocationID.x + 2]
     };
 
+    // Negative or degenerate W values are rejected
+    if (any(lessThanEqual(vec3(transformedV[0].w,
+                               transformedV[1].w,
+                               transformedV[2].w),
+                          vec3(0.0)))) {
+        mark_triangle_discard();
+        return;
+    }
+
     vec3 barys[6];
     u32 postClipVertexCount = clip(transformedV, barys);
 
@@ -178,7 +189,7 @@ void main() {
     // note that values [1,2] shouldn't be possible - if even a single vertex
     //  is inside the viewport, the rest will be clipped
     if (postClipVertexCount == 0) {
-        triangleBlocks[gl_GlobalInvocationID.x].totalTriangleCount = 0;
+        mark_triangle_discard();
         return;
     }
 
