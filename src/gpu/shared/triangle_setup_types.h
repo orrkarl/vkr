@@ -23,8 +23,9 @@ struct TriangleRasterInfo {
     u32 depthA, depthB, depthC;
 
     /// Bounding box of the triangle, in subpixel coordinates
-    u16vec2 boundingBoxMin;
-    u16vec2 boundingBoxMax;
+    /// u16vec2 packed in a u32
+    u32 boundingBoxMin;
+    u32 boundingBoxMax;
 
     TriangleParameterBlock drawParameters;
 };
@@ -37,7 +38,7 @@ struct TriangleSetupBlock {
      * 0 < totalTriangleCount < 9 means that this record is valid, and so are
      * 		the first (totalTriangleCount - 1) records in the extra triangles array portion
      * anything above 9 is an invalid value.
-    */
+     */
     u32 totalTriangleCount;
 
     TriangleRasterInfo triangleInfo;
