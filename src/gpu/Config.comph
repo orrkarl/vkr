@@ -1,4 +1,8 @@
 #include "shared/compatibility.h"
 
-#define SUBPIXEL_BITS 4
-#define SAMPLE_BITS 1
+// 2 ** 11 = 2048 pixels
+#define VIEWPORT_BITS (11)
+
+#define SUBPIXEL_BITS (4)
+#define SAMPLE_BITS (1)
+#define INTERPOLATE_EQN_BITS (30)
