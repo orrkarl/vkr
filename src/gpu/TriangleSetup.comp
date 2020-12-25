@@ -127,8 +127,8 @@ u32 clip(const vec4 base[3], out vec3 barys[6]) {
     return vertexCount;
 }
 
-ivec2 project(vec4 vertex) {
-    return ivec2(uvec2(viewport) * (1 << (SUBPIXEL_BITS - 1)) * (vertex.xy / vertex.w));
+i16vec2 project(vec4 vertex) {
+    return i16vec2(u16vec2(viewport) * (1 << (SUBPIXEL_BITS - 1)) * (vertex.xy / vertex.w));
 }
 
 vec4 combine(const vec4 base[3], const vec3 barys) {
@@ -141,15 +141,15 @@ void mark_triangle_discard() {
 
 bool setupTriangle(const vec4 base[3], const vec3 barys[3], out TriangleSetupBlock result) {
     // it's assumed that although the type is "ivec2", v coordinates are i16
-    ivec2 v[3] = {
+    i16vec2 v[3] = {
         project(combine(base, barys[0])),
         project(combine(base, barys[1])),
         project(combine(base, barys[2]))
     };
 
     ivec2 d[2] = {
-        v[1] - v[0],
-        v[2] - v[1],
+        ivec2(v[1]) - ivec2(v[0]),
+        ivec2(v[2]) - ivec2(v[1]),
     };
     i32 area = d[0].x * d[1].y - d[0].y * d[1].x;
 
