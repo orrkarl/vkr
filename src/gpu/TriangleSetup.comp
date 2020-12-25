@@ -128,7 +128,8 @@ u32 clip(const vec4 base[3], out vec3 barys[6]) {
 }
 
 i16vec2 project(vec4 vertex) {
-    return i16vec2(u16vec2(viewport) * (1 << (SUBPIXEL_BITS - 1)) * (vertex.xy / vertex.w));
+    // multiplying by [1 << (SUBPIXEL_BITS - 1)] will overflow when abs(x) == w or abs(y) == w
+    return i16vec2(u16vec2(viewport) * ((1 << (SUBPIXEL_BITS - 1)) - 1) * (vertex.xy / vertex.w));
 }
 
 vec4 combine(const vec4 base[3], const vec3 barys) {
