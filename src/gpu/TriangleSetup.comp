@@ -84,23 +84,25 @@ u32 clipAgainst(u32 vertexCount, const f32 dists[6], const vec3 barysIn[6], out 
         vec3 tmpBarys[6];                                                 \
         f32 dists[6];                                                     \
                                                                           \
+        // clip against coord < w plane                                   \
         for (u32 i = 0; i < dists.length(); ++i) {                        \
             vec3 baseCoords = vec3(                                       \
-                ACCESS_##coord(base[0]) + base[0].w,                      \
-                ACCESS_##coord(base[1]) + base[1].w,                      \
-                ACCESS_##coord(base[2]) + base[2].w                       \
+                base[0].w - ACCESS_##coord(base[0]),                      \
+                base[1].w - ACCESS_##coord(base[1]),                      \
+                base[2].w - ACCESS_##coord(base[2])                       \
             );                                                            \
             dists[i] = dot(baseCoords, barys[i]);                         \
         }                                                                 \
         vertexCount = clipAgainst(vertexCount, dists, barys, tmpBarys);   \
                                                                           \
+        // clip against -w < coord plane                                  \
         for (u32 i = 0; i < dists.length(); ++i) {                        \
             vec3 baseCoords = vec3(                                       \
-                ACCESS_##coord(base[0]) + base[0].w,                      \
-                ACCESS_##coord(base[1]) + base[1].w,                      \
-                ACCESS_##coord(base[2]) + base[2].w                       \
+                base[0].w + ACCESS_##coord(base[0]),                      \
+                base[1].w + ACCESS_##coord(base[1]),                      \
+                base[2].w + ACCESS_##coord(base[2])                       \
             );                                                            \
-            dists[i] = -dot(baseCoords, tmpBarys[i]);                     \
+            dists[i] = dot(baseCoords, tmpBarys[i]);                      \
         }                                                                 \
         vertexCount = clipAgainst(vertexCount, dists, tmpBarys, barys);   \
     }
@@ -148,24 +150,26 @@ void main() {
         project(transformedV[2])
     };
 
+    vec3 barys[6];
+    u32 postClipVertexCount = clip(transformedV, barys);
+
+    // no overlap between the triangle and the viewport, the triangle is culled
+    // note that values [1,2] shouldn't be possible - if even a single vertex
+    //  is inside the viewport, the rest will be clipped
+    if (postClipVertexCount == 0) {
+        triangleBlocks[gl_GlobalInvocationID.x].totalTriangleCount = 0;
+        return;
+    }
+
     // it's assumed that although the type is "ivec2", v coordinates are i16
     ivec2 d[2] = {
-        v[1] - v[0],
-        v[2] - v[1]
+        v[0] - v[1],
+        v[1] - v[2]
     };
     i32 area = d[0].x * d[1].y - d[0].y * d[1].x;
 
     // degenrate or backfacing (CW) triangles are culled.
     if (area <= 0) {
-        triangleBlocks[gl_GlobalInvocationID.x].totalTriangleCount = 0;
-        return;
-    }
-
-    vec3 barys[6];
-    u32 postClipVertexCount = clip(transformedV, barys);
-
-    // no edge is inside\intersects the clipping box, the triangle is culled
-    if (postClipVertexCount == 0) {
         triangleBlocks[gl_GlobalInvocationID.x].totalTriangleCount = 0;
         return;
     }
