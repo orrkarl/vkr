@@ -1,6 +1,7 @@
 #include "TriangleSetupContext.h"
 
-TriangleSetupContext::TriangleSetupContext()
-{
+#include "gpu/AllKernels.h"
+#include "gpu/shared/compatibility.h"
 
+TriangleSetupContext::TriangleSetupContext() {
 }
