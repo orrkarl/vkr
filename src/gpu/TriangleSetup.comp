@@ -187,6 +187,7 @@ bool setupTriangle(const vec4 base[3], const vec3 barys[3], out TriangleSetupBlo
 
     u32 eqnConstScale = ((1 << INTERPOLATE_EQN_BITS) - 1);
     uvec3 zEqnConsts = uvec3(eqnConstScale * vec3(v[0].z, v[1].z, v[2].z));
+    // TODO: implement parameter equation setup
 
     result.triangleInfo.boundingBoxMin = pack32(min(p[0], min(p[1], p[2])).xy);
     result.triangleInfo.boundingBoxMax = pack32(max(p[0], max(p[1], p[2])).xy);
@@ -196,7 +197,7 @@ bool setupTriangle(const vec4 base[3], const vec3 barys[3], out TriangleSetupBlo
     uvec3 sEqnConsts = uvec3(balancedW[0] * eqnConstScale, 0, 0);
     uvec3 tEqnConsts = uvec3(0, balancedW[1] * eqnConstScale, 0);
     uvec3 pEqnConsts = uvec3(0, 0, balancedW[2] * eqnConstScale);
-
+    // TODO: implement parameter equation setup
 
     vec4 localColors[3] = {
         colors[3 * gl_GlobalInvocationID.x + 0],
