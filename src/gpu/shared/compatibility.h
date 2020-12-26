@@ -7,4 +7,9 @@
 #include "host_compatibility.h"
 #endif // #ifdef VKR_DEVICE_SIDE
 
+struct RasterConfig {
+    u32 packedViewport;
+    u32 multiSampleBitCount;
+};
+
 #endif // #ifndef _COMPATIBILITY_H_
