@@ -143,7 +143,6 @@ void mark_triangle_discard() {
 }
 
 bool setupTriangle(const vec4 base[3], const vec3 barys[3], out TriangleSetupBlock result) {
-    // it's assumed that although the type is "ivec2", v coordinates are i16
     u16vec2 v[3] = {
         project(combine(base, barys[0])),
         project(combine(base, barys[1])),
