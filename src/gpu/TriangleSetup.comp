@@ -24,14 +24,6 @@ layout(binding = 2, std430) writeonly buffer SetupBlocks {
     TriangleSetupBlock triangleBlocks[];
 };
 
-u16 min3(const u16vec3 vec) {
-    return min(vec.x, min(vec.y, vec.z));
-}
-
-u16 max3(const u16vec3 vec) {
-    return max(vec.x, max(vec.y, vec.z));
-}
-
 /**
  * @brief clips the given vertecies against a clipping plane
  *
@@ -170,12 +162,10 @@ bool setupTriangle(const vec4 base[3], const vec3 barys[3], out TriangleSetupBlo
         return false;
     }
 
-    u16vec3 xs = { v[0].x, v[1].x, v[2].x };
-    u16vec3 ys = { v[0].y, v[1].y, v[2].y };
     result.triangleInfo.boundingBoxMin = pack32(
-        u16vec2(min3(xs), min3(ys)));
-    result.triangleInfo.boundingBoxMin = pack32(
-        u16vec2(max3(xs), max3(ys)));
+        min(v[0], min(v[1], v[2])).xy);
+    result.triangleInfo.boundingBoxMax = pack32(
+        max(v[0], max(v[1], v[2])).xy);
 
     return true;
 }
