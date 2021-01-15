@@ -253,7 +253,8 @@ bool setupTriangle(const vec4 base[3], const vec3 barys[3], out TriangleSetupBlo
 }
 
 void main() {
-    if (gl_GlobalInvocationID.x > vertexCount / 3) {
+    const u32 triangleCount = vertexCount / 3;
+    if (gl_GlobalInvocationID.x >= triangleCount) {
         return;
     }
 
@@ -286,8 +287,15 @@ void main() {
     if (!setupTriangle(transformedV,
                        vec3[3](barys[0], barys[1], barys[2]),
                        triangleBlocks[gl_GlobalInvocationID.x])) {
+        mark_triangle_discard();
         return;
     }
 
     triangleBlocks[gl_GlobalInvocationID.x].totalTriangleCount = postClipVertexCount - 2;
+
+    for (u32 i = 2; i < postClipVertexCount - 1; ++i) {
+        setupTriangle(transformedV,
+                      vec3[3](barys[0], barys[i], barys[i + 1]),
+                      triangleBlocks[triangleCount + gl_GlobalInvocationID.x + i - 2]);
+    }
 }
