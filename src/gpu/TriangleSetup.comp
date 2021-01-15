@@ -198,19 +198,47 @@ bool setupTriangle(const vec4 base[3], const vec3 barys[3], out TriangleSetupBlo
     result.triangleInfo.B2 = d[0].x;
     result.triangleInfo.C2 = d[0].y * p[0].x - d[0].x * p[0].y;
 
+    uvec2 p0SampleSpace = p[0] >> (SUBPIXEL_BITS - SAMPLE_BITS);
     u32 eqnConstScale = ((1 << INTERPOLATE_EQN_BITS) - 1);
-    uvec3 zEqnConsts = uvec3(eqnConstScale * vec3(v[0].z, v[1].z, v[2].z));
-    // TODO: implement parameter equation setup
+
+    uvec3 zEqn = uvec3(buildInterpolationEqn(
+        uvec3(eqnConstScale * vec3(v[0].z, v[1].z, v[2].z)),
+        area,
+        p0SampleSpace,
+        d[0],
+        d[2]));
+    result.triangleInfo.depthA = zEqn.x;
+    result.triangleInfo.depthB = zEqn.y;
+    result.triangleInfo.depthC = zEqn.z;
 
     result.triangleInfo.boundingBoxMin = pack32(min(p[0], min(p[1], p[2])).xy);
     result.triangleInfo.boundingBoxMax = pack32(max(p[0], max(p[1], p[2])).xy);
 
     vec3 balancedW = min(v[0].w, min(v[1].w, v[2].w)) / vec3(v[0].w, v[1].w, v[2].w);
-    uvec3 wEqnConsts = uvec3(eqnConstScale * balancedW);
-    uvec3 sEqnConsts = uvec3(balancedW[0] * eqnConstScale, 0, 0);
-    uvec3 tEqnConsts = uvec3(0, balancedW[1] * eqnConstScale, 0);
-    uvec3 pEqnConsts = uvec3(0, 0, balancedW[2] * eqnConstScale);
-    // TODO: implement parameter equation setup
+    ivec3 sEqn = buildInterpolationEqn(uvec3(balancedW[0] * eqnConstScale, 0, 0),
+                                       area,
+                                       p0SampleSpace,
+                                       d[0],
+                                       d[2]);
+    ivec3 tEqn = buildInterpolationEqn(uvec3(0, balancedW[1] * eqnConstScale, 0),
+                                       area,
+                                       p0SampleSpace,
+                                       d[0],
+                                       d[2]);
+    ivec3 wEqn = buildInterpolationEqn(uvec3(eqnConstScale * balancedW),
+                                       area,
+                                       p0SampleSpace,
+                                       d[0],
+                                       d[2]);
+    result.triangleInfo.drawParameters.sCoordA = sEqn.x;
+    result.triangleInfo.drawParameters.sCoordB = sEqn.y;
+    result.triangleInfo.drawParameters.sCoordC = sEqn.z;
+    result.triangleInfo.drawParameters.tCoordA = tEqn.x;
+    result.triangleInfo.drawParameters.tCoordB = tEqn.y;
+    result.triangleInfo.drawParameters.tCoordC = tEqn.z;
+    result.triangleInfo.drawParameters.wCoordA = wEqn.x;
+    result.triangleInfo.drawParameters.wCoordB = wEqn.y;
+    result.triangleInfo.drawParameters.wCoordC = wEqn.z;
 
     vec4 localColors[3] = {
         colors[3 * gl_GlobalInvocationID.x + 0],
