@@ -26,17 +26,25 @@ ADD_SUBDIRECTORY(src)
 IF(BUILD_TESTS)
 	INCLUDE(FetchContent)
 
+    # Tests based on Catch2 suite
 	FetchContent_Declare(
 			catch2
 			GIT_REPOSITORY https://github.com/catchorg/Catch2.git
 			GIT_TAG v2.13.3)
     FetchContent_MakeAvailable(catch2)
 
-	INCLUDE(${catch2_SOURCE_DIR}/contrib/Catch.cmake)
+    # Using vk-bootstrap for vulkan boilerplate
+    FetchContent_Declare(
+            vk-bootstrap
+            GIT_REPOSITORY https://github.com/charls-lunarg/vk-bootstrap.git
+            GIT_TAG v0.2)
+    FetchContent_MakeAvailable(vk-bootstrap)
 
-	ENABLE_TESTING()
+    INCLUDE(${catch2_SOURCE_DIR}/contrib/Catch.cmake)
 
-	ADD_SUBDIRECTORY(test)
+    ENABLE_TESTING()
+
+    ADD_SUBDIRECTORY(test)
 ENDIF()
 
 IF(BUILD_DOCS)
