@@ -201,12 +201,11 @@ bool setupTriangle(const vec4 base[3], const vec3 barys[3], out TriangleSetupBlo
     uvec2 p0SampleSpace = p[0] >> (SUBPIXEL_BITS - SAMPLE_BITS);
     u32 eqnConstScale = ((1 << INTERPOLATE_EQN_BITS) - 1);
 
-    uvec3 zEqn = uvec3(buildInterpolationEqn(
-        uvec3(eqnConstScale * vec3(v[0].z, v[1].z, v[2].z)),
-        area,
-        p0SampleSpace,
-        d[0],
-        d[2]));
+    uvec3 zEqn = buildInterpolationEqn(uvec3(eqnConstScale * vec3(v[0].z, v[1].z, v[2].z)),
+                                       area,
+                                       p0SampleSpace,
+                                       d[0],
+                                       d[2]);
     result.triangleInfo.depthA = zEqn.x;
     result.triangleInfo.depthB = zEqn.y;
     result.triangleInfo.depthC = zEqn.z;
