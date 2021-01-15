@@ -5,8 +5,8 @@
 
 struct TriangleParameterBlock {
     /// Compressed equations calculating barycentrics
-    i32 uCoordA, uCoordB, uCoordC;
-    i32 vCoordA, vCoordB, vCoordC;
+    i32 sCoordA, sCoordB, sCoordC;
+    i32 tCoordA, tCoordB, tCoordC;
     i32 wCoordA, wCoordB, wCoordC;
 
     /// Color at each vertex
