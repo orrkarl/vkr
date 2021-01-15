@@ -9,6 +9,16 @@ namespace vkr::detail {
 template <typename T, size_t Size>
 struct Vec;
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#endif // __GNUC__
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpedantic"
+#endif // __clang__
+
+#pragma pack(push, 1)
 template <typename T>
 struct Vec<T, 2> {
     static constexpr auto Size = 2;
@@ -22,7 +32,9 @@ struct Vec<T, 2> {
         };
     };
 };
+#pragma pack(pop)
 
+#pragma pack(push, 1)
 template <typename T>
 struct Vec<T, 3> {
     static constexpr auto Size = 3;
@@ -37,7 +49,9 @@ struct Vec<T, 3> {
         };
     };
 };
+#pragma pack(pop)
 
+#pragma pack(push, 1)
 template <typename T>
 struct Vec<T, 4> {
     static constexpr auto Size = 4;
@@ -53,6 +67,14 @@ struct Vec<T, 4> {
         };
     };
 };
+#pragma pack(pop)
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif // __GNUC__
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif // __clang__
 
 } // vkr::detail
 
