@@ -149,6 +149,18 @@ void mark_triangle_discard() {
     triangleBlocks[gl_GlobalInvocationID.x].totalTriangleCount = 0;
 }
 
+ivec3 buildInterpolationEqn(uvec3 valuesAtVertecies, i32 area, uvec2 v0, ivec2 d01, ivec2 d02) {
+    i64 dbeta = valuesAtVertecies.y - valuesAtVertecies.x;
+    i64 dgamma = valuesAtVertecies.z - valuesAtVertecies.x;
+
+    ivec3 ret;
+    ret.x = i32(((- dgamma * d01.y - dbeta * d02.y) << (SUBPIXEL_BITS - SAMPLE_BITS)) / area);
+    ret.y = i32(((+ dgamma * d01.x + dbeta * d02.x) << (SUBPIXEL_BITS - SAMPLE_BITS)) / area);
+    ret.z = i32(valuesAtVertecies.x) - ret.x * i32(v0.x) - ret.y * i32(v0.y);
+
+    return ret;
+}
+
 bool setupTriangle(const vec4 base[3], const vec3 barys[3], out TriangleSetupBlock result) {
     u16vec2 viewport = unpack16(config.packedViewport);
     vec4 v[3] = {
@@ -156,6 +168,7 @@ bool setupTriangle(const vec4 base[3], const vec3 barys[3], out TriangleSetupBlo
         toNDC(combine(base, barys[1])),
         toNDC(combine(base, barys[2]))
     };
+
     u16vec2 p[3] = {
         project(viewport, v[0].xy),
         project(viewport, v[1].xy),
