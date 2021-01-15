@@ -24,7 +24,7 @@ include(cmake/glslc.cmake)
 ADD_LIBRARY(vkr-global-compiler-opts INTERFACE)
 TARGET_COMPILE_OPTIONS(vkr-global-compiler-opts INTERFACE
         $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
-        $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Werror -pedantic-errors -Wconversion -Wsign-conversion>
+        $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Werror -Wpedantic -Wconversion -Wsign-conversion>
         )
 
 # Adding vkr itself
