@@ -9,6 +9,8 @@
 #define i16 int16_t
 #define u32 uint
 #define i32 int
+#define u64 uint64_t
+#define i64 int64_t
 #define f32 float
 
 #endif // #ifndef _DEVICE_COMPATIBILITY_H_
