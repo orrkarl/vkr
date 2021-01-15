@@ -10,5 +10,8 @@ TARGET_COMPILE_OPTIONS(vkr-backend PRIVATE
 
 ADD_SUBDIRECTORY(gpu)
 
-TARGET_LINK_LIBRARIES(vkr-backend PUBLIC Vulkan::Vulkan PRIVATE vkr-gpu)
+TARGET_LINK_LIBRARIES(vkr-backend
+    PUBLIC Vulkan::Vulkan
+    PRIVATE vkr-gpu
+    INTERFACE vkr-global-compiler-opts)
 TARGET_INCLUDE_DIRECTORIES(vkr-backend INTERFACE "../src")

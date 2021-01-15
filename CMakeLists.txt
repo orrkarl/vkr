@@ -20,6 +20,13 @@ FIND_PACKAGE(Vulkan REQUIRED)
 # Including required cmake utilities
 include(cmake/glslc.cmake)
 
+# Creating global compiler options pseudo-target
+ADD_LIBRARY(vkr-global-compiler-opts INTERFACE)
+TARGET_COMPILE_OPTIONS(vkr-global-compiler-opts INTERFACE
+        $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+        $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Werror -pedantic-errors -Wconversion -Wsign-conversion>
+        )
+
 # Adding vkr itself
 ADD_SUBDIRECTORY(src)
 
