@@ -35,14 +35,27 @@ vkb::PhysicalDevice pickPhysicalDevice(const vkb::Instance& inst) {
     return ret.value();
 }
 
+vkb::Device buildLogicalDevice(const vkb::PhysicalDevice& pdev) {
+    vkb::DeviceBuilder dev(pdev);
+    auto ret = dev.build();
+
+    if (!ret) {
+        throw std::runtime_error(std::string("could not build logical device: ") + ret.error().message());
+    }
+
+    return ret.value();
+}
+
 TEST_CASE("Sanity", "[sanity]") {
     auto vkinst = buildInstance();
+
     auto pdev = pickPhysicalDevice(vkinst);
     std::cout << "[vkr-tests] picked physical device: " << pdev.properties.deviceName << std::endl;
     CAPTURE(pdev.properties.deviceName);
 
+    auto dev = buildLogicalDevice(pdev);
+    REQUIRE(dev.device);
+
     auto setupModuleInfo = vkr::gpu::describeTriangleSetup();
-    REQUIRE(vkinst.instance);
-    REQUIRE(pdev.physical_device);
     REQUIRE(setupModuleInfo.pCode[0] == 0xAABBCCDD);
 }
