@@ -16,7 +16,7 @@ vkb::Instance buildInstance() {
                    .build();
 
     if (!ret) {
-        throw std::runtime_error(std::string("could not create instance: ") + ret.error().message());
+        throw std::runtime_error("could not create instance: " + ret.error().message());
     }
 
     return ret.value();
@@ -29,7 +29,7 @@ vkb::PhysicalDevice pickPhysicalDevice(const vkb::Instance& inst) {
                    .select();
 
     if (!ret) {
-        throw std::runtime_error(std::string("could not pick physical device: ") + ret.error().message());
+        throw std::runtime_error("could not pick physical device: " + ret.error().message());
     }
 
     return ret.value();
@@ -40,7 +40,7 @@ vkb::Device buildLogicalDevice(const vkb::PhysicalDevice& pdev) {
     auto ret = dev.build();
 
     if (!ret) {
-        throw std::runtime_error(std::string("could not build logical device: ") + ret.error().message());
+        throw std::runtime_error("could not build logical device: " + ret.error().message());
     }
 
     return ret.value();
