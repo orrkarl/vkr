@@ -1,11 +1,10 @@
 ADD_EXECUTABLE(vkr-tests
         ${vk-bootstrap_SOURCE_DIR}/src/VkBootstrap.cpp
-        src/Main.cpp
         src/example/TestFail.cpp)
 
 TARGET_LINK_LIBRARIES(vkr-tests
         PRIVATE ${CMAKE_DL_LIBS}
-        PRIVATE Catch2::Catch2
+        PRIVATE Catch2WithMain
         PRIVATE vkr-backend
         INTERFACE vkr-global-compiler-opts)
 
