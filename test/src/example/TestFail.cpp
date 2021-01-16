@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <VkBootstrap.h>
 
@@ -12,11 +12,24 @@ vkb::Instance buildInstance() {
                    .request_validation_layers()
                    .require_api_version(1, 1, 0)
                    .use_default_debug_messenger()
+                   .set_headless()
                    .build();
 
     if (!ret) {
-        auto err = static_cast<vkb::InstanceError>(ret.error().value());
-        throw std::runtime_error(std::string("could not create instance: ") + vkb::to_string(err));
+        throw std::runtime_error(std::string("could not create instance: ") + ret.error().message());
+    }
+
+    return ret.value();
+}
+
+vkb::PhysicalDevice pickPhysicalDevice(const vkb::Instance& inst) {
+    vkb::PhysicalDeviceSelector physicalDev(inst);
+    auto ret = physicalDev.set_minimum_version(1, 1)
+                   .prefer_gpu_device_type(vkb::PreferredDeviceType::discrete)
+                   .select();
+
+    if (!ret) {
+        throw std::runtime_error(std::string("could not pick physical device: ") + ret.error().message());
     }
 
     return ret.value();
@@ -24,7 +37,9 @@ vkb::Instance buildInstance() {
 
 TEST_CASE("Sanity", "[sanity]") {
     auto vkinst = buildInstance();
+    auto pdev = pickPhysicalDevice(vkinst);
     auto setupModuleInfo = vkr::gpu::describeTriangleSetup();
     REQUIRE(vkinst.instance);
-    REQUIRE(setupModuleInfo.pCode[0] == 0xAABBCCDD);
+    REQUIRE(pdev.physical_device);
+    REQUIRE_FALSE(setupModuleInfo.pCode[0] == 0xAABBCCDD);
 }
