@@ -6,6 +6,10 @@
 
 #include <gpu/AllKernels.h>
 
+namespace vkb::detail {
+VkQueue get_queue(VkDevice device, uint32_t family);
+}
+
 vkb::Instance buildInstance() {
     vkb::InstanceBuilder builder;
     auto ret = builder.set_app_name("vkr-test-suite")
@@ -53,12 +57,16 @@ vkb::Device buildLogicalDevice(const vkb::PhysicalDevice& pdev) {
 }
 
 VkQueue acquireComputeQueue(const vkb::Device dev) {
-    auto ret = dev.get_queue(vkb::QueueType::compute);
-    if (!ret) {
-        throw std::runtime_error("could not acquire compute queue: " + ret.error().message());
+    auto computeQueueFamily = std::find_if(
+        dev.queue_families.cbegin(), dev.queue_families.cend(),
+        [](const auto& family) { return (family.queueFlags & VK_QUEUE_COMPUTE_BIT) != 0; });
+    if (computeQueueFamily == dev.queue_families.cend()) {
+        throw std::runtime_error("could not acquire compute queue: "
+                                 + vkb::make_error_code(vkb::QueueError::compute_unavailable).message());
     }
 
-    return ret.value();
+    return vkb::detail::get_queue(dev.device,
+                                  static_cast<uint32_t>(computeQueueFamily - dev.queue_families.cbegin()));
 }
 
 TEST_CASE("Sanity", "[sanity]") {
