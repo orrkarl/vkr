@@ -38,8 +38,11 @@ vkb::PhysicalDevice pickPhysicalDevice(const vkb::Instance& inst) {
 TEST_CASE("Sanity", "[sanity]") {
     auto vkinst = buildInstance();
     auto pdev = pickPhysicalDevice(vkinst);
+    std::cout << "[vkr-tests] picked physical device: " << pdev.properties.deviceName << std::endl;
+    CAPTURE(pdev.properties.deviceName);
+
     auto setupModuleInfo = vkr::gpu::describeTriangleSetup();
     REQUIRE(vkinst.instance);
     REQUIRE(pdev.physical_device);
-    REQUIRE_FALSE(setupModuleInfo.pCode[0] == 0xAABBCCDD);
+    REQUIRE(setupModuleInfo.pCode[0] == 0xAABBCCDD);
 }
