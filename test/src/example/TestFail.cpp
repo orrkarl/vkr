@@ -25,8 +25,13 @@ vkb::Instance buildInstance() {
 vkb::PhysicalDevice pickPhysicalDevice(const vkb::Instance& inst) {
     vkb::PhysicalDeviceSelector physicalDev(inst);
 
+    VkPhysicalDeviceFeatures requiredFeatures {};
+    requiredFeatures.shaderInt16 = VK_TRUE;
+    requiredFeatures.shaderInt64 = VK_TRUE;
+
     auto ret = physicalDev.set_minimum_version(1, 1)
                    .prefer_gpu_device_type(vkb::PreferredDeviceType::discrete)
+                   .set_required_features(requiredFeatures)
                    .select();
 
     if (!ret) {
