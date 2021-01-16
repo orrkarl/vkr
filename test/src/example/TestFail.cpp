@@ -24,6 +24,7 @@ vkb::Instance buildInstance() {
 
 vkb::PhysicalDevice pickPhysicalDevice(const vkb::Instance& inst) {
     vkb::PhysicalDeviceSelector physicalDev(inst);
+
     auto ret = physicalDev.set_minimum_version(1, 1)
                    .prefer_gpu_device_type(vkb::PreferredDeviceType::discrete)
                    .select();
@@ -46,15 +47,26 @@ vkb::Device buildLogicalDevice(const vkb::PhysicalDevice& pdev) {
     return ret.value();
 }
 
+VkQueue acquireComputeQueue(const vkb::Device dev) {
+    auto ret = dev.get_queue(vkb::QueueType::compute);
+    if (!ret) {
+        throw std::runtime_error("could not acquire compute queue: " + ret.error().message());
+    }
+
+    return ret.value();
+}
+
 TEST_CASE("Sanity", "[sanity]") {
     auto vkinst = buildInstance();
 
     auto pdev = pickPhysicalDevice(vkinst);
     std::cout << "[vkr-tests] picked physical device: " << pdev.properties.deviceName << std::endl;
-    CAPTURE(pdev.properties.deviceName);
 
     auto dev = buildLogicalDevice(pdev);
     REQUIRE(dev.device);
+
+    auto compq = acquireComputeQueue(dev);
+    REQUIRE(compq);
 
     auto setupModuleInfo = vkr::gpu::describeTriangleSetup();
     REQUIRE(setupModuleInfo.pCode[0] == 0xAABBCCDD);
