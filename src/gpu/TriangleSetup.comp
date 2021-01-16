@@ -11,19 +11,19 @@ layout(push_constant) uniform Transform {
     mat4 mvp;
 };
 
-layout(binding = 0, std140) uniform Config {
+layout(set = 0, binding = 0, std140) uniform Config {
     RasterConfig config;
 };
 
-layout(binding = 1, std430) readonly buffer VertexBuffer {
+layout(set = 1, binding = 1, std430) readonly buffer VertexBuffer {
     vec4 vertecies[];
 };
 
-layout(binding = 2, std430) readonly buffer VertexColorBuffer {
+layout(set = 1, binding = 2, std430) readonly buffer VertexColorBuffer {
     vec4 colors[];
 };
 
-layout(binding = 3, std430) writeonly buffer SetupBlocks {
+layout(set = 1, binding = 3, std430) writeonly buffer SetupBlocks {
     TriangleSetupBlock triangleBlocks[];
 };
 
