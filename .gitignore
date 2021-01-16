@@ -25,6 +25,7 @@ cmake-build-*/
 
 # Qt-Creator
 CMakeLists.txt.user
+*.autosave
 
 # Auto-generated files
 **/generated
