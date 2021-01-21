@@ -4,12 +4,13 @@
 
 #include "../vk-util/VulkanContext.h"
 
-#include <gpu/AllKernels.h>
+#include <gpu/host-interface/TriangleSetupAPI.h>
 
 TEST_CASE("Sanity", "[sanity]") {
     utils::VulkanContext ctx;
     REQUIRE(ctx.compute());
 
-    auto setupModuleInfo = vkr::gpu::describeTriangleSetup();
-    REQUIRE(setupModuleInfo.pCode[0] == 0xAABBCCDD);
+    vkr::gpu::TriangleSetupAPI triangleSetup;
+    REQUIRE(triangleSetup.init(ctx.device().device, nullptr) == VK_SUCCESS);
+    triangleSetup.destroy(ctx.device().device, nullptr);
 }
