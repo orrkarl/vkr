@@ -200,7 +200,9 @@ VkResult TriangleSetupAPI::initArgSetProcessedDescription(VkDevice dev,
 }
 
 VkResult TriangleSetupAPI::initStageDescription(VkDevice dev, const VkAllocationCallbacks* allocator) {
-    VkPushConstantRange pushArgsDesc { VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, 0, 4 * 4 * 4 + 4 };
+    VkPushConstantRange pushArgsDesc { VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT,
+                                       0,
+                                       VERTEX_COUNT_SIZE + MVP_SIZE };
     VkPipelineLayoutCreateInfo pipelineDesc { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
                                               nullptr,
                                               0,
