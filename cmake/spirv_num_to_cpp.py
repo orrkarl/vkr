@@ -65,12 +65,14 @@ def handle_source_command(args):
     file_name = os.path.basename(args.src_path)
     total_data_count = len(file_data.split(','))
 
+    os.makedirs(args.dest_path, exist_ok=True)
     with open(os.path.join(args.dest_path, file_name + '.cpp'), 'w') as f:
         f.write(SOURCE_FMT.format(file_name=file_name, namespace=args.namespace, var_name=make_var_name(args.src_path),
                                   raw_lines=file_data, total_data_count=total_data_count))
 
 
 def handle_header_command(args):
+    os.makedirs(os.path.dirname(args.dest_path), exist_ok=True)
     with open(args.dest_path, 'w') as f:
         f.write(HEADER_FMT.format(namespace=args.namespace, var_pairs=make_var_pairs(args.spirv_files)))
 
