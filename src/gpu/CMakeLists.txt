@@ -9,6 +9,12 @@ ADD_SPIRV_LIBRARY(
     SOURCES "TriangleSetup.comp")
 
 ADD_LIBRARY(vkr-gpu
-        AllKernels.cpp)
+        host-interface/TriangleSetupAPI.cpp)
 
-TARGET_LINK_LIBRARIES(vkr-gpu vkr-gpu-resources)
+TARGET_LINK_LIBRARIES(vkr-gpu
+    PRIVATE vkr-gpu-resources
+    PRIVATE Vulkan::Vulkan
+    INTERFACE vkr-global-compiler-opts)
+
+TARGET_INCLUDE_DIRECTORIES(vkr-gpu
+    INTERFACE host-interface)
