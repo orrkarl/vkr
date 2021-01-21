@@ -4,8 +4,7 @@
 
 namespace utils {
 
-class VulkanContext
-{
+class VulkanContext {
 public:
     VulkanContext();
 

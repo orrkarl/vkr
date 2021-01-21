@@ -44,8 +44,9 @@ VulkanContext::VulkanContext() {
     m_device = dev.value();
 
     auto computeQueueFamily = std::find_if(
-        m_device.queue_families.cbegin(), m_device.queue_families.cend(),
-        [](const auto& family) { return (family.queueFlags & VK_QUEUE_COMPUTE_BIT) != 0; });
+        m_device.queue_families.cbegin(), m_device.queue_families.cend(), [](const auto& family) {
+            return (family.queueFlags & VK_QUEUE_COMPUTE_BIT) != 0;
+        });
     if (computeQueueFamily == m_device.queue_families.cend()) {
         vkb::destroy_device(m_device);
         vkb::destroy_instance(m_instance);
