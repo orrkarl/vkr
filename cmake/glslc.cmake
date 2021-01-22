@@ -16,8 +16,9 @@ function(ADD_SPIRV_LIBRARY)
             COMMAND ${CMAKE_COMMAND} -E make_directory "${SPIRV_OUTPUT_DIR}"
             VERBATIM)
 
+    SET(GLSLC_ADDITIONAL_PARAMS --target-env=vulkan1.1 -mfmt=num -g -Werror -O -fshader-stage=compute)
     FOREACH(MACRO ${RSRC_ARG_MACROS})
-        SET(GLSLC_MACROS ${GLSLC_MACROS} -D${MACRO})
+        SET(GLSLC_ADDITIONAL_PARAMS ${GLSLC_ADDITIONAL_PARAMS} -D${MACRO})
     ENDFOREACH()
 
     FOREACH(FILE_NAME ${RSRC_ARG_SOURCES})
@@ -27,7 +28,6 @@ function(ADD_SPIRV_LIBRARY)
         SET(SPIRV_OUTPUT "${SPIRV_OUTPUT_DIR}/${FILE_NAME_ONLY}")
         SET(EMBED_OUTPUT "${RESULT_FILE_PATH}.cpp")
 
-        SET(GLSLC_ADDITIONAL_PARAMS --target-env=vulkan1.1 -mfmt=num -g -Werror -O -fshader-stage=compute ${GLSLC_MACROS})
         ADD_CUSTOM_COMMAND(
                 OUTPUT "${SPIRV_OUTPUT}"
                 COMMAND ${GLSLC} -o "${SPIRV_OUTPUT}" ${GLSLC_ADDITIONAL_PARAMS} "${FILE_NAME}"
