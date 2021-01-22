@@ -109,7 +109,7 @@ vec4 toNDC(vec4 v) {
     return vec4(v.xy / v.w, 0.5 + (0.5 * v.z) / v.w, v.w);
 }
 
-u16vec2 project(u16vec2 viewport, vec2 vNdc) {
+u16vec2 toSubpixel(u16vec2 viewport, vec2 vNdc) {
     // multiplying by [1 << (SUBPIXEL_BITS - 1)] will overflow when abs(x) == w or abs(y) == w
     uvec2 shift = viewport * ((1 << (SUBPIXEL_BITS - 1)) - 1);
 
@@ -141,9 +141,9 @@ bool setupTriangle(const RasterConfig config, const vec4 colors[3], const vec4 b
     };
 
     u16vec2 p[3] = {
-        project(viewport, v[0].xy),
-        project(viewport, v[1].xy),
-        project(viewport, v[2].xy)
+        toSubpixel(viewport, v[0].xy),
+        toSubpixel(viewport, v[1].xy),
+        toSubpixel(viewport, v[2].xy)
     };
 
     ivec2 d[3] = {
