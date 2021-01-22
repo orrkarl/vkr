@@ -7,6 +7,7 @@ TARGET_LINK_LIBRARIES(vkr-tests
         PRIVATE ${CMAKE_DL_LIBS}
         PRIVATE Catch2WithMain
         PRIVATE vkr-backend
+        PRIVATE vkr-gpu-tests
         INTERFACE vkr-global-compiler-opts)
 
 TARGET_INCLUDE_DIRECTORIES(vkr-tests
