@@ -2,15 +2,36 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "../vk-util/VulkanContext.h"
+#include <gpu/host-interface/main/TriangleSetupAPI.h>
+#include <gpu/host-interface/tests/setup/ClippingAPI.h>
 
-#include <gpu/host-interface/TriangleSetupAPI.h>
+#include "../vk-util/CommonVulkanResoruces.h"
+#include "../vk-util/ManagedVulkanResource.h"
+#include "../vk-util/VulkanContext.h"
 
 TEST_CASE("Sanity", "[sanity]") {
     utils::VulkanContext ctx;
     REQUIRE(ctx.compute());
 
-    vkr::gpu::TriangleSetupAPI triangleSetup;
-    REQUIRE(triangleSetup.init(ctx.device().device, nullptr) == VK_SUCCESS);
-    triangleSetup.destroy(ctx.device().device, nullptr);
+    {
+        utils::ManagedVulkanResource<vkr::gpu::TriangleSetupAPI> triangleSetup(ctx.device().device, nullptr);
+
+        VkPipeline triangleSetupStage;
+        auto pipelineDesc = triangleSetup->describeStage();
+        REQUIRE(vkCreateComputePipelines(
+                    ctx.device().device, VK_NULL_HANDLE, 1, &pipelineDesc, nullptr, &triangleSetupStage)
+                == VK_SUCCESS);
+        utils::ManagedVulkanResource<VkPipeline> triangleSetupStageGuard(
+            ctx.device().device, std::move(triangleSetupStage), nullptr);
+    }
+    {
+        utils::ManagedVulkanResource<vkr::tests::gpu::ClippingAPI> clipping(ctx.device().device, nullptr);
+        VkPipeline clippingRunner;
+        auto pipelineDesc = clipping->describeRunner();
+        REQUIRE(vkCreateComputePipelines(
+                    ctx.device().device, VK_NULL_HANDLE, 1, &pipelineDesc, nullptr, &clippingRunner)
+                == VK_SUCCESS);
+        utils::ManagedVulkanResource<VkPipeline> clippingRunnerGuard(
+            ctx.device().device, std::move(clippingRunner), nullptr);
+    }
 }
