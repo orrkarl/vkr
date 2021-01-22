@@ -1,0 +1,218 @@
+#include "shared/compatibility.h"
+#include "shared/triangle_setup_types.h"
+#include "Config.comph"
+
+/**
+ * @brief clips the given vertecies against a clipping plane
+ *
+ * The clipping plane is not passed directly - only each vertex' distance from it
+ * The vertecies themselves aren't passed as well, only their barycentric coords
+ *	in the same triangle - which is enough to generate clipped vertecies
+ *
+ * Clipping is done with a naive implementation of sutherland-hodgman polygon clipping algo.
+ * This probably should be optimized to not access arrays dynamically
+ */
+u32 clipAgainst(u32 vertexCount, const f32 dists[6], const vec3 barysIn[6], out vec3 barysOut[6]) {
+    u32 dstIdx = 0;
+
+    for (u32 i = 0; i < vertexCount - 1; ++i) {
+        vec3 a = barysIn[i];
+        float da = dists[i];
+        vec3 b = barysIn[i + 1];
+        float db = dists[i + 1];
+
+        if (da >= 0.0) {
+            if (db >= 0.0) {
+                barysOut[dstIdx++] = b;
+            } else {
+                barysOut[dstIdx++] = mix(a, b, da / (da - db));
+            }
+        } else if (db >= 0.0) {
+            barysOut[dstIdx++] = mix(a, b, da / (db - da));
+            barysOut[dstIdx++] = b;
+        }
+    }
+
+    vec3 a = barysIn[vertexCount - 1];
+    float da = dists[vertexCount - 1];
+    vec3 b = barysIn[0];
+    float db = dists[0];
+
+    if (da >= 0.0) {
+        if (db >= 0.0) {
+            barysOut[dstIdx++] = b;
+        } else {
+            barysOut[dstIdx++] = mix(a, b, da / (da - db));
+        }
+    } else if (db >= 0.0) {
+        barysOut[dstIdx++] = mix(a, b, da / (db - da));
+        barysOut[dstIdx++] = b;
+    }
+
+    return dstIdx;
+}
+
+#define ACCESS_X(v) v.x
+#define ACCESS_Y(v) v.y
+#define ACCESS_Z(v) v.z
+
+#define DECL_CLIP_AGAINST_PLANE(coord)                                    \
+    void clipAgainst ## coord(const vec4 base[3], out u32 vertexCount,    \
+                              out vec3 barys[6]){                         \
+        vec3 tmpBarys[6];                                                 \
+        f32 dists[6];                                                     \
+                                                                          \
+        for (u32 i = 0; i < dists.length(); ++i) {                        \
+            vec3 baseCoords = vec3(                                       \
+                base[0].w - ACCESS_##coord(base[0]),                      \
+                base[1].w - ACCESS_##coord(base[1]),                      \
+                base[2].w - ACCESS_##coord(base[2])                       \
+            );                                                            \
+            dists[i] = dot(baseCoords, barys[i]);                         \
+        }                                                                 \
+        vertexCount = clipAgainst(vertexCount, dists, barys, tmpBarys);   \
+                                                                          \
+        for (u32 i = 0; i < dists.length(); ++i) {                        \
+            vec3 baseCoords = vec3(                                       \
+                base[0].w + ACCESS_##coord(base[0]),                      \
+                base[1].w + ACCESS_##coord(base[1]),                      \
+                base[2].w + ACCESS_##coord(base[2])                       \
+            );                                                            \
+            dists[i] = dot(baseCoords, tmpBarys[i]);                      \
+        }                                                                 \
+        vertexCount = clipAgainst(vertexCount, dists, tmpBarys, barys);   \
+    }
+
+DECL_CLIP_AGAINST_PLANE(X)
+DECL_CLIP_AGAINST_PLANE(Y)
+DECL_CLIP_AGAINST_PLANE(Z)
+
+#undef DECL_CLIP_AGAINST_PLANE
+#undef ACCESS_Z
+#undef ACCESS_Y
+#undef ACCESS_X
+
+u32 clip(const vec4 base[3], out vec3 barys[6]) {
+    u32 vertexCount = 3;
+    barys[0] = vec3(1.0, 0.0, 0.0);
+    barys[1] = vec3(0.0, 1.0, 0.0);
+    barys[2] = vec3(0.0, 0.0, 1.0);
+
+    clipAgainstX(base, vertexCount, barys);
+    clipAgainstY(base, vertexCount, barys);
+    clipAgainstZ(base, vertexCount, barys);
+
+    return vertexCount;
+}
+
+vec4 toNDC(vec4 v) {
+    return vec4(v.xy / v.w, 0.5 + (0.5 * v.z) / v.w, v.w);
+}
+
+u16vec2 project(u16vec2 viewport, vec2 vNdc) {
+    // multiplying by [1 << (SUBPIXEL_BITS - 1)] will overflow when abs(x) == w or abs(y) == w
+    uvec2 shift = viewport * ((1 << (SUBPIXEL_BITS - 1)) - 1);
+
+    return u16vec2(shift + ivec2(shift * vNdc));
+}
+
+vec4 combine(const vec4 base[3], const vec3 barys) {
+    return barys[0] * base[0] + barys[1] * base[1] + barys[2] * base[2];
+}
+
+ivec3 buildInterpolationEqn(uvec3 valuesAtVertecies, i32 area, uvec2 v0, ivec2 d01, ivec2 d20) {
+    i64 dbeta = valuesAtVertecies.y - valuesAtVertecies.x;
+    i64 dgamma = valuesAtVertecies.z - valuesAtVertecies.x;
+
+    ivec3 ret;
+    ret.x = i32(((- dgamma * d01.y - dbeta * d20.y) << (SUBPIXEL_BITS - SAMPLE_BITS)) / area);
+    ret.y = i32(((+ dgamma * d01.x + dbeta * d20.x) << (SUBPIXEL_BITS - SAMPLE_BITS)) / area);
+    ret.z = i32(valuesAtVertecies.x) - ret.x * i32(v0.x) - ret.y * i32(v0.y);
+
+    return ret;
+}
+
+bool setupTriangle(const RasterConfig config, const vec4 colors[3], const vec4 base[3], const vec3 barys[3], out TriangleSetupBlock result) {
+    u16vec2 viewport = unpack16(config.packedViewport);
+    vec4 v[3] = {
+        toNDC(combine(base, barys[0])),
+        toNDC(combine(base, barys[1])),
+        toNDC(combine(base, barys[2]))
+    };
+
+    u16vec2 p[3] = {
+        project(viewport, v[0].xy),
+        project(viewport, v[1].xy),
+        project(viewport, v[2].xy)
+    };
+
+    ivec2 d[3] = {
+        ivec2(p[1]) - ivec2(p[0]),
+        ivec2(p[2]) - ivec2(p[1]),
+        ivec2(p[0]) - ivec2(p[2]),
+    };
+    i32 area = d[0].x * d[1].y - d[0].y * d[1].x;
+
+    // degenrate or backfacing (CW) triangles are culled. will be configurable in the future
+    if (area <= 0) {
+        result.totalTriangleCount = 0;
+        return false;
+    }
+
+    result.triangleInfo.A0 = -d[1].y;
+    result.triangleInfo.B0 = d[1].x;
+    result.triangleInfo.C0 = d[1].y * p[1].x - d[1].x * p[1].y;
+    result.triangleInfo.A1 = -d[2].y;
+    result.triangleInfo.B1 = d[2].x;
+    result.triangleInfo.C1 = d[2].y * p[2].x - d[2].x * p[2].y;
+    result.triangleInfo.A2 = -d[0].y;
+    result.triangleInfo.B2 = d[0].x;
+    result.triangleInfo.C2 = d[0].y * p[0].x - d[0].x * p[0].y;
+
+    uvec2 p0SampleSpace = p[0] >> (SUBPIXEL_BITS - SAMPLE_BITS);
+    u32 eqnConstScale = ((1 << INTERPOLATE_EQN_BITS) - 1);
+
+    uvec3 zEqn = buildInterpolationEqn(uvec3(eqnConstScale * vec3(v[0].z, v[1].z, v[2].z)),
+                                       area,
+                                       p0SampleSpace,
+                                       d[0],
+                                       d[2]);
+    result.triangleInfo.depthA = zEqn.x;
+    result.triangleInfo.depthB = zEqn.y;
+    result.triangleInfo.depthC = zEqn.z;
+
+    result.triangleInfo.boundingBoxMin = pack32(min(p[0], min(p[1], p[2])).xy);
+    result.triangleInfo.boundingBoxMax = pack32(max(p[0], max(p[1], p[2])).xy);
+
+    vec3 balancedW = min(v[0].w, min(v[1].w, v[2].w)) / vec3(v[0].w, v[1].w, v[2].w);
+    ivec3 sEqn = buildInterpolationEqn(uvec3(balancedW[0] * eqnConstScale, 0, 0),
+                                       area,
+                                       p0SampleSpace,
+                                       d[0],
+                                       d[2]);
+    ivec3 tEqn = buildInterpolationEqn(uvec3(0, balancedW[1] * eqnConstScale, 0),
+                                       area,
+                                       p0SampleSpace,
+                                       d[0],
+                                       d[2]);
+    ivec3 wEqn = buildInterpolationEqn(uvec3(eqnConstScale * balancedW),
+                                       area,
+                                       p0SampleSpace,
+                                       d[0],
+                                       d[2]);
+    result.triangleInfo.drawParameters.sCoordA = sEqn.x;
+    result.triangleInfo.drawParameters.sCoordB = sEqn.y;
+    result.triangleInfo.drawParameters.sCoordC = sEqn.z;
+    result.triangleInfo.drawParameters.tCoordA = tEqn.x;
+    result.triangleInfo.drawParameters.tCoordB = tEqn.y;
+    result.triangleInfo.drawParameters.tCoordC = tEqn.z;
+    result.triangleInfo.drawParameters.wCoordA = wEqn.x;
+    result.triangleInfo.drawParameters.wCoordB = wEqn.y;
+    result.triangleInfo.drawParameters.wCoordC = wEqn.z;
+
+    result.triangleInfo.drawParameters.userParams[0] = combine(colors, barys[0]);
+    result.triangleInfo.drawParameters.userParams[1] = combine(colors, barys[1]);
+    result.triangleInfo.drawParameters.userParams[2] = combine(colors, barys[2]);
+
+    return true;
+}
