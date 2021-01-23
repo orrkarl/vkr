@@ -5,7 +5,7 @@
 
 #include <vulkan/vulkan.h>
 
-#include "../../../util/DeviceModuleAPI.h"
+#include "../DeviceModuleAPI.h"
 
 namespace vkr {
 namespace gpu {
