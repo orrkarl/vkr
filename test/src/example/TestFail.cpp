@@ -17,7 +17,7 @@ TEST_CASE("Sanity", "[sanity]") {
         utils::ManagedVulkanResource<vkr::gpu::TriangleSetupAPI> triangleSetup(ctx.device().device, nullptr);
 
         VkPipeline triangleSetupStage;
-        auto pipelineDesc = triangleSetup->describeStage();
+        auto pipelineDesc = triangleSetup->describeRunner();
         REQUIRE(vkCreateComputePipelines(
                     ctx.device().device, VK_NULL_HANDLE, 1, &pipelineDesc, nullptr, &triangleSetupStage)
                 == VK_SUCCESS);
