@@ -18,8 +18,8 @@ VkResult DeviceModuleAPI<APITraits>::init(VkDevice dev, const VkAllocationCallba
     VkShaderModuleCreateInfo codeInfo { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
                                              nullptr,
                                              0,
-                                             APITraits::MODULE.size() * sizeof(uint32_t),
-                                             APITraits::MODULE.data() };
+                                             APITraits::MODULE_SIZE * sizeof(uint32_t),
+                                             APITraits::MODULE_DATA };
 
     VkResult status = vkCreateShaderModule(dev, &codeInfo, allocator, &m_code);
     if (status != VK_SUCCESS) {
