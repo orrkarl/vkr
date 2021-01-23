@@ -1,5 +1,9 @@
 # gpu resources and interface
 
+# GPU API utilities
+ADD_LIBRARY(vkr-gpu-utils
+        host-interface/APIUtils.cpp)
+
 # Main GPU library
 ADD_SPIRV_LIBRARY(
     TARGET vkr-gpu-resources
@@ -14,6 +18,7 @@ ADD_LIBRARY(vkr-gpu
 
 TARGET_LINK_LIBRARIES(vkr-gpu
     PRIVATE vkr-gpu-resources
+    PRIVATE vkr-gpu-utils
     PRIVATE Vulkan::Vulkan
     INTERFACE vkr-global-compiler-opts)
 
@@ -31,5 +36,6 @@ ADD_LIBRARY(vkr-gpu-tests
 
 TARGET_LINK_LIBRARIES(vkr-gpu-tests
     PRIVATE vkr-gpu-test-resources
+    PRIVATE vkr-gpu-utils
     PRIVATE Vulkan::Vulkan
     INTERFACE vkr-global-compiler-opts)
