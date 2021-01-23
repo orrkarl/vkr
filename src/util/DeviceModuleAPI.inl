@@ -1,9 +1,8 @@
 namespace vkr {
 namespace gpu {
-namespace detail {
 
-template<typename APITraits>
-DeviceModuleAPI<APITraits>::DeviceModuleAPI()
+template<typename APILayout>
+DeviceModuleAPI<APILayout>::DeviceModuleAPI()
     : m_code(VK_NULL_HANDLE)
     , m_argsDesc{}
     , m_runnerDesc(VK_NULL_HANDLE) {
@@ -13,22 +12,23 @@ DeviceModuleAPI<APITraits>::DeviceModuleAPI()
     }
 }
 
-template<typename APITraits>
-VkResult DeviceModuleAPI<APITraits>::init(VkDevice dev, const VkAllocationCallbacks *allocator) {
+template<typename APILayout>
+VkResult DeviceModuleAPI<APILayout>::init(VkDevice dev, const VkAllocationCallbacks *allocator) {
     VkShaderModuleCreateInfo codeInfo { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
                                              nullptr,
                                              0,
-                                             APITraits::MODULE_SIZE * sizeof(uint32_t),
-                                             APITraits::MODULE_DATA };
+                                             APILayout::MODULE_SIZE * sizeof(uint32_t),
+                                             APILayout::MODULE_DATA };
 
     VkResult status = vkCreateShaderModule(dev, &codeInfo, allocator, &m_code);
     if (status != VK_SUCCESS) {
         return status;
     }
 
-    for (size_t i = 0; i < APITraits::ARG_SETS.size(); ++i) {
+    uint32_t currentSet = 0;
+    for (size_t i = 0; i < APILayout::SETS.size(); ++i) {
         VkDescriptorSetLayoutCreateInfo argSetInfo {
-            VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO, nullptr, 0, APITraits::ARG_SETS[i].size(), APITraits::ARG_SETS[i].data()
+            VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO, nullptr, 0, APILayout::SETS[i], &APILayout::BINDINGS[currentSet]
         };
         status = vkCreateDescriptorSetLayout(dev, &argSetInfo, allocator, &m_argsDesc[i]);
         if (status != VK_SUCCESS) {
@@ -40,6 +40,8 @@ VkResult DeviceModuleAPI<APITraits>::init(VkDevice dev, const VkAllocationCallba
             m_code = VK_NULL_HANDLE;
             return status;
         }
+
+        currentSet += APILayout::SETS[i];
     }
 
     VkPipelineLayoutCreateInfo pipelineDesc { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
@@ -47,8 +49,8 @@ VkResult DeviceModuleAPI<APITraits>::init(VkDevice dev, const VkAllocationCallba
                                               0,
                                               static_cast<uint32_t>(m_argsDesc.size()),
                                               m_argsDesc.data(),
-                                              static_cast<uint32_t>(APITraits::PUSH_ARGS.size()),
-                                              APITraits::PUSH_ARGS.size()};
+                                              static_cast<uint32_t>(APILayout::PUSH_ARGS.size()),
+                                              APILayout::PUSH_ARGS.data()};
     status = vkCreatePipelineLayout(dev, &pipelineDesc, allocator, &m_runnerDesc);
     if (status != VK_SUCCESS) {
         for (auto it = m_argsDesc.rbegin(); it != m_argsDesc.rend(); ++it) {
@@ -63,8 +65,8 @@ VkResult DeviceModuleAPI<APITraits>::init(VkDevice dev, const VkAllocationCallba
     return VK_SUCCESS;
 }
 
-template<typename APITraits>
-void DeviceModuleAPI<APITraits>::destroy(VkDevice dev, const VkAllocationCallbacks *allocator) {
+template<typename APILayout>
+void DeviceModuleAPI<APILayout>::destroy(VkDevice dev, const VkAllocationCallbacks *allocator) {
     vkDestroyPipelineLayout(dev, m_runnerDesc, allocator);
     m_runnerDesc = VK_NULL_HANDLE;
     for (auto it = m_argsDesc.rbegin(); it != m_argsDesc.rend(); ++it) {
@@ -75,13 +77,13 @@ void DeviceModuleAPI<APITraits>::destroy(VkDevice dev, const VkAllocationCallbac
     m_code = VK_NULL_HANDLE;
 }
 
-template<typename APITraits>
-DeviceModuleAPI<APITraits>::ArgumentSetsLayout DeviceModuleAPI<APITraits>::describeArguments() {
+template<typename APILayout>
+typename DeviceModuleAPI<APILayout>::ArgumentSetsLayout DeviceModuleAPI<APILayout>::describeArguments() {
     return m_argsDesc;
 }
 
-template<typename APITraits>
-VkComputePipelineCreateInfo DeviceModuleAPI<APITraits>::describeRunner() {
+template<typename APILayout>
+VkComputePipelineCreateInfo DeviceModuleAPI<APILayout>::describeRunner() {
     return { VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
              nullptr,
              0,
@@ -97,6 +99,5 @@ VkComputePipelineCreateInfo DeviceModuleAPI<APITraits>::describeRunner() {
              0 };
 }
 
-}
 }
 }
