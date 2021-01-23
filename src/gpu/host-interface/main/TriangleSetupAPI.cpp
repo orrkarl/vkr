@@ -49,7 +49,7 @@ TriangleSetupAPI::describeRasterConfigUpdate(const TriangleSetupAPI::Arguments& 
              Layout::RASTER_CONFIG_POS.second,
              0,
              1,
-             VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+             VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
              nullptr,
              &rasterConfigBuffer,
              nullptr };
