@@ -14,6 +14,11 @@ struct VulkanResourceTraits<VkDeviceMemory> {
     static void destroy(VkDevice dev, VkDeviceMemory& mem, const VkAllocationCallbacks* allocator) noexcept;
 };
 
+template <>
+struct VulkanResourceTraits<VkBuffer> {
+    static void destroy(VkDevice dev, VkBuffer& mem, const VkAllocationCallbacks* allocator) noexcept;
+};
+
 namespace factory {
 
 ManagedVulkanResource<VkPipeline> computePipeline(VkDevice dev,

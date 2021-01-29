@@ -18,6 +18,12 @@ void VulkanResourceTraits<VkDeviceMemory>::destroy(VkDevice dev,
     vkFreeMemory(dev, std::exchange(mem, nullptr), allocator);
 }
 
+void VulkanResourceTraits<VkBuffer>::destroy(VkDevice dev,
+                                             VkBuffer& mem,
+                                             const VkAllocationCallbacks* allocator) noexcept {
+    vkDestroyBuffer(dev, std::exchange(mem, nullptr), allocator);
+}
+
 namespace factory {
 
 ManagedVulkanResource<VkPipeline> computePipeline(VkDevice dev,
