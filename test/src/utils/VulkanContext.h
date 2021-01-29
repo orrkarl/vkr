@@ -2,6 +2,8 @@
 
 #include <VkBootstrap.h>
 
+#include <vulkan/vulkan.hpp>
+
 namespace utils {
 
 class VulkanContext {
@@ -18,22 +20,19 @@ public:
 
     const vkb::Instance& instance() const;
     const vkb::PhysicalDevice& physicalDevice() const;
-    const vkb::Device& device() const;
-    VkDevice rawDevice();
+    vk::Device device() const;
 
-    VkQueue computeQueue() const;
+    vk::Queue computeQueue() const;
 
-    VkDeviceMemory allocate(VkMemoryRequirements allocation,
-                            VkMemoryPropertyFlags properties,
-                            const VkAllocationCallbacks* allocator = nullptr);
+    vk::UniqueDeviceMemory allocate(VkMemoryRequirements allocation,
+                                    VkMemoryPropertyFlags properties,
+                                    vk::Optional<const vk::AllocationCallbacks> allocator = nullptr);
 
 private:
-    uint32_t findMemoryIndex(uint32_t types, VkMemoryPropertyFlags properties) const;
-
     vkb::Instance m_instance;
     vkb::PhysicalDevice m_physicalDevice;
     vkb::Device m_device;
-    VkQueue m_computeQueue;
+    vk::Queue m_computeQueue;
 };
 
 } // namespace utils

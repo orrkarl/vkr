@@ -17,7 +17,4 @@ uint32_t findMemoryIndex(VkPhysicalDeviceMemoryProperties availableProperties,
     throw std::runtime_error("could not find appropriate memory type!");
 }
 
-VkMemoryRequirements unifyRequirements(const std::vector<VkMemoryRequirements>& requirements) {
-}
-
 } // namespace utils

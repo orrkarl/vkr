@@ -4,21 +4,21 @@
 #include <string>
 #include <utility>
 
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan.hpp>
 
 namespace utils {
 
 template <typename T>
 struct VulkanResourceTraits {
-    static VkResult init(VkDevice dev, T& obj, const VkAllocationCallbacks* allocator);
-    static void destroy(VkDevice dev, T& obj, const VkAllocationCallbacks* allocator) noexcept;
+    static vk::Result init(vk::Device dev, T& obj, vk::Optional<const vk::AllocationCallbacks> allocator);
+    static void destroy(vk::Device dev, T& obj, vk::Optional<const vk::AllocationCallbacks> allocator) noexcept;
 };
 
 template <typename T>
 class ManagedVulkanResource {
 public:
-    ManagedVulkanResource(VkDevice dev, const VkAllocationCallbacks* allocator);
-    ManagedVulkanResource(VkDevice dev, T obj, const VkAllocationCallbacks* allocator);
+    ManagedVulkanResource(vk::Device dev, vk::Optional<const vk::AllocationCallbacks> allocator);
+    ManagedVulkanResource(vk::Device dev, T obj, vk::Optional<const vk::AllocationCallbacks> allocator);
     ~ManagedVulkanResource();
 
     ManagedVulkanResource(ManagedVulkanResource&& other);
@@ -35,11 +35,10 @@ public:
 
 private:
     T m_object;
-    VkDevice m_allocatingDevice;
-    const VkAllocationCallbacks* m_allocator;
+    vk::Device m_allocatingDevice;
+    vk::Optional<const vk::AllocationCallbacks> m_allocator;
 };
 
-}
+} // namespace utils
 
-#include "ManagedVulkanResource.h"
 #include "ManagedVulkanResource.inl"
