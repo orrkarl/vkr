@@ -1,40 +1,42 @@
 #pragma once
 
+#include <array>
+
 #include <vulkan/vulkan.h>
 
 #include "../../../shared/compatibility.h"
+#include "../../DeviceModuleAPI.h"
 
 namespace vkr {
-namespace tests {
 namespace gpu {
+namespace tests {
 
-class ClippingAPI {
+namespace detail {
+
+struct ClippingLayout {
+    static const size_t MODULE_SIZE;
+    static const uint32_t* MODULE_DATA;
+    static const std::array<VkDescriptorSetLayoutBinding, 3> BINDINGS;
+    static const std::array<uint32_t, 1> SETS;
+    static const std::array<VkPushConstantRange, 1> PUSH_ARGS;
+
+    static constexpr std::pair<uint32_t, uint32_t> VERTECIES_POS = {0, 0};
+    static constexpr std::pair<uint32_t, uint32_t> CLIPPED_VERTECIES_POS = {0, 1};
+    static constexpr std::pair<uint32_t, uint32_t> CLIPPED_VERTEX_COUNTS = {0, 2};
+
+    static constexpr uint32_t TRIANGLE_COUNT_OFFSET = 0;
+    static constexpr uint32_t TRIANGLE_COUNT_SIZE = sizeof(uint32_t);
+};
+
+}
+
+class ClippingAPI : public DeviceModuleAPI<detail::ClippingLayout> {
 public:
-    explicit ClippingAPI();
-    VkResult init(VkDevice dev, const VkAllocationCallbacks* allocator);
-    void destroy(VkDevice dev, const VkAllocationCallbacks* allocator);
-
-    VkDescriptorSetLayout describeArguments();
-    VkComputePipelineCreateInfo describeRunner();
-
-    VkWriteDescriptorSet describeVerteciesUpdate(VkDescriptorSet args, const VkDescriptorBufferInfo& rasterConfigBuffer);
-    VkWriteDescriptorSet describeClippedVerteciesUpdate(VkDescriptorSet args, const VkDescriptorBufferInfo& vertexBuffer);
-    VkWriteDescriptorSet describeClippedVertexCountsUpdate(VkDescriptorSet args, const VkDescriptorBufferInfo& colorBuffer);
+    VkWriteDescriptorSet describeVerteciesUpdate(VkDescriptorSet args, const VkDescriptorBufferInfo& vertecies);
+    VkWriteDescriptorSet describeClippedVerteciesUpdate(VkDescriptorSet args, const VkDescriptorBufferInfo& clippedVertecies);
+    VkWriteDescriptorSet describeClippedVertexCountsUpdate(VkDescriptorSet args, const VkDescriptorBufferInfo& clippedVertexCounts);
 
     void cmdUpdateTriangleCount(VkCommandBuffer cmdBuffer, u32 triangleCount);
-
-private:
-    static constexpr uint32_t VERTECIES_POS = 0;
-    static constexpr uint32_t CLIPPED_VERTECIES_POS = 1;
-    static constexpr uint32_t CLIPPED_VERTEX_COUNTS_POS = 2;
-
-    VkResult initClippingCode(VkDevice dev, const VkAllocationCallbacks* allocator);
-    VkResult initArgsDescription(VkDevice dev, const VkAllocationCallbacks* allocator);
-    VkResult initClippingDescription(VkDevice dev, const VkAllocationCallbacks* allocator);
-
-    VkShaderModule m_clippingCode;
-    VkDescriptorSetLayout m_argsDesc;
-    VkPipelineLayout m_clippingRunnerDesc;
 };
 
 }

@@ -25,7 +25,7 @@ TEST_CASE("Sanity", "[sanity]") {
             ctx.device().device, std::move(triangleSetupStage), nullptr);
     }
     {
-        utils::ManagedVulkanResource<vkr::tests::gpu::ClippingAPI> clipping(ctx.device().device, nullptr);
+        utils::ManagedVulkanResource<vkr::gpu::tests::ClippingAPI> clipping(ctx.device().device, nullptr);
         VkPipeline clippingRunner;
         auto pipelineDesc = clipping->describeRunner();
         REQUIRE(vkCreateComputePipelines(
