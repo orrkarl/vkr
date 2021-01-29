@@ -5,9 +5,9 @@
 #include <gpu/host-interface/main/TriangleSetupAPI.h>
 #include <gpu/host-interface/tests/setup/ClippingAPI.h>
 
-#include "../vk-util/CommonVulkanResoruces.h"
-#include "../vk-util/ManagedVulkanResource.h"
-#include "../vk-util/VulkanContext.h"
+#include "../../utils/CommonVulkanResoruces.h"
+#include "../../utils/ManagedVulkanResource.h"
+#include "../../utils/VulkanContext.h"
 
 TEST_CASE("Sanity", "[sanity]") {
     utils::VulkanContext ctx;
