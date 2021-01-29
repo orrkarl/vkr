@@ -2,7 +2,8 @@ ADD_EXECUTABLE(vkr-tests
         ${vk-bootstrap_SOURCE_DIR}/src/VkBootstrap.cpp
         src/utils/VulkanContext.cpp
         src/utils/CommonVulkanResoruces.cpp
-        src/stages/setup/TestFail.cpp)
+        src/stages/setup/TestFullStage.cpp
+        src/stages/setup/TestClipping.cpp)
 
 TARGET_LINK_LIBRARIES(vkr-tests
         PRIVATE ${CMAKE_DL_LIBS}
