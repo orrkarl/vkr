@@ -16,8 +16,10 @@ struct VulkanResourceTraits<VkDeviceMemory> {
 
 namespace factory {
 
-ManagedVulkanResource<VkPipeline> computePipeline(VkDevice dev, const VkComputePipelineCreateInfo& info, const VkAllocationCallbacks* allocator = nullptr);
+ManagedVulkanResource<VkPipeline> computePipeline(VkDevice dev,
+                                                  const VkComputePipelineCreateInfo& info,
+                                                  const VkAllocationCallbacks* allocator = nullptr);
 
-}
+} // namespace factory
 
-}
+} // namespace utils

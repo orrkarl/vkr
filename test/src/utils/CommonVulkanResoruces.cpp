@@ -32,6 +32,6 @@ ManagedVulkanResource<VkPipeline> computePipeline(VkDevice dev,
     return ManagedVulkanResource<VkPipeline>(dev, std::move(ret), allocator);
 }
 
-}
+} // namespace factory
 
-}
+} // namespace utils
