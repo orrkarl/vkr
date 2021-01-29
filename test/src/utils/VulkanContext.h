@@ -18,9 +18,10 @@ public:
 
     const vkb::Instance& instance() const;
     const vkb::PhysicalDevice& physicalDevice() const;
-    const vkb::Device& device();
+    const vkb::Device& device() const;
+    VkDevice rawDevice();
 
-    VkQueue compute() const;
+    VkQueue computeQueue() const;
 
 private:
     vkb::Instance m_instance;

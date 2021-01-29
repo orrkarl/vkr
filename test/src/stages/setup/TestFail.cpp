@@ -13,15 +13,14 @@ using namespace utils;
 
 TEST_CASE("Sanity", "[sanity]") {
     VulkanContext ctx;
-    REQUIRE(ctx.compute());
+    REQUIRE(ctx.computeQueue());
 
     {
-        ManagedVulkanResource<vkr::gpu::TriangleSetupAPI> triangleSetup(ctx.device().device, nullptr);
-        auto triangleSetupStage = factory::computePipeline(ctx.device().device,
-                                                           triangleSetup->describeRunner());
+        ManagedVulkanResource<vkr::gpu::TriangleSetupAPI> triangleSetup(ctx.rawDevice(), nullptr);
+        auto triangleSetupStage = factory::computePipeline(ctx.rawDevice(), triangleSetup->describeRunner());
     }
     {
-        ManagedVulkanResource<vkr::gpu::tests::ClippingAPI> clipping(ctx.device().device, nullptr);
-        auto clippingRunner = factory::computePipeline(ctx.device().device, clipping->describeRunner());
+        ManagedVulkanResource<vkr::gpu::tests::ClippingAPI> clipping(ctx.rawDevice(), nullptr);
+        auto clippingRunner = factory::computePipeline(ctx.rawDevice(), clipping->describeRunner());
     }
 }

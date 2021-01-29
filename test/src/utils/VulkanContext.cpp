@@ -71,11 +71,15 @@ const vkb::PhysicalDevice& VulkanContext::physicalDevice() const {
     return m_physicalDevice;
 }
 
-const vkb::Device& VulkanContext::device() {
+const vkb::Device& VulkanContext::device() const {
     return m_device;
 }
 
-VkQueue VulkanContext::compute() const {
+VkDevice VulkanContext::rawDevice() {
+    return m_device.device;
+}
+
+VkQueue VulkanContext::computeQueue() const {
     return m_computeQueue;
 }
 
