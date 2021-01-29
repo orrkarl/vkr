@@ -33,8 +33,8 @@ VkResult DeviceModuleAPI<APILayout>::init(VkDevice dev, const VkAllocationCallba
         status = vkCreateDescriptorSetLayout(dev, &argSetInfo, allocator, &m_argsDesc[i]);
         if (status != VK_SUCCESS) {
             for (size_t j = i; j > 0; --j) {
-                vkDestroyDescriptorSetLayout(dev, m_argsDesc[j], allocator);
-                m_argsDesc[j] = VK_NULL_HANDLE;
+                vkDestroyDescriptorSetLayout(dev, m_argsDesc[j - 1], allocator);
+                m_argsDesc[j - 1] = VK_NULL_HANDLE;
             }
             vkDestroyShaderModule(dev, m_code, allocator);
             m_code = VK_NULL_HANDLE;
