@@ -1,8 +1,9 @@
 #include "CommonVulkanResoruces.h"
 
-#include <stdexcept>
 #include <string>
 #include <utility>
+
+#include "VulkanError.h"
 
 namespace utils {
 
@@ -32,10 +33,22 @@ ManagedVulkanResource<VkPipeline> computePipeline(VkDevice dev,
     VkPipeline ret;
     VkResult status = vkCreateComputePipelines(dev, nullptr, 1, &info, allocator, &ret);
     if (status != VK_SUCCESS) {
-        throw std::runtime_error("could not create pipeline: " + std::to_string(status));
+        throw utils::VulkanError("could not create pipeline", status);
     }
 
-    return ManagedVulkanResource<VkPipeline>(dev, std::move(ret), allocator);
+    return ManagedVulkanResource(dev, ret, allocator);
+}
+
+ManagedVulkanResource<VkBuffer> buffer(VkDevice dev,
+                                       const VkBufferCreateInfo& info,
+                                       const VkAllocationCallbacks* allocator) {
+    VkBuffer ret;
+    auto status = vkCreateBuffer(dev, &info, allocator, &ret);
+    if (status != VK_SUCCESS) {
+        throw utils::VulkanError("could not create buffer", status);
+    }
+
+    return ManagedVulkanResource(dev, ret, allocator);
 }
 
 } // namespace factory

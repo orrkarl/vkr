@@ -25,6 +25,10 @@ ManagedVulkanResource<VkPipeline> computePipeline(VkDevice dev,
                                                   const VkComputePipelineCreateInfo& info,
                                                   const VkAllocationCallbacks* allocator = nullptr);
 
+ManagedVulkanResource<VkBuffer> buffer(VkDevice dev,
+                                       const VkBufferCreateInfo& info,
+                                       const VkAllocationCallbacks* allocator = nullptr);
+
 } // namespace factory
 
 } // namespace utils
