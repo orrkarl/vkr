@@ -29,6 +29,11 @@ ManagedVulkanResource<VkBuffer> buffer(VkDevice dev,
                                        const VkBufferCreateInfo& info,
                                        const VkAllocationCallbacks* allocator = nullptr);
 
+ManagedVulkanResource<VkBuffer> exclusiveBuffer(VkDevice dev,
+                                                VkDeviceSize size,
+                                                VkBufferUsageFlags usage,
+                                                const VkAllocationCallbacks* allocator = nullptr);
+
 } // namespace factory
 
 } // namespace utils

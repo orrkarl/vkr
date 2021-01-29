@@ -51,6 +51,17 @@ ManagedVulkanResource<VkBuffer> buffer(VkDevice dev,
     return ManagedVulkanResource(dev, ret, allocator);
 }
 
+ManagedVulkanResource<VkBuffer> exclusiveBuffer(VkDevice dev,
+                                                VkDeviceSize size,
+                                                VkBufferUsageFlags usage,
+                                                const VkAllocationCallbacks* allocator) {
+    const VkBufferCreateInfo info {
+        VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, nullptr, 0, size, usage, VK_SHARING_MODE_EXCLUSIVE, 0, nullptr
+    };
+
+    return buffer(dev, info, allocator);
+}
+
 } // namespace factory
 
 } // namespace utils
