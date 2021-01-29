@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "VulkanError.h"
+
 namespace vkb::detail {
 VkQueue get_queue(VkDevice device, uint32_t family);
 }
@@ -83,4 +85,32 @@ VkQueue VulkanContext::computeQueue() const {
     return m_computeQueue;
 }
 
-} // namespace vk_util
+VkDeviceMemory VulkanContext::allocate(VkMemoryRequirements allocation,
+                                       VkMemoryPropertyFlags properties,
+                                       const VkAllocationCallbacks* allocator) {
+    VkMemoryAllocateInfo alloc { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+                                 nullptr,
+                                 allocation.size,
+                                 findMemoryIndex(allocation.memoryTypeBits, properties) };
+    VkDeviceMemory res = nullptr;
+    auto status = vkAllocateMemory(m_device.device, &alloc, allocator, &res);
+    if (status != VK_SUCCESS) {
+        throw utils::VulkanError("could not allocate memory", status);
+    }
+
+    return res;
+}
+
+uint32_t VulkanContext::findMemoryIndex(uint32_t types, VkMemoryPropertyFlags properties) const {
+    const auto memProperties = m_physicalDevice.memory_properties;
+    for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i) {
+        if ((types & (1u << i))
+            && ((memProperties.memoryTypes[i].propertyFlags & properties) == properties)) {
+            return i;
+        }
+    }
+
+    throw std::runtime_error("could not find appropriate memory type!");
+}
+
+} // namespace utils

@@ -23,12 +23,17 @@ public:
 
     VkQueue computeQueue() const;
 
+    VkDeviceMemory allocate(VkMemoryRequirements allocation,
+                            VkMemoryPropertyFlags properties,
+                            const VkAllocationCallbacks* allocator = nullptr);
+
 private:
+    uint32_t findMemoryIndex(uint32_t types, VkMemoryPropertyFlags properties) const;
+
     vkb::Instance m_instance;
     vkb::PhysicalDevice m_physicalDevice;
     vkb::Device m_device;
     VkQueue m_computeQueue;
 };
 
-} // namespace vk_util
-
+} // namespace utils
