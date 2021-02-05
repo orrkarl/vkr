@@ -24,9 +24,14 @@ public:
 
     vk::Queue computeQueue() const;
 
-    vk::UniqueDeviceMemory allocate(VkMemoryRequirements allocation,
-                                    VkMemoryPropertyFlags properties,
+    vk::UniqueDeviceMemory allocate(vk::MemoryRequirements allocation,
+                                    vk::MemoryPropertyFlags properties,
                                     vk::Optional<const vk::AllocationCallbacks> allocator = nullptr);
+
+    vk::UniqueDeviceMemory satisfyBuffersMemory(
+        const std::vector<vk::Buffer>& buffers,
+        vk::MemoryPropertyFlags properties,
+        vk::Optional<const vk::AllocationCallbacks> allocator = nullptr);
 
 private:
     vkb::Instance m_instance;

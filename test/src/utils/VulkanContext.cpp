@@ -83,17 +83,34 @@ vk::Queue VulkanContext::computeQueue() const {
     return m_computeQueue;
 }
 
-vk::UniqueDeviceMemory VulkanContext::allocate(VkMemoryRequirements allocation,
-                                               VkMemoryPropertyFlags properties,
+vk::UniqueDeviceMemory VulkanContext::allocate(vk::MemoryRequirements allocation,
+                                               vk::MemoryPropertyFlags properties,
                                                vk::Optional<const vk::AllocationCallbacks> allocator) {
-    VkMemoryAllocateInfo alloc {
-        VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-        nullptr,
-        allocation.size,
-        findMemoryIndex(m_physicalDevice.memory_properties, allocation.memoryTypeBits, properties)
-    };
+    vk::PhysicalDeviceMemoryProperties props;
+    std::memcpy(&props, &properties, sizeof(props));
+
+    VkMemoryAllocateInfo alloc { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+                                 nullptr,
+                                 allocation.size,
+                                 findMemoryIndex(props, allocation.memoryTypeBits, properties) };
 
     return device().allocateMemoryUnique(alloc, allocator);
+}
+
+vk::UniqueDeviceMemory VulkanContext::satisfyBuffersMemory(
+    const std::vector<vk::Buffer>& buffers,
+    vk::MemoryPropertyFlags properties,
+    vk::Optional<const vk::AllocationCallbacks> allocator) {
+
+    std::vector<vk::MemoryRequirements> requirements(buffers.size());
+    std::transform(buffers.cbegin(), buffers.cend(), requirements.begin(), [this](auto buffer) {
+        return this->device().getBufferMemoryRequirements(buffer);
+    });
+
+    auto memory = allocate(describeBatchAllocation(requirements), properties, allocator);
+    bindBuffers(device(), *memory, buffers, requirements);
+
+    return memory;
 }
 
 } // namespace utils
