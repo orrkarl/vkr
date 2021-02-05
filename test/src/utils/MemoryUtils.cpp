@@ -68,4 +68,16 @@ void bindBuffers(vk::Device dev,
     }
 }
 
+MappedMemoryGuard::MappedMemoryGuard(vk::Device& dev,
+                                     vk::DeviceMemory& memory,
+                                     vk::DeviceSize regionSize,
+                                     vk::DeviceSize regionOffset /* = 0 */)
+    : m_device(dev), m_memory(memory), m_address(nullptr) {
+    m_address = dev.mapMemory(memory, regionOffset, regionSize);
+}
+
+MappedMemoryGuard::~MappedMemoryGuard() {
+    m_device.unmapMemory(m_memory);
+}
+
 } // namespace utils
