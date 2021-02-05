@@ -12,9 +12,9 @@ T align(T value, T alignment) {
     return (value + alignBits) & (~alignBits);
 }
 
-uint32_t findMemoryIndex(VkPhysicalDeviceMemoryProperties availableProperties,
+uint32_t findMemoryIndex(vk::PhysicalDeviceMemoryProperties availableProperties,
                          uint32_t types,
-                         VkMemoryPropertyFlags properties) {
+                         vk::MemoryPropertyFlags properties) {
     for (uint32_t i = 0; i < availableProperties.memoryTypeCount; ++i) {
         if ((types & (1u << i))
             && ((availableProperties.memoryTypes[i].propertyFlags & properties) == properties)) {

@@ -6,9 +6,9 @@
 
 namespace utils {
 
-uint32_t findMemoryIndex(VkPhysicalDeviceMemoryProperties availableProperties,
+uint32_t findMemoryIndex(vk::PhysicalDeviceMemoryProperties availableProperties,
                          uint32_t types,
-                         VkMemoryPropertyFlags properties);
+                         vk::MemoryPropertyFlags properties);
 
 vk::MemoryRequirements describeBatchAllocation(const std::vector<vk::MemoryRequirements>& requirements);
 
