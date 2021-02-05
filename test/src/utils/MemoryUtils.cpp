@@ -44,7 +44,7 @@ vk::MemoryRequirements describeBatchAllocation(const std::vector<vk::MemoryRequi
     // flags are the intersection of all type flags
     uint32_t flags = std::accumulate(requirements.cbegin(),
                                      requirements.cend(),
-                                     uint32_t(0),
+                                     uint32_t(-1),
                                      [](uint32_t collectedFlags, vk::MemoryRequirements curr) {
                                          return collectedFlags & curr.memoryTypeBits;
                                      });

@@ -87,7 +87,7 @@ vk::UniqueDeviceMemory VulkanContext::allocate(vk::MemoryRequirements allocation
                                                vk::MemoryPropertyFlags properties,
                                                vk::Optional<const vk::AllocationCallbacks> allocator) {
     vk::PhysicalDeviceMemoryProperties props;
-    std::memcpy(&props, &properties, sizeof(props));
+    std::memcpy(&props, &m_physicalDevice.memory_properties, sizeof(props));
 
     VkMemoryAllocateInfo alloc { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
                                  nullptr,
