@@ -28,7 +28,7 @@ TEST_CASE("Clipping correctness", "[setup]") {
                                  MAX_CLIPPED_VERTECIES * sizeof(vec4),
                                  vk::BufferUsageFlagBits::eStorageBuffer));
         auto clipProductsOutput = ctx.device().createBufferUnique(vk::BufferCreateInfo(
-            vk::BufferCreateFlags(), TRIANGLE_COUNT * sizeof(vec4), vk::BufferUsageFlagBits::eStorageBuffer));
+            vk::BufferCreateFlags(), TRIANGLE_COUNT * sizeof(u32), vk::BufferUsageFlagBits::eStorageBuffer));
 
         std::array<vec4, VERTEX_COUNT> triangles;
         std::random_device rd;
