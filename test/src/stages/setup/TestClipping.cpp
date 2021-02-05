@@ -5,6 +5,7 @@
 #include <gpu/host-interface/tests/setup/ClippingAPI.h>
 
 #include "../../utils/ManagedVulkanResource.h"
+#include "../../utils/MemoryUtils.h"
 #include "../../utils/VulkanContext.h"
 
 using namespace utils;
@@ -34,17 +35,21 @@ TEST_CASE("Clipping correctness", "[setup]") {
                                                vk::MemoryPropertyFlagBits::eHostCoherent
                                                    | vk::MemoryPropertyFlagBits::eHostVisible);
 
-        std::array<vec4, VERTEX_COUNT> triangles;
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_real_distribution<float> wDist(MIN, MAX);
-        for (size_t i = 0; i < VERTEX_COUNT; ++i) {
-            auto w = wDist(gen);
-            std::uniform_real_distribution<float> pointDist(-w, w);
-            triangles[i].x = pointDist(gen);
-            triangles[i].y = pointDist(gen);
-            triangles[i].z = pointDist(gen);
-            triangles[i].w = w;
+        {
+            vk::Device devView = ctx.device();
+            MappedMemoryGuard mapVertexInput(devView, *memory, VERTEX_COUNT * sizeof(vec4));
+            auto triangles = mapVertexInput.hostAddress<vec4>();
+            for (size_t i = 0; i < VERTEX_COUNT; ++i) {
+                auto w = wDist(gen);
+                std::uniform_real_distribution<float> pointDist(-w, w);
+                triangles[i].x = pointDist(gen);
+                triangles[i].y = pointDist(gen);
+                triangles[i].z = pointDist(gen);
+                triangles[i].w = w;
+            }
         }
     }
 }
