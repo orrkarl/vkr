@@ -51,5 +51,28 @@ TEST_CASE("Clipping correctness", "[setup]") {
                 triangles[i].w = w;
             }
         }
+
+        auto clippingArgsLayout = clipping->describeArguments();
+        vk::DescriptorPoolSize storageSetsCount(vk::DescriptorType::eStorageBuffer, 3);
+        auto descPool = ctx.device().createDescriptorPoolUnique(
+            { vk::DescriptorPoolCreateFlags(), 1, 1, &storageSetsCount });
+        auto args = ctx.device().allocateDescriptorSets(
+            { *descPool,
+              clippingArgsLayout.size(),
+              reinterpret_cast<vk::DescriptorSetLayout*>(clippingArgsLayout.data()) });
+
+        std::array<VkDescriptorBufferInfo, 3> bufferDescs {
+            VkDescriptorBufferInfo { *vertexInput, 0, VERTEX_COUNT * sizeof(vec4) },
+            VkDescriptorBufferInfo { *clippedVerteciesOutput, 0, MAX_CLIPPED_VERTECIES * sizeof(vec4) },
+            VkDescriptorBufferInfo { *clipProductsCounts, 0, TRIANGLE_COUNT * sizeof(uint32_t) }
+        };
+
+        std::array<vk::WriteDescriptorSet, 3> updateSets {
+            clipping->describeVerteciesUpdate(args[0], bufferDescs[0]),
+            clipping->describeVerteciesUpdate(args[0], bufferDescs[1]),
+            clipping->describeVerteciesUpdate(args[0], bufferDescs[2])
+        };
+
+        ctx.device().updateDescriptorSets(updateSets, {});
     }
 }
