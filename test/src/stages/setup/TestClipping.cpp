@@ -90,5 +90,8 @@ TEST_CASE("Clipping correctness", "[setup]") {
             1);
         clipping->cmdUpdateTriangleCount(command, TRIANGLE_COUNT);
         command.end();
+
+        ctx.computeQueue().submit({ vk::SubmitInfo { 0, nullptr, nullptr, 1, &command } }, vk::Fence());
+        ctx.computeQueue().waitIdle();
     }
 }
