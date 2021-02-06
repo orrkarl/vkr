@@ -16,7 +16,7 @@ TEST_CASE("Clipping correctness", "[setup]") {
     auto clippingRunner = ctx.device().createComputePipelineUnique(nullptr, clipping->describeRunner());
 
     SECTION("clipping triangles inside the viewport does nothing") {
-        constexpr size_t TRIANGLE_COUNT = 100;
+        constexpr uint32_t TRIANGLE_COUNT = 100;
         constexpr auto VERTEX_COUNT = 3 * TRIANGLE_COUNT;
         constexpr auto MAX_CLIPPED_VERTECIES = 6 * TRIANGLE_COUNT;
         constexpr float MIN = std::numeric_limits<float>::min();
@@ -59,7 +59,7 @@ TEST_CASE("Clipping correctness", "[setup]") {
         auto args = ctx.device().allocateDescriptorSets(
             { *descPool,
               clippingArgsLayout.size(),
-              reinterpret_cast<vk::DescriptorSetLayout*>(clippingArgsLayout.data()) });
+              reinterpret_cast<vk::DescriptorSetLayout*>(clippingArgsLayout.data()) })[0];
 
         std::array<VkDescriptorBufferInfo, 3> bufferDescs {
             VkDescriptorBufferInfo { *vertexInput, 0, VERTEX_COUNT * sizeof(vec4) },
@@ -69,11 +69,26 @@ TEST_CASE("Clipping correctness", "[setup]") {
 
         // each bufferDescs element has to live as long as the WriteDescriptorSet instances
         std::array<vk::WriteDescriptorSet, 3> updateSets {
-            clipping->describeVerteciesUpdate(args[0], bufferDescs[0]),
-            clipping->describeClippedVerteciesUpdate(args[0], bufferDescs[1]),
-            clipping->describeClippedVertexCountsUpdate(args[0], bufferDescs[2])
+            clipping->describeVerteciesUpdate(args, bufferDescs[0]),
+            clipping->describeClippedVerteciesUpdate(args, bufferDescs[1]),
+            clipping->describeClippedVertexCountsUpdate(args, bufferDescs[2])
         };
 
         ctx.device().updateDescriptorSets(updateSets, {});
+
+        auto commandPool = ctx.createComputeCommnadPool();
+        auto command = std::move(
+            ctx.device().allocateCommandBuffers({ *commandPool, vk::CommandBufferLevel::ePrimary, 1 })[0]);
+
+        command.begin({ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
+        command.bindPipeline(vk::PipelineBindPoint::eCompute, *clippingRunner);
+        command.bindDescriptorSets(
+            vk::PipelineBindPoint::eCompute, clipping->runnerLayout(), 0, { args }, {});
+        command.dispatch(
+            (TRIANGLE_COUNT + clipping->dispatchGroupSizes()[0] - 1) / clipping->dispatchGroupSizes()[0],
+            1,
+            1);
+        clipping->cmdUpdateTriangleCount(command, TRIANGLE_COUNT);
+        command.end();
     }
 }
