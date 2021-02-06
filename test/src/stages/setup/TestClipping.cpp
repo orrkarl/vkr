@@ -67,6 +67,7 @@ TEST_CASE("Clipping correctness", "[setup]") {
             VkDescriptorBufferInfo { *clipProductsCounts, 0, TRIANGLE_COUNT * sizeof(uint32_t) }
         };
 
+        // each bufferDescs element has to live as long as the WriteDescriptorSet instances
         std::array<vk::WriteDescriptorSet, 3> updateSets {
             clipping->describeVerteciesUpdate(args[0], bufferDescs[0]),
             clipping->describeClippedVerteciesUpdate(args[0], bufferDescs[1]),
