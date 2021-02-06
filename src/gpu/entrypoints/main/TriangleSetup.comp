@@ -1,8 +1,11 @@
 #version 450
 
 #include "../../TriangleSetupUtil.comp"
+#include "TriangleSetup.h"
 
-layout(local_size_x = 64) in;
+layout(local_size_x = TRIANGLE_SETUP_LOCAL_SIZE_X,
+       local_size_y = TRIANGLE_SETUP_LOCAL_SIZE_Y,
+       local_size_z = TRIANGLE_SETUP_LOCAL_SIZE_Z) in;
 
 layout(push_constant) uniform Transform {
     u32 vertexCount;

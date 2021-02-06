@@ -104,5 +104,10 @@ VkPipelineLayout vkr::gpu::DeviceModuleAPI<APILayout>::runnerLayout() {
     return m_runnerDesc;
 }
 
+template <typename APILayout>
+std::array<uint32_t, 3> vkr::gpu::DeviceModuleAPI<APILayout>::dispatchGroupSizes() const {
+    return APILayout::GROUP_SIZES;
+}
+
 } // namespace gpu
 } // namespace vkr

@@ -19,6 +19,7 @@ struct ClippingLayout {
     static const std::array<VkDescriptorSetLayoutBinding, 3> BINDINGS;
     static const std::array<uint32_t, 1> SETS;
     static const std::array<VkPushConstantRange, 1> PUSH_ARGS;
+    static const std::array<uint32_t, 3> GROUP_SIZES;
 
     static constexpr std::pair<uint32_t, uint32_t> VERTECIES_POS = { 0, 0 };
     static constexpr std::pair<uint32_t, uint32_t> CLIPPED_VERTECIES_POS = { 0, 1 };
