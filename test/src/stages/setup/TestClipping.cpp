@@ -69,8 +69,8 @@ TEST_CASE("Clipping correctness", "[setup]") {
 
         std::array<vk::WriteDescriptorSet, 3> updateSets {
             clipping->describeVerteciesUpdate(args[0], bufferDescs[0]),
-            clipping->describeVerteciesUpdate(args[0], bufferDescs[1]),
-            clipping->describeVerteciesUpdate(args[0], bufferDescs[2])
+            clipping->describeClippedVerteciesUpdate(args[0], bufferDescs[1]),
+            clipping->describeClippedVertexCountsUpdate(args[0], bufferDescs[2])
         };
 
         ctx.device().updateDescriptorSets(updateSets, {});
