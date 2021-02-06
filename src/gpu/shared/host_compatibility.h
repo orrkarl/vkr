@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <ostream>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -8,6 +9,16 @@ namespace vkr::detail {
 
 template <typename T, size_t Size>
 struct Vec;
+
+template <typename T, size_t Size>
+std::ostream& operator<<(std::ostream& os, const Vec<T, Size>& v) {
+    os << "[ ";
+    for (size_t i = 0; i < Size - 1; ++i) {
+        os << v.data[i] << ", ";
+    }
+    os << v.data[Size - 1] << " ]";
+    return os;
+}
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -76,7 +87,7 @@ struct Vec<T, 4> {
 #pragma clang diagnostic pop
 #endif // __clang__
 
-} // vkr::detail
+} // namespace vkr::detail
 
 using u8 = uint8_t;
 using i8 = int8_t;
