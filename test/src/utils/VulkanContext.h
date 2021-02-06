@@ -33,11 +33,14 @@ public:
         vk::MemoryPropertyFlags properties,
         vk::Optional<const vk::AllocationCallbacks> allocator = nullptr);
 
+    vk::UniqueCommandPool createComputeCommnadPool();
+
 private:
     vkb::Instance m_instance;
     vkb::PhysicalDevice m_physicalDevice;
     vkb::Device m_device;
     vk::Queue m_computeQueue;
+    uint32_t m_computeFamilyIndex;
 };
 
 } // namespace utils

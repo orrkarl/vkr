@@ -58,8 +58,8 @@ VulkanContext::VulkanContext() {
                                  + vkb::make_error_code(vkb::QueueError::compute_unavailable).message());
     }
 
-    m_computeQueue = vk::Queue(vkb::detail::get_queue(
-        m_device.device, static_cast<uint32_t>(computeQueueFamily - m_device.queue_families.cbegin())));
+    m_computeFamilyIndex = static_cast<uint32_t>(computeQueueFamily - m_device.queue_families.cbegin());
+    m_computeQueue = vk::Queue(vkb::detail::get_queue(m_device.device, m_computeFamilyIndex));
 }
 
 VulkanContext::~VulkanContext() {
@@ -111,6 +111,11 @@ vk::UniqueDeviceMemory VulkanContext::satisfyBuffersMemory(
     bindBuffers(device(), *memory, buffers, requirements);
 
     return memory;
+}
+
+vk::UniqueCommandPool VulkanContext::createComputeCommnadPool() {
+    return device().createCommandPoolUnique(
+        vk::CommandPoolCreateInfo(vk::CommandPoolCreateFlags(), m_computeFamilyIndex));
 }
 
 } // namespace utils
