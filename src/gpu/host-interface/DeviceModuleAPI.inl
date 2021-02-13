@@ -84,7 +84,7 @@ typename DeviceModuleAPI<APILayout>::ArgumentSetsLayout DeviceModuleAPI<APILayou
 
 template <typename APILayout>
 VkComputePipelineCreateInfo DeviceModuleAPI<APILayout>::describeRunner() {
-    return { VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+    return VkComputePipelineCreateInfo{ VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
              nullptr,
              0,
              VkPipelineShaderStageCreateInfo { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
