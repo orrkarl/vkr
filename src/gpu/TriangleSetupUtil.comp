@@ -52,12 +52,12 @@ u32 clipAgainst(u32 vertexCount, const f32 dists[6], const vec3 barysIn[6], out 
     return dstIdx;
 }
 
-#define ACCESS_X(v) v.x
-#define ACCESS_Y(v) v.y
-#define ACCESS_Z(v) v.z
+#define ACCESS_X(v) ((v).x)
+#define ACCESS_Y(v) ((v).y)
+#define ACCESS_Z(v) ((v).z)
 
 #define DECL_CLIP_AGAINST_PLANE(coord)                                    \
-    void clipAgainst ## coord(const vec4 base[3], out u32 vertexCount,    \
+    u32 clipAgainst ## coord(const vec4 base[3], u32 vertexCount,         \
                               out vec3 barys[6]){                         \
         vec3 tmpBarys[6];                                                 \
         f32 dists[6];                                                     \
@@ -80,7 +80,7 @@ u32 clipAgainst(u32 vertexCount, const f32 dists[6], const vec3 barysIn[6], out 
             );                                                            \
             dists[i] = dot(baseCoords, tmpBarys[i]);                      \
         }                                                                 \
-        vertexCount = clipAgainst(vertexCount, dists, tmpBarys, barys);   \
+        return clipAgainst(vertexCount, dists, tmpBarys, barys);          \
     }
 
 DECL_CLIP_AGAINST_PLANE(X)
@@ -98,9 +98,9 @@ u32 clip(const vec4 base[3], out vec3 barys[6]) {
     barys[1] = vec3(0.0, 1.0, 0.0);
     barys[2] = vec3(0.0, 0.0, 1.0);
 
-    clipAgainstX(base, vertexCount, barys);
-    clipAgainstY(base, vertexCount, barys);
-    clipAgainstZ(base, vertexCount, barys);
+    vertexCount = clipAgainstX(base, vertexCount, barys);
+    vertexCount = clipAgainstY(base, vertexCount, barys);
+    vertexCount = clipAgainstZ(base, vertexCount, barys);
 
     return vertexCount;
 }
