@@ -4,11 +4,13 @@
 
 #include <vulkan/vulkan.hpp>
 
+#include "IDebugMessenger.h"
+
 namespace utils {
 
 class VulkanContext {
 public:
-    VulkanContext();
+    VulkanContext(IDebugMessenger& instanceDebugMessenger);
 
     VulkanContext(const VulkanContext&) = delete;
     VulkanContext& operator=(const VulkanContext&) = delete;

@@ -12,15 +12,15 @@ VkQueue get_queue(VkDevice device, uint32_t family);
 
 namespace utils {
 
-VulkanContext::VulkanContext() {
+VulkanContext::VulkanContext(IDebugMessenger& instanceDebugMessenger) {
     vkb::InstanceBuilder instBuild;
     auto inst = instBuild.set_app_name("vkr-test-suite")
                     .request_validation_layers()
                     .enable_validation_layers()
                     .enable_layer("VK_LAYER_KHRONOS_validation")
                     .require_api_version(1, 1, 0)
-                    .use_default_debug_messenger()
                     .set_headless()
+                    .provide_instance_debug_messenger(instanceDebugMessenger.describeMessenger())
                     .build();
     if (!inst) {
         throw std::runtime_error("could not create instance: " + inst.error().message());
