@@ -20,7 +20,7 @@ TARGET_LINK_LIBRARIES(vkr-gpu
     PRIVATE vkr-gpu-resources
     PRIVATE vkr-gpu-utils
     PRIVATE Vulkan::Vulkan
-    INTERFACE vkr-global-compiler-opts)
+    PRIVATE vkr-global-compiler-opts)
 
 # Testing GPU library
 ADD_SPIRV_LIBRARY(
@@ -38,4 +38,4 @@ TARGET_LINK_LIBRARIES(vkr-gpu-tests
     PRIVATE vkr-gpu-test-resources
     PRIVATE vkr-gpu-utils
     PRIVATE Vulkan::Vulkan
-    INTERFACE vkr-global-compiler-opts)
+    PRIVATE vkr-global-compiler-opts)
