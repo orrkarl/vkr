@@ -83,13 +83,13 @@ TEST_CASE("Clipping correctness", "[setup]") {
 
         command.begin({ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
         command.bindPipeline(vk::PipelineBindPoint::eCompute, *clippingRunner);
+        clipping->cmdUpdateTriangleCount(command, TRIANGLE_COUNT);
         command.bindDescriptorSets(
             vk::PipelineBindPoint::eCompute, clipping->runnerLayout(), 0, { args }, {});
         command.dispatch(
             (TRIANGLE_COUNT + clipping->dispatchGroupSizes()[0] - 1) / clipping->dispatchGroupSizes()[0],
             1,
             1);
-        clipping->cmdUpdateTriangleCount(command, TRIANGLE_COUNT);
         command.end();
 
         ctx.computeQueue().submit({ vk::SubmitInfo { 0, nullptr, nullptr, 1, &command } }, vk::Fence());
