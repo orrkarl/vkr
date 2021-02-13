@@ -43,8 +43,8 @@ IF(BUILD_TESTS)
     # Using vk-bootstrap for vulkan boilerplate
     FetchContent_Declare(
             vk-bootstrap
-            GIT_REPOSITORY https://github.com/charles-lunarg/vk-bootstrap.git
-            GIT_TAG v0.2)
+            GIT_REPOSITORY https://github.com/orrkarl/vk-bootstrap.git
+            GIT_TAG v0.2.1)
     FetchContent_MakeAvailable(vk-bootstrap)
 
     INCLUDE(${catch2_SOURCE_DIR}/extras/Catch.cmake)
