@@ -13,8 +13,7 @@ using namespace utils;
 TEST_CASE("Clipping correctness", "[setup]") {
     VulkanContext ctx;
     ManagedVulkanResource<vkr::gpu::tests::ClippingAPI> clipping(ctx.device(), nullptr);
-    vk::UniquePipeline clippingRunner = ctx.device().createComputePipelineUnique(nullptr,
-                                                                                 clipping->describeRunner());
+    auto clippingRunner = ctx.device().createComputePipelineUnique(nullptr, clipping->describeRunner()).value;
 
     SECTION("clipping triangles inside the viewport does nothing") {
         constexpr uint32_t TRIANGLE_COUNT = 100;

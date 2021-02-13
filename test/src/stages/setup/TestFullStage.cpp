@@ -10,6 +10,7 @@ using namespace utils;
 TEST_CASE("Triangle Setup full stage correctness", "[setup]") {
     VulkanContext ctx;
     ManagedVulkanResource<vkr::gpu::TriangleSetupAPI> triangleSetup(ctx.device(), nullptr);
-    auto triangleSetupStage = ctx.device().createComputePipelineUnique(nullptr,
-                                                                       triangleSetup->describeRunner());
+    auto triangleSetupStage = ctx.device()
+                                  .createComputePipelineUnique(nullptr, triangleSetup->describeRunner())
+                                  .value;
 }
