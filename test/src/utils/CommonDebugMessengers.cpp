@@ -13,9 +13,7 @@ void OstreamLoggingMessenger::debugCallback(vk::DebugUtilsMessageSeverityFlagsEX
     m_output << stringifyDebugMessage(severity, type, callbackData) << std::endl;
 }
 
-FileLoggingMessenger::FileLoggingMessenger(const std::string& path,
-                                           vk::DebugUtilsMessageSeverityFlagBitsEXT minSeverity)
-    : IDebugMessenger(minSeverityToBitmap(minSeverity)), m_output(path, std::ios::trunc | std::ios::out) {
+FileLoggingMessenger::FileLoggingMessenger(const std::string& path) : m_output(path, std::ios::trunc | std::ios::out) {
 }
 
 void FileLoggingMessenger::debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT severity,

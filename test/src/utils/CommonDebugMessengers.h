@@ -22,7 +22,7 @@ private:
 
 class FileLoggingMessenger : public IDebugMessenger {
 public:
-    FileLoggingMessenger(const std::string& path, vk::DebugUtilsMessageSeverityFlagBitsEXT minSeverity);
+    FileLoggingMessenger(const std::string& path);
 
 protected:
     void debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT severity,
