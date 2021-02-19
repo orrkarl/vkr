@@ -19,7 +19,7 @@ public:
     VulkanContext(VulkanContext&& other) = delete;
     VulkanContext& operator=(VulkanContext&& other) = delete;
 
-    ~VulkanContext();
+    ~VulkanContext() = default;
 
     vk::Instance instance() const;
     const vkb::PhysicalDevice& physicalDevice() const;

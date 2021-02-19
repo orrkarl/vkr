@@ -82,9 +82,6 @@ VulkanContext::VulkanContext() {
     m_computeQueue = vk::Queue(vkb::detail::get_queue(m_device->device, m_computeFamilyIndex));
 }
 
-VulkanContext::~VulkanContext() {
-}
-
 vk::Instance VulkanContext::instance() const {
     return m_instance->instance;
 }
