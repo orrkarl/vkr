@@ -3,6 +3,7 @@ ADD_EXECUTABLE(vkr-tests
         src/utils/MemoryUtils.cpp
         src/utils/VulkanContext.cpp
         src/utils/IDebugMessenger.cpp
+        src/utils/CommonDebugMessengers.cpp
         src/stages/setup/TestFullStage.cpp
         src/stages/setup/TestClipping.cpp)
 
