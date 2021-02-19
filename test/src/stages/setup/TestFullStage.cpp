@@ -12,10 +12,15 @@
 using namespace utils;
 
 TEST_CASE("Triangle Setup full stage correctness", "[setup]") {
-    OstreamLoggingMessenger debug(std::cout, vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning);
-    VulkanContext ctx({ debug });
-    DebugMessengerRegisterGuard guard(ctx.instance(), ctx.dynamics(), debug);
+    OstreamLoggingMessenger realtimeMessenger(std::cout, vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning);
+    SeverityCountMessenger validationFailures(vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning
+                                              | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
+    VulkanContext ctx({ realtimeMessenger, validationFailures });
+    DebugMessengerRegisterGuard registerRealtime(ctx.instance(), ctx.dynamics(), realtimeMessenger);
+    DebugMessengerRegisterGuard registerFailCount(ctx.instance(), ctx.dynamics(), validationFailures);
 
     ManagedVulkanResource<vkr::gpu::TriangleSetupAPI> triangleSetup(ctx.device(), nullptr);
     auto triangleSetupStage = ctx.device().createComputePipelineUnique(nullptr, triangleSetup->describeRunner()).value;
+
+    REQUIRE(validationFailures.count() == 0);
 }
