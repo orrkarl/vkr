@@ -1,3 +1,4 @@
+#include <iostream>
 #include <random>
 
 #include <catch2/catch_test_macros.hpp>
@@ -8,10 +9,15 @@
 #include "../../utils/MemoryUtils.h"
 #include "../../utils/VulkanContext.h"
 
+#include "../../utils/CommonDebugMessengers.h"
+
 using namespace utils;
 
 TEST_CASE("Clipping correctness", "[setup]") {
-    VulkanContext ctx;
+    OstreamLoggingMessenger debug(std::cout, vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning);
+    VulkanContext ctx({ debug });
+    DebugMessengerRegisterGuard guard(ctx.instance().instance, ctx.dynamics(), debug);
+
     ManagedVulkanResource<vkr::gpu::tests::ClippingAPI> clipping(ctx.device(), nullptr);
     auto clippingRunner = ctx.device().createComputePipelineUnique(nullptr, clipping->describeRunner()).value;
 
@@ -24,10 +30,8 @@ TEST_CASE("Clipping correctness", "[setup]") {
 
         auto vertexInput = ctx.device().createBufferUnique(vk::BufferCreateInfo(
             vk::BufferCreateFlags(), VERTEX_COUNT * sizeof(vec4), vk::BufferUsageFlagBits::eStorageBuffer));
-        auto clippedVerteciesOutput = ctx.device().createBufferUnique(
-            vk::BufferCreateInfo(vk::BufferCreateFlags(),
-                                 MAX_CLIPPED_VERTECIES * sizeof(vec4),
-                                 vk::BufferUsageFlagBits::eStorageBuffer));
+        auto clippedVerteciesOutput = ctx.device().createBufferUnique(vk::BufferCreateInfo(
+            vk::BufferCreateFlags(), MAX_CLIPPED_VERTECIES * sizeof(vec4), vk::BufferUsageFlagBits::eStorageBuffer));
         auto clipProductsCounts = ctx.device().createBufferUnique(vk::BufferCreateInfo(
             vk::BufferCreateFlags(), TRIANGLE_COUNT * sizeof(u32), vk::BufferUsageFlagBits::eStorageBuffer));
 
@@ -83,12 +87,9 @@ TEST_CASE("Clipping correctness", "[setup]") {
         command.begin({ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
         command.bindPipeline(vk::PipelineBindPoint::eCompute, *clippingRunner);
         clipping->cmdUpdateTriangleCount(command, TRIANGLE_COUNT);
-        command.bindDescriptorSets(
-            vk::PipelineBindPoint::eCompute, clipping->runnerLayout(), 0, { args }, {});
+        command.bindDescriptorSets(vk::PipelineBindPoint::eCompute, clipping->runnerLayout(), 0, { args }, {});
         command.dispatch(
-            (TRIANGLE_COUNT + clipping->dispatchGroupSizes()[0] - 1) / clipping->dispatchGroupSizes()[0],
-            1,
-            1);
+            (TRIANGLE_COUNT + clipping->dispatchGroupSizes()[0] - 1) / clipping->dispatchGroupSizes()[0], 1, 1);
         command.end();
 
         ctx.computeQueue().submit({ vk::SubmitInfo { 0, nullptr, nullptr, 1, &command } }, vk::Fence());
