@@ -58,7 +58,6 @@ VulkanContext::VulkanContext() {
                     .set_required_features(requiredFeatures)
                     .select();
     if (!pdev) {
-        vkb::destroy_instance(m_instance);
         throw std::runtime_error("could not pick physical device: " + pdev.error().message());
     }
     m_physicalDevice = pdev.value();
@@ -66,7 +65,6 @@ VulkanContext::VulkanContext() {
     vkb::DeviceBuilder devBuild(m_physicalDevice);
     auto dev = devBuild.build();
     if (!dev) {
-        vkb::destroy_instance(m_instance);
         throw std::runtime_error("could not build logical device: " + dev.error().message());
     }
     m_device = dev.value();
@@ -76,8 +74,6 @@ VulkanContext::VulkanContext() {
             return (family.queueFlags & VK_QUEUE_COMPUTE_BIT) != 0;
         });
     if (computeQueueFamily == m_device->queue_families.cend()) {
-        vkb::destroy_device(m_device);
-        vkb::destroy_instance(m_instance);
         throw std::runtime_error("could not acquire compute queue: "
                                  + vkb::make_error_code(vkb::QueueError::compute_unavailable).message());
     }
