@@ -10,7 +10,7 @@ namespace utils {
 
 class VulkanContext {
 public:
-    VulkanContext(IDebugMessenger& instanceDebugMessenger);
+    VulkanContext(std::vector<std::reference_wrapper<IDebugMessenger>> instanceMessengers);
 
     VulkanContext(const VulkanContext&) = delete;
     VulkanContext& operator=(const VulkanContext&) = delete;
@@ -30,15 +30,17 @@ public:
                                     vk::MemoryPropertyFlags properties,
                                     vk::Optional<const vk::AllocationCallbacks> allocator = nullptr);
 
-    vk::UniqueDeviceMemory satisfyBuffersMemory(
-        const std::vector<vk::Buffer>& buffers,
-        vk::MemoryPropertyFlags properties,
-        vk::Optional<const vk::AllocationCallbacks> allocator = nullptr);
+    vk::UniqueDeviceMemory satisfyBuffersMemory(const std::vector<vk::Buffer>& buffers,
+                                                vk::MemoryPropertyFlags properties,
+                                                vk::Optional<const vk::AllocationCallbacks> allocator = nullptr);
 
     vk::UniqueCommandPool createComputeCommnadPool();
 
+    const vk::DispatchLoaderDynamic& dynamics() const;
+
 private:
     vkb::Instance m_instance;
+    vk::DispatchLoaderDynamic m_dynamics;
     vkb::PhysicalDevice m_physicalDevice;
     vkb::Device m_device;
     vk::Queue m_computeQueue;

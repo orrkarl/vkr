@@ -12,20 +12,29 @@ VkQueue get_queue(VkDevice device, uint32_t family);
 
 namespace utils {
 
-VulkanContext::VulkanContext(IDebugMessenger& instanceDebugMessenger) {
+std::vector<VkDebugUtilsMessengerCreateInfoEXT> extractMessengers(
+    std::vector<std::reference_wrapper<IDebugMessenger>> messengers) {
+    std::vector<VkDebugUtilsMessengerCreateInfoEXT> ret(messengers.size());
+    std::transform(messengers.begin(), messengers.end(), ret.begin(), [](IDebugMessenger& messenger) {
+        return messenger.describeMessenger();
+    });
+    return ret;
+}
+
+VulkanContext::VulkanContext(std::vector<std::reference_wrapper<IDebugMessenger>> instanceMessengers) {
     vkb::InstanceBuilder instBuild;
     auto inst = instBuild.set_app_name("vkr-test-suite")
                     .request_validation_layers()
-                    .enable_validation_layers()
-                    .enable_layer("VK_LAYER_KHRONOS_validation")
+                    .enable_extension(VK_EXT_DEBUG_UTILS_EXTENSION_NAME)
                     .require_api_version(1, 1, 0)
                     .set_headless()
-                    .provide_instance_debug_messenger(instanceDebugMessenger.describeMessenger())
+                    .provide_instance_debug_messengers(extractMessengers(instanceMessengers))
                     .build();
     if (!inst) {
         throw std::runtime_error("could not create instance: " + inst.error().message());
     }
     m_instance = inst.value();
+    m_dynamics = vk::DispatchLoaderDynamic(m_instance.instance, vkGetInstanceProcAddr);
 
     vkb::PhysicalDeviceSelector pdevSelect(m_instance);
     VkPhysicalDeviceFeatures requiredFeatures {};
@@ -98,10 +107,9 @@ vk::UniqueDeviceMemory VulkanContext::allocate(vk::MemoryRequirements allocation
     return device().allocateMemoryUnique(alloc, allocator);
 }
 
-vk::UniqueDeviceMemory VulkanContext::satisfyBuffersMemory(
-    const std::vector<vk::Buffer>& buffers,
-    vk::MemoryPropertyFlags properties,
-    vk::Optional<const vk::AllocationCallbacks> allocator) {
+vk::UniqueDeviceMemory VulkanContext::satisfyBuffersMemory(const std::vector<vk::Buffer>& buffers,
+                                                           vk::MemoryPropertyFlags properties,
+                                                           vk::Optional<const vk::AllocationCallbacks> allocator) {
 
     std::vector<vk::MemoryRequirements> requirements(buffers.size());
     std::transform(buffers.cbegin(), buffers.cend(), requirements.begin(), [this](auto buffer) {
@@ -117,6 +125,10 @@ vk::UniqueDeviceMemory VulkanContext::satisfyBuffersMemory(
 vk::UniqueCommandPool VulkanContext::createComputeCommnadPool() {
     return device().createCommandPoolUnique(
         vk::CommandPoolCreateInfo(vk::CommandPoolCreateFlags(), m_computeFamilyIndex));
+}
+
+const vk::DispatchLoaderDynamic& VulkanContext::dynamics() const {
+    return m_dynamics;
 }
 
 } // namespace utils
