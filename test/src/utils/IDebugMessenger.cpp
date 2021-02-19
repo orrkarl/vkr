@@ -12,7 +12,7 @@ vk::Bool32 IDebugMessenger::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT
     reinterpret_cast<IDebugMessenger*>(pUserData)->debugCallback(
         vk::DebugUtilsMessageSeverityFlagsEXT(messageSeverity),
         vk::DebugUtilsMessageTypeFlagsEXT(messageType),
-        reinterpret_cast<const vk::DebugUtilsMessengerCallbackDataEXT*>(pCallbackData));
+        *reinterpret_cast<const vk::DebugUtilsMessengerCallbackDataEXT*>(pCallbackData));
     return VK_FALSE;
 }
 
@@ -28,14 +28,14 @@ vk::DebugUtilsMessengerCreateInfoEXT IDebugMessenger::describeMessenger() {
 
 std::string IDebugMessenger::stringifyDebugMessage(vk::DebugUtilsMessageSeverityFlagsEXT severity,
                                                    vk::DebugUtilsMessageTypeFlagsEXT type,
-                                                   const vk::DebugUtilsMessengerCallbackDataEXT* callbackData) {
+                                                   const vk::DebugUtilsMessengerCallbackDataEXT& callbackData) {
     std::stringstream ss;
     ss << "==========================================================================" << std::endl;
-    ss << "DEBUG Callback Message: " << callbackData->pMessageIdName << " (" << callbackData->messageIdNumber << ")"
+    ss << "DEBUG Callback Message: " << callbackData.pMessageIdName << " (" << callbackData.messageIdNumber << ")"
        << std::endl;
     ss << "\tSEVERITIES = " << vk::to_string(severity) << std::endl;
     ss << "\tTYPES = " << vk::to_string(type) << std::endl;
-    ss << callbackData->pMessage << std::endl;
+    ss << callbackData.pMessage << std::endl;
     ss << "==========================================================================" << std::endl;
     return ss.str();
 }

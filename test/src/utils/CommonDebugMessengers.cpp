@@ -9,7 +9,7 @@ OstreamLoggingMessenger::OstreamLoggingMessenger(std::ostream& output,
 
 void OstreamLoggingMessenger::debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT severity,
                                             vk::DebugUtilsMessageTypeFlagsEXT type,
-                                            const vk::DebugUtilsMessengerCallbackDataEXT* callbackData) {
+                                            const vk::DebugUtilsMessengerCallbackDataEXT& callbackData) {
     m_output << stringifyDebugMessage(severity, type, callbackData) << std::endl;
 }
 
@@ -18,7 +18,7 @@ FileLoggingMessenger::FileLoggingMessenger(const std::string& path) : m_output(p
 
 void FileLoggingMessenger::debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT severity,
                                          vk::DebugUtilsMessageTypeFlagsEXT type,
-                                         const vk::DebugUtilsMessengerCallbackDataEXT* callbackData) {
+                                         const vk::DebugUtilsMessengerCallbackDataEXT& callbackData) {
     m_output << stringifyDebugMessage(severity, type, callbackData) << std::endl;
 }
 
@@ -32,7 +32,7 @@ uint64_t SeverityCountMessenger::count() const {
 
 void SeverityCountMessenger::debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT severity,
                                            vk::DebugUtilsMessageTypeFlagsEXT type,
-                                           const vk::DebugUtilsMessengerCallbackDataEXT* callbackData) {
+                                           const vk::DebugUtilsMessengerCallbackDataEXT& callbackData) {
     m_counter++;
 }
 

@@ -22,13 +22,13 @@ public:
 protected:
     static std::string stringifyDebugMessage(vk::DebugUtilsMessageSeverityFlagsEXT severity,
                                              vk::DebugUtilsMessageTypeFlagsEXT type,
-                                             const vk::DebugUtilsMessengerCallbackDataEXT* callbackData);
+                                             const vk::DebugUtilsMessengerCallbackDataEXT& callbackData);
 
     static vk::DebugUtilsMessageSeverityFlagsEXT minSeverityToBitmap(vk::DebugUtilsMessageSeverityFlagBitsEXT min);
 
     virtual void debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT severity,
                                vk::DebugUtilsMessageTypeFlagsEXT type,
-                               const vk::DebugUtilsMessengerCallbackDataEXT* callbackData)
+                               const vk::DebugUtilsMessengerCallbackDataEXT& callbackData)
         = 0;
 
 private:

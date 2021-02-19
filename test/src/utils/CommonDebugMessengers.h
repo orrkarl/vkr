@@ -14,7 +14,7 @@ public:
 protected:
     void debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT severity,
                        vk::DebugUtilsMessageTypeFlagsEXT type,
-                       const vk::DebugUtilsMessengerCallbackDataEXT* callbackData) override;
+                       const vk::DebugUtilsMessengerCallbackDataEXT& callbackData) override;
 
 private:
     std::ostream& m_output;
@@ -27,7 +27,7 @@ public:
 protected:
     void debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT severity,
                        vk::DebugUtilsMessageTypeFlagsEXT type,
-                       const vk::DebugUtilsMessengerCallbackDataEXT* callbackData) override;
+                       const vk::DebugUtilsMessengerCallbackDataEXT& callbackData) override;
 
 private:
     std::ofstream m_output;
@@ -42,7 +42,7 @@ public:
 protected:
     void debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT severity,
                        vk::DebugUtilsMessageTypeFlagsEXT type,
-                       const vk::DebugUtilsMessengerCallbackDataEXT* callbackData) override;
+                       const vk::DebugUtilsMessengerCallbackDataEXT& callbackData) override;
 
 private:
     uint64_t m_counter;
