@@ -28,8 +28,22 @@ public:
     }
     VkbWrapper(T obj) : m_obj(obj) {
     }
+
+    VkbWrapper(const VkbWrapper& other) = delete;
+    VkbWrapper& operator=(const VkbWrapper& other) = delete;
+
+    VkbWrapper(VkbWrapper&& other) : m_obj(std::exchange(other.m_obj, T{})) {
+    }
+    VkbWrapper& operator=(VkbWrapper&& other) {
+        Traits::deleter(m_obj);
+        m_obj = std::exchange(other.m_obj, T{});
+
+        return *this;
+    }
+
     ~VkbWrapper() {
         Traits::deleter(m_obj);
+        m_obj = T{};
     }
 
     operator T&() {
