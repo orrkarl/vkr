@@ -78,8 +78,8 @@ VulkanContext::~VulkanContext() {
     vkb::destroy_instance(m_instance);
 }
 
-const vkb::Instance& VulkanContext::instance() const {
-    return m_instance;
+vk::Instance VulkanContext::instance() const {
+    return m_instance.instance;
 }
 
 const vkb::PhysicalDevice& VulkanContext::physicalDevice() const {

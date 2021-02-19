@@ -20,7 +20,7 @@ public:
 
     ~VulkanContext();
 
-    const vkb::Instance& instance() const;
+    vk::Instance instance() const;
     const vkb::PhysicalDevice& physicalDevice() const;
     vk::Device device() const;
 

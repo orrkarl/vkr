@@ -16,7 +16,7 @@ using namespace utils;
 TEST_CASE("Clipping correctness", "[setup]") {
     OstreamLoggingMessenger debug(std::cout, vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning);
     VulkanContext ctx({ debug });
-    DebugMessengerRegisterGuard guard(ctx.instance().instance, ctx.dynamics(), debug);
+    DebugMessengerRegisterGuard guard(ctx.instance(), ctx.dynamics(), debug);
 
     ManagedVulkanResource<vkr::gpu::tests::ClippingAPI> clipping(ctx.device(), nullptr);
     auto clippingRunner = ctx.device().createComputePipelineUnique(nullptr, clipping->describeRunner()).value;

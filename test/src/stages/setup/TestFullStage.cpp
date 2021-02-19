@@ -14,7 +14,7 @@ using namespace utils;
 TEST_CASE("Triangle Setup full stage correctness", "[setup]") {
     OstreamLoggingMessenger debug(std::cout, vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning);
     VulkanContext ctx({ debug });
-    DebugMessengerRegisterGuard guard(ctx.instance().instance, ctx.dynamics(), debug);
+    DebugMessengerRegisterGuard guard(ctx.instance(), ctx.dynamics(), debug);
 
     ManagedVulkanResource<vkr::gpu::TriangleSetupAPI> triangleSetup(ctx.device(), nullptr);
     auto triangleSetupStage = ctx.device().createComputePipelineUnique(nullptr, triangleSetup->describeRunner()).value;
