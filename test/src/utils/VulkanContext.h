@@ -5,6 +5,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "CommonDebugMessengers.h"
+#include "VkbWrapper.h"
 
 namespace utils {
 
@@ -41,11 +42,11 @@ public:
 private:
     uint64_t m_validationFailures;
     std::vector<std::unique_ptr<IDebugMessenger>> m_debugMessengers;
-    vkb::Instance m_instance;
+    VkbWrapper<vkb::Instance> m_instance;
     vk::DispatchLoaderDynamic m_dynamics;
     std::vector<DebugMessengerRegisterGuard> m_messengersRegistration;
     vkb::PhysicalDevice m_physicalDevice;
-    vkb::Device m_device;
+    VkbWrapper<vkb::Device> m_device;
     vk::Queue m_computeQueue;
     uint32_t m_computeFamilyIndex;
 };

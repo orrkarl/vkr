@@ -43,10 +43,10 @@ VulkanContext::VulkanContext() {
         throw std::runtime_error("could not create instance: " + inst.error().message());
     }
     m_instance = inst.value();
-    m_dynamics = vk::DispatchLoaderDynamic(m_instance.instance, vkGetInstanceProcAddr);
+    m_dynamics = vk::DispatchLoaderDynamic(m_instance->instance, vkGetInstanceProcAddr);
 
     for (auto& messenger : m_debugMessengers) {
-        m_messengersRegistration.emplace_back(m_instance.instance, m_dynamics, *messenger);
+        m_messengersRegistration.emplace_back(m_instance->instance, m_dynamics, *messenger);
     }
 
     vkb::PhysicalDeviceSelector pdevSelect(m_instance);
@@ -72,28 +72,25 @@ VulkanContext::VulkanContext() {
     m_device = dev.value();
 
     auto computeQueueFamily = std::find_if(
-        m_device.queue_families.cbegin(), m_device.queue_families.cend(), [](const auto& family) {
+        m_device->queue_families.cbegin(), m_device->queue_families.cend(), [](const auto& family) {
             return (family.queueFlags & VK_QUEUE_COMPUTE_BIT) != 0;
         });
-    if (computeQueueFamily == m_device.queue_families.cend()) {
+    if (computeQueueFamily == m_device->queue_families.cend()) {
         vkb::destroy_device(m_device);
         vkb::destroy_instance(m_instance);
         throw std::runtime_error("could not acquire compute queue: "
                                  + vkb::make_error_code(vkb::QueueError::compute_unavailable).message());
     }
 
-    m_computeFamilyIndex = static_cast<uint32_t>(computeQueueFamily - m_device.queue_families.cbegin());
-    m_computeQueue = vk::Queue(vkb::detail::get_queue(m_device.device, m_computeFamilyIndex));
+    m_computeFamilyIndex = static_cast<uint32_t>(computeQueueFamily - m_device->queue_families.cbegin());
+    m_computeQueue = vk::Queue(vkb::detail::get_queue(m_device->device, m_computeFamilyIndex));
 }
 
 VulkanContext::~VulkanContext() {
-    vkb::destroy_device(m_device);
-    vkb::destroy_instance(m_instance);
-    REQUIRE(m_validationFailures == 0);
 }
 
 vk::Instance VulkanContext::instance() const {
-    return m_instance.instance;
+    return m_instance->instance;
 }
 
 const vkb::PhysicalDevice& VulkanContext::physicalDevice() const {
@@ -101,7 +98,7 @@ const vkb::PhysicalDevice& VulkanContext::physicalDevice() const {
 }
 
 vk::Device VulkanContext::device() const {
-    return vk::Device(m_device.device);
+    return vk::Device(m_device->device);
 }
 
 vk::Queue VulkanContext::computeQueue() const {
