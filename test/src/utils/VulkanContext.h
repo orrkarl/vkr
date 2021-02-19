@@ -4,13 +4,13 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include "IDebugMessenger.h"
+#include "CommonDebugMessengers.h"
 
 namespace utils {
 
 class VulkanContext {
 public:
-    VulkanContext(std::vector<std::reference_wrapper<IDebugMessenger>> instanceMessengers);
+    VulkanContext();
 
     VulkanContext(const VulkanContext&) = delete;
     VulkanContext& operator=(const VulkanContext&) = delete;
@@ -39,8 +39,11 @@ public:
     const vk::DispatchLoaderDynamic& dynamics() const;
 
 private:
+    uint64_t m_validationFailures;
+    std::vector<std::unique_ptr<IDebugMessenger>> m_debugMessengers;
     vkb::Instance m_instance;
     vk::DispatchLoaderDynamic m_dynamics;
+    std::vector<DebugMessengerRegisterGuard> m_messengersRegistration;
     vkb::PhysicalDevice m_physicalDevice;
     vkb::Device m_device;
     vk::Queue m_computeQueue;

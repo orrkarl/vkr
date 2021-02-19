@@ -1,7 +1,9 @@
 #include "VulkanContext.h"
 
 #include <algorithm>
+#include <iostream>
 
+#include <catch2/catch_test_macros.hpp>
 #include <vulkan/vulkan.hpp>
 
 #include "MemoryUtils.h"
@@ -13,28 +15,39 @@ VkQueue get_queue(VkDevice device, uint32_t family);
 namespace utils {
 
 std::vector<VkDebugUtilsMessengerCreateInfoEXT> extractMessengers(
-    std::vector<std::reference_wrapper<IDebugMessenger>> messengers) {
+    std::vector<std::unique_ptr<IDebugMessenger>>& messengers) {
     std::vector<VkDebugUtilsMessengerCreateInfoEXT> ret(messengers.size());
-    std::transform(messengers.begin(), messengers.end(), ret.begin(), [](IDebugMessenger& messenger) {
-        return messenger.describeMessenger();
+    std::transform(messengers.begin(), messengers.end(), ret.begin(), [](std::unique_ptr<IDebugMessenger>& messenger) {
+        return messenger->describeMessenger();
     });
     return ret;
 }
 
-VulkanContext::VulkanContext(std::vector<std::reference_wrapper<IDebugMessenger>> instanceMessengers) {
+VulkanContext::VulkanContext() {
+    m_validationFailures = 0;
+    m_debugMessengers.emplace_back(
+        std::make_unique<OstreamLoggingMessenger>(std::cout, vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning));
+    m_debugMessengers.emplace_back(std::make_unique<SeverityCountMessenger>(
+        m_validationFailures,
+        vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError));
+
     vkb::InstanceBuilder instBuild;
     auto inst = instBuild.set_app_name("vkr-test-suite")
                     .request_validation_layers()
                     .enable_extension(VK_EXT_DEBUG_UTILS_EXTENSION_NAME)
                     .require_api_version(1, 1, 0)
                     .set_headless()
-                    .provide_instance_debug_messengers(extractMessengers(instanceMessengers))
+                    .provide_instance_debug_messengers(extractMessengers(m_debugMessengers))
                     .build();
     if (!inst) {
         throw std::runtime_error("could not create instance: " + inst.error().message());
     }
     m_instance = inst.value();
     m_dynamics = vk::DispatchLoaderDynamic(m_instance.instance, vkGetInstanceProcAddr);
+
+    for (auto& messenger : m_debugMessengers) {
+        m_messengersRegistration.emplace_back(m_instance.instance, m_dynamics, *messenger);
+    }
 
     vkb::PhysicalDeviceSelector pdevSelect(m_instance);
     VkPhysicalDeviceFeatures requiredFeatures {};
@@ -76,6 +89,7 @@ VulkanContext::VulkanContext(std::vector<std::reference_wrapper<IDebugMessenger>
 VulkanContext::~VulkanContext() {
     vkb::destroy_device(m_device);
     vkb::destroy_instance(m_instance);
+    REQUIRE(m_validationFailures == 0);
 }
 
 vk::Instance VulkanContext::instance() const {

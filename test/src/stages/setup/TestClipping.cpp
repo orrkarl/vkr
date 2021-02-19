@@ -14,12 +14,7 @@
 using namespace utils;
 
 TEST_CASE("Clipping correctness", "[setup]") {
-    OstreamLoggingMessenger realtimeMessenger(std::cout, vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning);
-    SeverityCountMessenger validationFailures(vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning
-                                              | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
-    VulkanContext ctx({ realtimeMessenger, validationFailures });
-    DebugMessengerRegisterGuard registerRealtime(ctx.instance(), ctx.dynamics(), realtimeMessenger);
-    DebugMessengerRegisterGuard registerFailCount(ctx.instance(), ctx.dynamics(), validationFailures);
+    VulkanContext ctx;
 
     ManagedVulkanResource<vkr::gpu::tests::ClippingAPI> clipping(ctx.device(), nullptr);
     auto clippingRunner = ctx.device().createComputePipelineUnique(nullptr, clipping->describeRunner()).value;
@@ -98,6 +93,4 @@ TEST_CASE("Clipping correctness", "[setup]") {
         ctx.computeQueue().submit({ vk::SubmitInfo { 0, nullptr, nullptr, 1, &command } }, vk::Fence());
         ctx.computeQueue().waitIdle();
     }
-
-    REQUIRE(validationFailures.count() == 0);
 }
