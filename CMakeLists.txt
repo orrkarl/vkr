@@ -33,13 +33,6 @@ ADD_SUBDIRECTORY(src)
 IF(BUILD_TESTS)
 	INCLUDE(FetchContent)
 
-    # Tests based on Catch2 suite
-	FetchContent_Declare(
-            catch2
-            GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-            GIT_TAG v3.0.0-preview3)
-    FetchContent_MakeAvailable(catch2)
-
     # Using vk-bootstrap for vulkan boilerplate
     FetchContent_Declare(
             vk-bootstrap
@@ -47,7 +40,12 @@ IF(BUILD_TESTS)
             GIT_TAG v0.2.1)
     FetchContent_MakeAvailable(vk-bootstrap)
 
-    INCLUDE(${catch2_SOURCE_DIR}/extras/Catch.cmake)
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_Declare(
+            googletest
+            GIT_REPOSITORY https://github.com/google/googletest.git
+            GIT_TAG release-1.10.0)
+    FetchContent_MakeAvailable(googletest)
 
     ENABLE_TESTING()
 

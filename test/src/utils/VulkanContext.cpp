@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <iostream>
 
-#include <catch2/catch_test_macros.hpp>
 #include <vulkan/vulkan.hpp>
 
 #include "MemoryUtils.h"
