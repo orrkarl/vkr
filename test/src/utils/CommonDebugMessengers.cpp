@@ -30,7 +30,7 @@ uint64_t SeverityCountMessenger::count() const {
     return m_counter;
 }
 
-void SeverityCountMessenger::reset() {
+void SeverityCountMessenger::resetCounter() {
     m_counter = 0;
 }
 
