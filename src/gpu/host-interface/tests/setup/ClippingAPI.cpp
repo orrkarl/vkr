@@ -31,9 +31,9 @@ const std::array<VkDescriptorSetLayoutBinding, 3> ClippingLayout::BINDINGS = {
                                    nullptr },
 };
 const std::array<uint32_t, 1> ClippingLayout::SETS = { 3 };
-const std::array<VkPushConstantRange, 1> ClippingLayout::PUSH_ARGS = {
-    { VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, TRIANGLE_COUNT_OFFSET, TRIANGLE_COUNT_SIZE }
-};
+const VkPushConstantRange ClippingLayout::PUSH_ARGS = { VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT,
+                                                        TRIANGLE_COUNT_OFFSET,
+                                                        TRIANGLE_COUNT_SIZE };
 const std::array<uint32_t, 3> ClippingLayout::GROUP_SIZES { CLIPPING_LOCAL_SIZE_X,
                                                             CLIPPING_LOCAL_SIZE_Y,
                                                             CLIPPING_LOCAL_SIZE_Z };
@@ -42,18 +42,17 @@ const std::array<uint32_t, 3> ClippingLayout::GROUP_SIZES { CLIPPING_LOCAL_SIZE_
 
 VkWriteDescriptorSet ClippingAPI::describeVerteciesUpdate(VkDescriptorSet args,
                                                           const VkDescriptorBufferInfo& vertecies) {
-    return describeSimpleBufferUpdate(
-        args, Layout::VERTECIES_POS.second, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, vertecies);
+    return describeSimpleBufferUpdate(args, Layout::VERTECIES_POS.second, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, vertecies);
 }
 
-VkWriteDescriptorSet ClippingAPI::describeClippedVerteciesUpdate(
-    VkDescriptorSet args, const VkDescriptorBufferInfo& clippedVertecies) {
+VkWriteDescriptorSet ClippingAPI::describeClippedVerteciesUpdate(VkDescriptorSet args,
+                                                                 const VkDescriptorBufferInfo& clippedVertecies) {
     return describeSimpleBufferUpdate(
         args, Layout::CLIPPED_VERTECIES_POS.second, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, clippedVertecies);
 }
 
-VkWriteDescriptorSet ClippingAPI::describeClippedVertexCountsUpdate(
-    VkDescriptorSet args, const VkDescriptorBufferInfo& clippedVertexCounts) {
+VkWriteDescriptorSet ClippingAPI::describeClippedVertexCountsUpdate(VkDescriptorSet args,
+                                                                    const VkDescriptorBufferInfo& clippedVertexCounts) {
     return describeSimpleBufferUpdate(
         args, Layout::CLIPPED_VERTEX_COUNTS.second, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, clippedVertexCounts);
 }

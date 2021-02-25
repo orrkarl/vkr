@@ -35,19 +35,17 @@ const std::array<VkDescriptorSetLayoutBinding, 4> TriangleSetupLayout::BINDINGS 
                                    nullptr },
 };
 const std::array<uint32_t, 2> TriangleSetupLayout::SETS = { 1, 3 };
-const std::array<VkPushConstantRange, 2> TriangleSetupLayout::PUSH_ARGS = {
-    VkPushConstantRange {
-        VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, VERTEX_COUNT_OFFSET, VERTEX_COUNT_SIZE },
-    VkPushConstantRange { VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, MVP_OFFSET, MVP_SIZE }
-};
+const VkPushConstantRange TriangleSetupLayout::PUSH_ARGS = { VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT,
+                                                             VERTEX_COUNT_OFFSET,
+                                                             VERTEX_COUNT_SIZE + MVP_SIZE };
 const std::array<uint32_t, 3> TriangleSetupLayout::GROUP_SIZES { TRIANGLE_SETUP_LOCAL_SIZE_X,
                                                                  TRIANGLE_SETUP_LOCAL_SIZE_Y,
                                                                  TRIANGLE_SETUP_LOCAL_SIZE_Z };
 
 } // namespace detail
 
-VkWriteDescriptorSet TriangleSetupAPI::describeRasterConfigUpdate(
-    const TriangleSetupAPI::Arguments& args, const VkDescriptorBufferInfo& rasterConfigBuffer) {
+VkWriteDescriptorSet TriangleSetupAPI::describeRasterConfigUpdate(const TriangleSetupAPI::Arguments& args,
+                                                                  const VkDescriptorBufferInfo& rasterConfigBuffer) {
     return describeSimpleBufferUpdate(args[Layout::RASTER_CONFIG_POS.first],
                                       Layout::RASTER_CONFIG_POS.second,
                                       VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -70,8 +68,8 @@ VkWriteDescriptorSet TriangleSetupAPI::describeColorUpdate(const Arguments& args
                                       colorBuffer);
 }
 
-VkWriteDescriptorSet TriangleSetupAPI::describeTriangleBlocksUpdate(
-    const Arguments& args, const VkDescriptorBufferInfo& triangleBlocks) {
+VkWriteDescriptorSet TriangleSetupAPI::describeTriangleBlocksUpdate(const Arguments& args,
+                                                                    const VkDescriptorBufferInfo& triangleBlocks) {
     return describeSimpleBufferUpdate(args[Layout::TRIANGLE_BLOCKS_POS.first],
                                       Layout::TRIANGLE_BLOCKS_POS.second,
                                       VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,

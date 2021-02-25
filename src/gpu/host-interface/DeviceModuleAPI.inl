@@ -49,8 +49,8 @@ VkResult DeviceModuleAPI<APILayout>::init(VkDevice dev, const VkAllocationCallba
                                               0,
                                               static_cast<uint32_t>(m_argsDesc.size()),
                                               m_argsDesc.data(),
-                                              static_cast<uint32_t>(APILayout::PUSH_ARGS.size()),
-                                              APILayout::PUSH_ARGS.data() };
+                                              1,
+                                              &APILayout::PUSH_ARGS };
     status = vkCreatePipelineLayout(dev, &pipelineDesc, allocator, &m_runnerDesc);
     if (status != VK_SUCCESS) {
         for (auto it = m_argsDesc.rbegin(); it != m_argsDesc.rend(); ++it) {
