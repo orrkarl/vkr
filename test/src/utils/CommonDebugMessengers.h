@@ -12,7 +12,7 @@ public:
     OstreamLoggingMessenger(std::ostream& output, vk::DebugUtilsMessageSeverityFlagBitsEXT minSeverity);
 
 protected:
-    void debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT severity,
+    void debugCallback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
                        vk::DebugUtilsMessageTypeFlagsEXT type,
                        const vk::DebugUtilsMessengerCallbackDataEXT& callbackData) override;
 
@@ -25,7 +25,7 @@ public:
     FileLoggingMessenger(const std::string& path);
 
 protected:
-    void debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT severity,
+    void debugCallback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
                        vk::DebugUtilsMessageTypeFlagsEXT type,
                        const vk::DebugUtilsMessengerCallbackDataEXT& callbackData) override;
 
@@ -40,7 +40,7 @@ public:
     uint64_t count() const;
 
 protected:
-    void debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT severity,
+    void debugCallback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
                        vk::DebugUtilsMessageTypeFlagsEXT type,
                        const vk::DebugUtilsMessengerCallbackDataEXT& callbackData) override;
 

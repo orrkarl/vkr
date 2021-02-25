@@ -26,7 +26,7 @@ protected:
 
     static vk::DebugUtilsMessageSeverityFlagsEXT minSeverityToBitmap(vk::DebugUtilsMessageSeverityFlagBitsEXT min);
 
-    virtual void debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT severity,
+    virtual void debugCallback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
                                vk::DebugUtilsMessageTypeFlagsEXT type,
                                const vk::DebugUtilsMessengerCallbackDataEXT& callbackData)
         = 0;

@@ -10,7 +10,7 @@ vk::Bool32 IDebugMessenger::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT
                                           const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
                                           void* pUserData) {
     reinterpret_cast<IDebugMessenger*>(pUserData)->debugCallback(
-        vk::DebugUtilsMessageSeverityFlagsEXT(messageSeverity),
+        vk::DebugUtilsMessageSeverityFlagBitsEXT(messageSeverity),
         vk::DebugUtilsMessageTypeFlagsEXT(messageType),
         *reinterpret_cast<const vk::DebugUtilsMessengerCallbackDataEXT*>(pCallbackData));
     return VK_FALSE;

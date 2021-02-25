@@ -7,7 +7,7 @@ OstreamLoggingMessenger::OstreamLoggingMessenger(std::ostream& output,
     : IDebugMessenger(minSeverityToBitmap(minSeverity)), m_output(output) {
 }
 
-void OstreamLoggingMessenger::debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT severity,
+void OstreamLoggingMessenger::debugCallback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
                                             vk::DebugUtilsMessageTypeFlagsEXT type,
                                             const vk::DebugUtilsMessengerCallbackDataEXT& callbackData) {
     m_output << stringifyDebugMessage(severity, type, callbackData) << std::endl;
@@ -16,7 +16,7 @@ void OstreamLoggingMessenger::debugCallback(vk::DebugUtilsMessageSeverityFlagsEX
 FileLoggingMessenger::FileLoggingMessenger(const std::string& path) : m_output(path, std::ios::trunc | std::ios::out) {
 }
 
-void FileLoggingMessenger::debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT severity,
+void FileLoggingMessenger::debugCallback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
                                          vk::DebugUtilsMessageTypeFlagsEXT type,
                                          const vk::DebugUtilsMessengerCallbackDataEXT& callbackData) {
     m_output << stringifyDebugMessage(severity, type, callbackData) << std::endl;
@@ -30,7 +30,7 @@ uint64_t SeverityCountMessenger::count() const {
     return m_counter;
 }
 
-void SeverityCountMessenger::debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT severity,
+void SeverityCountMessenger::debugCallback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
                                            vk::DebugUtilsMessageTypeFlagsEXT type,
                                            const vk::DebugUtilsMessengerCallbackDataEXT& callbackData) {
     m_counter++;
