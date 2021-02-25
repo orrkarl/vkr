@@ -48,4 +48,17 @@ private:
     uint64_t m_counter;
 };
 
+class ChainedDebugMessenger : public IDebugMessenger {
+public:
+    ChainedDebugMessenger(std::vector<std::reference_wrapper<IDebugMessenger>> messengers);
+
+protected:
+    void debugCallback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
+                       vk::DebugUtilsMessageTypeFlagsEXT type,
+                       const vk::DebugUtilsMessengerCallbackDataEXT& callbackData) override;
+
+private:
+    std::vector<vk::DebugUtilsMessengerCreateInfoEXT> m_messengers;
+};
+
 } // namespace utils
