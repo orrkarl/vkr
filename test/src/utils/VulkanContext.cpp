@@ -13,30 +13,14 @@ VkQueue get_queue(VkDevice device, uint32_t family);
 
 namespace utils {
 
-std::vector<VkDebugUtilsMessengerCreateInfoEXT> extractMessengers(
-    std::vector<std::unique_ptr<IDebugMessenger>>& messengers) {
-    std::vector<VkDebugUtilsMessengerCreateInfoEXT> ret(messengers.size());
-    std::transform(messengers.begin(), messengers.end(), ret.begin(), [](std::unique_ptr<IDebugMessenger>& messenger) {
-        return messenger->describeMessenger();
-    });
-    return ret;
-}
-
-VulkanContext::VulkanContext() {
-    m_validationFailures = 0;
-    m_debugMessengers.emplace_back(
-        std::make_unique<OstreamLoggingMessenger>(std::cout, vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning));
-    m_debugMessengers.emplace_back(std::make_unique<SeverityCountMessenger>(
-        m_validationFailures,
-        vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError));
-
+VulkanContext::VulkanContext(std::unique_ptr<ChainedDebugMessenger> messenger) : m_messenger(std::move(messenger)) {
     vkb::InstanceBuilder instBuild;
     auto inst = instBuild.set_app_name("vkr-test-suite")
                     .request_validation_layers()
                     .enable_extension(VK_EXT_DEBUG_UTILS_EXTENSION_NAME)
                     .require_api_version(1, 1, 0)
                     .set_headless()
-                    .provide_instance_debug_messengers(extractMessengers(m_debugMessengers))
+                    .provide_instance_debug_messengers({ m_messenger->describeMessenger() })
                     .build();
     if (!inst) {
         throw std::runtime_error("could not create instance: " + inst.error().message());
@@ -44,9 +28,8 @@ VulkanContext::VulkanContext() {
     m_instance = inst.value();
     m_dynamics = vk::DispatchLoaderDynamic(m_instance->instance, vkGetInstanceProcAddr);
 
-    for (auto& messenger : m_debugMessengers) {
-        m_messengersRegistration.emplace_back(m_instance->instance, m_dynamics, *messenger);
-    }
+    m_messengerRegistration = std::make_unique<DebugMessengerRegisterGuard>(
+        m_instance->instance, m_dynamics, *m_messenger);
 
     vkb::PhysicalDeviceSelector pdevSelect(m_instance);
     VkPhysicalDeviceFeatures requiredFeatures {};

@@ -11,7 +11,7 @@ namespace utils {
 
 class VulkanContext {
 public:
-    VulkanContext();
+    VulkanContext(std::unique_ptr<ChainedDebugMessenger> messenger);
 
     VulkanContext(const VulkanContext&) = delete;
     VulkanContext& operator=(const VulkanContext&) = delete;
@@ -40,11 +40,10 @@ public:
     const vk::DispatchLoaderDynamic& dynamics() const;
 
 private:
-    uint64_t m_validationFailures;
-    std::vector<std::unique_ptr<IDebugMessenger>> m_debugMessengers;
+    std::unique_ptr<ChainedDebugMessenger> m_messenger;
     VkbWrapper<vkb::Instance> m_instance;
     vk::DispatchLoaderDynamic m_dynamics;
-    std::vector<DebugMessengerRegisterGuard> m_messengersRegistration;
+    std::unique_ptr<DebugMessengerRegisterGuard> m_messengerRegistration;
     vkb::PhysicalDevice m_physicalDevice;
     VkbWrapper<vkb::Device> m_device;
     vk::Queue m_computeQueue;
