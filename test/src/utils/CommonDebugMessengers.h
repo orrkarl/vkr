@@ -38,6 +38,7 @@ public:
     SeverityCountMessenger(vk::DebugUtilsMessageSeverityFlagsEXT severities);
 
     uint64_t count() const;
+    void reset();
 
 protected:
     void debugCallback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,

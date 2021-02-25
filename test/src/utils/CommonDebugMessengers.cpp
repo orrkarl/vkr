@@ -30,6 +30,10 @@ uint64_t SeverityCountMessenger::count() const {
     return m_counter;
 }
 
+void SeverityCountMessenger::reset() {
+    m_counter = 0;
+}
+
 void SeverityCountMessenger::debugCallback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
                                            vk::DebugUtilsMessageTypeFlagsEXT type,
                                            const vk::DebugUtilsMessengerCallbackDataEXT& callbackData) {
