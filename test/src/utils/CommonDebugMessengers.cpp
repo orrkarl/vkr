@@ -22,8 +22,12 @@ void FileLoggingMessenger::debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT s
     m_output << stringifyDebugMessage(severity, type, callbackData) << std::endl;
 }
 
-SeverityCountMessenger::SeverityCountMessenger(uint64_t& counter, vk::DebugUtilsMessageSeverityFlagsEXT severities)
-    : IDebugMessenger(severities), m_counter(counter) {
+SeverityCountMessenger::SeverityCountMessenger(vk::DebugUtilsMessageSeverityFlagsEXT severities)
+    : IDebugMessenger(severities), m_counter(0) {
+}
+
+uint64_t SeverityCountMessenger::count() const {
+    return m_counter;
 }
 
 void SeverityCountMessenger::debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT severity,

@@ -35,7 +35,9 @@ private:
 
 class SeverityCountMessenger : public IDebugMessenger {
 public:
-    SeverityCountMessenger(uint64_t& counter, vk::DebugUtilsMessageSeverityFlagsEXT severities);
+    SeverityCountMessenger(vk::DebugUtilsMessageSeverityFlagsEXT severities);
+
+    uint64_t count() const;
 
 protected:
     void debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT severity,
@@ -43,7 +45,7 @@ protected:
                        const vk::DebugUtilsMessengerCallbackDataEXT& callbackData) override;
 
 private:
-    uint64_t& m_counter;
+    uint64_t m_counter;
 };
 
 } // namespace utils
