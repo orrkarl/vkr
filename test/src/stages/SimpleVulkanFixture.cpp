@@ -8,6 +8,7 @@ void SimpleVulkanFixture::SetUp() {
 
 void SimpleVulkanFixture::TearDown() {
     m_currentContext.reset();
+    ASSERT_EQ(m_validationErrorCounter->count(), 0) << "Some validation errors occured during the run of this test";
 }
 
 utils::VulkanContext& SimpleVulkanFixture::context() {
