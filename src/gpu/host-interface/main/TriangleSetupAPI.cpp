@@ -14,7 +14,7 @@ const size_t TriangleSetupLayout::MODULE_SIZE = device_side::TriangleSetup_comp_
 const uint32_t* TriangleSetupLayout::MODULE_DATA = device_side::TriangleSetup_comp;
 const std::array<VkDescriptorSetLayoutBinding, 4> TriangleSetupLayout::BINDINGS = {
     VkDescriptorSetLayoutBinding { RASTER_CONFIG_POS.second,
-                                   VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                                   VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                    1,
                                    VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT,
                                    nullptr },
