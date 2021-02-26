@@ -59,12 +59,12 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
         CLIPPED_VERTECIES_SPACE.first + CLIPPED_VERTECIES_SPACE.second, TRIANGLE_COUNT * sizeof(u32)
     };
 
-    auto vertexInput = context().device().createBufferUnique(vk::BufferCreateInfo(
-        vk::BufferCreateFlags(), VERTEX_COUNT * sizeof(vec4), vk::BufferUsageFlagBits::eStorageBuffer));
+    auto vertexInput = context().device().createBufferUnique(
+        vk::BufferCreateInfo(vk::BufferCreateFlags(), VERTECIES_SPACE.second, vk::BufferUsageFlagBits::eStorageBuffer));
     auto clippedVerteciesOutput = context().device().createBufferUnique(vk::BufferCreateInfo(
-        vk::BufferCreateFlags(), MAX_CLIPPED_VERTECIES * sizeof(vec4), vk::BufferUsageFlagBits::eStorageBuffer));
+        vk::BufferCreateFlags(), CLIPPED_VERTECIES_SPACE.second, vk::BufferUsageFlagBits::eStorageBuffer));
     auto clipProductsCounts = context().device().createBufferUnique(vk::BufferCreateInfo(
-        vk::BufferCreateFlags(), TRIANGLE_COUNT * sizeof(u32), vk::BufferUsageFlagBits::eStorageBuffer));
+        vk::BufferCreateFlags(), CLIPPED_VERTECIES_COUNTS_SPACE.second, vk::BufferUsageFlagBits::eStorageBuffer));
 
     auto memory = context().satisfyBuffersMemory({ *vertexInput, *clippedVerteciesOutput, *clipProductsCounts },
                                                  vk::MemoryPropertyFlagBits::eHostCoherent
@@ -96,9 +96,9 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
           reinterpret_cast<vk::DescriptorSetLayout*>(clippingArgsLayout.data()) })[0];
 
     std::array<VkDescriptorBufferInfo, 3> bufferDescs {
-        VkDescriptorBufferInfo { *vertexInput, 0, VERTEX_COUNT * sizeof(vec4) },
-        VkDescriptorBufferInfo { *clippedVerteciesOutput, 0, MAX_CLIPPED_VERTECIES * sizeof(vec4) },
-        VkDescriptorBufferInfo { *clipProductsCounts, 0, TRIANGLE_COUNT * sizeof(uint32_t) }
+        VkDescriptorBufferInfo { *vertexInput, 0, VERTECIES_SPACE.second },
+        VkDescriptorBufferInfo { *clippedVerteciesOutput, 0, CLIPPED_VERTECIES_SPACE.second },
+        VkDescriptorBufferInfo { *clipProductsCounts, 0, CLIPPED_VERTECIES_COUNTS_SPACE.second }
     };
 
     // each bufferDescs element has to live as long as the WriteDescriptorSet instances
@@ -127,9 +127,9 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
     {
         MappedMemoryGuard mapClipCounts(
             context().device(), *memory, CLIPPED_VERTECIES_COUNTS_SPACE.first, CLIPPED_VERTECIES_COUNTS_SPACE.second);
-        std::vector<u32> clipCounts(TRIANGLE_COUNT);
+        std::vector<u32> clipCounts(CLIPPED_VERTECIES_COUNTS_SPACE.second);
         auto mappedCountsPtr = mapClipCounts.hostAddress<u32>();
-        std::copy(mappedCountsPtr, mappedCountsPtr + TRIANGLE_COUNT, clipCounts.begin());
+        std::copy(mappedCountsPtr, mappedCountsPtr + CLIPPED_VERTECIES_COUNTS_SPACE.second, clipCounts.begin());
         // Nothing was supposed to be clipped - 3 vertecies per triangle remain 3 vertecies
         EXPECT_THAT(clipCounts, Each(3));
     }
