@@ -14,12 +14,14 @@
 #include "../../utils/VulkanContext.h"
 
 using namespace utils;
+using namespace vkr::gpu::tests;
+using testing::Each;
 
 class TriangleSetupClipping : public SimpleVulkanFixture {
 protected:
     void SetUp() override {
         SimpleVulkanFixture::SetUp();
-        m_clipping = std::make_unique<ManagedVulkanResource<vkr::gpu::tests::ClippingAPI>>(context().device(), nullptr);
+        m_clipping = std::make_unique<ManagedVulkanResource<ClippingAPI>>(context().device(), nullptr);
         m_clippingRunner = std::make_unique<vk::UniquePipeline>(
             context().device().createComputePipelineUnique(nullptr, clipping()->describeRunner()));
     }
@@ -30,7 +32,7 @@ protected:
         SimpleVulkanFixture::TearDown();
     }
 
-    ManagedVulkanResource<vkr::gpu::tests::ClippingAPI>& clipping() {
+    ManagedVulkanResource<ClippingAPI>& clipping() {
         return *m_clipping;
     }
 
@@ -39,7 +41,7 @@ protected:
     }
 
 private:
-    std::unique_ptr<ManagedVulkanResource<vkr::gpu::tests::ClippingAPI>> m_clipping;
+    std::unique_ptr<ManagedVulkanResource<ClippingAPI>> m_clipping;
     std::unique_ptr<vk::UniquePipeline> m_clippingRunner;
 };
 
@@ -126,8 +128,9 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
         MappedMemoryGuard mapClipCounts(
             context().device(), *memory, CLIPPED_VERTECIES_COUNTS_SPACE.first, CLIPPED_VERTECIES_COUNTS_SPACE.second);
         std::vector<u32> clipCounts(TRIANGLE_COUNT);
-        std::memcpy(clipCounts.data(), mapClipCounts.hostAddress<u32>(), TRIANGLE_COUNT);
+        auto mappedCountsPtr = mapClipCounts.hostAddress<u32>();
+        std::copy(mappedCountsPtr, mappedCountsPtr + TRIANGLE_COUNT, clipCounts.begin());
         // Nothing was supposed to be clipped - 3 vertecies per triangle remain 3 vertecies
-        EXPECT_THAT(clipCounts, testing::Each(3));
+        EXPECT_THAT(clipCounts, Each(3));
     }
 }
