@@ -49,6 +49,13 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
     constexpr float MIN = std::numeric_limits<float>::min();
     constexpr float MAX = 1000; // TODO: think of a better way to generate floats
 
+    constexpr std::pair<size_t, size_t> VERTECIES_SPACE = { 0, VERTEX_COUNT * sizeof(vec4) };
+    constexpr std::pair<size_t, size_t> CLIPPED_VERTECIES_SPACE = { VERTECIES_SPACE.first + VERTECIES_SPACE.second,
+                                                                    MAX_CLIPPED_VERTECIES * sizeof(vec4) };
+    constexpr std::pair<size_t, size_t> CLIPPED_VERTECIES_COUNTS_SPACE = {
+        CLIPPED_VERTECIES_SPACE.first + CLIPPED_VERTECIES_SPACE.second, TRIANGLE_COUNT * sizeof(u32)
+    };
+
     auto vertexInput = context().device().createBufferUnique(vk::BufferCreateInfo(
         vk::BufferCreateFlags(), VERTEX_COUNT * sizeof(vec4), vk::BufferUsageFlagBits::eStorageBuffer));
     auto clippedVerteciesOutput = context().device().createBufferUnique(vk::BufferCreateInfo(
@@ -65,7 +72,7 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
     std::uniform_real_distribution<float> wDist(MIN, MAX);
     {
         vk::Device devView = context().device();
-        MappedMemoryGuard mapVertexInput(devView, *memory, VERTEX_COUNT * sizeof(vec4));
+        MappedMemoryGuard mapVertexInput(devView, *memory, VERTECIES_SPACE.first, VERTECIES_SPACE.second);
         auto triangles = mapVertexInput.hostAddress<vec4>();
         for (size_t i = 0; i < VERTEX_COUNT; ++i) {
             auto w = wDist(gen);

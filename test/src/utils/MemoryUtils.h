@@ -21,8 +21,8 @@ class MappedMemoryGuard {
 public:
     MappedMemoryGuard(vk::Device& dev,
                       vk::DeviceMemory& memory,
-                      vk::DeviceSize regionSize,
-                      vk::DeviceSize regionOffset = 0);
+                      vk::DeviceSize regionOffset,
+                      vk::DeviceSize regionSize);
     ~MappedMemoryGuard();
 
     template <typename T>

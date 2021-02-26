@@ -16,8 +16,7 @@ uint32_t findMemoryIndex(vk::PhysicalDeviceMemoryProperties availableProperties,
                          uint32_t types,
                          vk::MemoryPropertyFlags properties) {
     for (uint32_t i = 0; i < availableProperties.memoryTypeCount; ++i) {
-        if ((types & (1u << i))
-            && ((availableProperties.memoryTypes[i].propertyFlags & properties) == properties)) {
+        if ((types & (1u << i)) && ((availableProperties.memoryTypes[i].propertyFlags & properties) == properties)) {
             return i;
         }
     }
@@ -35,19 +34,16 @@ vk::MemoryRequirements describeBatchAllocation(const std::vector<vk::MemoryRequi
                                           });
 
     // allignment is just the maximum allignment of all elements
-    vk::DeviceSize alignment = std::max_element(
-                                   requirements.cbegin(),
-                                   requirements.cend(),
-                                   [](auto req1, auto req2) { return req1.alignment < req2.alignment; })
-                                   ->alignment;
+    vk::DeviceSize alignment = std::max_element(requirements.cbegin(), requirements.cend(), [](auto req1, auto req2) {
+                                   return req1.alignment < req2.alignment;
+                               })->alignment;
 
     // flags are the intersection of all type flags
-    uint32_t flags = std::accumulate(requirements.cbegin(),
-                                     requirements.cend(),
-                                     uint32_t(-1),
-                                     [](uint32_t collectedFlags, vk::MemoryRequirements curr) {
-                                         return collectedFlags & curr.memoryTypeBits;
-                                     });
+    uint32_t flags = std::accumulate(
+        requirements.cbegin(),
+        requirements.cend(),
+        uint32_t(-1),
+        [](uint32_t collectedFlags, vk::MemoryRequirements curr) { return collectedFlags & curr.memoryTypeBits; });
 
     return { size, alignment, flags };
 }
@@ -70,8 +66,8 @@ void bindBuffers(vk::Device dev,
 
 MappedMemoryGuard::MappedMemoryGuard(vk::Device& dev,
                                      vk::DeviceMemory& memory,
-                                     vk::DeviceSize regionSize,
-                                     vk::DeviceSize regionOffset /* = 0 */)
+                                     vk::DeviceSize regionOffset,
+                                     vk::DeviceSize regionSize)
     : m_device(dev), m_memory(memory), m_address(nullptr) {
     m_address = dev.mapMemory(memory, regionOffset, regionSize);
 }
