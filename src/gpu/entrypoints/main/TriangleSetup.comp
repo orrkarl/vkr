@@ -8,8 +8,8 @@ layout(local_size_x = TRIANGLE_SETUP_LOCAL_SIZE_X,
        local_size_z = TRIANGLE_SETUP_LOCAL_SIZE_Z) in;
 
 layout(push_constant) uniform Transform {
-    u32 vertexCount;
     mat4 mvp;
+    u32 vertexCount;
 };
 
 layout(set = 0, binding = 0, std140) uniform Config {

@@ -25,10 +25,10 @@ struct TriangleSetupLayout {
     static constexpr std::pair<uint32_t, uint32_t> COLORS_POS = { 1, 2 };
     static constexpr std::pair<uint32_t, uint32_t> TRIANGLE_BLOCKS_POS = { 1, 3 };
 
-    static constexpr uint32_t VERTEX_COUNT_OFFSET = 0;
-    static constexpr uint32_t VERTEX_COUNT_SIZE = sizeof(uint32_t);
-    static constexpr uint32_t MVP_OFFSET = VERTEX_COUNT_SIZE;
+    static constexpr uint32_t MVP_OFFSET = 0;
     static constexpr uint32_t MVP_SIZE = sizeof(float[4 * 4]);
+    static constexpr uint32_t VERTEX_COUNT_OFFSET = MVP_SIZE;
+    static constexpr uint32_t VERTEX_COUNT_SIZE = sizeof(uint32_t);
 };
 
 } // namespace detail

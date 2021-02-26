@@ -36,7 +36,7 @@ const std::array<VkDescriptorSetLayoutBinding, 4> TriangleSetupLayout::BINDINGS 
 };
 const std::array<uint32_t, 2> TriangleSetupLayout::SETS = { 1, 3 };
 const VkPushConstantRange TriangleSetupLayout::PUSH_ARGS = { VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT,
-                                                             VERTEX_COUNT_OFFSET,
+                                                             MVP_OFFSET,
                                                              VERTEX_COUNT_SIZE + MVP_SIZE };
 const std::array<uint32_t, 3> TriangleSetupLayout::GROUP_SIZES { TRIANGLE_SETUP_LOCAL_SIZE_X,
                                                                  TRIANGLE_SETUP_LOCAL_SIZE_Y,
