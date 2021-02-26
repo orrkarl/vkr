@@ -1,6 +1,7 @@
 #include <iostream>
 #include <random>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <gpu/host-interface/tests/setup/ClippingAPI.h>
@@ -71,8 +72,7 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> wDist(MIN, MAX);
     {
-        vk::Device devView = context().device();
-        MappedMemoryGuard mapVertexInput(devView, *memory, VERTECIES_SPACE.first, VERTECIES_SPACE.second);
+        MappedMemoryGuard mapVertexInput(context().device(), *memory, VERTECIES_SPACE.first, VERTECIES_SPACE.second);
         auto triangles = mapVertexInput.hostAddress<vec4>();
         for (size_t i = 0; i < VERTEX_COUNT; ++i) {
             auto w = wDist(gen);

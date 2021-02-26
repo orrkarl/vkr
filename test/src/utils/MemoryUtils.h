@@ -19,10 +19,7 @@ void bindBuffers(vk::Device dev,
 
 class MappedMemoryGuard {
 public:
-    MappedMemoryGuard(vk::Device& dev,
-                      vk::DeviceMemory& memory,
-                      vk::DeviceSize regionOffset,
-                      vk::DeviceSize regionSize);
+    MappedMemoryGuard(vk::Device dev, vk::DeviceMemory memory, vk::DeviceSize regionOffset, vk::DeviceSize regionSize);
     ~MappedMemoryGuard();
 
     template <typename T>
@@ -34,8 +31,8 @@ private:
     MappedMemoryGuard(MappedMemoryGuard&&) = delete;
     MappedMemoryGuard& operator=(MappedMemoryGuard&&) = delete;
 
-    vk::Device& m_device;
-    vk::DeviceMemory& m_memory;
+    vk::Device m_device;
+    vk::DeviceMemory m_memory;
     void* m_address;
 };
 

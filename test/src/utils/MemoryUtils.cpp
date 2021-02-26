@@ -64,8 +64,8 @@ void bindBuffers(vk::Device dev,
     }
 }
 
-MappedMemoryGuard::MappedMemoryGuard(vk::Device& dev,
-                                     vk::DeviceMemory& memory,
+MappedMemoryGuard::MappedMemoryGuard(vk::Device dev,
+                                     vk::DeviceMemory memory,
                                      vk::DeviceSize regionOffset,
                                      vk::DeviceSize regionSize)
     : m_device(dev), m_memory(memory), m_address(nullptr) {
