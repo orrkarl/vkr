@@ -121,4 +121,13 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
 
     context().computeQueue().submit({ vk::SubmitInfo { 0, nullptr, nullptr, 1, &command } }, vk::Fence());
     context().computeQueue().waitIdle();
+
+    {
+        MappedMemoryGuard mapClipCounts(
+            context().device(), *memory, CLIPPED_VERTECIES_COUNTS_SPACE.first, CLIPPED_VERTECIES_COUNTS_SPACE.second);
+        std::vector<u32> clipCounts(TRIANGLE_COUNT);
+        std::memcpy(clipCounts.data(), mapClipCounts.hostAddress<u32>(), TRIANGLE_COUNT);
+        // Nothing was supposed to be clipped - 3 vertecies per triangle remain 3 vertecies
+        EXPECT_THAT(clipCounts, testing::Each(3));
+    }
 }

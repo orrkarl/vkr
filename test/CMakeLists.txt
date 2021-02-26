@@ -13,6 +13,7 @@ ADD_EXECUTABLE(vkr-tests
 TARGET_LINK_LIBRARIES(vkr-tests
         PRIVATE ${CMAKE_DL_LIBS}
         PRIVATE gtest_main
+        PRIVATE gmock
         PRIVATE vkr-backend
         PRIVATE vkr-gpu-tests)
 
