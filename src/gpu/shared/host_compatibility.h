@@ -20,6 +20,11 @@ std::ostream& operator<<(std::ostream& os, const Vec<T, Size>& v) {
     return os;
 }
 
+template <typename T, size_t Size>
+bool operator==(const Vec<T, Size>& v1, const Vec<T, Size>& v2) {
+    return v1.data == v2.data;
+}
+
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
