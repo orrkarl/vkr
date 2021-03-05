@@ -64,6 +64,7 @@ struct Vec<T, 3> {
             T z;
         };
     };
+    std::aligned_storage_t<sizeof(T), alignof(T)> padding;
 };
 #pragma pack(pop)
 
