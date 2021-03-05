@@ -124,13 +124,31 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
     context().computeQueue().submit({ vk::SubmitInfo { 0, nullptr, nullptr, 1, &command } }, vk::Fence());
     context().computeQueue().waitIdle();
 
+    std::vector<u32> clipCounts(CLIPPED_VERTECIES_COUNTS_SPACE.second);
+    std::vector<vec3> barys(VERTEX_COUNT);
+    std::vector<vec3> expectedBarys(VERTEX_COUNT);
+
     {
         MappedMemoryGuard mapClipCounts(
             context().device(), *memory, CLIPPED_VERTECIES_COUNTS_SPACE.first, CLIPPED_VERTECIES_COUNTS_SPACE.second);
-        std::vector<u32> clipCounts(CLIPPED_VERTECIES_COUNTS_SPACE.second);
         auto mappedCountsPtr = mapClipCounts.hostAddress<u32>();
         std::copy(mappedCountsPtr, mappedCountsPtr + CLIPPED_VERTECIES_COUNTS_SPACE.second, clipCounts.begin());
-        // Nothing was supposed to be clipped - 3 vertecies per triangle remain 3 vertecies
-        EXPECT_THAT(clipCounts, Each(3));
     }
+
+    {
+        MappedMemoryGuard mapProducts(
+            context().device(), *memory, CLIPPED_VERTECIES_SPACE.first, CLIPPED_VERTECIES_SPACE.second);
+        for (size_t i = 0; i < barys.size(); i += 3) {
+            barys[i + 0] = mapProducts.hostAddress<vec3>()[2 * i + 0];
+            barys[i + 1] = mapProducts.hostAddress<vec3>()[2 * i + 1];
+            barys[i + 2] = mapProducts.hostAddress<vec3>()[2 * i + 2];
+            expectedBarys[i + 0] = vec3 { 1.0f, 0.0f, 0.0f };
+            expectedBarys[i + 1] = vec3 { 0.0f, 1.0f, 0.0f };
+            expectedBarys[i + 2] = vec3 { 0.0f, 0.0f, 1.0f };
+        }
+    }
+
+    // Nothing was supposed to be clipped - 3 vertecies per triangle remain 3 vertecies
+    EXPECT_THAT(clipCounts, Each(3));
+    EXPECT_EQ(barys, expectedBarys);
 }
