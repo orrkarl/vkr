@@ -40,6 +40,12 @@ struct Vec<T, 2> {
     static constexpr auto Size = 2;
     using Type = T;
 
+    Vec() : data {} {
+    }
+
+    Vec(T x, T y) : x(std::move(x)), y(std::move(y)) {
+    }
+
     union {
         std::array<T, 2> data;
         struct {
@@ -55,6 +61,12 @@ template <typename T>
 struct Vec<T, 3> {
     static constexpr auto Size = 3;
     using Type = T;
+
+    Vec() : data {}, padding {} {
+    }
+
+    Vec(T x, T y, T z) : x(std::move(x)), y(std::move(y)), z(std::move(z)), padding {} {
+    }
 
     union {
         std::array<T, 3> data;
@@ -73,6 +85,12 @@ template <typename T>
 struct Vec<T, 4> {
     static constexpr auto Size = 4;
     using Type = T;
+
+    Vec() : data {} {
+    }
+
+    Vec(T x, T y, T z, T w) : x(std::move(x)), y(std::move(y)), z(std::move(z)), w(std::move(w)) {
+    }
 
     union {
         std::array<T, 4> data;
