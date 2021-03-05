@@ -72,19 +72,18 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::vector<vec4> originalTriangles(VERTEX_COUNT);
     std::uniform_real_distribution<float> wDist(MIN, MAX);
-    for (size_t i = 0; i < originalTriangles.size(); ++i) {
-        auto w = wDist(gen);
-        std::uniform_real_distribution<float> pointDist(-w, w);
-        originalTriangles[i].x = pointDist(gen);
-        originalTriangles[i].y = pointDist(gen);
-        originalTriangles[i].z = pointDist(gen);
-        originalTriangles[i].w = w;
-    }
     {
         MappedMemoryGuard mapVertexInput(context().device(), *memory, VERTECIES_SPACE.first, VERTECIES_SPACE.second);
-        std::copy(originalTriangles.cbegin(), originalTriangles.cend(), mapVertexInput.hostAddress<vec4>());
+        auto triangles = mapVertexInput.hostAddress<vec4>();
+        for (size_t i = 0; i < VERTEX_COUNT; ++i) {
+            auto w = wDist(gen);
+            std::uniform_real_distribution<float> pointDist(-w, w);
+            triangles[i].x = pointDist(gen);
+            triangles[i].y = pointDist(gen);
+            triangles[i].z = pointDist(gen);
+            triangles[i].w = w;
+        }
     }
 
     auto clippingArgsLayout = clipping()->describeArguments();
@@ -133,18 +132,5 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
         std::copy(mappedCountsPtr, mappedCountsPtr + CLIPPED_VERTECIES_COUNTS_SPACE.second, clipCounts.begin());
         // Nothing was supposed to be clipped - 3 vertecies per triangle remain 3 vertecies
         EXPECT_THAT(clipCounts, Each(3));
-    }
-
-    {
-        MappedMemoryGuard mapProducts(
-            context().device(), *memory, CLIPPED_VERTECIES_SPACE.first, CLIPPED_VERTECIES_SPACE.second);
-        std::vector<vec4> products(VERTEX_COUNT);
-        auto mappedProductsPtr = mapProducts.hostAddress<vec4>();
-        for (size_t i = 0; i < MAX_CLIPPED_VERTECIES / 6; ++i) {
-            products[3 * i + 0] = mappedProductsPtr[6 * i + 0];
-            products[3 * i + 1] = mappedProductsPtr[6 * i + 1];
-            products[3 * i + 2] = mappedProductsPtr[6 * i + 2];
-        }
-        ASSERT_EQ(products, originalTriangles);
     }
 }
