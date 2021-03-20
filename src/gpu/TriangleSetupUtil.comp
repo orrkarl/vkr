@@ -58,7 +58,7 @@ u32 clipAgainst(u32 vertexCount, const f32 dists[6], const vec3 barysIn[6], out 
 
 #define DECL_CLIP_AGAINST_PLANE(coord)                                    \
     u32 clipAgainst ## coord(const vec4 base[3], u32 vertexCount,         \
-                              out vec3 barys[6]){                         \
+                              inout vec3 barys[6]){                       \
         vec3 tmpBarys[6];                                                 \
         f32 dists[6];                                                     \
                                                                           \
@@ -92,7 +92,7 @@ DECL_CLIP_AGAINST_PLANE(Z)
 #undef ACCESS_Y
 #undef ACCESS_X
 
-u32 clip(const vec4 base[3], out vec3 barys[6]) {
+u32 clip(const vec4 base[3], inout vec3 barys[6]) {
     u32 vertexCount = 3;
     barys[0] = vec3(1.0, 0.0, 0.0);
     barys[1] = vec3(0.0, 1.0, 0.0);
