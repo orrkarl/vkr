@@ -124,7 +124,7 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
     context().computeQueue().submit({ vk::SubmitInfo { 0, nullptr, nullptr, 1, &command } }, vk::Fence());
     context().computeQueue().waitIdle();
 
-    std::vector<u32> clipCounts(CLIPPED_VERTECIES_COUNTS_SPACE.second);
+    std::vector<u32> clipCounts(TRIANGLE_COUNT);
     std::vector<vec3> barys(VERTEX_COUNT);
     std::vector<vec3> expectedBarys(VERTEX_COUNT);
 
@@ -132,7 +132,7 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
         MappedMemoryGuard mapClipCounts(
             context().device(), *memory, CLIPPED_VERTECIES_COUNTS_SPACE.first, CLIPPED_VERTECIES_COUNTS_SPACE.second);
         auto mappedCountsPtr = mapClipCounts.hostAddress<u32>();
-        std::copy(mappedCountsPtr, mappedCountsPtr + CLIPPED_VERTECIES_COUNTS_SPACE.second, clipCounts.begin());
+        std::copy(mappedCountsPtr, mappedCountsPtr + TRIANGLE_COUNT, clipCounts.begin());
     }
 
     {
