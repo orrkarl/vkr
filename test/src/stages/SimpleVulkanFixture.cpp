@@ -14,3 +14,9 @@ void SimpleVulkanFixture::TearDown() {
 utils::VulkanContext& SimpleVulkanFixture::context() {
     return *m_currentContext;
 }
+
+vk::UniqueDescriptorPool SimpleVulkanFixture::createDescriptorPool(
+    uint32_t maxSetCount, const std::vector<vk::DescriptorPoolSize>& poolCaps) {
+    return m_currentContext->device().createDescriptorPoolUnique(
+        { vk::DescriptorPoolCreateFlags(), maxSetCount, static_cast<uint32_t>(poolCaps.size()), poolCaps.data() });
+}

@@ -15,6 +15,9 @@ protected:
 
     utils::VulkanContext& context();
 
+    vk::UniqueDescriptorPool createDescriptorPool(uint32_t maxSetCount,
+                                                  const std::vector<vk::DescriptorPoolSize>& poolCaps);
+
 private:
     utils::OstreamLoggingMessenger m_printingMessenger { std::cout,
                                                          vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning };

@@ -9,6 +9,7 @@
 #include "../SimpleVulkanFixture.h"
 
 #include "../../utils/CommonDebugMessengers.h"
+#include "../../utils/IterUtils.h"
 #include "../../utils/ManagedVulkanResource.h"
 #include "../../utils/MemoryUtils.h"
 #include "../../utils/VulkanContext.h"
@@ -61,8 +62,7 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
                                                  vk::MemoryPropertyFlagBits::eHostCoherent
                                                      | vk::MemoryPropertyFlagBits::eHostVisible);
 
-    std::random_device rd;
-    std::mt19937 gen(rd());
+    std::mt19937 gen(std::random_device {}());
     std::uniform_real_distribution<float> wDist(MIN, MAX);
     {
         MappedMemoryGuard mapVertexInput(context().device(), *memory, VERTECIES_SPACE.first, VERTECIES_SPACE.second);
@@ -77,14 +77,9 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
         }
     }
 
-    auto clippingArgsLayout = m_clipping->describeArguments();
-    vk::DescriptorPoolSize storageSetsCount(vk::DescriptorType::eStorageBuffer, 3);
-    auto descPool = context().device().createDescriptorPoolUnique(
-        { vk::DescriptorPoolCreateFlags(), 1, 1, &storageSetsCount });
-    auto args = context().device().allocateDescriptorSets(
-        { *descPool,
-          clippingArgsLayout.size(),
-          reinterpret_cast<vk::DescriptorSetLayout*>(clippingArgsLayout.data()) })[0];
+    auto clippingArgsLayout = utils::buildVectorFrom<vk::DescriptorSetLayout>(m_clipping->describeArguments());
+    auto descPool = createDescriptorPool(1, { { vk::DescriptorType::eStorageBuffer, 3 } });
+    auto args = context().device().allocateDescriptorSets({ *descPool, clippingArgsLayout })[0];
 
     std::array<VkDescriptorBufferInfo, 3> bufferDescs {
         VkDescriptorBufferInfo { *vertexInput, 0, VERTECIES_SPACE.second },
