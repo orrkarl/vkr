@@ -23,7 +23,7 @@ protected:
         SimpleVulkanFixture::SetUp();
         m_clipping = ManagedVulkanResource<ClippingAPI>(context().device(), nullptr);
         m_clippingRunner = vk::UniquePipeline(
-            context().device().createComputePipelineUnique(nullptr, clipping()->describeRunner()).value);
+            context().device().createComputePipelineUnique(nullptr, m_clipping->describeRunner()).value);
     }
 
     void TearDown() override {
@@ -32,15 +32,6 @@ protected:
         SimpleVulkanFixture::TearDown();
     }
 
-    ManagedVulkanResource<ClippingAPI>& clipping() {
-        return m_clipping;
-    }
-
-    vk::UniquePipeline& clippingRunner() {
-        return m_clippingRunner;
-    }
-
-private:
     ManagedVulkanResource<ClippingAPI> m_clipping;
     vk::UniquePipeline m_clippingRunner;
 };
@@ -86,7 +77,7 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
         }
     }
 
-    auto clippingArgsLayout = clipping()->describeArguments();
+    auto clippingArgsLayout = m_clipping->describeArguments();
     vk::DescriptorPoolSize storageSetsCount(vk::DescriptorType::eStorageBuffer, 3);
     auto descPool = context().device().createDescriptorPoolUnique(
         { vk::DescriptorPoolCreateFlags(), 1, 1, &storageSetsCount });
@@ -102,9 +93,9 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
     };
 
     // each bufferDescs element has to live as long as the WriteDescriptorSet instances
-    std::array<vk::WriteDescriptorSet, 3> updateSets { clipping()->describeVerteciesUpdate(args, bufferDescs[0]),
-                                                       clipping()->describeClippedVerteciesUpdate(args, bufferDescs[1]),
-                                                       clipping()->describeClippedVertexCountsUpdate(args,
+    std::array<vk::WriteDescriptorSet, 3> updateSets { m_clipping->describeVerteciesUpdate(args, bufferDescs[0]),
+                                                       m_clipping->describeClippedVerteciesUpdate(args, bufferDescs[1]),
+                                                       m_clipping->describeClippedVertexCountsUpdate(args,
                                                                                                      bufferDescs[2]) };
 
     context().device().updateDescriptorSets(updateSets, {});
@@ -114,11 +105,11 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
         context().device().allocateCommandBuffers({ *commandPool, vk::CommandBufferLevel::ePrimary, 1 })[0]);
 
     command.begin({ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
-    command.bindPipeline(vk::PipelineBindPoint::eCompute, *clippingRunner());
-    clipping()->cmdUpdateTriangleCount(command, TRIANGLE_COUNT);
-    command.bindDescriptorSets(vk::PipelineBindPoint::eCompute, clipping()->runnerLayout(), 0, { args }, {});
+    command.bindPipeline(vk::PipelineBindPoint::eCompute, *m_clippingRunner);
+    m_clipping->cmdUpdateTriangleCount(command, TRIANGLE_COUNT);
+    command.bindDescriptorSets(vk::PipelineBindPoint::eCompute, m_clipping->runnerLayout(), 0, { args }, {});
     command.dispatch(
-        (TRIANGLE_COUNT + clipping()->dispatchGroupSizes()[0] - 1) / clipping()->dispatchGroupSizes()[0], 1, 1);
+        (TRIANGLE_COUNT + m_clipping->dispatchGroupSizes()[0] - 1) / m_clipping->dispatchGroupSizes()[0], 1, 1);
     command.end();
 
     context().computeQueue().submit({ vk::SubmitInfo { 0, nullptr, nullptr, 1, &command } }, vk::Fence());

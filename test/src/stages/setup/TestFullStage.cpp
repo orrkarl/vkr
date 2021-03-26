@@ -18,7 +18,7 @@ protected:
         SimpleVulkanFixture::SetUp();
         m_setup = ManagedVulkanResource<vkr::gpu::TriangleSetupAPI>(context().device(), nullptr);
         m_setupRunner = vk::UniquePipeline(
-            context().device().createComputePipelineUnique(nullptr, setup()->describeRunner()).value);
+            context().device().createComputePipelineUnique(nullptr, m_setup->describeRunner()).value);
     }
 
     void TearDown() override {
@@ -27,15 +27,6 @@ protected:
         SimpleVulkanFixture::TearDown();
     }
 
-    ManagedVulkanResource<vkr::gpu::TriangleSetupAPI>& setup() {
-        return m_setup;
-    }
-
-    vk::UniquePipeline& setupRunner() {
-        return m_setupRunner;
-    }
-
-private:
     ManagedVulkanResource<vkr::gpu::TriangleSetupAPI> m_setup;
     vk::UniquePipeline m_setupRunner;
 };
