@@ -1,10 +1,12 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include <gtest/gtest.h>
 
 #include "../utils/CommonDebugMessengers.h"
+#include "../utils/MemoryUtils.h"
 #include "../utils/VulkanContext.h"
 
 class SimpleVulkanFixture : public ::testing::Test {
@@ -18,6 +20,9 @@ protected:
     vk::UniqueDescriptorPool createDescriptorPool(uint32_t maxSetCount,
                                                   const std::vector<vk::DescriptorPoolSize>& poolCaps);
 
+    template <typename T>
+    std::vector<T> readDeviceMemory(vk::DeviceMemory memory, size_t offset, size_t count);
+
 private:
     utils::OstreamLoggingMessenger m_printingMessenger { std::cout,
                                                          vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning };
@@ -26,3 +31,5 @@ private:
 
     std::unique_ptr<utils::VulkanContext> m_currentContext;
 };
+
+#include "SimpleVulkanFixture.inl"

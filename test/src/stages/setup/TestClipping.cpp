@@ -33,6 +33,18 @@ protected:
         SimpleVulkanFixture::TearDown();
     }
 
+    void updateAllSets(const ClippingAPI::ArgumentSets& sets,
+                       const std::array<VkDescriptorBufferInfo, 3>& descriptors) {
+        // each bufferDescs element has to live as long as the WriteDescriptorSet instances
+        std::array<vk::WriteDescriptorSet, 3> updateSets {
+            m_clipping->describeVerteciesUpdate(sets, descriptors[0]),
+            m_clipping->describeClippedVerteciesUpdate(sets, descriptors[1]),
+            m_clipping->describeClippedVertexCountsUpdate(sets, descriptors[2])
+        };
+
+        context().device().updateDescriptorSets(updateSets, {});
+    }
+
     ManagedVulkanResource<ClippingAPI> m_clipping;
     vk::UniquePipeline m_clippingRunner;
 };
@@ -82,19 +94,10 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
     auto args = buildArrayFrom<VkDescriptorSet, 1>(
         context().device().allocateDescriptorSets({ *descPool, clippingArgsLayout }));
 
-    std::array<VkDescriptorBufferInfo, 3> bufferDescs {
-        VkDescriptorBufferInfo { *vertexInput, 0, VERTECIES_SPACE.second },
-        VkDescriptorBufferInfo { *clippedVerteciesOutput, 0, CLIPPED_VERTECIES_SPACE.second },
-        VkDescriptorBufferInfo { *clipProductsCounts, 0, CLIPPED_VERTECIES_COUNTS_SPACE.second }
-    };
-
-    // each bufferDescs element has to live as long as the WriteDescriptorSet instances
-    std::array<vk::WriteDescriptorSet, 3> updateSets { m_clipping->describeVerteciesUpdate(args, bufferDescs[0]),
-                                                       m_clipping->describeClippedVerteciesUpdate(args, bufferDescs[1]),
-                                                       m_clipping->describeClippedVertexCountsUpdate(args,
-                                                                                                     bufferDescs[2]) };
-
-    context().device().updateDescriptorSets(updateSets, {});
+    updateAllSets(args,
+                  { VkDescriptorBufferInfo { *vertexInput, 0, VERTECIES_SPACE.second },
+                    VkDescriptorBufferInfo { *clippedVerteciesOutput, 0, CLIPPED_VERTECIES_SPACE.second },
+                    VkDescriptorBufferInfo { *clipProductsCounts, 0, CLIPPED_VERTECIES_COUNTS_SPACE.second } });
 
     auto commandPool = context().createComputeCommnadPool();
     auto command = std::move(
@@ -112,31 +115,18 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
     context().computeQueue().submit({ vk::SubmitInfo { 0, nullptr, nullptr, 1, &command } }, vk::Fence());
     context().computeQueue().waitIdle();
 
-    std::vector<u32> clipCounts(TRIANGLE_COUNT);
-    std::vector<vec3> barys(VERTEX_COUNT);
-    std::vector<vec3> expectedBarys(VERTEX_COUNT);
+    std::vector<u32> clipCounts = readDeviceMemory<u32>(*memory, CLIPPED_VERTECIES_COUNTS_SPACE.first, TRIANGLE_COUNT);
 
-    {
-        MappedMemoryGuard mapClipCounts(
-            context().device(), *memory, CLIPPED_VERTECIES_COUNTS_SPACE.first, CLIPPED_VERTECIES_COUNTS_SPACE.second);
-        auto mappedCountsPtr = mapClipCounts.hostAddress<u32>();
-        std::copy(mappedCountsPtr, mappedCountsPtr + TRIANGLE_COUNT, clipCounts.begin());
-    }
+    // Since no triangle should be clipped, the last 3 vertecies should be garbage, and we discard them
+    std::vector<std::array<vec3, 3>> barys = map(
+        groupBy<6>(readDeviceMemory<vec3>(*memory, CLIPPED_VERTECIES_SPACE.first, MAX_CLIPPED_VERTECIES)),
+        takeCountedFrom<3, std::array<vec3, 6>>);
 
-    {
-        MappedMemoryGuard mapProducts(
-            context().device(), *memory, CLIPPED_VERTECIES_SPACE.first, CLIPPED_VERTECIES_SPACE.second);
-        for (size_t i = 0; i < barys.size(); i += 3) {
-            barys[i + 0] = mapProducts.hostAddress<vec3>()[2 * i + 0];
-            barys[i + 1] = mapProducts.hostAddress<vec3>()[2 * i + 1];
-            barys[i + 2] = mapProducts.hostAddress<vec3>()[2 * i + 2];
-            expectedBarys[i + 0] = vec3 { 1.0f, 0.0f, 0.0f };
-            expectedBarys[i + 1] = vec3 { 0.0f, 1.0f, 0.0f };
-            expectedBarys[i + 2] = vec3 { 0.0f, 0.0f, 1.0f };
-        }
-    }
+    std::array<vec3, 3> expectedBarys { vec3 { 1.0f, 0.0f, 0.0f },
+                                        vec3 { 0.0f, 1.0f, 0.0f },
+                                        vec3 { 0.0f, 0.0f, 1.0f } };
 
     // Nothing was supposed to be clipped - 3 vertecies per triangle remain 3 vertecies
     EXPECT_THAT(clipCounts, Each(3));
-    EXPECT_EQ(barys, expectedBarys);
+    EXPECT_THAT(barys, Each(expectedBarys));
 }
