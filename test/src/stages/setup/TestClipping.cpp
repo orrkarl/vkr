@@ -21,9 +21,9 @@ class TriangleSetupClipping : public SimpleVulkanFixture {
 protected:
     void SetUp() override {
         SimpleVulkanFixture::SetUp();
-        m_clipping = std::make_unique<ManagedVulkanResource<ClippingAPI>>(context().device(), nullptr);
-        m_clippingRunner = std::make_unique<vk::UniquePipeline>(
-            context().device().createComputePipelineUnique(nullptr, clipping()->describeRunner()));
+        m_clipping = ManagedVulkanResource<ClippingAPI>(context().device(), nullptr);
+        m_clippingRunner = vk::UniquePipeline(
+            context().device().createComputePipelineUnique(nullptr, clipping()->describeRunner()).value);
     }
 
     void TearDown() override {
@@ -33,16 +33,16 @@ protected:
     }
 
     ManagedVulkanResource<ClippingAPI>& clipping() {
-        return *m_clipping;
+        return m_clipping;
     }
 
     vk::UniquePipeline& clippingRunner() {
-        return *m_clippingRunner;
+        return m_clippingRunner;
     }
 
 private:
-    std::unique_ptr<ManagedVulkanResource<ClippingAPI>> m_clipping;
-    std::unique_ptr<vk::UniquePipeline> m_clippingRunner;
+    ManagedVulkanResource<ClippingAPI> m_clipping;
+    vk::UniquePipeline m_clippingRunner;
 };
 
 TEST_F(TriangleSetupClipping, TrianglesInViewport) {

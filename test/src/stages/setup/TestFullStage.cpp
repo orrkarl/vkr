@@ -16,9 +16,9 @@ class TriangleSetup : public SimpleVulkanFixture {
 protected:
     void SetUp() override {
         SimpleVulkanFixture::SetUp();
-        m_setup = std::make_unique<ManagedVulkanResource<vkr::gpu::TriangleSetupAPI>>(context().device(), nullptr);
-        m_setupRunner = std::make_unique<vk::UniquePipeline>(
-            context().device().createComputePipelineUnique(nullptr, setup()->describeRunner()));
+        m_setup = ManagedVulkanResource<vkr::gpu::TriangleSetupAPI>(context().device(), nullptr);
+        m_setupRunner = vk::UniquePipeline(
+            context().device().createComputePipelineUnique(nullptr, setup()->describeRunner()).value);
     }
 
     void TearDown() override {
@@ -28,16 +28,16 @@ protected:
     }
 
     ManagedVulkanResource<vkr::gpu::TriangleSetupAPI>& setup() {
-        return *m_setup;
+        return m_setup;
     }
 
     vk::UniquePipeline& setupRunner() {
-        return *m_setupRunner;
+        return m_setupRunner;
     }
 
 private:
-    std::unique_ptr<ManagedVulkanResource<vkr::gpu::TriangleSetupAPI>> m_setup;
-    std::unique_ptr<vk::UniquePipeline> m_setupRunner;
+    ManagedVulkanResource<vkr::gpu::TriangleSetupAPI> m_setup;
+    vk::UniquePipeline m_setupRunner;
 };
 
 TEST_F(TriangleSetup, StageSanity) {
