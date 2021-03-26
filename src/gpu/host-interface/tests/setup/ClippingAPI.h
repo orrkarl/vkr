@@ -42,6 +42,8 @@ public:
                                                            const VkDescriptorBufferInfo& clippedVertexCounts);
 
     void cmdUpdateTriangleCount(VkCommandBuffer cmdBuffer, u32 triangleCount);
+
+    void cmdDispatch(VkCommandBuffer command, uint32_t triangleCount);
 };
 
 } // namespace tests

@@ -58,14 +58,12 @@ protected:
 
         command.begin({ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
         command.bindPipeline(vk::PipelineBindPoint::eCompute, *m_clippingRunner);
-        m_clipping->cmdUpdateTriangleCount(command, triangleCount);
         command.bindDescriptorSets(vk::PipelineBindPoint::eCompute,
                                    m_clipping->runnerLayout(),
                                    0,
                                    buildVectorFrom<vk::DescriptorSet>(m_argumentSets),
                                    {});
-        command.dispatch(
-            (triangleCount + m_clipping->dispatchGroupSizes()[0] - 1) / m_clipping->dispatchGroupSizes()[0], 1, 1);
+        m_clipping->cmdDispatch(command, triangleCount);
         command.end();
 
         context().computeQueue().submit({ vk::SubmitInfo { 0, nullptr, nullptr, 1, &command } }, vk::Fence());

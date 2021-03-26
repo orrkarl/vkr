@@ -67,6 +67,13 @@ void ClippingAPI::cmdUpdateTriangleCount(VkCommandBuffer cmdBuffer, u32 triangle
                        &triangleCount);
 }
 
+void ClippingAPI::cmdDispatch(VkCommandBuffer command, uint32_t triangleCount) {
+    cmdUpdateTriangleCount(command, triangleCount);
+
+    uint32_t groupSizeX = dispatchGroupSizes()[0];
+    vkCmdDispatch(command, (triangleCount + groupSizeX - 1) / groupSizeX, 1, 1);
+}
+
 } // namespace tests
 } // namespace gpu
 } // namespace vkr

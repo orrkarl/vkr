@@ -44,8 +44,10 @@ public:
     VkWriteDescriptorSet describeTriangleBlocksUpdate(const ArgumentSets& args,
                                                       const VkDescriptorBufferInfo& triangleBlocks);
 
-    void cmdUpdateVertexCount(VkCommandBuffer cmdBuffer, uint32_t vertexCount);
+    void cmdUpdateTriangleCount(VkCommandBuffer cmdBuffer, uint32_t triangleCount);
     void cmdUpdateMVP(VkCommandBuffer cmdBuffer, float* mvp4x4);
+
+    void cmdDispatch(VkCommandBuffer command, uint32_t triangleCount);
 };
 
 } // namespace gpu

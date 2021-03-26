@@ -76,13 +76,13 @@ VkWriteDescriptorSet TriangleSetupAPI::describeTriangleBlocksUpdate(const Argume
                                       triangleBlocks);
 }
 
-void TriangleSetupAPI::cmdUpdateVertexCount(VkCommandBuffer cmdBuffer, uint32_t vertexCount) {
+void TriangleSetupAPI::cmdUpdateTriangleCount(VkCommandBuffer cmdBuffer, uint32_t triangleCount) {
     vkCmdPushConstants(cmdBuffer,
                        m_runnerDesc,
                        VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT,
                        Layout::VERTEX_COUNT_OFFSET,
                        Layout::VERTEX_COUNT_SIZE,
-                       &vertexCount);
+                       &triangleCount);
 }
 
 void TriangleSetupAPI::cmdUpdateMVP(VkCommandBuffer cmdBuffer, float* mvp4x4) {
@@ -92,6 +92,13 @@ void TriangleSetupAPI::cmdUpdateMVP(VkCommandBuffer cmdBuffer, float* mvp4x4) {
                        Layout::MVP_OFFSET,
                        Layout::MVP_SIZE,
                        mvp4x4);
+}
+
+void TriangleSetupAPI::cmdDispatch(VkCommandBuffer command, uint32_t triangleCount) {
+    cmdUpdateTriangleCount(command, triangleCount);
+
+    uint32_t groupSizeX = dispatchGroupSizes()[0];
+    vkCmdDispatch(command, (triangleCount + groupSizeX - 1) / groupSizeX, 1, 1);
 }
 
 } // namespace gpu
