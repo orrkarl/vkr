@@ -21,7 +21,7 @@ protected:
                                                   const std::vector<vk::DescriptorPoolSize>& poolCaps);
 
     template <typename T>
-    std::vector<T> readDeviceMemory(vk::DeviceMemory memory, size_t offset, size_t count);
+    std::vector<T> readDeviceMemory(vk::DeviceMemory memory, const utils::TypedRegionDescriptor<T>& region);
 
 private:
     utils::OstreamLoggingMessenger m_printingMessenger { std::cout,

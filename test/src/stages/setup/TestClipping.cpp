@@ -53,22 +53,20 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
     constexpr uint32_t TRIANGLE_COUNT = 100;
     constexpr auto VERTEX_COUNT = 3 * TRIANGLE_COUNT;
     constexpr auto MAX_CLIPPED_VERTECIES = 6 * TRIANGLE_COUNT;
+
     constexpr float MIN = std::numeric_limits<float>::min();
     constexpr float MAX = 1000; // TODO: think of a better way to generate floats
 
-    constexpr std::pair<size_t, size_t> VERTECIES_SPACE = { 0, VERTEX_COUNT * sizeof(vec4) };
-    constexpr std::pair<size_t, size_t> CLIPPED_VERTECIES_SPACE = { VERTECIES_SPACE.first + VERTECIES_SPACE.second,
-                                                                    MAX_CLIPPED_VERTECIES * sizeof(vec4) };
-    constexpr std::pair<size_t, size_t> CLIPPED_VERTECIES_COUNTS_SPACE = {
-        CLIPPED_VERTECIES_SPACE.first + CLIPPED_VERTECIES_SPACE.second, TRIANGLE_COUNT * sizeof(u32)
-    };
+    TypedRegionDescriptor<vec4> vertexRegion { 0, VERTEX_COUNT };
+    TypedRegionDescriptor<vec3> clippedVerteciesRegion { vertexRegion.end(), MAX_CLIPPED_VERTECIES };
+    TypedRegionDescriptor<u32> clippedVerteciesCountsRegion { clippedVerteciesRegion.end(), TRIANGLE_COUNT };
 
     auto vertexInput = context().device().createBufferUnique(
-        vk::BufferCreateInfo(vk::BufferCreateFlags(), VERTECIES_SPACE.second, vk::BufferUsageFlagBits::eStorageBuffer));
+        vk::BufferCreateInfo(vk::BufferCreateFlags(), vertexRegion.size(), vk::BufferUsageFlagBits::eStorageBuffer));
     auto clippedVerteciesOutput = context().device().createBufferUnique(vk::BufferCreateInfo(
-        vk::BufferCreateFlags(), CLIPPED_VERTECIES_SPACE.second, vk::BufferUsageFlagBits::eStorageBuffer));
+        vk::BufferCreateFlags(), clippedVerteciesRegion.size(), vk::BufferUsageFlagBits::eStorageBuffer));
     auto clipProductsCounts = context().device().createBufferUnique(vk::BufferCreateInfo(
-        vk::BufferCreateFlags(), CLIPPED_VERTECIES_COUNTS_SPACE.second, vk::BufferUsageFlagBits::eStorageBuffer));
+        vk::BufferCreateFlags(), clippedVerteciesCountsRegion.size(), vk::BufferUsageFlagBits::eStorageBuffer));
 
     auto memory = context().satisfyBuffersMemory({ *vertexInput, *clippedVerteciesOutput, *clipProductsCounts },
                                                  vk::MemoryPropertyFlagBits::eHostCoherent
@@ -77,7 +75,7 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
     std::mt19937 gen(std::random_device {}());
     std::uniform_real_distribution<float> wDist(MIN, MAX);
     {
-        MappedMemoryGuard mapVertexInput(context().device(), *memory, VERTECIES_SPACE.first, VERTECIES_SPACE.second);
+        MappedMemoryGuard mapVertexInput(context().device(), *memory, vertexRegion.offset(), vertexRegion.size());
         auto triangles = mapVertexInput.hostAddress<vec4>();
         for (size_t i = 0; i < VERTEX_COUNT; ++i) {
             auto w = wDist(gen);
@@ -95,9 +93,9 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
         context().device().allocateDescriptorSets({ *descPool, clippingArgsLayout }));
 
     updateAllSets(args,
-                  { VkDescriptorBufferInfo { *vertexInput, 0, VERTECIES_SPACE.second },
-                    VkDescriptorBufferInfo { *clippedVerteciesOutput, 0, CLIPPED_VERTECIES_SPACE.second },
-                    VkDescriptorBufferInfo { *clipProductsCounts, 0, CLIPPED_VERTECIES_COUNTS_SPACE.second } });
+                  { VkDescriptorBufferInfo { *vertexInput, 0, vertexRegion.size() },
+                    VkDescriptorBufferInfo { *clippedVerteciesOutput, 0, clippedVerteciesRegion.size() },
+                    VkDescriptorBufferInfo { *clipProductsCounts, 0, clippedVerteciesCountsRegion.size() } });
 
     auto commandPool = context().createComputeCommnadPool();
     auto command = std::move(
@@ -115,12 +113,11 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
     context().computeQueue().submit({ vk::SubmitInfo { 0, nullptr, nullptr, 1, &command } }, vk::Fence());
     context().computeQueue().waitIdle();
 
-    std::vector<u32> clipCounts = readDeviceMemory<u32>(*memory, CLIPPED_VERTECIES_COUNTS_SPACE.first, TRIANGLE_COUNT);
+    std::vector<u32> clipCounts = readDeviceMemory<u32>(*memory, clippedVerteciesCountsRegion);
 
     // Since no triangle should be clipped, the last 3 vertecies should be garbage, and we discard them
-    std::vector<std::array<vec3, 3>> barys = map(
-        groupBy<6>(readDeviceMemory<vec3>(*memory, CLIPPED_VERTECIES_SPACE.first, MAX_CLIPPED_VERTECIES)),
-        takeCountedFrom<3, std::array<vec3, 6>>);
+    std::vector<std::array<vec3, 3>> barys = map(groupBy<6>(readDeviceMemory<vec3>(*memory, clippedVerteciesRegion)),
+                                                 takeCountedFrom<3, std::array<vec3, 6>>);
 
     std::array<vec3, 3> expectedBarys { vec3 { 1.0f, 0.0f, 0.0f },
                                         vec3 { 0.0f, 1.0f, 0.0f },

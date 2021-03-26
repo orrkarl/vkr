@@ -1,9 +1,10 @@
 template <typename T>
-std::vector<T> SimpleVulkanFixture::readDeviceMemory(vk::DeviceMemory memory, size_t offset, size_t count) {
-    std::vector<T> ret(count);
+std::vector<T> SimpleVulkanFixture::readDeviceMemory(vk::DeviceMemory memory,
+                                                     const utils::TypedRegionDescriptor<T>& region) {
+    std::vector<T> ret(region.count());
 
-    utils::MappedMemoryGuard mappedRegion(context().device(), memory, offset, sizeof(T) * count);
-    std::copy(mappedRegion.hostAddress<T>(), mappedRegion.hostAddress<T>() + count, ret.begin());
+    utils::MappedMemoryGuard mappedRegion(context().device(), memory, region.offset(), sizeof(T) * region.count());
+    std::copy(mappedRegion.hostAddress<T>(), mappedRegion.hostAddress<T>() + region.count(), ret.begin());
 
     return ret;
 }
