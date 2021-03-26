@@ -17,12 +17,16 @@ struct VulkanResourceTraits {
 template <typename T>
 class ManagedVulkanResource {
 public:
+    ManagedVulkanResource() : m_allocatingDevice(), m_allocator(nullptr), m_object() {
+    }
     ManagedVulkanResource(vk::Device dev, vk::Optional<const vk::AllocationCallbacks> allocator);
     ManagedVulkanResource(vk::Device dev, T obj, vk::Optional<const vk::AllocationCallbacks> allocator);
     ~ManagedVulkanResource();
 
     ManagedVulkanResource(ManagedVulkanResource&& other);
     ManagedVulkanResource& operator=(ManagedVulkanResource&& other);
+
+    void reset();
 
     ManagedVulkanResource(const ManagedVulkanResource&) = delete;
     ManagedVulkanResource& operator=(const ManagedVulkanResource&) = delete;
@@ -34,9 +38,9 @@ public:
     const T& operator*() const;
 
 private:
-    T m_object;
     vk::Device m_allocatingDevice;
     vk::Optional<const vk::AllocationCallbacks> m_allocator;
+    T m_object;
 };
 
 } // namespace utils
