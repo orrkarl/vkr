@@ -9,7 +9,7 @@ layout(local_size_x = TRIANGLE_SETUP_LOCAL_SIZE_X,
 
 layout(push_constant) uniform Transform {
     mat4 mvp;
-    u32 vertexCount;
+    u32 triangleCount;
 };
 
 layout(set = 0, binding = 0, std140) uniform Config {
@@ -33,7 +33,6 @@ void mark_triangle_discard() {
 }
 
 void main() {
-    const u32 triangleCount = vertexCount / 3;
     if (gl_GlobalInvocationID.x >= triangleCount) {
         return;
     }
