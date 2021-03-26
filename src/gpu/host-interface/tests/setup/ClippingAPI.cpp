@@ -40,21 +40,22 @@ const std::array<uint32_t, 3> ClippingLayout::GROUP_SIZES { CLIPPING_LOCAL_SIZE_
 
 } // namespace detail
 
-VkWriteDescriptorSet ClippingAPI::describeVerteciesUpdate(VkDescriptorSet args,
+VkWriteDescriptorSet ClippingAPI::describeVerteciesUpdate(const ArgumentSets& args,
                                                           const VkDescriptorBufferInfo& vertecies) {
-    return describeSimpleBufferUpdate(args, Layout::VERTECIES_POS.second, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, vertecies);
+    return describeSimpleBufferUpdate(
+        args[0], Layout::VERTECIES_POS.second, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, vertecies);
 }
 
-VkWriteDescriptorSet ClippingAPI::describeClippedVerteciesUpdate(VkDescriptorSet args,
+VkWriteDescriptorSet ClippingAPI::describeClippedVerteciesUpdate(const ArgumentSets& args,
                                                                  const VkDescriptorBufferInfo& clippedVertecies) {
     return describeSimpleBufferUpdate(
-        args, Layout::CLIPPED_VERTECIES_POS.second, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, clippedVertecies);
+        args[0], Layout::CLIPPED_VERTECIES_POS.second, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, clippedVertecies);
 }
 
-VkWriteDescriptorSet ClippingAPI::describeClippedVertexCountsUpdate(VkDescriptorSet args,
+VkWriteDescriptorSet ClippingAPI::describeClippedVertexCountsUpdate(const ArgumentSets& args,
                                                                     const VkDescriptorBufferInfo& clippedVertexCounts) {
     return describeSimpleBufferUpdate(
-        args, Layout::CLIPPED_VERTEX_COUNTS.second, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, clippedVertexCounts);
+        args[0], Layout::CLIPPED_VERTEX_COUNTS.second, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, clippedVertexCounts);
 }
 
 void ClippingAPI::cmdUpdateTriangleCount(VkCommandBuffer cmdBuffer, u32 triangleCount) {

@@ -33,10 +33,12 @@ struct ClippingLayout {
 
 class ClippingAPI : public DeviceModuleAPI<detail::ClippingLayout> {
 public:
-    VkWriteDescriptorSet describeVerteciesUpdate(VkDescriptorSet args, const VkDescriptorBufferInfo& vertecies);
-    VkWriteDescriptorSet describeClippedVerteciesUpdate(VkDescriptorSet args,
+    using ArgumentSets = std::array<VkDescriptorSet, Layout::SETS.size()>;
+
+    VkWriteDescriptorSet describeVerteciesUpdate(const ArgumentSets& args, const VkDescriptorBufferInfo& vertecies);
+    VkWriteDescriptorSet describeClippedVerteciesUpdate(const ArgumentSets& args,
                                                         const VkDescriptorBufferInfo& clippedVertecies);
-    VkWriteDescriptorSet describeClippedVertexCountsUpdate(VkDescriptorSet args,
+    VkWriteDescriptorSet describeClippedVertexCountsUpdate(const ArgumentSets& args,
                                                            const VkDescriptorBufferInfo& clippedVertexCounts);
 
     void cmdUpdateTriangleCount(VkCommandBuffer cmdBuffer, u32 triangleCount);

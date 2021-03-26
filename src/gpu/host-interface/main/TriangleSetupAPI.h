@@ -35,13 +35,13 @@ struct TriangleSetupLayout {
 
 class TriangleSetupAPI : public DeviceModuleAPI<detail::TriangleSetupLayout> {
 public:
-    using Arguments = std::array<VkDescriptorSet, Layout::BINDINGS.size()>;
+    using ArgumentSets = std::array<VkDescriptorSet, Layout::SETS.size()>;
 
-    VkWriteDescriptorSet describeRasterConfigUpdate(const Arguments& args,
+    VkWriteDescriptorSet describeRasterConfigUpdate(const ArgumentSets& args,
                                                     const VkDescriptorBufferInfo& rasterConfigBuffer);
-    VkWriteDescriptorSet describeVertexUpdate(const Arguments& args, const VkDescriptorBufferInfo& vertexBuffer);
-    VkWriteDescriptorSet describeColorUpdate(const Arguments& args, const VkDescriptorBufferInfo& colorBuffer);
-    VkWriteDescriptorSet describeTriangleBlocksUpdate(const Arguments& args,
+    VkWriteDescriptorSet describeVertexUpdate(const ArgumentSets& args, const VkDescriptorBufferInfo& vertexBuffer);
+    VkWriteDescriptorSet describeColorUpdate(const ArgumentSets& args, const VkDescriptorBufferInfo& colorBuffer);
+    VkWriteDescriptorSet describeTriangleBlocksUpdate(const ArgumentSets& args,
                                                       const VkDescriptorBufferInfo& triangleBlocks);
 
     void cmdUpdateVertexCount(VkCommandBuffer cmdBuffer, uint32_t vertexCount);

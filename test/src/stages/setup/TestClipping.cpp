@@ -77,9 +77,10 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
         }
     }
 
-    auto clippingArgsLayout = utils::buildVectorFrom<vk::DescriptorSetLayout>(m_clipping->describeArguments());
+    auto clippingArgsLayout = buildVectorFrom<vk::DescriptorSetLayout>(m_clipping->describeArguments());
     auto descPool = createDescriptorPool(1, { { vk::DescriptorType::eStorageBuffer, 3 } });
-    auto args = context().device().allocateDescriptorSets({ *descPool, clippingArgsLayout })[0];
+    auto args = buildArrayFrom<VkDescriptorSet, 1>(
+        context().device().allocateDescriptorSets({ *descPool, clippingArgsLayout }));
 
     std::array<VkDescriptorBufferInfo, 3> bufferDescs {
         VkDescriptorBufferInfo { *vertexInput, 0, VERTECIES_SPACE.second },
@@ -102,7 +103,8 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
     command.begin({ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
     command.bindPipeline(vk::PipelineBindPoint::eCompute, *m_clippingRunner);
     m_clipping->cmdUpdateTriangleCount(command, TRIANGLE_COUNT);
-    command.bindDescriptorSets(vk::PipelineBindPoint::eCompute, m_clipping->runnerLayout(), 0, { args }, {});
+    command.bindDescriptorSets(
+        vk::PipelineBindPoint::eCompute, m_clipping->runnerLayout(), 0, buildVectorFrom<vk::DescriptorSet>(args), {});
     command.dispatch(
         (TRIANGLE_COUNT + m_clipping->dispatchGroupSizes()[0] - 1) / m_clipping->dispatchGroupSizes()[0], 1, 1);
     command.end();
