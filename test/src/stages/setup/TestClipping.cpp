@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <chrono>
 #include <iostream>
 #include <random>
 
@@ -99,8 +100,13 @@ protected:
         m_clipping->cmdDispatch(command, m_triangleCount);
         command.end();
 
+        auto start = std::chrono::steady_clock::now();
         context().computeQueue().submit({ vk::SubmitInfo { 0, nullptr, nullptr, 1, &command } }, vk::Fence());
         context().computeQueue().waitIdle();
+        auto end = std::chrono::steady_clock::now();
+
+        std::cout << "Command Dispatch Took: "
+                  << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << "us" << std::endl;
     }
 
     vk::DeviceMemory argumentsMemory() {
