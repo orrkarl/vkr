@@ -4,6 +4,7 @@
 #include <ostream>
 #include <stddef.h>
 #include <stdint.h>
+#include <tuple>
 
 namespace vkr::detail {
 
@@ -110,6 +111,61 @@ struct Vec<T, 4> {
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif // __clang__
+
+template <typename T, size_t N>
+Vec<T, N>& operator+=(Vec<T, N>& lhs, const Vec<T, N>& rhs) {
+    for (size_t i = 0; i < N; ++i) {
+        lhs.data[i] += rhs.data[i];
+    }
+
+    return lhs;
+}
+
+template <typename T, size_t N>
+Vec<T, N> operator+(const Vec<T, N>& lhs, const Vec<T, N>& rhs) {
+    Vec<T, N> ret(lhs);
+    ret += rhs;
+    return ret;
+}
+
+template <typename T, size_t N>
+Vec<T, N>& operator*=(Vec<T, N>& v, const T& t) {
+    for (T& e : v.data) {
+        e *= t;
+    }
+
+    return v;
+}
+
+template <typename T, size_t N>
+Vec<T, N>& operator/=(Vec<T, N>& v, const T& t) {
+    for (T& e : v.data) {
+        e /= t;
+    }
+
+    return v;
+}
+
+template <typename T, size_t N>
+Vec<T, N> operator*(const Vec<T, N>& v, const T& t) {
+    Vec<T, N> ret(v);
+    ret *= t;
+
+    return ret;
+}
+
+template <typename T, size_t N>
+Vec<T, N> operator*(const T& t, const Vec<T, N>& v) {
+    return v * t;
+}
+
+template <typename T, size_t N>
+Vec<T, N> operator/(Vec<T, N> v, const T& t) {
+    Vec<T, N> ret(v);
+    ret /= t;
+
+    return ret;
+}
 
 } // namespace vkr::detail
 
