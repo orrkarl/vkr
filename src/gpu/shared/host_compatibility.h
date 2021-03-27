@@ -8,11 +8,12 @@
 
 namespace vkr::detail {
 
+// Copied from the reference implementation with a single different:
+//   creating the result with list initialization, not with standard constructor call
 template <typename T, typename Tuple, size_t... Idx>
 constexpr T MakeFromTupleImpl(Tuple&& t, std::index_sequence<Idx...>) {
     return T { std::get<Idx>(std::forward<Tuple>(t))... };
 }
-
 template <typename T, typename Tuple>
 constexpr T MakeFromTuple(Tuple&& t) {
     return MakeFromTupleImpl<T>(std::forward<Tuple>(t),
