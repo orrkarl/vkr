@@ -130,6 +130,12 @@ private:
     vk::UniqueDeviceMemory m_argumentsMemory;
 };
 
+vec4 generateInsideViewport(std::mt19937& generator, std::uniform_real_distribution<float>& wDist) {
+    const float w = wDist(generator);
+    std::uniform_real_distribution<float> pointDist(-w, w);
+    return { pointDist(generator), pointDist(generator), pointDist(generator), w };
+}
+
 TEST_F(TriangleSetupClipping, TrianglesOutsideViewport) {
     constexpr float MIN = std::numeric_limits<float>::min();
     constexpr float MAX = 1000; // TODO: think of a better way to generate floats
@@ -181,12 +187,57 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
 
         auto triangles = mapVertexInput.hostAddress<vec4>();
         for (size_t i = 0; i < m_vertexCount; ++i) {
-            auto w = wDist(gen);
-            std::uniform_real_distribution<float> pointDist(-w, w);
-            triangles[i].x = pointDist(gen);
-            triangles[i].y = pointDist(gen);
-            triangles[i].z = pointDist(gen);
-            triangles[i].w = w;
+            triangles[i] = generateInsideViewport(gen, wDist);
+        }
+    }
+
+    dispatch();
+
+    std::vector<u32> clipCounts = readDeviceMemory<u32>(argumentsMemory(), m_outputClippedVertexCountsRegion);
+
+    // Since no triangle should be clipped, the last 3 vertecies should be garbage, and we discard them
+    std::vector<std::array<vec3, 3>> barys = map(
+        groupBy<6>(readDeviceMemory<vec3>(argumentsMemory(), m_outputClippedVerteciesRegion)),
+        takeCountedFrom<3, std::array<vec3, 6>>);
+
+    std::array<vec3, 3> expectedBarys { vec3 { 1.0f, 0.0f, 0.0f },
+                                        vec3 { 0.0f, 1.0f, 0.0f },
+                                        vec3 { 0.0f, 0.0f, 1.0f } };
+
+    // Nothing was supposed to be clipped - 3 vertecies per triangle remain 3 vertecies
+    EXPECT_THAT(clipCounts, Each(3));
+    EXPECT_THAT(barys, Each(expectedBarys));
+}
+
+TEST_F(TriangleSetupClipping, SingleClipProduct) {
+    constexpr float MIN = std::numeric_limits<float>::min();
+    constexpr float MAX = 1000; // TODO: think of a better way to generate floats
+
+    {
+        std::mt19937 gen(std::random_device {}());
+        std::array<uint32_t, 3> vertexPermutation { 0, 1, 2 };
+        std::uniform_real_distribution<float> wDist(MIN, MAX);
+        std::uniform_int_distribution axisDist(0, 2);
+        std::uniform_int_distribution frontBackDist(0, 1);
+
+        MappedMemoryGuard mapVertexInput(
+            context().device(), argumentsMemory(), m_inputVerteciesRegion.offset(), m_inputVerteciesRegion.size());
+
+        auto triangles = mapVertexInput.hostAddress<vec4>();
+        for (size_t t = 0; t < m_triangleCount; ++t) {
+            triangles[3 * t + vertexPermutation[0]] = generateInsideViewport(gen, wDist);
+
+            vec3 offset;
+            offset.data[axisDist(gen)] = frontBackDist(gen) * 2 - 1;
+            offset.data[3] = 1;
+
+            auto tmpV1 = generateInsideViewport(gen, wDist);
+            triangles[3 * t + vertexPermutation[1]] = vec4(0.5f * vec3(tmpV1) + 1.5f * tmpV1.w * offset, tmpV1.w);
+
+            auto tmpV2 = generateInsideViewport(gen, wDist);
+            triangles[3 * t + vertexPermutation[2]] = vec4(0.5f * vec3(tmpV2) + 1.5f * tmpV2.w * offset, tmpV2.w);
+
+            std::next_permutation(vertexPermutation.begin(), vertexPermutation.end());
         }
     }
 
