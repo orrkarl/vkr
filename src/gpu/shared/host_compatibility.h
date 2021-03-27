@@ -24,21 +24,6 @@ void initializeFrom(std::array<T, Size>& data, Vec<T, N> head, Tail&&... tail) {
     }
 }
 
-template <typename T, size_t Size>
-std::ostream& operator<<(std::ostream& os, const Vec<T, Size>& v) {
-    os << "[ ";
-    for (size_t i = 0; i < Size - 1; ++i) {
-        os << v.data[i] << ", ";
-    }
-    os << v.data[Size - 1] << " ]";
-    return os;
-}
-
-template <typename T, size_t Size>
-bool operator==(const Vec<T, Size>& v1, const Vec<T, Size>& v2) {
-    return v1.data == v2.data;
-}
-
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -188,11 +173,26 @@ Vec<T, N> operator*(const T& t, const Vec<T, N>& v) {
 }
 
 template <typename T, size_t N>
-Vec<T, N> operator/(Vec<T, N> v, const T& t) {
+Vec<T, N> operator/(const Vec<T, N>& v, const T& t) {
     Vec<T, N> ret(v);
     ret /= t;
 
     return ret;
+}
+
+template <typename T, size_t Size>
+std::ostream& operator<<(std::ostream& os, const Vec<T, Size>& v) {
+    os << "[ ";
+    for (size_t i = 0; i < Size - 1; ++i) {
+        os << v.data[i] << ", ";
+    }
+    os << v.data[Size - 1] << " ]";
+    return os;
+}
+
+template <typename T, size_t Size>
+bool operator==(const Vec<T, Size>& v1, const Vec<T, Size>& v2) {
+    return v1.data == v2.data;
 }
 
 } // namespace vkr::detail
