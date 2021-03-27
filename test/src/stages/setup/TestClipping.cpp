@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <random>
 
@@ -75,6 +76,67 @@ protected:
     vk::UniqueDescriptorPool m_descriptorPool;
     ClippingAPI::ArgumentSets m_argumentSets;
 };
+
+TEST_F(TriangleSetupClipping, TrianglesOutsideViewport) {
+    constexpr uint32_t TRIANGLE_COUNT = 100;
+    constexpr auto VERTEX_COUNT = 3 * TRIANGLE_COUNT;
+    constexpr auto MAX_CLIPPED_VERTECIES = 3 * TRIANGLE_COUNT;
+
+    TypedRegionDescriptor<vec4> vertexRegion { 0, VERTEX_COUNT };
+    TypedRegionDescriptor<vec3> clippedVerteciesRegion { vertexRegion.end(), MAX_CLIPPED_VERTECIES };
+    TypedRegionDescriptor<u32> clippedVerteciesCountsRegion { clippedVerteciesRegion.end(), TRIANGLE_COUNT };
+
+    auto vertexInput = context().device().createBufferUnique(
+        vk::BufferCreateInfo(vk::BufferCreateFlags(), vertexRegion.size(), vk::BufferUsageFlagBits::eStorageBuffer));
+    auto clippedVerteciesOutput = context().device().createBufferUnique(vk::BufferCreateInfo(
+        vk::BufferCreateFlags(), clippedVerteciesRegion.size(), vk::BufferUsageFlagBits::eStorageBuffer));
+    auto clipProductsCounts = context().device().createBufferUnique(vk::BufferCreateInfo(
+        vk::BufferCreateFlags(), clippedVerteciesCountsRegion.size(), vk::BufferUsageFlagBits::eStorageBuffer));
+
+    auto memory = context().satisfyBuffersMemory({ *vertexInput, *clippedVerteciesOutput, *clipProductsCounts },
+                                                 vk::MemoryPropertyFlagBits::eHostCoherent
+                                                     | vk::MemoryPropertyFlagBits::eHostVisible);
+
+    updateAllSets({ VkDescriptorBufferInfo { *vertexInput, 0, vertexRegion.size() },
+                    VkDescriptorBufferInfo { *clippedVerteciesOutput, 0, clippedVerteciesRegion.size() },
+                    VkDescriptorBufferInfo { *clipProductsCounts, 0, clippedVerteciesCountsRegion.size() } });
+
+    constexpr float MIN = std::numeric_limits<float>::min();
+    constexpr float MAX = 1000; // TODO: think of a better way to generate floats
+
+    {
+        std::mt19937 gen(std::random_device {}());
+        std::uniform_real_distribution<float> wDist(MIN, MAX);
+        std::array<uint32_t, 3> indices { 0, 1, 2 };
+        float currentSign = 1;
+
+        MappedMemoryGuard mapVertexInput(context().device(), *memory, vertexRegion.offset(), vertexRegion.size());
+        auto triangles = mapVertexInput.hostAddress<vec4>();
+        for (size_t t = 0; t < TRIANGLE_COUNT; ++t) {
+            for (size_t i = 0; i < 3; ++i) {
+                auto w = wDist(gen);
+                std::uniform_real_distribution<float> pointDist(-w, w);
+                triangles[3 * t + i].data[indices[0]] = 1.1 * std::copysignf(w, currentSign)
+                    + std::copysignf(pointDist(gen), currentSign);
+                triangles[3 * t + i].data[indices[1]] = pointDist(gen);
+                triangles[3 * t + i].data[indices[2]] = pointDist(gen);
+                triangles[3 * t + i].data[3] = w;
+            }
+
+            std::rotate(indices.begin(), indices.begin() + 1, indices.end());
+            if (t % 3 == 0) {
+                currentSign *= -1;
+            }
+        }
+    }
+
+    dispatch(TRIANGLE_COUNT);
+
+    std::vector<u32> clipCounts = readDeviceMemory<u32>(*memory, clippedVerteciesCountsRegion);
+
+    // All triangles should be culled
+    EXPECT_THAT(clipCounts, Each(0));
+}
 
 TEST_F(TriangleSetupClipping, TrianglesInViewport) {
     constexpr uint32_t TRIANGLE_COUNT = 100;
