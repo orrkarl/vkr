@@ -8,8 +8,32 @@
 
 namespace vkr::detail {
 
+template <typename T, typename Tuple, size_t... Idx>
+constexpr T MakeFromTupleImpl(Tuple&& t, std::index_sequence<Idx...>) {
+    return T { std::get<Idx>(std::forward<Tuple>(t))... };
+}
+
+template <typename T, typename Tuple>
+constexpr T MakeFromTuple(Tuple&& t) {
+    return MakeFromTupleImpl<T>(std::forward<Tuple>(t),
+                                std::make_index_sequence<std::tuple_size_v<std::remove_reference_t<Tuple>>> {});
+}
+
 template <typename T, size_t Size>
 struct Vec;
+
+template <typename T, size_t Size, size_t N, typename... Tail>
+void initializeFrom(std::array<T, Size>& data, Vec<T, N> head, Tail&&... tail) {
+    if constexpr (N < Size) {
+        static_assert(sizeof...(Tail) == Size - N, "Unexpected tail arguments length");
+        auto tailArr = MakeFromTuple<std::array<T, Size - N>>(std::forward_as_tuple(tail...));
+        std::copy(head.data.cbegin(), head.data.cend(), data.begin());
+        std::copy(tailArr.cbegin(), tailArr.cend(), data.begin() + N);
+    } else {
+        static_assert(sizeof...(Tail) == 0, "Unexpected tail arguments length");
+        std::copy(head.data.cbegin(), head.data.cbegin() + Size, data.begin());
+    }
+}
 
 template <typename T, size_t Size>
 std::ostream& operator<<(std::ostream& os, const Vec<T, Size>& v) {
@@ -44,6 +68,11 @@ struct Vec<T, 2> {
     Vec() : data {} {
     }
 
+    template <size_t N, typename... Tail>
+    Vec(Vec<T, N> head, Tail&&... tail) {
+        initializeFrom(data, head, std::forward<Tail>(tail)...);
+    }
+
     Vec(T x, T y) : x(std::move(x)), y(std::move(y)) {
     }
 
@@ -64,6 +93,11 @@ struct Vec<T, 3> {
     using Type = T;
 
     Vec() : data {}, padding {} {
+    }
+
+    template <size_t N, typename... Tail>
+    Vec(Vec<T, N> head, Tail&&... tail) {
+        initializeFrom(data, head, std::forward<Tail>(tail)...);
     }
 
     Vec(T x, T y, T z) : x(std::move(x)), y(std::move(y)), z(std::move(z)), padding {} {
@@ -88,6 +122,11 @@ struct Vec<T, 4> {
     using Type = T;
 
     Vec() : data {} {
+    }
+
+    template <size_t N, typename... Tail>
+    Vec(Vec<T, N> head, Tail&&... tail) {
+        initializeFrom(data, head, std::forward<Tail>(tail)...);
     }
 
     Vec(T x, T y, T z, T w) : x(std::move(x)), y(std::move(y)), z(std::move(z)), w(std::move(w)) {
