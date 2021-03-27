@@ -8,18 +8,6 @@
 
 namespace vkr::detail {
 
-// Copied from the reference implementation with a single different:
-//   creating the result with list initialization, not with standard constructor call
-template <typename T, typename Tuple, size_t... Idx>
-constexpr T MakeFromTupleImpl(Tuple&& t, std::index_sequence<Idx...>) {
-    return T { std::get<Idx>(std::forward<Tuple>(t))... };
-}
-template <typename T, typename Tuple>
-constexpr T MakeFromTuple(Tuple&& t) {
-    return MakeFromTupleImpl<T>(std::forward<Tuple>(t),
-                                std::make_index_sequence<std::tuple_size_v<std::remove_reference_t<Tuple>>> {});
-}
-
 template <typename T, size_t Size>
 struct Vec;
 
@@ -27,7 +15,7 @@ template <typename T, size_t Size, size_t N, typename... Tail>
 void initializeFrom(std::array<T, Size>& data, Vec<T, N> head, Tail&&... tail) {
     if constexpr (N < Size) {
         static_assert(sizeof...(Tail) == Size - N, "Unexpected tail arguments length");
-        auto tailArr = MakeFromTuple<std::array<T, Size - N>>(std::forward_as_tuple(tail...));
+        auto tailArr = std::array<T, Size - N> { std::forward<Tail>(tail)... };
         std::copy(head.data.cbegin(), head.data.cend(), data.begin());
         std::copy(tailArr.cbegin(), tailArr.cend(), data.begin() + N);
     } else {
