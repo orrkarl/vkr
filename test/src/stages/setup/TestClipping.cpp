@@ -19,7 +19,20 @@ using namespace utils;
 using namespace vkr::gpu::tests;
 using testing::Each;
 
+constexpr uint32_t TEST_TRIANGLE_COUNT = 100;
+
 class TriangleSetupClipping : public SimpleVulkanFixture {
+public:
+    TriangleSetupClipping()
+        : SimpleVulkanFixture()
+        , m_triangleCount(TEST_TRIANGLE_COUNT)
+        , m_vertexCount(3 * m_triangleCount)
+        , m_clippedVerteciesCount(6 * m_triangleCount)
+        , m_inputVerteciesRegion(0, m_vertexCount)
+        , m_outputClippedVerteciesRegion(m_inputVerteciesRegion.end(), m_clippedVerteciesCount)
+        , m_outputClippedVertexCountsRegion(m_outputClippedVerteciesRegion.end(), m_triangleCount) {
+    }
+
 protected:
     void SetUp() override {
         SimpleVulkanFixture::SetUp();
@@ -31,17 +44,26 @@ protected:
         m_descriptorPool = createDescriptorPool(1, { { vk::DescriptorType::eStorageBuffer, 3 } });
         m_argumentSets = buildArrayFrom<VkDescriptorSet, 1>(
             context().device().allocateDescriptorSets({ *m_descriptorPool, clippingArgsLayout }));
-    }
 
-    void TearDown() override {
-        std::fill(m_argumentSets.begin(), m_argumentSets.end(), nullptr);
-        m_descriptorPool.reset();
-        m_clippingRunner.reset();
-        m_clipping.reset();
-        SimpleVulkanFixture::TearDown();
-    }
+        m_argumentsBuffer = context().device().createBufferUnique({ vk::BufferCreateFlags(),
+                                                                    m_inputVerteciesRegion.size()
+                                                                        + m_outputClippedVerteciesRegion.size()
+                                                                        + m_outputClippedVertexCountsRegion.size(),
+                                                                    vk::BufferUsageFlagBits::eStorageBuffer });
 
-    void updateAllSets(const std::array<VkDescriptorBufferInfo, 3>& descriptors) {
+        m_argumentsMemory = context().allocate(context().device().getBufferMemoryRequirements(*m_argumentsBuffer),
+                                               vk::MemoryPropertyFlagBits::eHostCoherent
+                                                   | vk::MemoryPropertyFlagBits::eHostVisible);
+        context().device().bindBufferMemory(*m_argumentsBuffer, *m_argumentsMemory, 0);
+
+        std::array<VkDescriptorBufferInfo, 3> descriptors {
+            VkDescriptorBufferInfo { *m_argumentsBuffer, 0, m_inputVerteciesRegion.size() },
+            VkDescriptorBufferInfo {
+                *m_argumentsBuffer, m_inputVerteciesRegion.end(), m_outputClippedVerteciesRegion.size() },
+            VkDescriptorBufferInfo {
+                *m_argumentsBuffer, m_outputClippedVerteciesRegion.end(), m_outputClippedVertexCountsRegion.size() }
+        };
+
         // each bufferDescs element has to live as long as the WriteDescriptorSet instances
         std::array<vk::WriteDescriptorSet, 3> updateSets {
             m_clipping->describeVerteciesUpdate(m_argumentSets, descriptors[0]),
@@ -52,7 +74,17 @@ protected:
         context().device().updateDescriptorSets(updateSets, {});
     }
 
-    void dispatch(uint32_t triangleCount) {
+    void TearDown() override {
+        m_argumentsMemory.reset();
+        m_argumentsBuffer.reset();
+        std::fill(m_argumentSets.begin(), m_argumentSets.end(), nullptr);
+        m_descriptorPool.reset();
+        m_clippingRunner.reset();
+        m_clipping.reset();
+        SimpleVulkanFixture::TearDown();
+    }
+
+    void dispatch() {
         auto commandPool = context().createComputeCommnadPool();
         auto command = std::move(
             context().device().allocateCommandBuffers({ *commandPool, vk::CommandBufferLevel::ePrimary, 1 })[0]);
@@ -64,43 +96,35 @@ protected:
                                    0,
                                    buildVectorFrom<vk::DescriptorSet>(m_argumentSets),
                                    {});
-        m_clipping->cmdDispatch(command, triangleCount);
+        m_clipping->cmdDispatch(command, m_triangleCount);
         command.end();
 
         context().computeQueue().submit({ vk::SubmitInfo { 0, nullptr, nullptr, 1, &command } }, vk::Fence());
         context().computeQueue().waitIdle();
     }
 
+    vk::DeviceMemory argumentsMemory() {
+        return *m_argumentsMemory;
+    }
+
+    const uint32_t m_triangleCount;
+    const uint32_t m_vertexCount;
+    const uint32_t m_clippedVerteciesCount;
+    const TypedRegionDescriptor<vec4> m_inputVerteciesRegion;
+    const TypedRegionDescriptor<vec3> m_outputClippedVerteciesRegion;
+    const TypedRegionDescriptor<u32> m_outputClippedVertexCountsRegion;
+
     ManagedVulkanResource<ClippingAPI> m_clipping;
     vk::UniquePipeline m_clippingRunner;
     vk::UniqueDescriptorPool m_descriptorPool;
+
+private:
     ClippingAPI::ArgumentSets m_argumentSets;
+    vk::UniqueBuffer m_argumentsBuffer;
+    vk::UniqueDeviceMemory m_argumentsMemory;
 };
 
 TEST_F(TriangleSetupClipping, TrianglesOutsideViewport) {
-    constexpr uint32_t TRIANGLE_COUNT = 100;
-    constexpr auto VERTEX_COUNT = 3 * TRIANGLE_COUNT;
-    constexpr auto MAX_CLIPPED_VERTECIES = 3 * TRIANGLE_COUNT;
-
-    TypedRegionDescriptor<vec4> vertexRegion { 0, VERTEX_COUNT };
-    TypedRegionDescriptor<vec3> clippedVerteciesRegion { vertexRegion.end(), MAX_CLIPPED_VERTECIES };
-    TypedRegionDescriptor<u32> clippedVerteciesCountsRegion { clippedVerteciesRegion.end(), TRIANGLE_COUNT };
-
-    auto vertexInput = context().device().createBufferUnique(
-        vk::BufferCreateInfo(vk::BufferCreateFlags(), vertexRegion.size(), vk::BufferUsageFlagBits::eStorageBuffer));
-    auto clippedVerteciesOutput = context().device().createBufferUnique(vk::BufferCreateInfo(
-        vk::BufferCreateFlags(), clippedVerteciesRegion.size(), vk::BufferUsageFlagBits::eStorageBuffer));
-    auto clipProductsCounts = context().device().createBufferUnique(vk::BufferCreateInfo(
-        vk::BufferCreateFlags(), clippedVerteciesCountsRegion.size(), vk::BufferUsageFlagBits::eStorageBuffer));
-
-    auto memory = context().satisfyBuffersMemory({ *vertexInput, *clippedVerteciesOutput, *clipProductsCounts },
-                                                 vk::MemoryPropertyFlagBits::eHostCoherent
-                                                     | vk::MemoryPropertyFlagBits::eHostVisible);
-
-    updateAllSets({ VkDescriptorBufferInfo { *vertexInput, 0, vertexRegion.size() },
-                    VkDescriptorBufferInfo { *clippedVerteciesOutput, 0, clippedVerteciesRegion.size() },
-                    VkDescriptorBufferInfo { *clipProductsCounts, 0, clippedVerteciesCountsRegion.size() } });
-
     constexpr float MIN = std::numeric_limits<float>::min();
     constexpr float MAX = 1000; // TODO: think of a better way to generate floats
 
@@ -110,9 +134,10 @@ TEST_F(TriangleSetupClipping, TrianglesOutsideViewport) {
         std::array<uint32_t, 3> indices { 0, 1, 2 };
         float currentSign = 1;
 
-        MappedMemoryGuard mapVertexInput(context().device(), *memory, vertexRegion.offset(), vertexRegion.size());
+        MappedMemoryGuard mapVertexInput(
+            context().device(), argumentsMemory(), m_inputVerteciesRegion.offset(), m_inputVerteciesRegion.size());
         auto triangles = mapVertexInput.hostAddress<vec4>();
-        for (size_t t = 0; t < TRIANGLE_COUNT; ++t) {
+        for (size_t t = 0; t < m_triangleCount; ++t) {
             for (size_t i = 0; i < 3; ++i) {
                 auto w = wDist(gen);
                 std::uniform_real_distribution<float> pointDist(-w, w);
@@ -130,43 +155,26 @@ TEST_F(TriangleSetupClipping, TrianglesOutsideViewport) {
         }
     }
 
-    dispatch(TRIANGLE_COUNT);
+    dispatch();
 
-    std::vector<u32> clipCounts = readDeviceMemory<u32>(*memory, clippedVerteciesCountsRegion);
+    std::vector<u32> clipCounts = readDeviceMemory<u32>(argumentsMemory(), m_outputClippedVertexCountsRegion);
 
     // All triangles should be culled
     EXPECT_THAT(clipCounts, Each(0));
 }
 
 TEST_F(TriangleSetupClipping, TrianglesInViewport) {
-    constexpr uint32_t TRIANGLE_COUNT = 100;
-    constexpr auto VERTEX_COUNT = 3 * TRIANGLE_COUNT;
-    constexpr auto MAX_CLIPPED_VERTECIES = 6 * TRIANGLE_COUNT;
-
     constexpr float MIN = std::numeric_limits<float>::min();
     constexpr float MAX = 1000; // TODO: think of a better way to generate floats
 
-    TypedRegionDescriptor<vec4> vertexRegion { 0, VERTEX_COUNT };
-    TypedRegionDescriptor<vec3> clippedVerteciesRegion { vertexRegion.end(), MAX_CLIPPED_VERTECIES };
-    TypedRegionDescriptor<u32> clippedVerteciesCountsRegion { clippedVerteciesRegion.end(), TRIANGLE_COUNT };
-
-    auto vertexInput = context().device().createBufferUnique(
-        vk::BufferCreateInfo(vk::BufferCreateFlags(), vertexRegion.size(), vk::BufferUsageFlagBits::eStorageBuffer));
-    auto clippedVerteciesOutput = context().device().createBufferUnique(vk::BufferCreateInfo(
-        vk::BufferCreateFlags(), clippedVerteciesRegion.size(), vk::BufferUsageFlagBits::eStorageBuffer));
-    auto clipProductsCounts = context().device().createBufferUnique(vk::BufferCreateInfo(
-        vk::BufferCreateFlags(), clippedVerteciesCountsRegion.size(), vk::BufferUsageFlagBits::eStorageBuffer));
-
-    auto memory = context().satisfyBuffersMemory({ *vertexInput, *clippedVerteciesOutput, *clipProductsCounts },
-                                                 vk::MemoryPropertyFlagBits::eHostCoherent
-                                                     | vk::MemoryPropertyFlagBits::eHostVisible);
-
-    std::mt19937 gen(std::random_device {}());
-    std::uniform_real_distribution<float> wDist(MIN, MAX);
     {
-        MappedMemoryGuard mapVertexInput(context().device(), *memory, vertexRegion.offset(), vertexRegion.size());
+        std::mt19937 gen(std::random_device {}());
+        std::uniform_real_distribution<float> wDist(MIN, MAX);
+        MappedMemoryGuard mapVertexInput(
+            context().device(), argumentsMemory(), m_inputVerteciesRegion.offset(), m_inputVerteciesRegion.size());
+
         auto triangles = mapVertexInput.hostAddress<vec4>();
-        for (size_t i = 0; i < VERTEX_COUNT; ++i) {
+        for (size_t i = 0; i < m_vertexCount; ++i) {
             auto w = wDist(gen);
             std::uniform_real_distribution<float> pointDist(-w, w);
             triangles[i].x = pointDist(gen);
@@ -176,17 +184,14 @@ TEST_F(TriangleSetupClipping, TrianglesInViewport) {
         }
     }
 
-    updateAllSets({ VkDescriptorBufferInfo { *vertexInput, 0, vertexRegion.size() },
-                    VkDescriptorBufferInfo { *clippedVerteciesOutput, 0, clippedVerteciesRegion.size() },
-                    VkDescriptorBufferInfo { *clipProductsCounts, 0, clippedVerteciesCountsRegion.size() } });
+    dispatch();
 
-    dispatch(TRIANGLE_COUNT);
-
-    std::vector<u32> clipCounts = readDeviceMemory<u32>(*memory, clippedVerteciesCountsRegion);
+    std::vector<u32> clipCounts = readDeviceMemory<u32>(argumentsMemory(), m_outputClippedVertexCountsRegion);
 
     // Since no triangle should be clipped, the last 3 vertecies should be garbage, and we discard them
-    std::vector<std::array<vec3, 3>> barys = map(groupBy<6>(readDeviceMemory<vec3>(*memory, clippedVerteciesRegion)),
-                                                 takeCountedFrom<3, std::array<vec3, 6>>);
+    std::vector<std::array<vec3, 3>> barys = map(
+        groupBy<6>(readDeviceMemory<vec3>(argumentsMemory(), m_outputClippedVerteciesRegion)),
+        takeCountedFrom<3, std::array<vec3, 6>>);
 
     std::array<vec3, 3> expectedBarys { vec3 { 1.0f, 0.0f, 0.0f },
                                         vec3 { 0.0f, 1.0f, 0.0f },
