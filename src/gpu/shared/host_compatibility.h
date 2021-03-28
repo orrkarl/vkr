@@ -50,6 +50,9 @@ struct Vec<T, 2> {
     Vec(T x, T y) : x(std::move(x)), y(std::move(y)) {
     }
 
+    explicit Vec(T t) : Vec(t, t) {
+    }
+
     union {
         std::array<T, 2> data;
         struct {
@@ -75,6 +78,9 @@ struct Vec<T, 3> {
     }
 
     Vec(T x, T y, T z) : x(std::move(x)), y(std::move(y)), z(std::move(z)), padding {} {
+    }
+
+    explicit Vec(T t) : Vec(t, t, t) {
     }
 
     union {
@@ -104,6 +110,9 @@ struct Vec<T, 4> {
     }
 
     Vec(T x, T y, T z, T w) : x(std::move(x)), y(std::move(y)), z(std::move(z)), w(std::move(w)) {
+    }
+
+    explicit Vec(T t) : Vec(t, t, t, t) {
     }
 
     union {
