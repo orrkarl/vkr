@@ -204,6 +204,43 @@ bool operator==(const Vec<T, Size>& v1, const Vec<T, Size>& v2) {
     return v1.data == v2.data;
 }
 
+template <typename T, size_t Size>
+bool operator<(const Vec<T, Size>& v1, const Vec<T, Size>& v2) {
+    for (size_t i = 0; i < Size; ++i) {
+        if (v1.data[i] >= v2.data[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+template <typename T, size_t Size>
+bool operator<=(const Vec<T, Size>& v1, const Vec<T, Size>& v2) {
+    for (size_t i = 0; i < Size; ++i) {
+        if (v1.data[i] > v2.data[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+template <typename T, size_t Size>
+bool operator!=(const Vec<T, Size>& v1, const Vec<T, Size>& v2) {
+    return !(v1 == v2);
+}
+
+template <typename T, size_t Size>
+bool operator>(const Vec<T, Size>& v1, const Vec<T, Size>& v2) {
+    return !(v1 <= v2);
+}
+
+template <typename T, size_t Size>
+bool operator>=(const Vec<T, Size>& v1, const Vec<T, Size>& v2) {
+    return !(v1 < v2);
+}
+
 } // namespace vkr::detail
 
 using u8 = uint8_t;
