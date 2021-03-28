@@ -140,6 +140,10 @@ vec4 combine(const vec3& barys, const std::array<vec4, 3>& base) {
     return barys.x * base[0] + barys.y * base[1] + barys.z * base[2];
 }
 
+MATCHER(ValidBarycentricCoordinates, "") {
+    return vec3(0) <= arg && arg <= vec3(1) && (std::abs(arg.x + arg.y + arg.z - 1) <= 1e-6);
+}
+
 TEST_F(TriangleSetupClipping, TrianglesOutsideViewport) {
     constexpr float MIN = std::numeric_limits<float>::min();
     constexpr float MAX = 1000; // TODO: think of a better way to generate floats
@@ -262,33 +266,25 @@ TEST_F(TriangleSetupClipping, SingleClipProduct) {
 
     std::vector<u32> clipCounts = readDeviceMemory<u32>(argumentsMemory(), m_outputClippedVertexCountsRegion);
 
-    // Since no triangle should be clipped, the last 3 vertecies should be garbage, and we discard them
-    std::vector<std::array<vec3, 6>> rawBarys = groupBy<6>(
-        readDeviceMemory<vec3>(argumentsMemory(), m_outputClippedVerteciesRegion));
-    std::vector<std::array<vec3, 3>> barys = map(rawBarys, takeCountedFrom<3, std::array<vec3, 6>>);
+    std::vector<vec3> rawBarys = readDeviceMemory<vec3>(argumentsMemory(), m_outputClippedVerteciesRegion);
 
     {
         std::ofstream clipProductsLog("clipped.log");
-        for (size_t i = 0; i < barys.size(); ++i) {
+        for (size_t i = 0; i < rawBarys.size() / 6; ++i) {
             clipProductsLog << "Output Triangle " << i << ":" << std::endl;
             clipProductsLog << "\tbarys:" << std::endl;
             for (size_t v = 0; v < clipCounts[i]; ++v) {
-                clipProductsLog << "\t\t" << barys[i][v] << std::endl;
+                clipProductsLog << "\t\t" << rawBarys[6 * i + v] << std::endl;
             }
             for (size_t t = 1; t < clipCounts[i] - 1; ++t) {
                 clipProductsLog << "\tsub-triangle " << t << std::endl;
-                clipProductsLog << "\t\t" << combine(rawBarys[i][0], trianglesRecord[i]) << std::endl;
-                clipProductsLog << "\t\t" << combine(rawBarys[i][t], trianglesRecord[i]) << std::endl;
-                clipProductsLog << "\t\t" << combine(rawBarys[i][t + 1], trianglesRecord[i]) << std::endl;
+                clipProductsLog << "\t\t" << combine(rawBarys[6 * i + 0], trianglesRecord[i]) << std::endl;
+                clipProductsLog << "\t\t" << combine(rawBarys[6 * i + t], trianglesRecord[i]) << std::endl;
+                clipProductsLog << "\t\t" << combine(rawBarys[6 * i + t + 1], trianglesRecord[i]) << std::endl;
             }
         }
     }
 
-    std::array<vec3, 3> expectedBarys { vec3 { 1.0f, 0.0f, 0.0f },
-                                        vec3 { 0.0f, 1.0f, 0.0f },
-                                        vec3 { 0.0f, 0.0f, 1.0f } };
-
-    // Nothing was supposed to be clipped - 3 vertecies per triangle remain 3 vertecies
     EXPECT_THAT(clipCounts, Each(3));
-    EXPECT_THAT(barys, Each(expectedBarys));
+    EXPECT_THAT(rawBarys, Each(ValidBarycentricCoordinates()));
 }
