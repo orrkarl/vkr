@@ -29,9 +29,9 @@ std::vector<std::array<T, GroupSize>> groupBy(const std::vector<T>& original) {
                                  + " isn't a multiple of " + std::to_string(GroupSize));
     }
 
-    std::vector<std::array<T, GroupSize>> ret;
+    std::vector<std::array<T, GroupSize>> ret(original.size() / GroupSize);
     for (size_t i = 0; i < ret.size(); ++i) {
-        std::copy(original.cbegin() + i * GroupSize, original.cend() + (i + 1) * GroupSize, ret[i].begin());
+        std::copy(original.cbegin() + i * GroupSize, original.cbegin() + (i + 1) * GroupSize, ret[i].begin());
     }
 
     return ret;
