@@ -28,7 +28,7 @@ u32 clipAgainst(u32 vertexCount, const f32 dists[6], const vec3 barysIn[6], out 
                 barysOut[dstIdx++] = mix(a, b, da / (da - db));
             }
         } else if (db >= 0.0) {
-            barysOut[dstIdx++] = mix(a, b, da / (db - da));
+            barysOut[dstIdx++] = mix(a, b, -da / (db - da));
             barysOut[dstIdx++] = b;
         }
     }
@@ -45,7 +45,7 @@ u32 clipAgainst(u32 vertexCount, const f32 dists[6], const vec3 barysIn[6], out 
             barysOut[dstIdx++] = mix(a, b, da / (da - db));
         }
     } else if (db >= 0.0) {
-        barysOut[dstIdx++] = mix(a, b, da / (db - da));
+        barysOut[dstIdx++] = mix(a, b, -da / (db - da));
         barysOut[dstIdx++] = b;
     }
 
