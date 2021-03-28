@@ -267,9 +267,17 @@ TEST_F(TriangleSetupClipping, SingleClipProduct) {
     std::vector<u32> clipCounts = readDeviceMemory<u32>(argumentsMemory(), m_outputClippedVertexCountsRegion);
 
     std::vector<vec3> rawBarys = readDeviceMemory<vec3>(argumentsMemory(), m_outputClippedVerteciesRegion);
+    std::vector<vec3> validBarys;
 
     {
-        std::ofstream clipProductsLog("clipped.log");
+        auto it = rawBarys.cbegin();
+        for (size_t clipCount : clipCounts) {
+            std::copy(it, it + clipCount, std::back_inserter(validBarys));
+        }
+    }
+
+    {
+        std::ofstream clipProductsLog("triangles.log", std::ios::app);
         for (size_t i = 0; i < rawBarys.size() / 6; ++i) {
             clipProductsLog << "Output Triangle " << i << ":" << std::endl;
             clipProductsLog << "\tbarys:" << std::endl;
@@ -286,5 +294,5 @@ TEST_F(TriangleSetupClipping, SingleClipProduct) {
     }
 
     EXPECT_THAT(clipCounts, Each(3));
-    EXPECT_THAT(rawBarys, Each(ValidBarycentricCoordinates()));
+    EXPECT_THAT(validBarys, Each(ValidBarycentricCoordinates()));
 }
