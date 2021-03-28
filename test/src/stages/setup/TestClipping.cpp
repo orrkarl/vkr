@@ -221,9 +221,7 @@ TEST_F(TriangleSetupClipping, SingleClipProduct) {
     constexpr float MIN = std::numeric_limits<float>::min();
     constexpr float MAX = 1000; // TODO: think of a better way to generate floats
 
-    std::vector<std::array<vec4, 3>> trianglesRecord;
     {
-        std::ofstream trianglesOut("triangles.log");
         std::mt19937 gen(std::random_device {}());
         std::array<uint32_t, 3> vertexPermutation { 0, 1, 2 };
         std::uniform_real_distribution<float> wDist(MIN, MAX);
@@ -235,29 +233,18 @@ TEST_F(TriangleSetupClipping, SingleClipProduct) {
 
         auto triangles = mapVertexInput.hostAddress<vec4>();
         for (size_t t = 0; t < m_triangleCount; ++t) {
-            std::array<vec4, 3> currentTriangle;
-
-            auto tmpV1 = generateInsideViewport(gen, wDist);
-            auto tmpV2 = generateInsideViewport(gen, wDist);
+            triangles[3 * t + vertexPermutation[0]] = generateInsideViewport(gen, wDist);
 
             vec3 offset;
             offset.data[axisDist(gen)] = frontBackDist(gen) * 2 - 1;
+            offset.data[3] = 1;
 
-            currentTriangle[vertexPermutation[0]] = generateInsideViewport(gen, wDist);
-            currentTriangle[vertexPermutation[1]] = vec4(0.5f * vec3(tmpV1) + 1.5f * tmpV1.w * offset, tmpV1.w);
-            currentTriangle[vertexPermutation[2]] = vec4(0.5f * vec3(tmpV2) + 1.5f * tmpV2.w * offset, tmpV2.w);
+            auto tmpV1 = generateInsideViewport(gen, wDist);
+            triangles[3 * t + vertexPermutation[1]] = vec4(0.5f * vec3(tmpV1) + 1.5f * tmpV1.w * offset, tmpV1.w);
 
-            triangles[3 * t + 0] = currentTriangle[0];
-            triangles[3 * t + 1] = currentTriangle[1];
-            triangles[3 * t + 2] = currentTriangle[2];
+            auto tmpV2 = generateInsideViewport(gen, wDist);
+            triangles[3 * t + vertexPermutation[2]] = vec4(0.5f * vec3(tmpV2) + 1.5f * tmpV2.w * offset, tmpV2.w);
 
-            trianglesOut << "Triangle " << t << ":" << std::endl;
-            trianglesOut << "\t" << currentTriangle[0] << std::endl;
-            trianglesOut << "\t" << currentTriangle[1] << std::endl;
-            trianglesOut << "\t" << currentTriangle[2] << std::endl;
-            trianglesOut << std::endl;
-
-            trianglesRecord.push_back(currentTriangle);
             std::next_permutation(vertexPermutation.begin(), vertexPermutation.end());
         }
     }
@@ -273,23 +260,6 @@ TEST_F(TriangleSetupClipping, SingleClipProduct) {
         auto it = rawBarys.cbegin();
         for (size_t clipCount : clipCounts) {
             std::copy(it, it + clipCount, std::back_inserter(validBarys));
-        }
-    }
-
-    {
-        std::ofstream clipProductsLog("triangles.log", std::ios::app);
-        for (size_t i = 0; i < rawBarys.size() / 6; ++i) {
-            clipProductsLog << "Output Triangle " << i << ":" << std::endl;
-            clipProductsLog << "\tbarys:" << std::endl;
-            for (size_t v = 0; v < clipCounts[i]; ++v) {
-                clipProductsLog << "\t\t" << rawBarys[6 * i + v] << std::endl;
-            }
-            for (size_t t = 1; t < clipCounts[i] - 1; ++t) {
-                clipProductsLog << "\tsub-triangle " << t << std::endl;
-                clipProductsLog << "\t\t" << combine(rawBarys[6 * i + 0], trianglesRecord[i]) << std::endl;
-                clipProductsLog << "\t\t" << combine(rawBarys[6 * i + t], trianglesRecord[i]) << std::endl;
-                clipProductsLog << "\t\t" << combine(rawBarys[6 * i + t + 1], trianglesRecord[i]) << std::endl;
-            }
         }
     }
 
